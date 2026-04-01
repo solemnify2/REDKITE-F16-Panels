@@ -19,6 +19,7 @@
 #define LOOP_DELAY_MS 50
 #define SERIAL_TIMEOUT 6        // Serial heartbeat timeout in seconds
 #define BACKLIGHT_PIN  0        // Backlight PWM (MOSFET: 0=off, 255=full)
+#define IDLE_TIMEOUT_MS 1800000 // 30 min idle timeout for backlight auto-off
 
 
 // ================================================================
@@ -394,6 +395,8 @@ static uint8_t switchBtnStart[NUM_SWITCHES];
 static uint8_t analogBtnStart[NUM_ANALOG_ARRAYS];
 static int     totalButtons = 0;
 static uint8_t prevBtnState[128];  // debug: previous button states
+static uint32_t lastInputTime = 0;    // millis() of last switch/button activity
+static bool backlightIdleOff = false;  // true when backlight is off due to idle
 
 // ================================================================
 //  Button Count Helper
@@ -501,9 +504,10 @@ void processSwitches() {
     switch (sw.type) {
       case SW_ON_OFF: {
         int state = !readSwPin(sw, sw.pin1);
-        if (ALLOW_DEBUG && prevBtnState[btn] != state) {
-          Serial.printf("[SW] btn %d %s = %s\n", btn, sw.name, state ? "ON" : "OFF");
+        if (prevBtnState[btn] != state) {
+          if (ALLOW_DEBUG) Serial.printf("[SW] btn %d %s = %s\n", btn, sw.name, state ? "ON" : "OFF");
           prevBtnState[btn] = state;
+          lastInputTime = millis();
         }
         Joystick.button(btn, state);
         if (sw.stateRef) *sw.stateRef = state;
@@ -513,10 +517,11 @@ void processSwitches() {
       case SW_ON_OFF_ON: {
         int s1 = readSwPin(sw, sw.pin1);
         int s2 = readSwPin(sw, sw.pin2);
-        if (ALLOW_DEBUG && (prevBtnState[btn] != !s1 || prevBtnState[btn + 1] != !s2)) {
-          Serial.printf("[SW] btn %d~%d %s = %d/%d\n", btn, btn + 1, sw.name, !s1, !s2);
+        if (prevBtnState[btn] != !s1 || prevBtnState[btn + 1] != !s2) {
+          if (ALLOW_DEBUG) Serial.printf("[SW] btn %d~%d %s = %d/%d\n", btn, btn + 1, sw.name, !s1, !s2);
           prevBtnState[btn] = !s1;
           prevBtnState[btn + 1] = !s2;
+          lastInputTime = millis();
         }
         Joystick.button(btn,     !s1);
         Joystick.button(btn + 1, !s2);
@@ -801,6 +806,7 @@ void setup() {
   // Configure backlight PWM (MOSFET gate: 0=off, 255=full brightness)
   analogWriteFrequency(BACKLIGHT_PIN, 1000);  // 1kHz PWM
   analogWrite(BACKLIGHT_PIN, 255);            // Full brightness
+  lastInputTime = millis();                   // Initialize idle timer
 
   // Configure pedal pins
 #if PEDAL_ENABLED
@@ -875,6 +881,11 @@ void loop() {
 
   if (detectAndRouteSerial()) {
     heartbeat = 0;
+    // Bridge online → restore backlight immediately
+    if (backlightIdleOff) {
+      analogWrite(BACKLIGHT_PIN, 255);
+      backlightIdleOff = false;
+    }
   }
 
   if (heartbeat >= timeoutTicks) {
@@ -887,6 +898,19 @@ void loop() {
 
   ++heartbeat;
   heartbeat = min(heartbeat, timeoutTicks);
+
+  // Backlight idle auto-off: offline + no input for IDLE_TIMEOUT_MS → turn off
+  if (heartbeat >= timeoutTicks) {
+    if (!backlightIdleOff && (millis() - lastInputTime > IDLE_TIMEOUT_MS)) {
+      analogWrite(BACKLIGHT_PIN, 0);
+      backlightIdleOff = true;
+    }
+  }
+  // Input activity → restore backlight immediately
+  if (backlightIdleOff && (millis() - lastInputTime < IDLE_TIMEOUT_MS)) {
+    analogWrite(BACKLIGHT_PIN, 255);
+    backlightIdleOff = false;
+  }
 
   // Online detection blink: TWA1 blinks 4 times at 0.5s interval
   if (onlineBlinkRemain > 0) {

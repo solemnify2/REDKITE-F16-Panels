@@ -93,7 +93,7 @@ Stand는 두 버전이 있으며, new 버전 사용을 권장합니다.
 | 로터리 스위치 SR26 1P12T | 4 | |
 | 로터리 스위치 RS16 1P6T / 1P5T | 2 / 2 | |
 | 포텐셔미터 10kΩ | 10 | |
-| 코리 스위치 | 1 | [HispaPanel](https://hispapanels.com) |
+| 코리 스위치 | 1 | [HispaPanel](https://hispapanels.com/tienda/en/buttons-encoders/71-korry-type-tactile-switch-momentary.html) |
 | 키보드 스위치 (Brown) | 2 | |
 
 **IC / 반도체**
