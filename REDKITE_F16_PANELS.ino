@@ -19,7 +19,7 @@
 #define LOOP_DELAY_MS 50
 #define SERIAL_TIMEOUT 6        // Serial heartbeat timeout in seconds
 #define BACKLIGHT_PIN  0        // Backlight PWM (MOSFET: 0=off, 255=full)
-#define IDLE_TIMEOUT_MS 1800000 // 30 min idle timeout for backlight auto-off
+#define IDLE_TIMEOUT_MS 30000   // offline idle timeout for backlight auto-off (30s for test)
 
 
 // ================================================================
@@ -239,8 +239,6 @@ const McpDeviceDef mcpDevices[] = {
 #define PEDAL_BRAKE_SW_REF    (&swLandingLight)
 #define PEDAL_BRAKE_SW_VALUE  (1)    // landing light UP position
 
-// --- Offline LED ---
-#define ECM_LED_IDX           LI_ECM
 
 // ================================================================
 //  End of Hardware Configuration
@@ -383,8 +381,6 @@ static Protocol  currentProto     = PROTO_UNKNOWN;
 static uint8_t   syncCount        = 0;       // consecutive 0x55 bytes seen
 static bool      bmsBiosSync1     = false;   // true after seeing 0xAA
 static uint32_t  protoDetectStart = 0;       // millis() when first byte arrived
-static int       onlineBlinkRemain = 0;      // remaining ON/OFF toggles for TWA1 blink
-static int       onlineBlinkTimer  = 0;      // tick counter for 0.5s interval
 
 // ================================================================
 //  Global State
@@ -395,8 +391,8 @@ static uint8_t switchBtnStart[NUM_SWITCHES];
 static uint8_t analogBtnStart[NUM_ANALOG_ARRAYS];
 static int     totalButtons = 0;
 static uint8_t prevBtnState[128];  // debug: previous button states
-static uint32_t lastInputTime = 0;    // millis() of last switch/button activity
 static bool backlightIdleOff = false;  // true when backlight is off due to idle
+static uint32_t lastInputTime = 0;    // millis() of last switch/button activity
 
 // ================================================================
 //  Button Count Helper
@@ -604,6 +600,39 @@ void turnOffAllLeds() {
   }
 }
 
+void welcomeCeremony() {
+  analogWrite(BACKLIGHT_PIN, 255);
+  turnOffAllLeds();
+
+  // Group sequential light-up: Gear → TWA → MISC
+  const unsigned int groups[][4] = {
+    {LI_GEAR_WARN, LI_NOSE_GEAR, LI_LEFT_GEAR, LI_RIGHT_GEAR},  // Gear
+    {LI_TWA_POWER, LI_TWA_LOW, LI_TWA_SEARCH, LI_TWA_ACT},      // TWA
+    {LI_ECM, LI_ADV_ACTIVE, LI_ADV_STANDBY, 0xFF},               // MISC (0xFF = unused)
+  };
+  const unsigned int groupSizes[] = {4, 4, 3};
+
+  for (int g = 0; g < 3; g++) {
+    for (unsigned int j = 0; j < groupSizes[g]; j++) {
+      writeLed(groups[g][j], true);
+      delay(80);
+    }
+  }
+
+  // All on — hold briefly
+  delay(300);
+
+  // Blink all 2 times
+  for (int b = 0; b < 2; b++) {
+    turnOffAllLeds();
+    delay(150);
+    for (unsigned int i = 0; i < NUM_LEDS; i++) writeLed(i, true);
+    delay(150);
+  }
+
+  turnOffAllLeds();
+}
+
 void updateLedsOffline() {
   static int blinkCounter = 0;
   const int ticksPerSecond = 1000 / LOOP_DELAY_MS;
@@ -646,16 +675,10 @@ void updateLedsOffline() {
   }
 
   for (unsigned int i = 0; i < NUM_LEDS; i++) {
-    if ((int)i == ECM_LED_IDX)
-      writeLed(i, blinkCounter / (ticksPerSecond / 2));
-    else if (i >= LI_NOSE_GEAR && i <= LI_RIGHT_GEAR)
+    if (i >= LI_NOSE_GEAR && i <= LI_RIGHT_GEAR)
       writeLed(i, gearLedOn[i - LI_NOSE_GEAR]);
     else if (i == LI_GEAR_WARN)
       writeLed(i, gearWarnTicks > 0);
-    else if (i == LI_ADV_ACTIVE)
-      writeLed(i, blinkCounter < ticksPerSecond / 2);   // 1s alternating
-    else if (i == LI_ADV_STANDBY)
-      writeLed(i, blinkCounter >= ticksPerSecond / 2);  // opposite phase
     else if (i >= LI_TWA_POWER && i <= LI_TWA_ACT)
       writeLed(i, 0);
     else
@@ -707,8 +730,6 @@ bool detectAndRouteSerial() {
             syncCount = 0;
             turnOffAllLeds();
             writeLed(LI_TWA_LOW, 1);
-            onlineBlinkRemain = 8;  // 4 blinks (ON/OFF × 4)
-            onlineBlinkTimer = 0;
             if (ALLOW_DEBUG) Serial.println("[Proto] Detected DCS-BIOS");
             // The 4 sync bytes are consumed; parser starts at ADDR_LOW
             dcsBiosReset();
@@ -724,8 +745,6 @@ bool detectAndRouteSerial() {
           turnOffAllLeds();
           writeLed(LI_TWA_POWER, 1);
           writeLed(LI_TWA_LOW, 1);
-          onlineBlinkRemain = 8;
-          onlineBlinkTimer = 0;
           if (ALLOW_DEBUG) Serial.println("[Proto] Detected BMS-BIOS");
           bmsBiosReset();
           // First frame sync already consumed; start at payload
@@ -806,7 +825,7 @@ void setup() {
   // Configure backlight PWM (MOSFET gate: 0=off, 255=full brightness)
   analogWriteFrequency(BACKLIGHT_PIN, 1000);  // 1kHz PWM
   analogWrite(BACKLIGHT_PIN, 255);            // Full brightness
-  lastInputTime = millis();                   // Initialize idle timer
+  lastInputTime = millis();
 
   // Configure pedal pins
 #if PEDAL_ENABLED
@@ -862,8 +881,12 @@ void setup() {
 void loop() {
   if (isUSBSuspended()) {
     turnOffAllLeds();
+    if (!backlightIdleOff) {
+      analogWrite(BACKLIGHT_PIN, 0);
+      backlightIdleOff = true;
+    }
     asm("wfi");   // CPU sleep until next interrupt (USB resume, timer, etc.)
-    return;
+    return;       // USB resume: backlight stays off until online or switch input
   }
 
   // --- Read all inputs ---
@@ -881,11 +904,6 @@ void loop() {
 
   if (detectAndRouteSerial()) {
     heartbeat = 0;
-    // Bridge online → restore backlight immediately
-    if (backlightIdleOff) {
-      analogWrite(BACKLIGHT_PIN, 255);
-      backlightIdleOff = false;
-    }
   }
 
   if (heartbeat >= timeoutTicks) {
@@ -906,21 +924,10 @@ void loop() {
       backlightIdleOff = true;
     }
   }
-  // Input activity → restore backlight immediately
-  if (backlightIdleOff && (millis() - lastInputTime < IDLE_TIMEOUT_MS)) {
-    analogWrite(BACKLIGHT_PIN, 255);
+  // Wake from idle: USB resume, switch input, or bridge online → ceremony + ON
+  if (backlightIdleOff && (heartbeat < timeoutTicks || millis() - lastInputTime < IDLE_TIMEOUT_MS)) {
+    welcomeCeremony();
     backlightIdleOff = false;
-  }
-
-  // Online detection blink: TWA1 blinks 4 times at 0.5s interval
-  if (onlineBlinkRemain > 0) {
-    const int halfSecTicks = 500 / LOOP_DELAY_MS;  // 10 ticks
-    onlineBlinkTimer++;
-    if (onlineBlinkTimer >= halfSecTicks) {
-      onlineBlinkTimer = 0;
-      onlineBlinkRemain--;
-      writeLed(LI_TWA_POWER, onlineBlinkRemain & 1);  // odd=ON, even=OFF
-    }
   }
 
   delay(LOOP_DELAY_MS);
