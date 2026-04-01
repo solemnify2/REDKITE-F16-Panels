@@ -193,7 +193,7 @@ Stand는 두 버전이 있으며, new 버전 사용을 권장합니다.
 - 소프트웨어에서 tolerance(±25~30) 범위 내 매칭으로 인식
 - 사용 핀: A10 (TWA 4버튼), A11 (CMDS MODE 6포지션), A12 (CMDS PRGM 5포지션)
 
-![Resistor Ladder Circuit](docs/resistor_ladder_circuit.png)
+[Resistor Ladder 회로도 (SVG)](docs/resistor_ladder_wiring.html)
 
 > `ALLOW_DEBUG = true`로 시리얼 모니터에서 실제 analogRead 값을 확인하고 values[] 배열을 캘리브레이션하세요.
 
