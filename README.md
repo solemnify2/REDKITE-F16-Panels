@@ -183,6 +183,20 @@ Stand는 두 버전이 있으며, new 버전 사용을 권장합니다.
 
 상세 핀 배치는 [docs/teensy_direct_pins.txt](docs/teensy_direct_pins.txt) 참조.
 
+### 저항 래더 (Resistor Ladder)
+
+로터리 스위치(CMDS MODE 6-pos, CMDS PRGM 5-pos)와 TWA 패널 버튼(4개)은 각각 Teensy 아날로그 핀 1개에 저항 래더로 연결합니다. 핀 1개로 여러 버튼을 처리할 수 있어 핀 절약에 효과적입니다.
+
+- 각 포지션마다 **1kΩ 직렬 저항**을 추가하여 고유한 ADC 값을 생성
+- **4.7kΩ 풀다운 저항**으로 GND 기준 전압 분배
+- ADC 값 = `1023 × 4700 / (k × 1000 + 4700)` (k = 선택된 포지션)
+- 소프트웨어에서 tolerance(±25~30) 범위 내 매칭으로 인식
+- 사용 핀: A10 (TWA 4버튼), A11 (CMDS MODE 6포지션), A12 (CMDS PRGM 5포지션)
+
+![Resistor Ladder Circuit](docs/resistor_ladder_circuit.png)
+
+> `ALLOW_DEBUG = true`로 시리얼 모니터에서 실제 analogRead 값을 확인하고 values[] 배열을 캘리브레이션하세요.
+
 ### MCP23017 패널 추가
 
 Teensy의 다이렉트 핀은 모두 사용 중이므로, 추가 스위치/LED는 MCP23017 I2C 확장으로만 추가할 수 있습니다. MCP23017 하나당 16핀(GPA0–7, GPB0–7)을 제공하며, I2C 주소를 달리하여 최대 8개(0x20–0x27)까지 데이지체인 연결이 가능합니다. 랜선 8중 4핀으로 연결 가능. 기존 쉬프트레지스터 방식은 칩 별로 In/Out이 정해져 있지만 I2C는 칩의 모든 핀을 In/Out으로 설정 가능한 장점이 있음. 또한, 데이지체인 형태로 계속 slave 장치를 추가 가능하므로 teensy에 추가로 핀을 연결할 필요 없음. 향후 콜드앤다크스타트에서 사용하는 손맛을 위한 패널들 (예: ECM, Elec, Snsr, HUD 등) 대응도 마음만 먹으면 가능
