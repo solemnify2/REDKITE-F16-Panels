@@ -1,3 +1,5 @@
 backup/
 *.bak
 *.tmp
+.claude/
+.omc/

@@ -662,6 +662,7 @@ void miscReconnectCeremony() {
   for (int i = 0; i < 3; i++) writeLed(miscLeds[i], false);
 }
 
+
 void updateLedsOffline() {
   static int blinkCounter = 0;
   const int ticksPerSecond = 1000 / LOOP_DELAY_MS;
