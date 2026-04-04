@@ -29,6 +29,10 @@ LED Address Map (used in DcsBiosParser.h):
   LIGHT_RWR_ALT_LOW    17534         0x447E        0x2000     13   TWA Alt Low
   LIGHT_ECM            17732         0x4544        0x4000     14   ECM Indicator
 
+Backlight Control:
+
+  LIGHT_INST_PNL           17540         0x4484        0xFFFF     -    Instrument Panel Lighting (0–65535)
+
 Not currently used but available:
 
   LIGHT_RWR_POWER      17534         0x447E        0x8000     15   RWR Power
@@ -55,16 +59,21 @@ Source: Falcon BMS 4.38 FlightData.h
 Protocol:
   - Binary, sync 0xAA 0xBB
   - Payload: ledBits (uint32 LE, 4 bytes)
+    - Bits 0–10: LED states (see LED Index Mapping)
+    - Bit 16: Backlight (1=ON from instrLight)
   - Checksum: XOR of 4 payload bytes (1 byte)
   - Total: 7 bytes per frame
   - Baud: 1,000,000
 
 Shared Memory:
   - Name: "FalconSharedMemoryArea"
-  - FlightData struct offsets:
+    FlightData struct offsets:
       lightBits  = 108  (unsigned int)
       lightBits2 = 124  (unsigned int)
       lightBits3 = 128  (unsigned int)
+  - Name: "FalconSharedMemoryArea2"
+    FlightData2 struct offsets:
+      instrLight = 1104  (unsigned char, 0=OFF, 1=DIM, 2=BRT)
 
 LightBits Mask Map (used in bmsbios_bridge.py):
 

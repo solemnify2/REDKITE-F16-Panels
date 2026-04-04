@@ -44,6 +44,9 @@
 #define DCSBIOS_ECM_ADDR        0x4544
 #define DCSBIOS_ECM_MASK        0x4000  // bit 14
 
+// Address 0x4484: LIGHT_INST_PNL — instrument panel backlight (0–65535)
+#define DCSBIOS_INST_PNL_ADDR   0x4484
+
 // ================================================================
 //  Parser State Machine
 // ================================================================
@@ -74,16 +77,18 @@ static bool         dcsBiosCapture = false;  // true if current chunk overlaps a
 // Returns true if we need to process data for this 2-byte aligned address
 static bool dcsBiosIsInteresting(uint16_t addr) {
   return (addr == DCSBIOS_GEAR_NL_ADDR || addr == DCSBIOS_GEAR_R_ADDR ||
-          addr == DCSBIOS_TWA_ADDR || addr == DCSBIOS_ECM_ADDR);
+          addr == DCSBIOS_TWA_ADDR || addr == DCSBIOS_ECM_ADDR ||
+          addr == DCSBIOS_INST_PNL_ADDR);
 }
 
 // Returns true if the chunk [addr, addr+count) overlaps any interesting address
 static bool dcsBiosChunkIsInteresting(uint16_t addr, uint16_t count) {
   uint16_t end = addr + count;
-  return (DCSBIOS_GEAR_NL_ADDR  >= addr && DCSBIOS_GEAR_NL_ADDR  < end) ||
-         (DCSBIOS_GEAR_R_ADDR   >= addr && DCSBIOS_GEAR_R_ADDR   < end) ||
-         (DCSBIOS_TWA_ADDR      >= addr && DCSBIOS_TWA_ADDR      < end) ||
-         (DCSBIOS_ECM_ADDR      >= addr && DCSBIOS_ECM_ADDR      < end);
+  return (DCSBIOS_GEAR_NL_ADDR    >= addr && DCSBIOS_GEAR_NL_ADDR    < end) ||
+         (DCSBIOS_GEAR_R_ADDR     >= addr && DCSBIOS_GEAR_R_ADDR     < end) ||
+         (DCSBIOS_TWA_ADDR        >= addr && DCSBIOS_TWA_ADDR        < end) ||
+         (DCSBIOS_ECM_ADDR        >= addr && DCSBIOS_ECM_ADDR        < end) ||
+         (DCSBIOS_INST_PNL_ADDR   >= addr && DCSBIOS_INST_PNL_ADDR   < end);
 }
 
 // ================================================================
@@ -112,6 +117,10 @@ static void dcsBiosOnUpdate(uint16_t addr, uint16_t value) {
   }
   else if (addr == DCSBIOS_ECM_ADDR) {
     writeLed(LI_ECM, (value & DCSBIOS_ECM_MASK));
+  }
+  else if (addr == DCSBIOS_INST_PNL_ADDR) {
+    // Instrument panel backlight: any brightness > 0 → backlight ON
+    analogWrite(BACKLIGHT_PIN, (value > 0) ? 255 : 0);
   }
 }
 

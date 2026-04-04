@@ -51,6 +51,9 @@ static void bmsBiosApply() {
   for (unsigned int i = 0; i < NUM_LEDS; i++) {
     writeLed(i, (ledBits >> i) & 1);
   }
+
+  // Bit 16: backlight from instrLight (0=off, 1=on)
+  analogWrite(BACKLIGHT_PIN, (ledBits & (1 << 16)) ? 255 : 0);
 }
 
 // ================================================================

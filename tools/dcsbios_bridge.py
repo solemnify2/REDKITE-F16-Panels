@@ -23,6 +23,9 @@ MULTICAST_PORT = 5010
 # Teensy는 USB CDC이므로 baud rate는 무관하지만 형식상 설정
 SERIAL_BAUD = 1000000
 
+# Tracked DCS-BIOS address for backlight resync
+ADDR_LIGHT_INST_PNL   = 0x4484  # LIGHT_INST_PNL (output indicator, 0–65535)
+
 
 def find_teensy_port():
     """Teensy COM 포트 자동 감지"""
@@ -39,9 +42,78 @@ def find_teensy_port():
     return None
 
 
-def parse_dcsbios_packet(data, debug_addrs):
-    """Parse DCS-BIOS binary frame and print values at watched addresses."""
+def filter_changed_only(data, state):
+    """Parse DCS-BIOS frame, update state dict, return frame with only changed values.
+    Returns None if nothing changed."""
+    # Skip sync header (0x55 x4)
     i = 0
+    while i + 3 < len(data) and data[i] == 0x55 and data[i+1] == 0x55 and data[i+2] == 0x55 and data[i+3] == 0x55:
+        i += 4
+    changed_chunks = []
+    while i + 3 < len(data):
+        addr = data[i] | (data[i+1] << 8)
+        count = data[i+2] | (data[i+3] << 8)
+        i += 4
+        if addr == 0x5555 and count == 0x5555:
+            break
+        if i + count > len(data):
+            break
+        # Check each word in this chunk for changes
+        for offset in range(0, count, 2):
+            if i + offset + 1 < len(data):
+                word_addr = addr + offset
+                new_val = data[i + offset] | (data[i + offset + 1] << 8)
+                old_val = state.get(word_addr)
+                if old_val != new_val:
+                    state[word_addr] = new_val
+                    changed_chunks.append((word_addr, new_val))
+        i += count
+
+    if not changed_chunks:
+        return None
+
+    # Build a filtered DCS-BIOS frame with only changed words
+    frame = b'\x55\x55\x55\x55'
+    for word_addr, value in changed_chunks:
+        frame += struct.pack('<HHH', word_addr, 2, value)
+    frame += struct.pack('<HH', 0x5555, 0x5555)
+    return frame
+
+
+def extract_tracked_values(data, tracked, debug=False):
+    """Parse DCS-BIOS frame and update tracked address values dict."""
+    # Skip sync header (0x55 x4)
+    i = 0
+    while i + 3 < len(data) and data[i] == 0x55 and data[i+1] == 0x55 and data[i+2] == 0x55 and data[i+3] == 0x55:
+        i += 4
+    while i + 3 < len(data):
+        addr = data[i] | (data[i+1] << 8)
+        count = data[i+2] | (data[i+3] << 8)
+        i += 4
+        if addr == 0x5555 and count == 0x5555:
+            break
+        if i + count > len(data):
+            break
+        for offset in range(0, count, 2):
+            if i + offset + 1 < len(data):
+                word_addr = addr + offset
+                if word_addr in tracked:
+                    new_val = data[i + offset] | (data[i + offset + 1] << 8)
+                    if debug and tracked[word_addr] != new_val:
+                        print(f"\n  [LIGHT] 0x{word_addr:04X}: {tracked[word_addr]} → {new_val}")
+                    tracked[word_addr] = new_val
+        i += count
+
+
+
+_debug_prev = {}
+
+def parse_dcsbios_packet(data, debug_addrs):
+    """Parse DCS-BIOS binary frame and print values at watched addresses (change only)."""
+    # Skip sync header (0x55 x4)
+    i = 0
+    while i + 3 < len(data) and data[i] == 0x55 and data[i+1] == 0x55 and data[i+2] == 0x55 and data[i+3] == 0x55:
+        i += 4
     while i + 3 < len(data):
         addr = data[i] | (data[i+1] << 8)
         count = data[i+2] | (data[i+3] << 8)
@@ -55,10 +127,12 @@ def parse_dcsbios_packet(data, debug_addrs):
                 word_addr = addr + offset
                 if word_addr in debug_addrs:
                     value = data[i + offset] | (data[i + offset + 1] << 8)
-                    act = 1 if (value & 0x0004) else 0
-                    stb = 1 if (value & 0x0008) else 0
-                    twa = f"{1 if (value & 0x0400) else 0}{1 if (value & 0x0800) else 0}{1 if (value & 0x1000) else 0}{1 if (value & 0x2000) else 0}"
-                    print(f"  [DCS] 0x{word_addr:04X} = 0x{value:04X}  ACT={act} STB={stb} TWA={twa}")
+                    if _debug_prev.get(word_addr) != value:
+                        _debug_prev[word_addr] = value
+                        act = 1 if (value & 0x0004) else 0
+                        stb = 1 if (value & 0x0008) else 0
+                        twa = f"{1 if (value & 0x0400) else 0}{1 if (value & 0x0800) else 0}{1 if (value & 0x1000) else 0}{1 if (value & 0x2000) else 0}"
+                        print(f"\n  [DCS] 0x{word_addr:04X} = 0x{value:04X}  ACT={act} STB={stb} TWA={twa}")
         i += count
 
 
@@ -67,6 +141,7 @@ def main():
     parser = argparse.ArgumentParser(description='DCS-BIOS UDP -> Serial Bridge')
     parser.add_argument('port', nargs='?', default=None, help='COM port (default: auto-detect or COM4)')
     parser.add_argument('--debug', action='store_true', help='Print 0x447E values to console')
+    parser.add_argument('--raw', action='store_true', help='Forward all DCS-BIOS data including carousel resync (default: changed values only)')
     args = parser.parse_args()
 
     # COM 포트 결정
@@ -106,14 +181,27 @@ def main():
     last_status = time.time()
     receiving = False
 
+    # Tracked address for backlight debug
+    tracked = {ADDR_LIGHT_INST_PNL: None}
+    # State dict for change-only filtering (default: enabled, --raw disables)
+    resync_state = None if args.raw else {}
+
     try:
         while True:
             try:
                 data, addr = sock.recvfrom(4096)
                 if data:
-                    ser.write(data)
-                    if debug_addrs:
-                        parse_dcsbios_packet(data, debug_addrs)
+                    if resync_state is not None:
+                        filtered = filter_changed_only(data, resync_state)
+                        if filtered:
+                            ser.write(filtered)
+                            if debug_addrs:
+                                parse_dcsbios_packet(filtered, debug_addrs)
+                    else:
+                        ser.write(data)
+                        if debug_addrs:
+                            parse_dcsbios_packet(data, debug_addrs)
+                    extract_tracked_values(data, tracked, debug=args.debug)
                     total_bytes += len(data)
                     packet_count += 1
 

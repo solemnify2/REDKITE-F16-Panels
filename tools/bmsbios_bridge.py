@@ -27,8 +27,10 @@ import ctypes
 #  Falcon BMS Shared Memory
 # ================================================================
 
-SHM_NAME = "FalconSharedMemoryArea"
-SHM_SIZE = 1024  # we only need the first ~300 bytes
+SHM_NAME  = "FalconSharedMemoryArea"
+SHM_SIZE  = 1024  # we only need the first ~300 bytes
+SHM2_NAME = "FalconSharedMemoryArea2"
+SHM2_SIZE = 1200  # need ~1105 bytes for instrLight
 
 # FlightData field offsets (BMS 4.33 / 4.37)
 OFF_LIGHTBITS  = 108   # unsigned int (see FlightData.h)
@@ -53,6 +55,10 @@ LB2_AUX_PWR         = 0x00008000  # bit 15 — TWA Power
 LB3_NOSE_GEAR_DN    = 0x00010000  # bit 16
 LB3_LEFT_GEAR_DN    = 0x00020000  # bit 17
 LB3_RIGHT_GEAR_DN   = 0x00040000  # bit 18
+
+# --- FlightData2 instrLight (offset 1104, unsigned char) ---
+# InstrLight enum: OFF=0, DIM=1, BRT=2
+OFF_FD2_INSTRLIGHT  = 1104
 
 # ================================================================
 #  LED Index Mapping (matches LedIdx enum in .ino)
@@ -103,21 +109,17 @@ def build_frame(led_bits: int) -> bytes:
 #  Shared Memory Reader
 # ================================================================
 
-def open_shm():
+def open_shm(name, size):
     """Open existing Falcon BMS shared memory (never creates new).
     Returns mmap object or None."""
     try:
-        # Use OpenFileMappingW to open ONLY if it already exists.
-        # mmap.mmap(-1, ...) calls CreateFileMapping which creates new
-        # shared memory if absent, preventing BMS from launching.
         kernel32 = ctypes.windll.kernel32
         FILE_MAP_READ = 0x0004
-        handle = kernel32.OpenFileMappingW(FILE_MAP_READ, False, SHM_NAME)
+        handle = kernel32.OpenFileMappingW(FILE_MAP_READ, False, name)
         if not handle:
             return None
         kernel32.CloseHandle(handle)
-        # Now safe to open with mmap — shared memory confirmed to exist
-        shm = mmap.mmap(-1, SHM_SIZE, tagname=SHM_NAME, access=mmap.ACCESS_READ)
+        shm = mmap.mmap(-1, size, tagname=name, access=mmap.ACCESS_READ)
         return shm
     except Exception:
         return None
@@ -127,8 +129,13 @@ def read_int32(shm, offset):
     shm.seek(offset)
     return struct.unpack('<i', shm.read(4))[0]
 
-def read_led_states(shm):
-    """Read all lightBits and return led_bits."""
+def read_byte(shm, offset):
+    """Read an unsigned byte from shared memory."""
+    shm.seek(offset)
+    return struct.unpack('B', shm.read(1))[0]
+
+def read_led_states(shm, shm2):
+    """Read all lightBits and return led_bits (bit 16 = backlight)."""
     lb  = read_int32(shm, OFF_LIGHTBITS)
     lb2 = read_int32(shm, OFF_LIGHTBITS2)
     lb3 = read_int32(shm, OFF_LIGHTBITS3)
@@ -138,6 +145,12 @@ def read_led_states(shm):
     for idx, offset, mask in LED_MAP:
         if lbits[offset] & mask:
             led_bits |= (1 << idx)
+
+    # Backlight: instrLight from FlightData2 (0=OFF, 1=DIM, 2=BRT)
+    if shm2 is not None:
+        instr = read_byte(shm2, OFF_FD2_INSTRLIGHT)
+        if instr > 0:
+            led_bits |= (1 << 16)  # bit 16 = backlight ON
 
     return led_bits
 
@@ -162,31 +175,37 @@ def main():
     interval = 1.0 / args.hz
     prev_led = -1
     shm = None
+    shm2 = None
 
     try:
         while True:
             # Try to open shared memory if not open
             if shm is None:
-                shm = open_shm()
+                shm = open_shm(SHM_NAME, SHM_SIZE)
                 if shm is not None:
                     print("[BMS-BIOS] BMS shared memory connected!")
+            if shm2 is None:
+                shm2 = open_shm(SHM2_NAME, SHM2_SIZE)
+                if shm2 is not None:
+                    print("[BMS-BIOS] FlightData2 connected (instrLight available)")
 
             if shm is not None:
                 try:
-                    led_bits = read_led_states(shm)
+                    led_bits = read_led_states(shm, shm2)
 
                     if args.debug:
                         lb  = read_int32(shm, OFF_LIGHTBITS)
                         lb2 = read_int32(shm, OFF_LIGHTBITS2)
                         lb3 = read_int32(shm, OFF_LIGHTBITS3)
-                        raw = (lb, lb2, lb3)
+                        bl  = 1 if (led_bits & (1 << 16)) else 0
+                        raw = (lb, lb2, lb3, bl)
                         if not hasattr(main, '_prev_raw'):
                             main._prev_raw = raw
                         if raw != main._prev_raw:
-                            print(f"\n  LB=0x{lb:08X}  LB2=0x{lb2:08X}  LB3=0x{lb3:08X}  → ledBits=0x{led_bits:08X}")
+                            print(f"\n  LB=0x{lb:08X}  LB2=0x{lb2:08X}  LB3=0x{lb3:08X}  BL={bl}  → ledBits=0x{led_bits:08X}")
                             main._prev_raw = raw
                         else:
-                            print(f"  LB=0x{lb:08X}  LB2=0x{lb2:08X}  LB3=0x{lb3:08X}  → ledBits=0x{led_bits:08X}", end="\r")
+                            print(f"  LB=0x{lb:08X}  LB2=0x{lb2:08X}  LB3=0x{lb3:08X}  BL={bl}  → ledBits=0x{led_bits:08X}", end="\r")
 
                     # Only send if state changed (or first frame)
                     if led_bits != prev_led:
@@ -203,8 +222,12 @@ def main():
 
                 except Exception as e:
                     print(f"[BMS-BIOS] SHM read error: {e}, reconnecting...")
-                    shm.close()
+                    try: shm.close()
+                    except: pass
+                    try: shm2.close()
+                    except: pass
                     shm = None
+                    shm2 = None
                     prev_led = -1
 
             time.sleep(interval)
@@ -215,6 +238,8 @@ def main():
         ser.close()
         if shm:
             shm.close()
+        if shm2:
+            shm2.close()
 
 if __name__ == '__main__':
     main()
