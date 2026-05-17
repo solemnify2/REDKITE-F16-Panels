@@ -69,6 +69,8 @@ static uint16_t     dcsBiosCount = 0;
 static uint16_t     dcsBiosSkip  = 0;
 static uint8_t      dcsBiosDataBuf[2];
 static bool         dcsBiosCapture = false;  // true if current chunk overlaps an address we care about
+static uint8_t      dcsBiosSyncRun = 0;      // consecutive 0x55 bytes seen in DATA state (resync detector)
+static uint32_t     dcsBiosLastByte = 0;     // millis() of last byte received (intra-frame timeout)
 
 // ================================================================
 //  Address Interest Check
@@ -134,6 +136,22 @@ void dcsBiosReset() {
   dcsBiosCount   = 0;
   dcsBiosSkip    = 0;
   dcsBiosCapture = false;
+  dcsBiosSyncRun = 0;
+  dcsBiosLastByte = 0;
+}
+
+// Intra-frame timeout check — call from loop() before processing bytes.
+// If parser is mid-frame and no byte arrived for too long, force resync.
+#define DCS_INTRA_FRAME_TIMEOUT_MS  200
+
+void dcsBiosCheckTimeout() {
+  if (dcsBiosState > DCS_SYNC_4 && dcsBiosLastByte != 0) {
+    if (millis() - dcsBiosLastByte > DCS_INTRA_FRAME_TIMEOUT_MS) {
+      if (ALLOW_DEBUG) Serial.println("[DCS] Intra-frame timeout, resync");
+      dcsBiosState = DCS_SYNC_1;
+      dcsBiosSyncRun = 0;
+    }
+  }
 }
 
 // ================================================================
@@ -141,6 +159,25 @@ void dcsBiosReset() {
 // ================================================================
 
 void processDcsBiosByte(uint8_t b) {
+  dcsBiosLastByte = millis();
+
+  // --- Resync detector: track consecutive 0x55 in non-sync states ---
+  // If we see 4+ consecutive 0x55 while parsing data, we've hit a new frame sync.
+  if (dcsBiosState > DCS_SYNC_4) {
+    if (b == 0x55) {
+      dcsBiosSyncRun++;
+      if (dcsBiosSyncRun >= 4) {
+        // New sync found mid-parse — force resync
+        if (ALLOW_DEBUG) Serial.println("[DCS] Resync: found 0x55x4 in data stream");
+        dcsBiosState = DCS_ADDR_LOW;
+        dcsBiosSyncRun = 0;
+        return;
+      }
+    } else {
+      dcsBiosSyncRun = 0;
+    }
+  }
+
   switch (dcsBiosState) {
     case DCS_SYNC_1:
       if (b == 0x55) dcsBiosState = DCS_SYNC_2;
@@ -161,6 +198,15 @@ void processDcsBiosByte(uint8_t b) {
       break;
     case DCS_ADDR_HIGH:
       dcsBiosAddr |= (uint16_t)b << 8;
+
+      // Address sanity check: DCS-BIOS addresses are even and within export range.
+      // Allow 0x5555 (frame end marker) and typical F-16 range 0x0000–0x8000.
+      if ((dcsBiosAddr & 1) && dcsBiosAddr != 0x5555) {
+        // Odd address (except end marker) = desync
+        if (ALLOW_DEBUG) Serial.printf("[DCS] Bad addr 0x%04X, resync\n", dcsBiosAddr);
+        dcsBiosState = DCS_SYNC_1;
+        break;
+      }
       dcsBiosState = DCS_COUNT_LOW;
       break;
     case DCS_COUNT_LOW:
@@ -176,9 +222,10 @@ void processDcsBiosByte(uint8_t b) {
         break;
       }
 
-      if (dcsBiosCount == 0) {
-        // Empty chunk, next address
-        dcsBiosState = DCS_ADDR_LOW;
+      // Count sanity check: must be even and reasonable (DCS-BIOS chunks are small)
+      if ((dcsBiosCount & 1) || dcsBiosCount == 0 || dcsBiosCount > 1024) {
+        if (ALLOW_DEBUG) Serial.printf("[DCS] Bad count %u @ 0x%04X, resync\n", dcsBiosCount, dcsBiosAddr);
+        dcsBiosState = DCS_SYNC_1;
         break;
       }
 

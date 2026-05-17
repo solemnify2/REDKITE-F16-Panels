@@ -557,8 +557,10 @@ void processAnalogButtons() {
       Joystick.button(btn + i, matched);
     }
 
+#if 0
     if (ALLOW_DEBUG && raw > 10)
       Serial.printf("[%s] raw=%d\n", arr.groupName, raw);
+#endif
   }
 }
 
@@ -581,20 +583,45 @@ void processPedal() {
   static int lbMin = 300, lbMax = 750;
   static int rbMin = 300, rbMax = 750;
 
-  int lb = analogRead(PEDAL_PIN_LEFT);
-  int rb = analogRead(PEDAL_PIN_RIGHT);
+  int rawLb = analogRead(PEDAL_PIN_LEFT);
+  int rawRb = analogRead(PEDAL_PIN_RIGHT);
+
+  // Calibration reset: both pedals fully pressed + EMER Jettison held for 2 seconds
+  {
+    static uint32_t calResetStart = 0;
+    bool bothPedals = (rawLb > 600 && rawRb > 600);
+    bool dnLockRel = !digitalRead(switches[13].pin1);  // DN LOCK REL (active-low)
+    if (bothPedals && dnLockRel) {
+      if (calResetStart == 0) calResetStart = millis();
+      else if (millis() - calResetStart >= 2000) {
+        lbMin = rawLb; lbMax = rawLb;
+        rbMin = rawRb; rbMax = rawRb;
+        calResetStart = 0;
+        Serial.println("[Pedal] Calibration RESET");
+        welcomeCeremony();
+      }
+    } else {
+      calResetStart = 0;
+    }
+  }
 
   // Auto calibration
-  lbMin = min(lbMin, lb);  lbMax = max(lbMax, lb);
-  rbMin = min(rbMin, rb);  rbMax = max(rbMax, rb);
+  lbMin = min(lbMin, rawLb);  lbMax = max(lbMax, rawLb);
+  rbMin = min(rbMin, rawRb);  rbMax = max(rbMax, rawRb);
 
-  lb = (lb - lbMin) * 1024 / (lbMax - lbMin);
-  rb = (rb - rbMin) * 1024 / (rbMax - rbMin);
+  int lb = (lbMax > lbMin) ? (rawLb - lbMin) * 1024 / (lbMax - lbMin) : 0;
+  int rb = (rbMax > rbMin) ? (rawRb - rbMin) * 1024 / (rbMax - rbMin) : 0;
 
   // Brake mode: linked switch active OR both pedals beyond deadzone
   bool brakeMode = (lb > PEDAL_DEADZONE && rb > PEDAL_DEADZONE);
   if (PEDAL_BRAKE_SW_REF)
     brakeMode = brakeMode || (*PEDAL_BRAKE_SW_REF == PEDAL_BRAKE_SW_VALUE);
+
+  if (ALLOW_DEBUG) {
+    Serial.printf("[Pedal] raw L=%d R=%d  cal L=%d R=%d  range L=[%d,%d] R=[%d,%d]  brake=%d  rudder=%d\n",
+      rawLb, rawRb, lb, rb, lbMin, lbMax, rbMin, rbMax, brakeMode,
+      brakeMode ? (1024 / 2) : ((1023 - lb + rb) / 2));
+  }
 
   setJoystickAxis(PEDAL_AXIS_LBRAKE, brakeMode ? lb : 0);
   setJoystickAxis(PEDAL_AXIS_RBRAKE, brakeMode ? rb : 0);
@@ -954,6 +981,8 @@ void loop() {
   // --- Serial communication & LED control ---
   static int heartbeat = 0;
   const int timeoutTicks = (1000 / LOOP_DELAY_MS) * SERIAL_TIMEOUT;
+
+  if (currentProto == PROTO_DCSBIOS) dcsBiosCheckTimeout();
 
   if (detectAndRouteSerial()) {
     heartbeat = 0;
