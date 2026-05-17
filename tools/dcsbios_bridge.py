@@ -207,6 +207,9 @@ def main():
 
                     if not receiving:
                         receiving = True
+                        # Clear change filter so Teensy gets full state after reconnect
+                        if resync_state is not None:
+                            resync_state.clear()
                         print(f"[OK] DCS-BIOS 데이터 수신 시작! (from {addr[0]})")
 
                     # 1초마다 상태 출력
