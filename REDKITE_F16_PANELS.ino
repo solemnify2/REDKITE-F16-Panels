@@ -404,6 +404,7 @@ static uint8_t analogBtnStart[NUM_ANALOG_ARRAYS];
 static int     totalButtons = 0;
 static uint8_t prevBtnState[128];  // debug: previous button states
 static bool backlightIdleOff = false;  // true when backlight is off due to idle
+static bool backlightManualOff = false; // true when manually turned off (DN LOCK REL + Landing Light OFF)
 static uint32_t lastInputTime = 0;    // millis() of last switch/button activity
 
 // ================================================================
@@ -994,6 +995,18 @@ void loop() {
       resetProtocol();
     }
     updateLedsOffline();
+
+    // Manual backlight control (offline): DN LOCK REL + Landing Light switch
+    bool dnLockRel = !digitalRead(switches[13].pin1);  // DN LOCK REL (active-low)
+    if (dnLockRel) {
+      if (swLandingLight == 0 && !backlightManualOff) {
+        analogWrite(BACKLIGHT_PIN, 0);
+        backlightManualOff = true;
+      } else if (swLandingLight != 0 && backlightManualOff) {
+        analogWrite(BACKLIGHT_PIN, 255);
+        backlightManualOff = false;
+      }
+    }
   }
 
   ++heartbeat;
@@ -1001,13 +1014,17 @@ void loop() {
 
   // Backlight idle auto-off: offline + no input for IDLE_TIMEOUT_MS → turn off
   if (heartbeat >= timeoutTicks) {
-    if (!backlightIdleOff && (millis() - lastInputTime > IDLE_TIMEOUT_MS)) {
+    if (!backlightIdleOff && !backlightManualOff && (millis() - lastInputTime > IDLE_TIMEOUT_MS)) {
       analogWrite(BACKLIGHT_PIN, 0);
       backlightIdleOff = true;
     }
   }
-  // Wake from idle: USB resume, switch input, or bridge online → ceremony + ON
-  if (backlightIdleOff && (heartbeat < timeoutTicks || millis() - lastInputTime < IDLE_TIMEOUT_MS)) {
+  // Wake from idle/manual-off: bridge online → always wake; offline input → wake only if not manual-off
+  if (heartbeat < timeoutTicks && (backlightIdleOff || backlightManualOff)) {
+    backlightManualOff = false;
+    welcomeCeremony();
+    backlightIdleOff = false;
+  } else if (backlightIdleOff && !backlightManualOff && millis() - lastInputTime < IDLE_TIMEOUT_MS) {
     welcomeCeremony();
     backlightIdleOff = false;
   }
