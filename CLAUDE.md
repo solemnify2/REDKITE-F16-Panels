@@ -63,7 +63,7 @@ MCP23017 chips add 16 GPIO pins each over I2C. Used for MISC panel (addr 0x20). 
 
 ### Backlight Control
 
-Step-Up converter (5V->12V) controlled via MOSFET on `BACKLIGHT_PIN` (pin 0, PWM). In-game sync: BMS uses `instrLight` from shared memory, DCS uses `LIGHT_INST_PNL` (0x4484). Currently ON/OFF only (no dimming).
+Step-Up converter (5V->12V) controlled via MOSFET on `BACKLIGHT_PIN` (pin 0, PWM). In-game sync: BMS uses `instrLight` from shared memory, DCS uses `LIGHT_INST_PNL` (0x4484). Currently ON/OFF only (no dimming). Offline manual control: hold DN LOCK REL + flip Landing Light switch (OFF=backlight off, TAXI/LANDING=backlight on). Idle auto-off after 30 min of no input; any switch press wakes (unless manually turned off). Bridge reconnect always restores backlight.
 
 ## Key Constants
 
@@ -81,4 +81,7 @@ Step-Up converter (5V->12V) controlled via MOSFET on `BACKLIGHT_PIN` (pin 0, PWM
 - Switch pin wiring uses active-low with INPUT_PULLUP (pressed = LOW = logical ON)
 - MCP pin numbering: GPA0-7 = 0-7, GPB0-7 = 8-15
 - Resistor ladder calibration: set `ALLOW_DEBUG = true`, read serial monitor, adjust `values[]` arrays
-- `stateRef` in `SwitchDef` links a switch's state to a variable used by other logic (e.g., pedal brake mode, offline gear LED sim)
+- `stateRef` in `SwitchDef` links a switch's state to a variable used by other logic (e.g., pedal brake mode, offline gear LED sim, manual backlight control)
+- `SW_ON_OFF_ON` state values: -1 (pin1 active), 0 (center/off), 1 (pin2 active)
+- Pedal calibration reset: hold both pedals + DN LOCK REL for 2 seconds
+- DN LOCK REL (switches[13]) is used as a modifier key for special combos (pedal cal reset, manual backlight)
