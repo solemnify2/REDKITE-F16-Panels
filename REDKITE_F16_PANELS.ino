@@ -129,7 +129,7 @@ const SwitchDef switches[] = {
   {"Landing Light",         PNL_GEAR,       SW_ON_OFF_ON,   -1,   3,   4,  &swLandingLight},
   {"Hook",                  PNL_GEAR,       SW_ON_OFF,      -1,   11,   0,  NULL},   // Up / Down
   {"Landing Gear",          PNL_GEAR,       SW_ON_OFF_ON,   -1,   28,   29,  &swGear},  // UP / DN
-  {"DN LOCK REL",           PNL_GEAR,       SW_ON_OFF,      -1,   1,   0,  NULL},
+  {"DN LOCK REL",           PNL_GEAR,       SW_ON_OFF,      -1,   1,   0,  NULL},   // SW_IDX_DN_LOCK_REL
   {"GND JETT ENABLE",       PNL_GEAR,       SW_ON_OFF,      -1,   9,   0,  NULL},   // ENABLE / OFF
   {"ANTI SKID",             PNL_GEAR,       SW_ON_OFF_ON,   -1,   6,  7,  NULL},   // PARKING BRAKE / ANTI SKID / OFF
   {"BRAKES Channel",        PNL_GEAR,       SW_ON_OFF,      -1,   8,   0,  NULL},   // CHAN 1 / CHAN 2
@@ -238,6 +238,9 @@ const McpDeviceDef mcpDevices[] = {
 // Set PEDAL_BRAKE_SW_REF to NULL to disable switch-linked brake mode
 #define PEDAL_BRAKE_SW_REF    (&swLandingLight)
 #define PEDAL_BRAKE_SW_VALUE  (1)    // landing light UP position
+
+// DN LOCK REL switch index (used as modifier key for combos)
+#define SW_IDX_DN_LOCK_REL    13
 
 
 // ================================================================
@@ -591,7 +594,7 @@ void processPedal() {
   {
     static uint32_t calResetStart = 0;
     bool bothPedals = (rawLb > 600 && rawRb > 600);
-    bool dnLockRel = !digitalRead(switches[13].pin1);  // DN LOCK REL (active-low)
+    bool dnLockRel = !digitalRead(switches[SW_IDX_DN_LOCK_REL].pin1);  // DN LOCK REL (active-low)
     if (bothPedals && dnLockRel) {
       if (calResetStart == 0) calResetStart = millis();
       else if (millis() - calResetStart >= 2000) {
@@ -997,7 +1000,7 @@ void loop() {
     updateLedsOffline();
 
     // Manual backlight control (offline): DN LOCK REL + Landing Light switch
-    bool dnLockRel = !digitalRead(switches[13].pin1);  // DN LOCK REL (active-low)
+    bool dnLockRel = !digitalRead(switches[SW_IDX_DN_LOCK_REL].pin1);  // DN LOCK REL (active-low)
     if (dnLockRel) {
       if (swLandingLight == 0 && !backlightManualOff) {
         analogWrite(BACKLIGHT_PIN, 0);
