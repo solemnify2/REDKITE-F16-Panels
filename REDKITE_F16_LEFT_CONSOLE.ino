@@ -10,7 +10,15 @@
 //  USB Type: Serial + Keyboard + Mouse + Joystick
 // ================================================================
 
-#include <Joystick.h>
+// #include <Joystick.h>
+
+// ================================================================
+//  Build Checks
+// ================================================================
+
+#if JOYSTICK_SIZE > 12
+  #warning "JOYSTICK_SIZE > 12 is unnecessary for Left Console. Consider setting it to 12 in usb_desc.h."
+#endif
 
 // ================================================================
 //  Constants
@@ -18,6 +26,8 @@
 
 #define ALLOW_DEBUG       false
 #define LOOP_DELAY_MS     50        // 20Hz main loop
+#define SERIAL_TIMEOUT    3         // seconds before protocol reset
+#define BAUDRATE          1000000
 
 // ================================================================
 //  Type Definitions
@@ -54,28 +64,33 @@ struct AnalogBtnArrayDef {
 // --- Digital Switches ---
 const SwitchDef switches[] = {
   // name              type           pin1  pin2
-  {"ECM OPR/STBY",     SW_ON_OFF_ON,    0,    1},   // OPR / OFF / STBY
-  {"ECM XMIT",         SW_ON_OFF_ON,    2,    3},   // 1 / 2 / 3
-  {"ELEC MAIN PWR",    SW_ON_OFF_ON,    4,    5},   // BATT / OFF / MAIN
+  // ECM (pin 18~13, descending)
+  {"ECM OPR/STBY",     SW_ON_OFF_ON,   18,   17},   // OPR / OFF / STBY       [ECM]
+  {"ECM XMIT",         SW_ON_OFF_ON,   16,   15},   // 1 / 2 / 3              [ECM]
+  {"ECM BIT",           SW_ON_OFF,     14,    0},   // momentary              [ECM]
+  {"ECM RESET",         SW_ON_OFF,     13,    0},   // momentary              [ECM]
+  // ELEC (pin 0~2)
+  {"ELEC MAIN PWR",    SW_ON_OFF_ON,    0,    1},   // BATT / OFF / MAIN      [ELEC]
+  {"ELEC CAUTION RST", SW_ON_OFF,      2,    0},   // momentary              [ELEC]
 };
 
-// --- Resistor Ladder (ECM 8-button) ---
+// --- Resistor Ladder (ECM 8-button) ---                              [ECM]
 // TODO: calibrate values[] by reading actual analogRead with ALLOW_DEBUG = true.
-// Resistor ladder: 1kOhm series chain + 4.7kOhm pulldown.
-// ADC_k = 1023 * 4700 / (k * 1000 + 4700)
+// Resistor ladder: 10kOhm series chain + 20kOhm pulldown.
+// ADC_k = 1023 * 20000 / (k * 10000 + 20000)  (k=0..7)
 
 const char* const ecmBtnNames[] = {
   "ECM 1", "ECM 2", "ECM 3", "ECM 4",
   "ECM 5", "ECM 6", "ECM FRM", "ECM SPL"
 };
-const int ecmBtnValues[] = {843, 724, 634, 563, 506, 459, 419, 385};
+const int ecmBtnValues[] = {1024, 680, 509, 406, 338, 290, 253, 225};
 
 const AnalogBtnArrayDef analogBtnArrays[] = {
   // groupName       pin   numBtn  btnNames      values          tolerance
-  {"ECM Buttons",    A0,   8,      ecmBtnNames,  ecmBtnValues,  20},
+  {"ECM Buttons",    A9,   8,      ecmBtnNames,  ecmBtnValues,  20},
 };
 
-// --- ELEC Panel LEDs (direct GPIO) ---
+// --- ELEC Panel LEDs (direct GPIO) ---                               [ELEC]
 // TODO: assign actual Teensy 4.0 pin numbers after wiring
 enum LedIdx {
   LI_FLCS_PMG, LI_MAIN_GEN, LI_STBY_GEN,
@@ -85,24 +100,24 @@ enum LedIdx {
 
 const LedDef leds[] = {
   // name               pin
-  {"FLCS PMG",           6},
-  {"MAIN GEN",           7},
-  {"STBY GEN",           8},
-  {"EPU GEN",            9},
-  {"EPU PMG",           10},
-  {"FLCS RLY",          11},
-  {"BATT FAIL",         15},
-  {"BATT TO FLCS",      16},
-  {"ELEC SYS",          17},
+  {"FLCS PMG",           3},
+  {"MAIN GEN",           4},
+  {"STBY GEN",           5},
+  {"EPU GEN",            6},
+  {"EPU PMG",            7},
+  {"FLCS RLY",           8},
+  {"BATT FAIL",          9},
+  {"BATT TO FLCS",      10},
+  {"ELEC SYS",          11},
 };
 
 #define NUM_LEDS (sizeof(leds) / sizeof(leds[0]))
 
-// --- ECM Panel LEDs (74HC595 x4, daisy-chained, 32 outputs) ---
+// --- ECM Panel LEDs (74HC595 x4, daisy-chained, 32 outputs) ---      [ECM]
 // TODO: assign actual Teensy 4.0 pin numbers after wiring
-#define SR_DATA_PIN    18   // SER (serial data input)
-#define SR_CLOCK_PIN   19   // SRCLK (shift register clock)
-#define SR_LATCH_PIN   20   // RCLK (storage register clock / latch)
+#define SR_DATA_PIN    22   // DS (serial data input)
+#define SR_CLOCK_PIN   21   // SH_CP (shift register clock)
+#define SR_LATCH_PIN   20   // ST_CP (storage register clock / latch)
 #define SR_NUM_CHIPS   4
 #define SR_NUM_OUTPUTS (SR_NUM_CHIPS * 8)  // 32
 
@@ -119,9 +134,45 @@ const char* const ecmSrLedNames[] = {
   "ECM_SPL_S", "ECM_SPL_A", "ECM_SPL_F", "ECM_SPL_T",
 };
 
+// Hardware SR index mapping: logical index → physical SR output
+// (PCB wiring does not follow standard shift order)
+const uint8_t srMap[SR_NUM_OUTPUTS] = {
+  17, 16, 19, 18,  // ECM 1: S, A, F, T
+  23, 22, 21, 20,  // ECM 2: S, A, F, T
+  25, 24, 27, 26,  // ECM 3: S, A, F, T
+  31, 30, 29, 28,  // ECM 4: S, A, F, T
+  13, 12, 15, 14,  // ECM 5: S, A, F, T
+  11, 10,  9,  8,  // ECM 6: S, A, F, T
+   5,  4,  7,  6,  // ECM FRM: S, A, F, T
+   3,  2,  1,  0,  // ECM SPL: S, A, F, T
+};
+
 // ================================================================
 //  End of Hardware Configuration
 // ================================================================
+
+// Forward declarations for BIOS handlers
+void writeElecLed(uint8_t idx, bool state);
+void srWrite(uint8_t idx, bool state);
+void srFlush();
+
+// ================================================================
+//  BIOS Handlers (DCS-BIOS + BMS-BIOS)
+// ================================================================
+
+#include "BiosHandler/DcsBiosParser.h"
+#include "BiosHandler/BmsBiosParser.h"
+
+// ================================================================
+//  Protocol Auto-Detection
+// ================================================================
+
+enum Protocol { PROTO_UNKNOWN, PROTO_DCSBIOS, PROTO_BMS_BIOS };
+
+static Protocol  currentProto     = PROTO_UNKNOWN;
+static uint8_t   syncCount        = 0;
+static bool      bmsBiosSync1     = false;
+static uint32_t  protoDetectStart = 0;
 
 #define NUM_SWITCHES      (sizeof(switches)      / sizeof(switches[0]))
 #define NUM_ANALOG_ARRAYS (sizeof(analogBtnArrays) / sizeof(analogBtnArrays[0]))
@@ -143,18 +194,19 @@ int switchButtonCount(SwitchType type) {
 // ================================================================
 
 void srFlush() {
-  // Shift out all chips (last chip first = MSB-first order)
+  // Shift out all chips
   digitalWrite(SR_LATCH_PIN, LOW);
   for (int i = SR_NUM_CHIPS - 1; i >= 0; i--) {
-    shiftOut(SR_DATA_PIN, SR_CLOCK_PIN, MSBFIRST, srData[i]);
+    shiftOut(SR_DATA_PIN, SR_CLOCK_PIN, LSBFIRST, srData[i]);
   }
   digitalWrite(SR_LATCH_PIN, HIGH);
 }
 
 void srWrite(uint8_t idx, bool state) {
   if (idx >= SR_NUM_OUTPUTS) return;
-  uint8_t chip = idx / 8;
-  uint8_t bit  = idx % 8;
+  uint8_t hw  = srMap[idx];
+  uint8_t chip = hw / 8;
+  uint8_t bit  = hw % 8;
   if (state) srData[chip] |=  (1 << bit);
   else       srData[chip] &= ~(1 << bit);
 }
@@ -184,6 +236,39 @@ void turnOffAllLeds() {
 }
 
 // ================================================================
+//  Welcome Ceremony (ECM LEDs)
+// ================================================================
+
+void welcomeCeremony() {
+  // Sweep on: each group S→A→F→T one by one
+  for (int grp = 0; grp < 8; grp++) {
+    for (int col = 0; col < 4; col++) {
+      srWrite(grp * 4 + col, true);
+      srFlush();
+      delay(40);
+    }
+  }
+  for (unsigned int i = 0; i < NUM_LEDS; i++) {
+    writeElecLed(i, true);
+    delay(40);
+  }
+  delay(300);
+
+  // Blink all twice
+  for (int blink = 0; blink < 2; blink++) {
+    turnOffAllLeds();
+    delay(150);
+    for (int i = 0; i < SR_NUM_OUTPUTS; i++) srWrite(i, true);
+    srFlush();
+    for (unsigned int i = 0; i < NUM_LEDS; i++) writeElecLed(i, true);
+    delay(150);
+  }
+
+  // All off
+  turnOffAllLeds();
+}
+
+// ================================================================
 //  Switch Processing
 // ================================================================
 
@@ -208,7 +293,7 @@ void processSwitches() {
       case SW_ON_OFF_ON: {
         int s1 = digitalRead(sw.pin1);
         int s2 = digitalRead(sw.pin2);
-        if (!s1 != prevBtnState[btn] || !s2 != prevBtnState[btn + 1]) {
+        if ((!s1) != prevBtnState[btn] || (!s2) != prevBtnState[btn + 1]) {
           if (ALLOW_DEBUG) Serial.printf("[SW] btn %d~%d %s = %d/%d\n", btn, btn+1, sw.name, !s1, !s2);
           prevBtnState[btn] = !s1;
           prevBtnState[btn + 1] = !s2;
@@ -253,11 +338,82 @@ void processAnalogButtons() {
 }
 
 // ================================================================
+//  Protocol Detection & Serial Routing
+// ================================================================
+
+void resetProtocol() {
+  currentProto = PROTO_UNKNOWN;
+  syncCount    = 0;
+  bmsBiosSync1 = false;
+  protoDetectStart = 0;
+  dcsBiosReset();
+  bmsBiosReset();
+  turnOffAllLeds();
+  if (ALLOW_DEBUG) Serial.println("[Proto] Reset to UNKNOWN");
+}
+
+bool detectAndRouteSerial() {
+  bool received = false;
+
+  while (Serial.available()) {
+    int ch = Serial.read();
+    if (ch < 0) break;
+    received = true;
+
+    switch (currentProto) {
+
+      case PROTO_UNKNOWN: {
+        if (protoDetectStart == 0) protoDetectStart = millis();
+
+        uint8_t b = (uint8_t)ch;
+        if (b == 0x55) {
+          syncCount++;
+          bmsBiosSync1 = false;
+          if (syncCount >= 4) {
+            currentProto = PROTO_DCSBIOS;
+            syncCount = 0;
+            turnOffAllLeds();
+            if (ALLOW_DEBUG) Serial.println("[Proto] Detected DCS-BIOS");
+            dcsBiosReset();
+            dcsBiosState = DCS_ADDR_LOW;
+          }
+        } else if (b == 0xAA) {
+          syncCount = 0;
+          bmsBiosSync1 = true;
+        } else if (b == 0xBB && bmsBiosSync1) {
+          currentProto = PROTO_BMS_BIOS;
+          bmsBiosSync1 = false;
+          turnOffAllLeds();
+          if (ALLOW_DEBUG) Serial.println("[Proto] Detected BMS-BIOS");
+          bmsBiosReset();
+          bbBufIdx = 0;
+          bbState = BB_PAYLOAD;
+        } else {
+          syncCount = 0;
+          bmsBiosSync1 = false;
+        }
+        break;
+      }
+
+      case PROTO_DCSBIOS:
+        processDcsBiosByte((uint8_t)ch);
+        break;
+
+      case PROTO_BMS_BIOS:
+        processBmsBiosByte((uint8_t)ch);
+        break;
+    }
+  }
+
+  return received;
+}
+
+// ================================================================
 //  Setup
 // ================================================================
 
 void setup() {
-  Serial.begin(115200);
+  Serial.begin(BAUDRATE);
 
   // Configure LED pins (direct GPIO)
   for (unsigned int i = 0; i < NUM_LEDS; i++) {
@@ -294,6 +450,7 @@ void setup() {
     nextBtn += analogBtnArrays[i].numButtons;
   }
 
+  Joystick.useManualSend(true);
   memset(prevBtnState, 0, sizeof(prevBtnState));
 
   // Startup info
@@ -318,6 +475,8 @@ void setup() {
       analogBtnArrays[i].groupName, analogBtnArrays[i].numButtons);
   }
   Serial.println("=========================");
+
+  welcomeCeremony();
 }
 
 // ================================================================
@@ -329,7 +488,26 @@ void loop() {
   processAnalogButtons();
   Joystick.send_now();
 
-  // Flush shift register (ECM LEDs) — call after any srWrite/writeEcmLed
+  // --- Serial communication & LED control ---
+  static int heartbeat = 0;
+  const int timeoutTicks = (1000 / LOOP_DELAY_MS) * SERIAL_TIMEOUT;
+
+  if (currentProto == PROTO_DCSBIOS) dcsBiosCheckTimeout();
+
+  if (detectAndRouteSerial()) {
+    heartbeat = 0;
+  }
+
+  if (heartbeat >= timeoutTicks) {
+    if (currentProto != PROTO_UNKNOWN) {
+      resetProtocol();
+    }
+  }
+
+  ++heartbeat;
+  heartbeat = min(heartbeat, timeoutTicks);
+
+  // Flush shift register (ECM LEDs)
   srFlush();
 
   delay(LOOP_DELAY_MS);
