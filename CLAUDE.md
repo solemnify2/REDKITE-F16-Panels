@@ -4,31 +4,76 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Teensy 4.0 기반 F-16 Left Console (ECM + ELEC 패널) USB 조이스틱 컨트롤러.
-Falcon BMS 시뮬레이터용 커스텀 콕핏 하드웨어 프로젝트 (Redkite Project).
+Teensy 4.0-based USB joystick controller for F-16 Left Console (ECM + ELEC panels). Supports Falcon BMS (BMS-BIOS) and DCS World (DCS-BIOS) with automatic protocol detection for LED synchronization. Part of the Redkite Project.
 
 ## Build & Upload
 
-Arduino IDE 또는 PlatformIO에서 Teensy 4.0 타겟으로 빌드.
-- Board: Teensy 4.0
-- USB Type: Serial + Keyboard + Mouse + Joystick
-- 의존성: Joystick 라이브러리 (Teensyduino 내장)
+- **IDE**: Arduino IDE with [Teensyduino](https://www.pjrc.com/teensy/td_download.html)
+- **Board**: Teensy 4.0
+- **USB Type**: Serial + Keyboard + Mouse + Joystick
+- **Libraries**: Joystick (Teensyduino built-in)
+- **JOYSTICK_SIZE**: 12 (default) is sufficient for this panel (17 buttons). `JOYSTICK_SIZE > 12` triggers a build warning.
+- **Upload**: Open `REDKITE_F16_LEFT_CONSOLE.ino` in Arduino IDE and Upload
 
 ## Architecture
 
-단일 `.ino` 파일 구조 (REDKITE_F16_LEFT_CONSOLE.ino):
+Single `.ino` file structure (`REDKITE_F16_LEFT_CONSOLE.ino`):
 
-1. **Hardware Config** (상단): `SwitchDef`, `LedDef`, `AnalogBtnArrayDef` 배열로 핀/스위치/LED 선언
-2. **74HC595 Driver**: 4개 데이지체인 시프트 레지스터로 ECM 패널 32개 LED 제어 (`srWrite`, `srFlush`)
-3. **Input Processing**: 디지털 스위치 (`processSwitches`) + 아날로그 저항래더 (`processAnalogButtons`)
-4. **Output**: USB Joystick 버튼으로 매핑 (순차 할당, 버튼 1번부터)
+### Data-Driven Hardware Configuration
 
-`name.c`: USB 디바이스 이름을 "REDKITE F16 Left Console"로 커스터마이즈.
+All hardware is declared in config arrays under the **HARDWARE CONFIGURATION** section. To add/remove hardware, only edit these arrays:
 
-## Key Conventions
+- `switches[]` — digital switches (direct Teensy pins)
+- `analogBtnArrays[]` — resistor ladder button groups (ECM 8-button on A9)
+- `leds[]` — ELEC panel LEDs (direct GPIO, indexed by `LedIdx` enum)
+- `ecmSrLedNames[]` / `srMap[]` — ECM panel LEDs (74HC595 shift registers)
 
-- 스위치는 INPUT_PULLUP, active-low
-- 새 스위치/버튼 추가 시 `switches[]` 또는 `analogBtnArrays[]` 배열에 항목 추가하면 조이스틱 버튼 번호 자동 할당
-- LED 추가: GPIO 직결은 `leds[]` 배열, 시프트 레지스터는 `ecmSrLedNames[]`
-- 디버그: `ALLOW_DEBUG`를 true로 변경하면 시리얼 모니터에 입력 상태 출력
-- 핀 배치 문서: `doc/PIN_ASSIGNMENT.md`
+Joystick button numbers are auto-assigned at runtime (button 1 onwards).
+
+### 74HC595 Shift Register Driver
+
+4 daisy-chained 74HC595 chips drive 32 ECM panel LEDs. `srMap[]` remaps logical LED index to physical SR output (PCB wiring doesn't follow standard shift order). Control functions: `srWrite(idx, state)`, `srFlush()`, `srClear()`.
+
+### Protocol Auto-Detection
+
+Teensy receives serial bytes and auto-detects the protocol:
+- **BMS-BIOS**: sync `0xAA 0xBB`, 7-byte frames with XOR checksum. Parsed by `BiosHandler/BmsBiosParser.h`.
+- **DCS-BIOS**: sync `0x55 x4`, address/count/data chunks. Parsed by `BiosHandler/DcsBiosParser.h`.
+- 3-second heartbeat timeout triggers protocol reset and re-detection.
+
+### USB Suspend Detection
+
+SOF-based suspend detection using `USB1_FRINDEX`. When PC enters sleep, USB SOF packets stop — if no frame change for 50ms, Teensy considers USB suspended. On suspend: all LEDs off (GPIO + SR), CPU enters `wfi` sleep. On resume: welcome ceremony runs automatically.
+
+### Welcome Ceremony
+
+ECM LED sweep animation + ELEC LED sequence + blink. Runs on: startup, USB resume from suspend, bridge online (offline->online transition).
+
+### Key Files
+
+| File | Purpose |
+|------|---------|
+| `REDKITE_F16_LEFT_CONSOLE.ino` | Main sketch: config arrays, 74HC595 driver, switch/analog processing, protocol detection, main loop |
+| `BiosHandler/DcsBiosParser.h` | DCS-BIOS frame parser + F-16C ELEC/ECM address map |
+| `BiosHandler/BmsBiosParser.h` | BMS-BIOS frame parser (packed LED bitfield) |
+| `name.c` | USB device name override ("REDKITE F16 Left Console") |
+| `doc/PIN_ASSIGNMENT.md` | Complete pin mapping and joystick button layout |
+
+## Key Constants
+
+| Constant | Value | Purpose |
+|----------|-------|---------|
+| `BAUDRATE` | 1000000 | Serial baud rate (USB CDC, rate is nominal) |
+| `ALLOW_DEBUG` | false | Set true for serial debug output |
+| `LOOP_DELAY_MS` | 50 | Main loop interval (20Hz) |
+| `SERIAL_TIMEOUT` | 3 | Seconds before protocol reset on no data |
+| `USB_SUSPEND_THRESHOLD_MS` | 50 | SOF silence threshold for suspend detection |
+
+## Conventions
+
+- Mixed Korean (comments) and English (code/identifiers)
+- Switch wiring: active-low with INPUT_PULLUP (pressed = LOW = logical ON)
+- New switch: add to `switches[]`. New analog ladder: add to `analogBtnArrays[]`
+- New ELEC LED: add to `leds[]` + `LedIdx` enum. New ECM LED: add to `ecmSrLedNames[]` + `srMap[]`
+- Resistor ladder calibration: set `ALLOW_DEBUG = true`, read serial monitor, adjust `values[]`
+- Pin assignment doc: `doc/PIN_ASSIGNMENT.md`

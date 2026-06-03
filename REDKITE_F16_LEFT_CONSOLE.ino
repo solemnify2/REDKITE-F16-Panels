@@ -524,6 +524,7 @@ void loop() {
 
   // --- Serial communication & LED control ---
   static int heartbeat = 0;
+  static bool wasOffline = true;
   const int timeoutTicks = (1000 / LOOP_DELAY_MS) * SERIAL_TIMEOUT;
 
   if (currentProto == PROTO_DCSBIOS) dcsBiosCheckTimeout();
@@ -536,6 +537,13 @@ void loop() {
     if (currentProto != PROTO_UNKNOWN) {
       resetProtocol();
     }
+    wasOffline = true;
+  }
+
+  // Bridge online: welcome ceremony on offline → online transition
+  if (heartbeat < timeoutTicks && wasOffline) {
+    wasOffline = false;
+    welcomeCeremony();
   }
 
   ++heartbeat;
