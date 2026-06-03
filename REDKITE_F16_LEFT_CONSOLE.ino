@@ -17,7 +17,11 @@
 // ================================================================
 
 #if JOYSTICK_SIZE > 12
-  #warning "JOYSTICK_SIZE > 12 is unnecessary for Left Console. Consider setting it to 12 in usb_desc.h."
+  #warning "JOYSTICK_SIZE > 12 is unnecessary for Left Console. Edit USB_SERIAL_HID section in %LOCALAPPDATA%/Arduino15/packages/teensy/hardware/avr/<version>/cores/teensy4/usb_desc.h"
+#endif
+
+#if PRODUCT_ID != 0x048E
+  #error "PRODUCT_ID must be 0x048E for Left Console. Edit USB_SERIAL_HID section in %LOCALAPPDATA%/Arduino15/packages/teensy/hardware/avr/<version>/cores/teensy4/usb_desc.h"
 #endif
 
 // ================================================================
@@ -260,13 +264,19 @@ void turnOffAllLeds() {
 // ================================================================
 
 void welcomeCeremony() {
-  // Sweep on: each group S→A→F→T one by one
-  for (int grp = 0; grp < 8; grp++) {
-    for (int col = 0; col < 4; col++) {
-      srWrite(grp * 4 + col, true);
-      srFlush();
-      delay(40);
+  // Sweep on: all groups simultaneously, column by column (S→A→F→T)
+  // Only the current column is lit; previous column turns off
+  for (int col = 0; col < 4; col++) {
+    if (col > 0) {
+      for (int grp = 0; grp < 8; grp++) {
+        srWrite(grp * 4 + (col - 1), false);
+      }
     }
+    for (int grp = 0; grp < 8; grp++) {
+      srWrite(grp * 4 + col, true);
+    }
+    srFlush();
+    delay(500);
   }
   for (unsigned int i = 0; i < NUM_LEDS; i++) {
     writeElecLed(i, true);
@@ -505,26 +515,38 @@ void setup() {
 
 void loop() {
   static bool wasSuspended = false;
+  static bool ledsOff = false;   // true when LEDs are off (suspend/offline) and awaiting wake trigger
 
   if (isUSBSuspended()) {
     turnOffAllLeds();
     wasSuspended = true;
+    ledsOff = true;
     asm("wfi");   // CPU sleep until next interrupt (USB resume, timer, etc.)
     return;
   }
 
   if (wasSuspended) {
     wasSuspended = false;
-    welcomeCeremony();
+    // Don't welcome immediately — wait for bridge online or switch input
   }
+
+  // Detect switch input change
+  uint8_t prevSnapshot[64];
+  if (ledsOff) memcpy(prevSnapshot, prevBtnState, sizeof(prevSnapshot));
 
   processSwitches();
   processAnalogButtons();
   Joystick.send_now();
 
+  // Wake on input: welcome ceremony when any switch changes while LEDs are off
+  if (ledsOff && memcmp(prevSnapshot, prevBtnState, sizeof(prevSnapshot)) != 0) {
+    ledsOff = false;
+    welcomeCeremony();
+  }
+
   // --- Serial communication & LED control ---
   static int heartbeat = 0;
-  static bool wasOffline = true;
+  static bool wasOffline = false;  // false: setup() already did welcome
   const int timeoutTicks = (1000 / LOOP_DELAY_MS) * SERIAL_TIMEOUT;
 
   if (currentProto == PROTO_DCSBIOS) dcsBiosCheckTimeout();
@@ -543,6 +565,7 @@ void loop() {
   // Bridge online: welcome ceremony on offline → online transition
   if (heartbeat < timeoutTicks && wasOffline) {
     wasOffline = false;
+    ledsOff = false;
     welcomeCeremony();
   }
 
