@@ -95,7 +95,7 @@ const AnalogBtnArrayDef analogBtnArrays[] = {
 enum LedIdx {
   LI_FLCS_PMG, LI_MAIN_GEN, LI_STBY_GEN,
   LI_EPU_GEN, LI_EPU_PMG, LI_FLCS_RLY,
-  LI_BATT_FAIL, LI_BATT_TO_FLCS, LI_ELEC_SYS,
+  LI_BATT_FAIL, LI_BATT_TO_FLCS,
 };
 
 const LedDef leds[] = {
@@ -108,7 +108,6 @@ const LedDef leds[] = {
   {"FLCS RLY",           8},
   {"BATT FAIL",          9},
   {"BATT TO FLCS",      10},
-  {"ELEC SYS",          11},
 };
 
 #define NUM_LEDS (sizeof(leds) / sizeof(leds[0]))
@@ -162,6 +161,27 @@ void srFlush();
 
 #include "BiosHandler/DcsBiosParser.h"
 #include "BiosHandler/BmsBiosParser.h"
+
+// ================================================================
+//  USB Suspend Detection (SOF-based, Teensy 4.x)
+// ================================================================
+
+#define USB_SUSPEND_THRESHOLD_MS  50
+
+static uint32_t lastFrameIndex = 0;
+static uint32_t lastSOFActiveTime = 0;
+
+bool isUSBSuspended() {
+  if (!usb_configuration) return true;
+
+  uint32_t frame = USB1_FRINDEX;
+  if (frame != lastFrameIndex) {
+    lastFrameIndex = frame;
+    lastSOFActiveTime = millis();
+    return false;
+  }
+  return (millis() - lastSOFActiveTime > USB_SUSPEND_THRESHOLD_MS);
+}
 
 // ================================================================
 //  Protocol Auto-Detection
@@ -484,6 +504,20 @@ void setup() {
 // ================================================================
 
 void loop() {
+  static bool wasSuspended = false;
+
+  if (isUSBSuspended()) {
+    turnOffAllLeds();
+    wasSuspended = true;
+    asm("wfi");   // CPU sleep until next interrupt (USB resume, timer, etc.)
+    return;
+  }
+
+  if (wasSuspended) {
+    wasSuspended = false;
+    welcomeCeremony();
+  }
+
   processSwitches();
   processAnalogButtons();
   Joystick.send_now();

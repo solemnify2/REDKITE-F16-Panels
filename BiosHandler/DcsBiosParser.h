@@ -138,7 +138,7 @@ static void dcsBiosOnUpdate(uint16_t addr, uint16_t value) {
     writeElecLed(LI_BATT_FAIL,   (value & DCSBIOS_BATT_FAIL_MASK));
   }
   else if (addr == DCSBIOS_CAUTION2_ADDR) {
-    writeElecLed(LI_ELEC_SYS,    (value & DCSBIOS_ELEC_SYS_MASK));
+    // ELEC SYS is on the right panel (Caution Light Panel), not here
     writeElecLed(LI_EPU_GEN,     (value & DCSBIOS_EPU_GEN_MASK));
     writeElecLed(LI_EPU_PMG,     (value & DCSBIOS_EPU_PMG_MASK));
   }

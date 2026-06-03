@@ -20,7 +20,6 @@
 | 8       | FLCS RLY     |
 | 9       | BATT FAIL    |
 | 10      | BATT TO FLCS |
-| 11      | ELEC SYS     |
 
 ## ECM Digital Switch Pins (INPUT_PULLUP, descending)
 
@@ -90,12 +89,12 @@
 | Pin Range | Usage              | Count |
 |-----------|--------------------|-------|
 | 0 - 2     | ELEC Switches      | 3     |
-| 3 - 11    | ELEC LEDs (GPIO)   | 9     |
-| 12        | (unused)           | 1     |
+| 3 - 10    | ELEC LEDs (GPIO)   | 8     |
+| 11 - 12   | (unused)           | 2     |
 | 13 - 18   | ECM Switches       | 6     |
 | 19        | (unused)           | 1     |
 | 20 - 22   | 74HC595 SR Control | 3     |
 | A9 (23)   | Analog Ladder      | 1     |
 
 > Note: Teensy 4.0의 A9 핀은 디지털 핀 23번과 동일합니다.
-> Pin 12, 19는 현재 미사용 상태입니다.
+> Pin 11, 12, 19는 현재 미사용 상태입니다.
