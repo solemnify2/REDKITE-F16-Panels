@@ -1,0 +1,155 @@
+<svg width="800" height="620" viewBox="0 0 800 620" xmlns="http://www.w3.org/2000/svg" font-family="Consolas, monospace">
+  <defs>
+    <marker id="dot" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6">
+      <circle cx="5" cy="5" r="4" fill="#4fc3f7"/>
+    </marker>
+  </defs>
+
+  <!-- Background -->
+  <rect width="800" height="620" rx="16" fill="#16213e"/>
+
+  <!-- Title -->
+  <text x="400" y="40" text-anchor="middle" fill="#e0e0e0" font-size="20" font-weight="bold">Resistor Ladder — 6-Position Rotary Switch</text>
+
+  <!-- 3.3V rail -->
+  <line x1="80" y1="90" x2="80" y2="110" stroke="#f44336" stroke-width="2.5"/>
+  <rect x="50" y="70" width="60" height="24" rx="4" fill="#b71c1c"/>
+  <text x="80" y="87" text-anchor="middle" fill="#fff" font-size="14" font-weight="bold">3.3V</text>
+
+  <!-- Resistor chain (vertical) -->
+  <!-- R1 -->
+  <line x1="80" y1="110" x2="80" y2="120" stroke="#f44336" stroke-width="2"/>
+  <rect x="64" y="120" width="32" height="50" rx="4" fill="#37474f" stroke="#78909c" stroke-width="1.5"/>
+  <text x="80" y="150" text-anchor="middle" fill="#fff" font-size="11">1kΩ</text>
+  <line x1="80" y1="170" x2="80" y2="180" stroke="#4fc3f7" stroke-width="2"/>
+  <circle cx="80" cy="180" r="4" fill="#4fc3f7"/>
+
+  <!-- R2 -->
+  <rect x="64" y="190" width="32" height="50" rx="4" fill="#37474f" stroke="#78909c" stroke-width="1.5"/>
+  <text x="80" y="220" text-anchor="middle" fill="#fff" font-size="11">1kΩ</text>
+  <line x1="80" y1="180" x2="80" y2="190" stroke="#4fc3f7" stroke-width="2"/>
+  <line x1="80" y1="240" x2="80" y2="250" stroke="#4fc3f7" stroke-width="2"/>
+  <circle cx="80" cy="250" r="4" fill="#4fc3f7"/>
+
+  <!-- R3 -->
+  <rect x="64" y="260" width="32" height="50" rx="4" fill="#37474f" stroke="#78909c" stroke-width="1.5"/>
+  <text x="80" y="290" text-anchor="middle" fill="#fff" font-size="11">1kΩ</text>
+  <line x1="80" y1="250" x2="80" y2="260" stroke="#4fc3f7" stroke-width="2"/>
+  <line x1="80" y1="310" x2="80" y2="320" stroke="#4fc3f7" stroke-width="2"/>
+  <circle cx="80" cy="320" r="4" fill="#4fc3f7"/>
+
+  <!-- R4 -->
+  <rect x="64" y="330" width="32" height="50" rx="4" fill="#37474f" stroke="#78909c" stroke-width="1.5"/>
+  <text x="80" y="360" text-anchor="middle" fill="#fff" font-size="11">1kΩ</text>
+  <line x1="80" y1="320" x2="80" y2="330" stroke="#4fc3f7" stroke-width="2"/>
+  <line x1="80" y1="380" x2="80" y2="390" stroke="#4fc3f7" stroke-width="2"/>
+  <circle cx="80" cy="390" r="4" fill="#4fc3f7"/>
+
+  <!-- R5 -->
+  <rect x="64" y="400" width="32" height="50" rx="4" fill="#37474f" stroke="#78909c" stroke-width="1.5"/>
+  <text x="80" y="430" text-anchor="middle" fill="#fff" font-size="11">1kΩ</text>
+  <line x1="80" y1="390" x2="80" y2="400" stroke="#4fc3f7" stroke-width="2"/>
+  <line x1="80" y1="450" x2="80" y2="460" stroke="#4fc3f7" stroke-width="2"/>
+  <circle cx="80" cy="460" r="4" fill="#4fc3f7"/>
+
+  <!-- R6 -->
+  <rect x="64" y="470" width="32" height="50" rx="4" fill="#37474f" stroke="#78909c" stroke-width="1.5"/>
+  <text x="80" y="500" text-anchor="middle" fill="#fff" font-size="11">1kΩ</text>
+  <line x1="80" y1="460" x2="80" y2="470" stroke="#4fc3f7" stroke-width="2"/>
+  <line x1="80" y1="520" x2="80" y2="530" stroke="#4fc3f7" stroke-width="2"/>
+  <circle cx="80" cy="530" r="4" fill="#4fc3f7"/>
+
+  <!-- Horizontal lines to rotary switch pins -->
+  <line x1="80" y1="180" x2="200" y2="180" stroke="#4fc3f7" stroke-width="2"/>
+  <line x1="80" y1="250" x2="200" y2="250" stroke="#4fc3f7" stroke-width="2"/>
+  <line x1="80" y1="320" x2="200" y2="320" stroke="#4fc3f7" stroke-width="2"/>
+  <line x1="80" y1="390" x2="200" y2="390" stroke="#4fc3f7" stroke-width="2"/>
+  <line x1="80" y1="460" x2="200" y2="460" stroke="#4fc3f7" stroke-width="2"/>
+  <line x1="80" y1="530" x2="200" y2="530" stroke="#4fc3f7" stroke-width="2"/>
+
+  <!-- Position labels on wires -->
+  <text x="140" y="173" text-anchor="middle" fill="#aaa" font-size="11">pos 1</text>
+  <text x="140" y="243" text-anchor="middle" fill="#aaa" font-size="11">pos 2</text>
+  <text x="140" y="313" text-anchor="middle" fill="#aaa" font-size="11">pos 3</text>
+  <text x="140" y="383" text-anchor="middle" fill="#aaa" font-size="11">pos 4</text>
+  <text x="140" y="453" text-anchor="middle" fill="#aaa" font-size="11">pos 5</text>
+  <text x="140" y="523" text-anchor="middle" fill="#aaa" font-size="11">pos 6</text>
+
+  <!-- Rotary Switch body -->
+  <rect x="200" y="150" width="160" height="410" rx="12" fill="#263238" stroke="#546e7a" stroke-width="2"/>
+  <text x="280" y="185" text-anchor="middle" fill="#b0bec5" font-size="14" font-weight="bold">ROTARY</text>
+  <text x="280" y="205" text-anchor="middle" fill="#b0bec5" font-size="14" font-weight="bold">SWITCH</text>
+
+  <!-- Rotary pins (left side - position pins) -->
+  <circle cx="200" cy="180" r="6" fill="#4fc3f7" stroke="#0288d1" stroke-width="1.5"/>
+  <circle cx="200" cy="250" r="6" fill="#4fc3f7" stroke="#0288d1" stroke-width="1.5"/>
+  <circle cx="200" cy="320" r="6" fill="#4fc3f7" stroke="#0288d1" stroke-width="1.5"/>
+  <circle cx="200" cy="390" r="6" fill="#4fc3f7" stroke="#0288d1" stroke-width="1.5"/>
+  <circle cx="200" cy="460" r="6" fill="#4fc3f7" stroke="#0288d1" stroke-width="1.5"/>
+  <circle cx="200" cy="530" r="6" fill="#4fc3f7" stroke="#0288d1" stroke-width="1.5"/>
+
+  <!-- Pin numbers inside switch -->
+  <text x="218" y="184" fill="#80cbc4" font-size="12">1</text>
+  <text x="218" y="254" fill="#80cbc4" font-size="12">2</text>
+  <text x="218" y="324" fill="#80cbc4" font-size="12">3</text>
+  <text x="218" y="394" fill="#80cbc4" font-size="12">4</text>
+  <text x="218" y="464" fill="#80cbc4" font-size="12">5</text>
+  <text x="218" y="534" fill="#80cbc4" font-size="12">6</text>
+
+  <!-- Internal rotary indicator (showing pos 3 selected) -->
+  <circle cx="280" cy="355" r="40" fill="none" stroke="#546e7a" stroke-width="1" stroke-dasharray="4"/>
+  <circle cx="280" cy="355" r="5" fill="#ffab40"/>
+  <line x1="280" y1="355" x2="240" y2="325" stroke="#ffab40" stroke-width="2.5" stroke-linecap="round"/>
+  <text x="280" y="415" text-anchor="middle" fill="#ffab40" font-size="11">← pos 3 선택</text>
+
+  <!-- COM pin (right side) -->
+  <circle cx="360" cy="355" r="6" fill="#ffab40" stroke="#f57c00" stroke-width="1.5"/>
+  <text x="345" y="345" fill="#80cbc4" font-size="12">COM</text>
+
+  <!-- COM to Analog Pin wire -->
+  <line x1="360" y1="355" x2="500" y2="355" stroke="#ffab40" stroke-width="2.5"/>
+
+  <!-- Junction dot -->
+  <circle cx="500" cy="355" r="5" fill="#ffab40"/>
+
+  <!-- Analog Pin label -->
+  <text x="500" y="340" text-anchor="middle" fill="#ffab40" font-size="13" font-weight="bold">Analog Pin</text>
+
+  <!-- Wire to Teensy -->
+  <line x1="500" y1="355" x2="620" y2="355" stroke="#ffab40" stroke-width="2.5"/>
+
+  <!-- Teensy box -->
+  <rect x="620" y="310" width="140" height="90" rx="8" fill="#1b5e20" stroke="#4caf50" stroke-width="2"/>
+  <text x="690" y="345" text-anchor="middle" fill="#c8e6c9" font-size="13" font-weight="bold">Teensy 4.1</text>
+  <text x="690" y="375" text-anchor="middle" fill="#a5d6a7" font-size="12">analogRead()</text>
+
+  <!-- Pulldown resistor wire down -->
+  <line x1="500" y1="355" x2="500" y2="430" stroke="#ffab40" stroke-width="2"/>
+
+  <!-- Pulldown resistor -->
+  <rect x="484" y="430" width="32" height="60" rx="4" fill="#37474f" stroke="#78909c" stroke-width="1.5"/>
+  <text x="500" y="458" text-anchor="middle" fill="#fff" font-size="10">4.7</text>
+  <text x="500" y="473" text-anchor="middle" fill="#fff" font-size="10">kΩ</text>
+
+  <!-- Pulldown label -->
+  <text x="545" y="465" fill="#aaa" font-size="11">풀다운</text>
+
+  <!-- Wire to GND -->
+  <line x1="500" y1="490" x2="500" y2="530" stroke="#66bb6a" stroke-width="2"/>
+
+  <!-- GND symbol -->
+  <line x1="480" y1="530" x2="520" y2="530" stroke="#66bb6a" stroke-width="3"/>
+  <line x1="486" y1="538" x2="514" y2="538" stroke="#66bb6a" stroke-width="2.5"/>
+  <line x1="492" y1="546" x2="508" y2="546" stroke="#66bb6a" stroke-width="2"/>
+  <text x="500" y="570" text-anchor="middle" fill="#66bb6a" font-size="14" font-weight="bold">GND</text>
+
+  <!-- ADC value annotation -->
+  <rect x="580" y="440" width="190" height="120" rx="8" fill="#1a237e" stroke="#3f51b5" stroke-width="1.5"/>
+  <text x="675" y="462" text-anchor="middle" fill="#90caf9" font-size="12" font-weight="bold">pos 3 선택 시</text>
+  <text x="675" y="484" text-anchor="middle" fill="#e0e0e0" font-size="11">직렬: 1k × 3 = 3kΩ</text>
+  <text x="675" y="504" text-anchor="middle" fill="#e0e0e0" font-size="11">풀다운: 4.7kΩ</text>
+  <line x1="600" y1="514" x2="750" y2="514" stroke="#3f51b5" stroke-width="1"/>
+  <text x="675" y="534" text-anchor="middle" fill="#ffab40" font-size="13" font-weight="bold">ADC = 624</text>
+  <text x="675" y="550" text-anchor="middle" fill="#aaa" font-size="10">1023 × 4700 / (3000+4700)</text>
+
+</svg>
