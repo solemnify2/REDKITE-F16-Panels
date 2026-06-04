@@ -19,8 +19,8 @@ Teensy 4.1-based USB joystick controller for an F-16 cockpit sim panel (Falcon B
 
 ```
 pip install pyserial
-python tools/bmsbios_bridge.py COM4          # Falcon BMS
-python tools/dcsbios_bridge.py COM4          # DCS World (also needs DCS-BIOS installed)
+python ../Bios/bmsbios_bridge.py             # Falcon BMS (COM port auto-detect)
+python ../Bios/dcsbios_bridge.py             # DCS World (COM port auto-detect, also needs DCS-BIOS installed)
 ```
 
 ## Architecture
