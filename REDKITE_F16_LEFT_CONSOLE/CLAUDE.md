@@ -57,7 +57,7 @@ ECM LED sweep animation + ELEC LED sequence + blink. Runs on: startup, USB resum
 | `BiosHandler/DcsBiosParser.h` | DCS-BIOS frame parser + F-16C ELEC/ECM address map |
 | `BiosHandler/BmsBiosParser.h` | BMS-BIOS frame parser (packed LED bitfield) |
 | `name.c` | USB device name override ("REDKITE F16 Left Console") |
-| `doc/PIN_ASSIGNMENT.md` | Complete pin mapping and joystick button layout |
+| `../docs/PIN_ASSIGNMENT.md` | Complete pin mapping and joystick button layout |
 
 ## Key Constants
 
@@ -76,4 +76,4 @@ ECM LED sweep animation + ELEC LED sequence + blink. Runs on: startup, USB resum
 - New switch: add to `switches[]`. New analog ladder: add to `analogBtnArrays[]`
 - New ELEC LED: add to `leds[]` + `LedIdx` enum. New ECM LED: add to `ecmSrLedNames[]` + `srMap[]`
 - Resistor ladder calibration: set `ALLOW_DEBUG = true`, read serial monitor, adjust `values[]`
-- Pin assignment doc: `doc/PIN_ASSIGNMENT.md`
+- Pin assignment doc: `../docs/PIN_ASSIGNMENT.md`

@@ -87,7 +87,7 @@ Both sketches detect the sim protocol from incoming serial bytes:
 
 ## Reference Docs
 
-- `REDKITE_F16_LEFT_AUX_MISC/docs/` — wiring diagrams, panel specs, protocol reference, pin assignments
-- `REDKITE_F16_LEFT_CONSOLE/doc/PIN_ASSIGNMENT.md` — pin mapping and joystick button layout
+- `docs/` — wiring diagrams, panel specs, protocol reference, pin assignments (all panels)
+- `docs/PIN_ASSIGNMENT.md` — LEFT_CONSOLE pin mapping and joystick button layout
 - `F4TS/` — legacy F4ToSerial app (replaced by BMS-BIOS in current version)
 - `Custom Stick/` — reference files for Teensyduino USB descriptor customization
