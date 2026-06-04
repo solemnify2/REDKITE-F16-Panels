@@ -1,0 +1,128 @@
+Protocol Reference — DCS-BIOS & BMS-BIOS LED Mapping
+=====================================================
+
+
+1. DCS-BIOS (DCS World F-16C_50)
+=================================
+
+Source: DCS-BIOS F-16C_50.json
+  Path: %USERPROFILE%\Saved Games\DCS\Scripts\DCS-BIOS\doc\json\F-16C_50.json
+  Web:  http://localhost:5010/reference/  (DCS 실행 중)
+
+Protocol:
+  - Binary, sync 0x55 x4
+  - Repeating chunks: ADDR_LO ADDR_HI COUNT_LO COUNT_HI DATA[count]
+  - Frame end: addr=0x5555, count=0x5555
+  - Baud: 1,000,000
+
+LED Address Map (used in DcsBiosParser.h):
+
+  Identifier           Address(dec)  Address(hex)  Mask(hex)  Bit  Description
+  -------------------  -----------   -----------   ---------  ---  -----------
+  LIGHT_GEAR_N         17530         0x447A        0x4000     14   Nose Gear (green)
+  LIGHT_GEAR_L         17530         0x447A        0x8000     15   Left Gear (green)
+  LIGHT_GEAR_R         17532         0x447C        0x0001      0   Right Gear (green)
+  LIGHT_GEAR_WARN      17532         0x447C        0x0002      1   Gear Warning (red)
+  LIGHT_RWR_SEARCH     17534         0x447E        0x0400     10   TWA Search
+  LIGHT_RWR_ACTIVITY   17534         0x447E        0x0800     11   TWA Activity
+  LIGHT_RWR_ACT_POWER  17534         0x447E        0x1000     12   TWA Act/Power
+  LIGHT_RWR_ALT_LOW    17534         0x447E        0x2000     13   TWA Alt Low
+  LIGHT_ECM            17732         0x4544        0x4000     14   ECM Indicator
+
+Backlight Control:
+
+  LIGHT_INST_PNL           17540         0x4484        0xFFFF     -    Instrument Panel Lighting (0–65535)
+
+Not currently used but available:
+
+  LIGHT_RWR_POWER      17534         0x447E        0x8000     15   RWR Power
+  LIGHT_RWR_ALT        17534         0x447E        0x4000     14   RWR Alt
+  LIGHT_HOOK           17526         0x4476        0x8000     15   Hook (yellow)
+  LIGHT_RWR_HANDOFF_UP 17536         0x4480        0x0001      0   RWR Handoff Up
+  LIGHT_RWR_HANDOFF_H  17536         0x4480        0x0002      1   RWR Handoff H
+  LIGHT_RWR_MSL_LAUNCH 17536         0x4480        0x0004      2   RWR Missile Launch
+  LIGHT_RWR_MODE_PRI   17536         0x4480        0x0008      3   RWR Mode Pri
+  LIGHT_RWR_MODE_OPEN  17536         0x4480        0x0010      4   RWR Mode Open
+  LIGHT_RWR_SHIP_UNK   17536         0x4480        0x0020      5   RWR Ship Unknown
+  LIGHT_RWR_SYSTEST    17536         0x4480        0x0040      6   RWR Sys Test
+  LIGHT_RWR_TGTSEP_UP  17536         0x4480        0x0080      7   RWR TgtSep Up
+  LIGHT_RWR_TGTSEP_DN  17536         0x4480        0x0100      8   RWR TgtSep Down
+  LIGHT_ECM_1_A        17536         0x4480        0x4000     14   ECM 1 A
+
+
+2. BMS-BIOS (Falcon BMS 4.38)
+===============================
+
+Source: Falcon BMS 4.38 FlightData.h
+  Path: C:\Falcon BMS 4.38\Tools\SharedMem\FlightData.h
+
+Protocol:
+  - Binary, sync 0xAA 0xBB
+  - Payload: ledBits (uint32 LE, 4 bytes)
+    - Bits 0–10: LED states (see LED Index Mapping)
+    - Bit 16: Backlight (1=ON from instrLight)
+  - Checksum: XOR of 4 payload bytes (1 byte)
+  - Total: 7 bytes per frame
+  - Baud: 1,000,000
+
+Shared Memory:
+  - Name: "FalconSharedMemoryArea"
+    FlightData struct offsets:
+      lightBits  = 108  (unsigned int)
+      lightBits2 = 124  (unsigned int)
+      lightBits3 = 128  (unsigned int)
+  - Name: "FalconSharedMemoryArea2"
+    FlightData2 struct offsets:
+      instrLight = 1104  (unsigned char, 0=OFF, 1=DIM, 2=BRT)
+
+LightBits Mask Map (used in bmsbios_bridge.py):
+
+  LightBits (offset 108):
+    Name            Mask(hex)     Bit  Description
+    -------------   ----------    ---  -----------
+    AdvStandby      0x80000000     31  ADV Standby indicator
+
+  LightBits2 (offset 124):
+    Name            Mask(hex)     Bit  Description
+    -------------   ----------    ---  -----------
+    AuxSrch         0x00001000     12  TWA Search
+    AuxAct          0x00002000     13  TWA Activity
+    AuxLow          0x00004000     14  TWA Alt Low
+    AuxPwr          0x00008000     15  TWA Power
+    EcmPwr          0x00010000     16  ECM power indicator
+    AdvActive       0x20000000     29  ADV Active indicator
+    GEARHANDLE      0x40000000     30  Gear handle lamp (gear in motion)
+
+  LightBits3 (offset 128):
+    Name            Mask(hex)     Bit  Description
+    -------------   ----------    ---  -----------
+    NoseGearDown    0x00010000     16  Nose gear down and locked
+    LeftGearDown    0x00020000     17  Left gear down and locked
+    RightGearDown   0x00040000     18  Right gear down and locked
+
+
+3. LED Index Mapping (LedIdx enum in .ino)
+==========================================
+
+  Index  Name          Pin   Location       DCS-BIOS              BMS LightBit
+  -----  -----------   ---   ----------     -------------------   ----------------
+  0      Nose Gear     30    direct         0x447A bit14          LB3 NoseGearDown
+  1      Left Gear     31    direct         0x447A bit15          LB3 LeftGearDown
+  2      Right Gear    32    direct         0x447C bit0           LB3 RightGearDown
+  3      Gear Warn     27    direct         0x447C bit1           LB2 GEARHANDLE
+  4      TWA Power     34    direct         0x447E bit12          LB2 AuxPwr
+  5      TWA Low       35    direct         0x447E bit13          LB2 AuxLow
+  6      TWA Search    36    direct         0x447E bit10          LB2 AuxSrch
+  7      TWA Act       37    direct         0x447E bit11          LB2 AuxAct
+  8      ECM           MCP0:7   MCP 0x20    0x4544 bit14          LB2 EcmPwr
+  9      ADV Active    MCP0:8   MCP 0x20    0x447E bit2           LB2 AdvActive
+  10     ADV Standby   MCP0:9   MCP 0x20    0x447E bit3           LB AdvStandby
+
+
+4. Protocol Auto-Detection
+===========================
+
+  Teensy receives serial data and auto-detects protocol:
+    - 0x55 x4 consecutive  →  DCS-BIOS
+    - 0xAA then 0xBB       →  BMS-BIOS
+  Timeout (6 sec no data)  →  reset to UNKNOWN, re-detect

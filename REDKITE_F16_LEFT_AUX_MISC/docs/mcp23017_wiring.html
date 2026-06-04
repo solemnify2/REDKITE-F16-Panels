@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>MCP23017 Wiring Diagram</title>
+<style>
+  body { background: #1a1a2e; margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+</style>
+</head>
+<body>
+<svg width="920" height="850" viewBox="0 0 920 850" xmlns="http://www.w3.org/2000/svg" font-family="Consolas, monospace">
+
+  <!-- Background -->
+  <rect width="920" height="850" rx="16" fill="#16213e"/>
+
+  <!-- Title -->
+  <text x="460" y="38" text-anchor="middle" fill="#e0e0e0" font-size="20" font-weight="bold">MCP23017 I2C Wiring — MISC Panel (addr 0x20)</text>
+
+  <!-- ======================== -->
+  <!-- Teensy 4.1 -->
+  <!-- ======================== -->
+  <rect x="40" y="180" width="150" height="340" rx="10" fill="#1b5e20" stroke="#4caf50" stroke-width="2"/>
+  <text x="115" y="210" text-anchor="middle" fill="#c8e6c9" font-size="15" font-weight="bold">Teensy 4.1</text>
+
+  <!-- Teensy pins -->
+  <text x="160" y="270" fill="#a5d6a7" font-size="12" text-anchor="end">Pin 18 (SDA)</text>
+  <circle cx="190" cy="266" r="5" fill="#4fc3f7"/>
+
+  <text x="160" y="310" fill="#a5d6a7" font-size="12" text-anchor="end">Pin 19 (SCL)</text>
+  <circle cx="190" cy="306" r="5" fill="#4fc3f7"/>
+
+  <text x="160" y="370" fill="#a5d6a7" font-size="12" text-anchor="end">3.3V</text>
+  <circle cx="190" cy="366" r="5" fill="#f44336"/>
+
+  <text x="160" y="410" fill="#a5d6a7" font-size="12" text-anchor="end">GND</text>
+  <circle cx="190" cy="406" r="5" fill="#66bb6a"/>
+
+  <!-- ======================== -->
+  <!-- I2C Bus wires -->
+  <!-- ======================== -->
+
+  <!-- SDA wire -->
+  <line x1="190" y1="266" x2="370" y2="266" stroke="#4fc3f7" stroke-width="2.5"/>
+  <text x="280" y="258" text-anchor="middle" fill="#4fc3f7" font-size="11">SDA</text>
+
+  <!-- SCL wire -->
+  <line x1="190" y1="306" x2="370" y2="306" stroke="#ffb74d" stroke-width="2.5"/>
+  <text x="280" y="298" text-anchor="middle" fill="#ffb74d" font-size="11">SCL</text>
+
+  <!-- 3.3V wire -->
+  <line x1="190" y1="366" x2="370" y2="366" stroke="#f44336" stroke-width="2"/>
+
+  <!-- GND wire -->
+  <line x1="190" y1="406" x2="370" y2="406" stroke="#66bb6a" stroke-width="2"/>
+  <!-- GND extends further for address pins -->
+  <line x1="310" y1="406" x2="310" y2="490" stroke="#66bb6a" stroke-width="2"/>
+
+  <!-- ======================== -->
+  <!-- Pull-up resistors -->
+  <!-- ======================== -->
+
+  <!-- SDA pullup junction -->
+  <circle cx="260" cy="266" r="4" fill="#4fc3f7"/>
+  <line x1="260" y1="266" x2="260" y2="200" stroke="#4fc3f7" stroke-width="1.5"/>
+  <rect x="244" y="140" width="32" height="60" rx="4" fill="#37474f" stroke="#78909c" stroke-width="1.5"/>
+  <text x="260" y="168" text-anchor="middle" fill="#fff" font-size="10">4.7</text>
+  <text x="260" y="180" text-anchor="middle" fill="#fff" font-size="10">kΩ</text>
+  <line x1="260" y1="140" x2="260" y2="110" stroke="#f44336" stroke-width="1.5"/>
+
+  <!-- SCL pullup junction -->
+  <circle cx="300" cy="306" r="4" fill="#ffb74d"/>
+  <line x1="300" y1="306" x2="300" y2="200" stroke="#ffb74d" stroke-width="1.5"/>
+  <rect x="284" y="140" width="32" height="60" rx="4" fill="#37474f" stroke="#78909c" stroke-width="1.5"/>
+  <text x="300" y="168" text-anchor="middle" fill="#fff" font-size="10">4.7</text>
+  <text x="300" y="180" text-anchor="middle" fill="#fff" font-size="10">kΩ</text>
+  <line x1="300" y1="140" x2="300" y2="110" stroke="#f44336" stroke-width="1.5"/>
+
+  <!-- 3.3V rail for pullups -->
+  <line x1="250" y1="110" x2="310" y2="110" stroke="#f44336" stroke-width="2.5"/>
+  <line x1="280" y1="110" x2="280" y2="95" stroke="#f44336" stroke-width="2"/>
+  <rect x="255" y="72" width="50" height="24" rx="4" fill="#b71c1c"/>
+  <text x="280" y="89" text-anchor="middle" fill="#fff" font-size="12" font-weight="bold">3.3V</text>
+
+  <text x="280" y="130" text-anchor="middle" fill="#aaa" font-size="10">I2C 풀업 (권장)</text>
+
+  <!-- ======================== -->
+  <!-- MCP23017 IC -->
+  <!-- ======================== -->
+  <rect x="370" y="140" width="200" height="500" rx="8" fill="#1a237e" stroke="#5c6bc0" stroke-width="2.5"/>
+  <text x="470" y="172" text-anchor="middle" fill="#9fa8da" font-size="16" font-weight="bold">MCP23017</text>
+  <text x="470" y="192" text-anchor="middle" fill="#7986cb" font-size="12">I2C I/O Expander</text>
+  <text x="470" y="210" text-anchor="middle" fill="#5c6bc0" font-size="11">addr: 0x20</text>
+
+  <!-- Left side pins -->
+  <!-- SDA -->
+  <circle cx="370" cy="266" r="5" fill="#4fc3f7"/>
+  <text x="385" y="270" fill="#9fa8da" font-size="11">SDA</text>
+
+  <!-- SCL -->
+  <circle cx="370" cy="306" r="5" fill="#ffb74d"/>
+  <text x="385" y="310" fill="#9fa8da" font-size="11">SCL</text>
+
+  <!-- VDD -->
+  <circle cx="370" cy="366" r="5" fill="#f44336"/>
+  <text x="385" y="370" fill="#9fa8da" font-size="11">VDD</text>
+
+  <!-- VSS -->
+  <circle cx="370" cy="406" r="5" fill="#66bb6a"/>
+  <text x="385" y="410" fill="#9fa8da" font-size="11">VSS</text>
+
+  <!-- RESET (tie to VDD) -->
+  <circle cx="370" cy="446" r="5" fill="#f44336"/>
+  <text x="385" y="450" fill="#9fa8da" font-size="11">RESET</text>
+  <line x1="350" y1="446" x2="370" y2="446" stroke="#f44336" stroke-width="1.5"/>
+  <line x1="350" y1="446" x2="350" y2="366" stroke="#f44336" stroke-width="1.5"/>
+  <circle cx="350" cy="366" r="3" fill="#f44336"/>
+  <text x="340" y="440" text-anchor="end" fill="#aaa" font-size="9">→ VDD</text>
+
+  <!-- Address pins -->
+  <circle cx="370" cy="486" r="5" fill="#66bb6a"/>
+  <text x="385" y="490" fill="#9fa8da" font-size="11">A0</text>
+  <circle cx="370" cy="516" r="5" fill="#66bb6a"/>
+  <text x="385" y="520" fill="#9fa8da" font-size="11">A1</text>
+  <circle cx="370" cy="546" r="5" fill="#66bb6a"/>
+  <text x="385" y="550" fill="#9fa8da" font-size="11">A2</text>
+
+  <!-- Address pins to GND -->
+  <line x1="310" y1="490" x2="370" y2="486" stroke="#66bb6a" stroke-width="1.5"/>
+  <line x1="310" y1="490" x2="370" y2="516" stroke="#66bb6a" stroke-width="1.5"/>
+  <line x1="310" y1="490" x2="370" y2="546" stroke="#66bb6a" stroke-width="1.5"/>
+  <circle cx="310" cy="490" r="3" fill="#66bb6a"/>
+
+  <!-- Address label -->
+  <text x="310" y="560" text-anchor="middle" fill="#aaa" font-size="10">A0=A1=A2=GND</text>
+  <text x="310" y="574" text-anchor="middle" fill="#aaa" font-size="10">→ addr 0x20</text>
+
+  <!-- ======================== -->
+  <!-- Right side - GPA ports -->
+  <!-- ======================== -->
+
+  <!-- GPA header -->
+  <text x="600" y="240" text-anchor="start" fill="#81c784" font-size="12" font-weight="bold">Port A</text>
+
+  <!-- GPA0-7 pins -->
+  <circle cx="570" cy="260" r="5" fill="#81c784"/><text x="585" y="264" fill="#c8e6c9" font-size="11">GPA0 — Master ARM (pos1)</text>
+  <line x1="570" y1="260" x2="540" y2="260" stroke="#81c784" stroke-width="1.5"/>
+
+  <circle cx="570" cy="284" r="5" fill="#81c784"/><text x="585" y="288" fill="#c8e6c9" font-size="11">GPA1 — Master ARM (pos2)</text>
+  <line x1="570" y1="284" x2="540" y2="284" stroke="#81c784" stroke-width="1.5"/>
+
+  <circle cx="570" cy="308" r="5" fill="#81c784"/><text x="585" y="312" fill="#c8e6c9" font-size="11">GPA2 — ALT REL</text>
+  <line x1="570" y1="308" x2="540" y2="308" stroke="#81c784" stroke-width="1.5"/>
+
+  <circle cx="570" cy="332" r="5" fill="#81c784"/><text x="585" y="336" fill="#c8e6c9" font-size="11">GPA3 — Laser ARM</text>
+  <line x1="570" y1="332" x2="540" y2="332" stroke="#81c784" stroke-width="1.5"/>
+
+  <circle cx="570" cy="356" r="5" fill="#81c784"/><text x="585" y="360" fill="#c8e6c9" font-size="11">GPA4 — RF (pos1)</text>
+  <line x1="570" y1="356" x2="540" y2="356" stroke="#81c784" stroke-width="1.5"/>
+
+  <circle cx="570" cy="380" r="5" fill="#81c784"/><text x="585" y="384" fill="#c8e6c9" font-size="11">GPA5 — RF (pos2)</text>
+  <line x1="570" y1="380" x2="540" y2="380" stroke="#81c784" stroke-width="1.5"/>
+
+  <circle cx="570" cy="404" r="5" fill="#78909c"/><text x="585" y="408" fill="#78909c" font-size="11">GPA6 — (unused)</text>
+  <line x1="570" y1="404" x2="540" y2="404" stroke="#78909c" stroke-width="1" stroke-dasharray="3"/>
+
+  <circle cx="570" cy="428" r="5" fill="#ff8a65"/><text x="585" y="432" fill="#ffccbc" font-size="11">GPA7 — ECM LED (Output)</text>
+  <line x1="570" y1="428" x2="540" y2="428" stroke="#ff8a65" stroke-width="1.5"/>
+
+  <!-- Port A internal pullup note -->
+  <line x1="540" y1="254" x2="540" y2="390" stroke="#546e7a" stroke-width="1" stroke-dasharray="3"/>
+  <text x="548" y="446" fill="#78909c" font-size="9">내부 풀업 활성 (Input)</text>
+
+  <!-- ======================== -->
+  <!-- GPB ports -->
+  <!-- ======================== -->
+  <text x="600" y="476" text-anchor="start" fill="#64b5f6" font-size="12" font-weight="bold">Port B</text>
+
+  <circle cx="570" cy="496" r="5" fill="#ff8a65"/><text x="585" y="500" fill="#ffccbc" font-size="11">GPB0 — ADV Active LED (Output)</text>
+  <line x1="570" y1="496" x2="540" y2="496" stroke="#ff8a65" stroke-width="1.5"/>
+
+  <circle cx="570" cy="520" r="5" fill="#ff8a65"/><text x="585" y="524" fill="#ffccbc" font-size="11">GPB1 — ADV Standby LED (Output)</text>
+  <line x1="570" y1="520" x2="540" y2="520" stroke="#ff8a65" stroke-width="1.5"/>
+
+  <circle cx="570" cy="544" r="5" fill="#64b5f6"/><text x="585" y="548" fill="#bbdefb" font-size="11">GPB2 — ADV MODE</text>
+  <line x1="570" y1="544" x2="540" y2="544" stroke="#64b5f6" stroke-width="1.5"/>
+
+  <circle cx="570" cy="568" r="5" fill="#64b5f6"/><text x="585" y="572" fill="#bbdefb" font-size="11">GPB3 — Roll AP (pos1)</text>
+  <line x1="570" y1="568" x2="540" y2="568" stroke="#64b5f6" stroke-width="1.5"/>
+
+  <circle cx="570" cy="592" r="5" fill="#64b5f6"/><text x="585" y="596" fill="#bbdefb" font-size="11">GPB4 — Roll AP (pos2)</text>
+  <line x1="570" y1="592" x2="540" y2="592" stroke="#64b5f6" stroke-width="1.5"/>
+
+  <circle cx="570" cy="616" r="5" fill="#64b5f6"/><text x="585" y="620" fill="#bbdefb" font-size="11">GPB5 — Pitch AP (pos1)</text>
+  <line x1="570" y1="616" x2="540" y2="616" stroke="#64b5f6" stroke-width="1.5"/>
+
+  <circle cx="570" cy="640" r="5" fill="#64b5f6"/><text x="585" y="644" fill="#bbdefb" font-size="11">GPB6 — Pitch AP (pos2)</text>
+  <line x1="570" y1="640" x2="540" y2="640" stroke="#64b5f6" stroke-width="1.5"/>
+
+  <!-- ======================== -->
+  <!-- Switch symbol -->
+  <!-- ======================== -->
+  <rect x="40" y="700" width="220" height="110" rx="8" fill="#263238" stroke="#546e7a" stroke-width="1.5"/>
+  <text x="150" y="725" text-anchor="middle" fill="#b0bec5" font-size="12" font-weight="bold">스위치 연결 (각 핀 공통)</text>
+
+  <text x="60" y="760" fill="#81c784" font-size="12">GPAx/GPBx</text>
+  <line x1="145" y1="756" x2="175" y2="756" stroke="#81c784" stroke-width="2"/>
+  <line x1="175" y1="756" x2="195" y2="745" stroke="#81c784" stroke-width="2"/>
+  <circle cx="200" cy="756" r="4" fill="none" stroke="#81c784" stroke-width="1.5"/>
+  <line x1="205" y1="756" x2="230" y2="756" stroke="#66bb6a" stroke-width="2"/>
+  <text x="238" y="760" fill="#66bb6a" font-size="12">GND</text>
+
+  <text x="60" y="790" fill="#aaa" font-size="10">MCP 내부 풀업 → 별도 저항 불필요</text>
+
+  <!-- ======================== -->
+  <!-- LED symbol -->
+  <!-- ======================== -->
+  <rect x="320" y="700" width="340" height="110" rx="8" fill="#263238" stroke="#546e7a" stroke-width="1.5"/>
+  <text x="490" y="725" text-anchor="middle" fill="#b0bec5" font-size="12" font-weight="bold">LED 연결 (GPA7, GPB0, GPB1)</text>
+
+  <text x="340" y="765" fill="#ff8a65" font-size="12">GPx</text>
+  <line x1="375" y1="761" x2="410" y2="761" stroke="#ff8a65" stroke-width="2"/>
+  <!-- Resistor -->
+  <rect x="410" y="751" width="40" height="20" rx="3" fill="#37474f" stroke="#78909c" stroke-width="1"/>
+  <text x="430" y="765" text-anchor="middle" fill="#fff" font-size="9">220Ω</text>
+  <line x1="450" y1="761" x2="470" y2="761" stroke="#ff8a65" stroke-width="2"/>
+  <!-- LED triangle -->
+  <polygon points="470,751 470,771 490,761" fill="#ff8a65" opacity="0.7"/>
+  <line x1="490" y1="751" x2="490" y2="771" stroke="#ff8a65" stroke-width="2"/>
+  <line x1="490" y1="761" x2="520" y2="761" stroke="#66bb6a" stroke-width="2"/>
+  <text x="528" y="765" fill="#66bb6a" font-size="12">GND</text>
+
+  <text x="340" y="795" fill="#aaa" font-size="10">LED 보호용 저항 필수 (3.3V 기준 220Ω)</text>
+
+</svg>
+</body>
+</html>

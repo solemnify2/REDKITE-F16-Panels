@@ -1,0 +1,108 @@
+===============================================================
+  REDKITE_F16_PANELS - Teensy 4.1 Direct Pin List
+===============================================================
+
+--- Digital Output - Backlight ---
+
+Pin   Name                    Note
+----  ----------------------  --------------------
+  0   Backlight Control       LOW=on, HIGH=off (USB suspend)
+
+--- Digital Input (INPUT_PULLUP) - Switches ---
+
+Pin   Name                    Panel       Type
+----  ----------------------  ----------  ----------
+  1   DN LOCK REL             Gear        ON/OFF
+  2   Horn Silencer           Gear        ON/OFF
+  3   Landing Light (pin1)    Gear        ON/OFF/ON
+  4   Landing Light (pin2)    Gear        ON/OFF/ON
+  5   Store CAT               Gear        ON/OFF
+  6   ANTI SKID (pin1)        Gear        ON/OFF/ON
+  7   ANTI SKID (pin2)        Gear        ON/OFF/ON
+  8   BRAKES Channel          Gear        ON/OFF
+  9   GND JETT ENABLE         Gear        ON/OFF
+ 10   EMER Jettison           Gear        ON/OFF
+ 11   Hook                    Gear        ON/OFF
+ 13   ALT GEAR Reset          AltGear     ON/OFF
+ 14   CMDS JETT               CMDS        ON/OFF
+ 15   CMDS MWS                CMDS        ON/OFF
+ 16   CMDS JMR                CMDS        ON/OFF
+ 17   CMDS RWR                CMDS        ON/OFF
+ 20   CMDS O1                 CMDS        ON/OFF
+ 21   CMDS O2                 CMDS        ON/OFF
+ 22   CMDS CH                 CMDS        ON/OFF
+ 23   CMDS FL                 CMDS        ON/OFF
+ 28   Landing Gear (pin1)     Gear        ON/OFF/ON
+ 29   Landing Gear (pin2)     Gear        ON/OFF/ON
+ 33   ALT GEAR Handle         AltGear     ON/OFF
+
+--- Digital Output - LEDs ---
+
+Pin   Name                    Panel
+----  ----------------------  ----------
+ 27   Gear Warn               Gear
+ 30   Nose Gear               Gear
+ 31   Left Gear               Gear
+ 32   Right Gear              Gear
+ 34   TWA Power               TWA
+ 35   TWA Low                 TWA
+ 36   TWA Search              TWA
+ 37   TWA Act                 TWA
+
+--- I2C (MCP23017) ---
+
+Pin   Function
+----  ----------------------
+ 18   SDA (I2C Data)
+ 19   SCL (I2C Clock)
+
+--- Analog Input - Potentiometer ---
+
+Pin   Name                    Panel       Axis
+----  ----------------------  ----------  ----------
+A13   HMCS Brightness         HMCS        X
+A14   HMCS Contrast           HMCS        Y
+A15   HMCS Symbology          HMCS        Z
+
+--- Analog Input - Resistor Ladder Button Arrays ---
+
+Pin   Name                    Panel       Buttons
+----  ----------------------  ----------  -------
+A10   TWA Buttons             TWA         4
+A11   CMDS MODE               CMDS        6
+A12   CMDS PRGM               CMDS        5
+
+--- Analog Input - Pedals ---
+
+Pin   Name
+----  ----------------------
+A16   Pedal Left
+A17   Pedal Right
+
+===============================================================
+  Pin Usage Summary
+===============================================================
+
+Backlight Output:   0                   (1 pin)
+Used Digital Pins:  1-11, 13-17, 20-23, 27-37  (31 pins)
+Used Analog Pins:   A10-A15, A16-A17           (8 pins)
+I2C Pins:           18 (SDA), 19 (SCL)
+
+Note: A10=pin24, A11=pin25, A12=pin26, A13=pin27,
+      A14=pin38, A15=pin39, A16=pin40, A17=pin41
+
+Unused Pins:        12
+
+MCP23017 (I2C 0x20) - MISC Panel:
+  GPA0-1  Master ARM (ON/OFF/ON)
+  GPA2    ALT REL
+  GPA3    Laser ARM
+  GPA4-5  RF (ON/OFF/ON)
+  GPA6    (unused)
+  GPA7    ECM LED (output)
+  GPB0    ADV Active LED (output)
+  GPB1    ADV Standby LED (output)
+  GPB2    ADV MODE
+  GPB3-4  Roll AP (ON/OFF/ON)
+  GPB5-6  Pitch AP (ON/OFF/ON)
+  GPB7    (unused)
