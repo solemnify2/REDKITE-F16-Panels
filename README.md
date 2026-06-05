@@ -289,13 +289,13 @@ Arduino IDE에서 `REDKITE_F16_LEFT_AUX_MISC.ino`를 열고 Upload.
 ### Falcon BMS (BMS-BIOS)
 
 - 바이너리 프로토콜, `0xAA 0xBB` sync 2바이트로 자동 감지
-- Python 브릿지(`Bios/bmsbios_bridge.py`)가 BMS 공유 메모리에서 LED 상태를 읽어 Teensy로 전송
+- Python 브릿지(`tools/bmsbios_bridge.py`)가 BMS 공유 메모리에서 LED 상태를 읽어 Teensy로 전송
 - BMS 실행 전에 bridge를 먼저 실행해도 안전 (공유 메모리 생성하지 않음)
 - 사용법:
   ```
   pip install pyserial
-  python ../Bios/bmsbios_bridge.py                    # COM port auto-detect
-  python ../Bios/bmsbios_bridge.py COM4:AUX --debug   # manual
+  python ../tools/bmsbios_bridge.py                    # COM port auto-detect
+  python ../tools/bmsbios_bridge.py COM4:AUX --debug   # manual
   ```
 
 > **참고 — Why not F4ToSerial?** 이전 버전에서는 [F4ToSerial](https://github.com/Music-Junky/F4ToSerial)을 사용했으나, F4TS는 Teensy의 다이렉트 핀만 지정 가능하고 MCP23017 등 I2C 확장 핀을 지원하지 않는 문제가 있어 BMS-BIOS로 대체했습니다. 부수적으로 JSON 파싱 오버헤드 제거, ArduinoJson 의존성 제거 등 소소한 이점도 기대할 수 있습니다 (체감 차이는 미지수). DCS-BIOS/BMS-BIOS 프로토콜을 직접 구현했으므로 향후 DCS나 BMS 업데이트로 주소/오프셋이 변경되면 직접 수정이 필요하지만, 소스가 명확하고(`docs/protocol_reference.txt` 참조) 수정 범위도 작아 큰 부담은 아닙니다. 게다가 [Claude Code](https://claude.com/claude-code)도 있으니 든든합니다.
@@ -303,11 +303,11 @@ Arduino IDE에서 `REDKITE_F16_LEFT_AUX_MISC.ino`를 열고 Upload.
 ### DCS World (DCS-BIOS)
 
 - 바이너리 프로토콜, `0x55` sync 4바이트로 자동 감지
-- DCS-BIOS 설치 및 UDP 브릿지(`Bios/dcsbios_bridge.py`) 필요
+- DCS-BIOS 설치 및 UDP 브릿지(`tools/dcsbios_bridge.py`) 필요
 - 사용법:
   ```
   pip install pyserial
-  python ../Bios/dcsbios_bridge.py             # COM port auto-detect
+  python ../tools/dcsbios_bridge.py             # COM port auto-detect
   ```
 
 ## Project Structure
@@ -323,7 +323,7 @@ REDKITE-F16-Panels/
 │   ├── REDKITE_F16_LEFT_CONSOLE.ino
 │   ├── BiosHandler/
 │   └── name.c
-├── Bios/                       # Python 브릿지 (BMS/DCS → Teensy)
+├── tools/                       # Python 브릿지 (BMS/DCS → Teensy)
 │   ├── bmsbios_bridge.py
 │   ├── dcsbios_bridge.py
 │   └── update_joystick_name.bat

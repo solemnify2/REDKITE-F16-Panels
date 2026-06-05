@@ -25,11 +25,11 @@ Each sketch has its own `CLAUDE.md` with detailed architecture — read that fir
 
 ### Python Bridges
 
-Located in `Bios/`. COM port auto-detect by VID/PID (VID `0x16C0`):
+Located in `tools/`. COM port auto-detect by VID/PID (VID `0x16C0`):
 ```
 pip install pyserial
-python Bios/bmsbios_bridge.py               # Falcon BMS (auto-detect)
-python Bios/dcsbios_bridge.py               # DCS World (auto-detect)
+python tools/bmsbios_bridge.py               # Falcon BMS (auto-detect)
+python tools/dcsbios_bridge.py               # DCS World (auto-detect)
 ```
 
 ## Architecture Patterns (Shared Across Sketches)
