@@ -16,7 +16,7 @@ HKCU\System\CurrentControlSet\Control\MediaProperties\PrivateProperties\Joystick
 
 ## 캐시 갱신
 
-펌웨어 업로드 후 이름이 반영되지 않으면 `Bios/update_joystick_name.bat`을 더블클릭하세요.
+펌웨어 업로드 후 이름이 반영되지 않으면 `tools/update_joystick_name.bat`을 더블클릭하세요.
 
 `joy.cpl` (조이스틱 제어판)을 다시 열면 변경된 이름이 표시됩니다.
 
