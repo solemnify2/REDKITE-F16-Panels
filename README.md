@@ -1,6 +1,6 @@
 # REDKITE F16 PANELS
 
-![My Cockpit](My%20Cockpit.png)
+![My Cockpit](docs/3d%20stl/My%20Cockpit.png)
 
 VR 전용 F-16 미니멀 데스크핏
 **Falcon BMS**(BMS-BIOS)와 **DCS World**(DCS-BIOS) 자동 감지로 패널의 LED 연동
