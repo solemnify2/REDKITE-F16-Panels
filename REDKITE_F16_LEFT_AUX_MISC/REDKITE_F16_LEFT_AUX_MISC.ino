@@ -171,7 +171,7 @@ const SwitchDef switches[] = {
 // Resistor ladder: 1kΩ series chain + 4.7kΩ pulldown per ladder.
 // ADC_k = 1023 × 4700 / (k × 1000 + 4700).  Calibrate with ALLOW_DEBUG = true.
 
-const char* const twaBtnNames[] = {"TWA SEARCH","TWA ACT/PWR","TWA ALT","TWA SYS PWR"};
+const char* const twaBtnNames[] = {"TWA ACT/PWR","TWA SEARCH","TWA ALT","TWA SYS PWR"};
 const int         twaBtnValues[] = {855, 740, 640, 582};
 
 const char* const cmdsModeBtnNames[] = {"MODE 1","MODE 2","MODE 3","MODE 4","MODE 5","MODE 6"};
