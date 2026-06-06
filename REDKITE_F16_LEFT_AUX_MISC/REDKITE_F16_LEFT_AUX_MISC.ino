@@ -9,6 +9,7 @@
    To disable a panel, comment out its entries in the config arrays.
 */
 
+
 // ================================================================
 //  Build Checks
 // ================================================================
@@ -17,8 +18,8 @@
   #error "JOYSTICK_SIZE must be 64. Edit USB_SERIAL_HID section in %LOCALAPPDATA%/Arduino15/packages/teensy/hardware/avr/<version>/cores/teensy4/usb_desc.h"
 #endif
 
-#if PRODUCT_ID != 0x0487
-  #error "PRODUCT_ID must be 0x0487 for Left Aux Misc. Edit USB_SERIAL_HID section in %LOCALAPPDATA%/Arduino15/packages/teensy/hardware/avr/<version>/cores/teensy4/usb_desc.h"
+#if PRODUCT_ID != 0x0489
+  #error "PRODUCT_ID must be 0x0489 for Left Aux Misc. Edit USB_SERIAL_HID section in %LOCALAPPDATA%/Arduino15/packages/teensy/hardware/avr/<version>/cores/teensy4/usb_desc.h"
 #endif
 
 // ================================================================
@@ -171,13 +172,13 @@ const SwitchDef switches[] = {
 // ADC_k = 1023 × 4700 / (k × 1000 + 4700).  Calibrate with ALLOW_DEBUG = true.
 
 const char* const twaBtnNames[] = {"TWA SEARCH","TWA ACT/PWR","TWA ALT","TWA SYS PWR"};
-const int         twaBtnValues[] = {839, 710, 615, 543};
+const int         twaBtnValues[] = {855, 740, 640, 582};
 
 const char* const cmdsModeBtnNames[] = {"MODE 1","MODE 2","MODE 3","MODE 4","MODE 5","MODE 6"};
-const int         cmdsModeBtnValues[] = {850, 728, 637, 567, 510, 464};
+const int         cmdsModeBtnValues[] = {855, 737, 649, 580, 528, 483};
 
 const char* const cmdsPrgmBtnNames[] = {"PRGM BIT","PRGM 1","PRGM 2","PRGM 3","PRGM 4"};
-const int         cmdsPrgmBtnValues[] = {848, 725, 632, 562, 506};
+const int         cmdsPrgmBtnValues[] = {855, 735, 645, 578, 522};
 
 const AnalogBtnArrayDef analogBtnArrays[] = {
   // groupName       panel     pin  numBtn  btnNames           values              tolerance
@@ -560,12 +561,15 @@ void processSwitches() {
 //  Analog Button Array Processing (resistor ladder)
 // ================================================================
 
+static int analogDebugRaw[NUM_ANALOG_ARRAYS];
+
 void processAnalogButtons() {
   for (unsigned int a = 0; a < NUM_ANALOG_ARRAYS; a++) {
     int btn = analogBtnStart[a];
-
     const AnalogBtnArrayDef& arr = analogBtnArrays[a];
-    int raw = analogRead(arr.pin);
+    int raw = 0;
+    for (int s = 0; s < 8; s++) raw += analogRead(arr.pin);
+    raw /= 8;
 
     for (int i = 0; i < arr.numButtons; i++) {
       bool matched = (raw >= arr.values[i] - arr.tolerance) &&
@@ -573,10 +577,16 @@ void processAnalogButtons() {
       Joystick.button(btn + i, matched);
     }
 
-#if 0
-    if (ALLOW_DEBUG && raw > 10)
-      Serial.printf("[%s] raw=%d\n", arr.groupName, raw);
-#endif
+    analogDebugRaw[a] = raw;
+  }
+
+  if (ALLOW_DEBUG) {
+    bool any = false;
+    for (unsigned int a = 0; a < NUM_ANALOG_ARRAYS; a++)
+      if (analogDebugRaw[a] > 10) { any = true; break; }
+    if (any)
+      Serial.printf("[Analog] TWA=%d  MODE=%d  PRGM=%d\n",
+        analogDebugRaw[0], analogDebugRaw[1], analogDebugRaw[2]);
   }
 }
 
@@ -633,11 +643,11 @@ void processPedal() {
   if (PEDAL_BRAKE_SW_REF)
     brakeMode = brakeMode || (*PEDAL_BRAKE_SW_REF == PEDAL_BRAKE_SW_VALUE);
 
-  if (ALLOW_DEBUG) {
-    Serial.printf("[Pedal] raw L=%d R=%d  cal L=%d R=%d  range L=[%d,%d] R=[%d,%d]  brake=%d  rudder=%d\n",
-      rawLb, rawRb, lb, rb, lbMin, lbMax, rbMin, rbMax, brakeMode,
-      brakeMode ? (1024 / 2) : ((1023 - lb + rb) / 2));
-  }
+  // if (ALLOW_DEBUG) {
+  //   Serial.printf("[Pedal] raw L=%d R=%d  cal L=%d R=%d  range L=[%d,%d] R=[%d,%d]  brake=%d  rudder=%d\n",
+  //     rawLb, rawRb, lb, rb, lbMin, lbMax, rbMin, rbMax, brakeMode,
+  //     brakeMode ? (1024 / 2) : ((1023 - lb + rb) / 2));
+  // }
 
   setJoystickAxis(PEDAL_AXIS_LBRAKE, brakeMode ? lb : 0);
   setJoystickAxis(PEDAL_AXIS_RBRAKE, brakeMode ? rb : 0);
