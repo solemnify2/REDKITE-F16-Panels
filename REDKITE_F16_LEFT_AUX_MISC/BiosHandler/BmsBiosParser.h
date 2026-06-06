@@ -1,14 +1,15 @@
 /*
   BmsBiosParser.h — BMS-BIOS binary frame parser for Teensy
 
-  BMS-BIOS protocol (from bmsbios_bridge.py):
+  BMS-BIOS protocol (unified, from bmsbios_bridge.py):
     Sync:     0xAA 0xBB          (2 bytes)
-    ledBits:  uint32 LE          (bits 0–N for leds[])
-    checksum: XOR of 4 payload bytes
-    Total: 7 bytes per frame
+    ledBits:  uint32 LE          (bits 0-N for leds[])
+    srData:   uint32 LE          (ECM shift register, ignored on this device)
+    checksum: XOR of 8 payload bytes
+    Total: 11 bytes per frame
 
-  The bridge reads Falcon BMS shared memory (lightBits/lightBits2/lightBits3)
-  and packs LED states into a single uint32.
+  The bridge sends the same unified frame to all Teensy devices.
+  This device uses only ledBits; srData is parsed but ignored.
 */
 
 #ifndef BMSBIOS_PARSER_H
@@ -18,7 +19,7 @@
 //  Protocol Constants
 // ================================================================
 
-#define BB_FRAME_PAYLOAD  4   // 4 bytes (ledBits)
+#define BB_FRAME_PAYLOAD  8   // 4 bytes (ledBits) + 4 bytes (srData, ignored)
 
 // ================================================================
 //  Parser State Machine
@@ -53,7 +54,7 @@ static void bmsBiosApply() {
   }
 
   // Bit 16: backlight from instrLight (0=off, 1=on)
-  analogWrite(BACKLIGHT_PIN, (ledBits & (1 << 16)) ? 255 : 0);
+  setBacklight((ledBits & (1 << 16)) != 0);
 }
 
 // ================================================================
