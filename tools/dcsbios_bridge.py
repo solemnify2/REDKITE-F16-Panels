@@ -28,10 +28,23 @@ SERIAL_BAUD = 1000000
 
 TEENSY_VID  = 0x16C0
 
+# 새 Teensy 추가 시 여기에 한 줄 추가
 PID_NAMES = {
+    0x0487: "REDKITE F16 Left Aux Misc",
     0x0489: "REDKITE F16 Left Aux Misc",
-    0x048E: "REDKITE F16 Left Console",
+    0x048E: "REDKITE F16 ELEC ECM AVTR",
 }
+
+
+def read_serial_output(port, s, rx_bufs):
+    """Read and print any serial output from Teensy (non-blocking)."""
+    n = s.in_waiting
+    if n <= 0:
+        return
+    rx_bufs[port] = rx_bufs.get(port, b'') + s.read(n)
+    while b'\n' in rx_bufs[port]:
+        line, rx_bufs[port] = rx_bufs[port].split(b'\n', 1)
+        print(f"[{port}] {line.decode('utf-8', errors='replace').rstrip()}")
 
 
 def find_teensy_ports():
@@ -94,19 +107,25 @@ def main():
                     print(f"  {p.device}: {p.description} [{vid_str} {pid_str}]")
             print("포트를 인자로 지정하세요. 예: python dcsbios_bridge.py COM3 COM4")
             sys.exit(1)
-        else:
-            print("[Auto] Teensy 감지:")
-            for d in descs:
-                print(d)
+
+    rx_bufs = {}
 
     # 시리얼 포트 열기
     serials = []
     failed = False
+    # PID→이름 역매핑 (연결 메시지용)
+    port_pid_names = {}
+    for p in serial.tools.list_ports.comports():
+        if p.vid == TEENSY_VID:
+            port_pid_names[p.device] = PID_NAMES.get(p.pid, f"Unknown (PID:0x{p.pid:04X})")
+
     for port in com_ports:
         try:
             s = serial.Serial(port, SERIAL_BAUD, timeout=0)
             serials.append((port, s))
-            print(f"[Serial] {port} 연결됨")
+            rx_bufs[port] = b''
+            name = port_pid_names.get(port, port)
+            print(f"  {port}: {name}")
         except serial.SerialException as e:
             print(f"[Serial] {port} 열기 실패: {e}")
             failed = True
@@ -166,6 +185,10 @@ def main():
                         receiving = True
                         print(f"[OK] DCS-BIOS 데이터 수신 시작! (from {addr[0]})")
 
+                    # Read serial output from Teensy
+                    for port, s in serials:
+                        read_serial_output(port, s, rx_bufs)
+
                     now = time.time()
                     if now - last_status >= 1.0:
                         print(f"  패킷: {packet_count}, 전송: {total_bytes} bytes → {port_names}", end="\r")
@@ -175,6 +198,10 @@ def main():
                 if receiving:
                     print(f"\n[!] UDP 데이터 수신 중단됨. 대기 중...")
                     receiving = False
+
+            # Read serial output from Teensy (always, even without UDP data)
+            for port, s in serials:
+                read_serial_output(port, s, rx_bufs)
 
     except KeyboardInterrupt:
         print(f"\n종료. 총 {packet_count} 패킷, {total_bytes} bytes 전송됨.")

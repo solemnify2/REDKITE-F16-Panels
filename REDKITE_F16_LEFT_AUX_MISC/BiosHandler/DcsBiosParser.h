@@ -122,7 +122,7 @@ static void dcsBiosOnUpdate(uint16_t addr, uint16_t value) {
   }
   else if (addr == DCSBIOS_INST_PNL_ADDR) {
     // Instrument panel backlight: any brightness > 0 → backlight ON
-    analogWrite(BACKLIGHT_PIN, (value > 0) ? 255 : 0);
+    setBacklight(value > 0);
   }
 }
 

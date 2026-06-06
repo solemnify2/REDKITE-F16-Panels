@@ -2,9 +2,9 @@
 """
 BMS-BIOS Bridge (통합) — Falcon BMS Shared Memory -> 여러 Teensy Serial
 
-디바이스별 프레임 포맷:
-  LEFT_AUX:     sync(2) + ledBits(4) + checksum(1)                = 7 bytes
-  LEFT_CONSOLE: sync(2) + ledBits(4) + srData(4) + checksum(1)    = 12 bytes
+통합 프레임 포맷 (모든 디바이스 동일):
+  sync(2) + ledBits(4) + srData(4) + checksum(1) = 11 bytes
+  각 디바이스는 자신에게 필요한 필드만 사용하고 나머지는 무시합니다.
 
 사용법:
   python bmsbios_bridge.py                              (자동 감지)
@@ -105,20 +105,12 @@ MAX_ECM_PROGRAMS = 5
 SYNC = b'\xAA\xBB'
 
 # ================================================================
-#  Frame Builders
+#  Frame Builder (unified)
 # ================================================================
 
-def build_aux_frame(led_bits: int) -> bytes:
-    """LEFT_AUX: 7 bytes (sync + ledBits + checksum)"""
-    payload = struct.pack('<I', led_bits)
-    checksum = 0
-    for b in payload:
-        checksum ^= b
-    return SYNC + payload + bytes([checksum])
-
-
-def build_console_frame(led_bits: int, sr_data: bytes) -> bytes:
-    """LEFT_CONSOLE: 12 bytes (sync + ledBits + srData + checksum)"""
+def build_frame(led_bits: int, sr_data: bytes = b'\x00\x00\x00\x00') -> bytes:
+    """Unified 12 bytes: sync(2) + ledBits(4) + srData(4) + checksum(1)
+    All devices receive the same frame; each ignores irrelevant fields."""
     payload = struct.pack('<I', led_bits) + sr_data
     checksum = 0
     for b in payload:
@@ -199,33 +191,44 @@ def compute_ecm_sr_data(shm2):
     return struct.pack('<I', sr_bits)
 
 # ================================================================
+#  Device Profiles — per-device LED map + frame builder
+# ================================================================
+
+DEVICE_PROFILES = {
+    'AUX': {
+        'led_map': AUX_LED_MAP,
+        'has_backlight': True,
+        'has_ecm': False,
+    },
+    'CONSOLE': {
+        'led_map': CONSOLE_LED_MAP,
+        'has_backlight': False,
+        'has_ecm': True,
+    },
+}
+
+# ================================================================
 #  Device Class
 # ================================================================
 
 class Device:
     def __init__(self, port, dev_type, ser):
         self.port = port
-        self.dev_type = dev_type  # 'AUX' or 'CONSOLE'
+        self.dev_type = dev_type
         self.ser = ser
         self.prev_frame = None
+        self.profile = DEVICE_PROFILES[dev_type]
 
     def build_and_send(self, lbits, shm2):
-        if self.dev_type == 'AUX':
-            led_bits = compute_led_bits(AUX_LED_MAP, lbits)
-            # Backlight: instrLight from FlightData2
-            if shm2 is not None:
-                instr = read_byte(shm2, OFF_FD2_INSTRLIGHT)
-                if instr > 0:
-                    led_bits |= (1 << 16)
-            frame = build_aux_frame(led_bits)
+        led_bits = compute_led_bits(self.profile['led_map'], lbits)
 
-        elif self.dev_type == 'CONSOLE':
-            led_bits = compute_led_bits(CONSOLE_LED_MAP, lbits)
-            sr_data = compute_ecm_sr_data(shm2) if shm2 else b'\x00\x00\x00\x00'
-            frame = build_console_frame(led_bits, sr_data)
+        if self.profile['has_backlight'] and shm2 is not None:
+            instr = read_byte(shm2, OFF_FD2_INSTRLIGHT)
+            if instr > 0:
+                led_bits |= (1 << 16)
 
-        else:
-            return
+        sr_data = compute_ecm_sr_data(shm2) if self.profile['has_ecm'] and shm2 else b'\x00\x00\x00\x00'
+        frame = build_frame(led_bits, sr_data)
 
         if frame != self.prev_frame:
             try:
@@ -241,6 +244,7 @@ class Device:
                 self.ser.write(self.prev_frame)
             except Exception:
                 pass
+
 
 # ================================================================
 #  Port Argument Parser
@@ -262,50 +266,42 @@ def detect_device_type(port):
     """VID/PID 기반 디바이스 타입 추정"""
     import serial.tools.list_ports
     for p in serial.tools.list_ports.comports():
-        if p.device == port:
-            if p.vid == TEENSY_VID:
-                if p.pid == PID_AUX:
-                    return 'AUX'
-                elif p.pid == PID_CONSOLE:
-                    return 'CONSOLE'
-            # PID 매칭 실패 시 description fallback
-            desc = (p.description or "").lower()
-            if "left console" in desc:
-                return 'CONSOLE'
-            elif "left aux" in desc or "panels" in desc:
-                return 'AUX'
+        if p.device == port and p.vid == TEENSY_VID:
+            entry = PID_DEVICES.get(p.pid)
+            if entry:
+                return entry[1]
     return None
 
 
 TEENSY_VID = 0x16C0
-PID_AUX     = 0x0489   # Left Aux Misc
-PID_CONSOLE = 0x048E   # Left Console
 
-PID_NAMES = {
-    PID_AUX:     "REDKITE F16 Left Aux Misc",
-    PID_CONSOLE: "REDKITE F16 Left Console",
+# PID → (display name, device type)
+# device type: 'AUX' or 'CONSOLE' (used for frame format selection)
+# 새 Teensy 추가 시 여기에 한 줄 추가
+PID_DEVICES = {
+    0x0487: ("REDKITE F16 Left Aux Misc",  "AUX"),      # default Teensy PID
+    0x0489: ("REDKITE F16 Left Aux Misc",  "AUX"),
+    0x048E: ("REDKITE F16 ELEC ECM AVTR",  "CONSOLE"),
 }
 
 
 def find_teensy_ports():
-    """VID/PID 기반 Teensy COM 포트 자동 감지 + 디바이스 타입 판별.
-    Returns (port_args, descriptions): port_args is list of 'COMx:TYPE', descriptions for display."""
+    """VID 기반 Teensy COM 포트 자동 감지 + PID로 디바이스 타입 판별.
+    Returns (port_args, descriptions): port_args is list of 'COMx:TYPE' or 'COMx', descriptions for display."""
     import serial.tools.list_ports
     ports = serial.tools.list_ports.comports()
     port_args = []
     descriptions = []
     for p in ports:
         if p.vid == TEENSY_VID:
-            name = PID_NAMES.get(p.pid, f"Unknown (PID:0x{p.pid:04X})")
-            if p.pid == PID_AUX:
-                port_args.append(f"{p.device}:AUX")
-                descriptions.append(f"  {p.device}: {name} [AUX]")
-            elif p.pid == PID_CONSOLE:
-                port_args.append(f"{p.device}:CONSOLE")
-                descriptions.append(f"  {p.device}: {name} [CONSOLE]")
+            entry = PID_DEVICES.get(p.pid)
+            if entry:
+                name, dtype = entry
+                port_args.append(f"{p.device}:{dtype}")
+                descriptions.append(f"  {p.device}: {name} [{dtype}]")
             else:
                 port_args.append(p.device)
-                descriptions.append(f"  {p.device}: {name}")
+                descriptions.append(f"  {p.device}: Unknown (PID:0x{p.pid:04X})")
     return port_args, descriptions
 
 # ================================================================
@@ -329,9 +325,6 @@ def main():
         auto, descs = find_teensy_ports()
         if auto:
             port_args = auto
-            print("[Auto] Teensy 감지:")
-            for d in descs:
-                print(d)
         else:
             import serial.tools.list_ports
             all_ports = serial.tools.list_ports.comports()
@@ -356,10 +349,11 @@ def main():
                 print(f"  {port}: 디바이스 타입 자동 감지 실패. COM:TYPE 형식으로 지정하세요 (예: {port}:AUX)")
                 continue
         try:
-            s = pyserial.Serial(port, args.baud, timeout=0.1)
+            s = pyserial.Serial(port, args.baud, timeout=0)
             dev = Device(port, dtype, s)
             devices.append(dev)
-            print(f"  {port}: {dtype} 연결됨")
+            name = next((n for pid, (n, t) in PID_DEVICES.items() if t == dtype), dtype)
+            print(f"  {port}: {name} [{dtype}]")
         except pyserial.SerialException as e:
             print(f"  {port}: 열기 실패 — {e}")
             failed = True
@@ -386,6 +380,7 @@ def main():
 
     try:
         while True:
+
             if shm is None:
                 shm = open_shm(SHM_NAME, SHM_SIZE)
                 if shm is not None:
@@ -412,6 +407,7 @@ def main():
                     if int(time.time() * args.hz) % args.hz == 0:
                         for dev in devices:
                             dev.heartbeat()
+
 
                 except Exception as e:
                     print(f"\n[BMS-BIOS] SHM read error: {e}, reconnecting...")

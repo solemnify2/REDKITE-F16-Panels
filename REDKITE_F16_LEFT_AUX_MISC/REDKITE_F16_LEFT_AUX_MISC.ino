@@ -18,7 +18,7 @@
   #error "JOYSTICK_SIZE must be 64. Edit USB_SERIAL_HID section in %LOCALAPPDATA%/Arduino15/packages/teensy/hardware/avr/<version>/cores/teensy4/usb_desc.h"
 #endif
 
-#if PRODUCT_ID != 0x0489
+#if PRODUCT_ID != 0x0487
   #error "PRODUCT_ID must be 0x0489 for Left Aux Misc. Edit USB_SERIAL_HID section in %LOCALAPPDATA%/Arduino15/packages/teensy/hardware/avr/<version>/cores/teensy4/usb_desc.h"
 #endif
 
@@ -105,7 +105,8 @@ struct AnalogBtnArrayDef {
   uint8_t            pin;          // analog input pin
   uint8_t            numButtons;
   const char* const* btnNames;     // array of button names, length = numButtons
-  const int*         values;       // expected analogRead per button, length = numButtons
+  const int*         values;       // expected analogRead per button (backlight OFF)
+  const int*         valuesBlOn;   // expected analogRead per button (backlight ON), NULL = same as values
   int                tolerance;    // +/- matching window
 };
 
@@ -172,19 +173,22 @@ const SwitchDef switches[] = {
 // ADC_k = 1023 × 4700 / (k × 1000 + 4700).  Calibrate with ALLOW_DEBUG = true.
 
 const char* const twaBtnNames[] = {"TWA ACT/PWR","TWA SEARCH","TWA ALT","TWA SYS PWR"};
-const int         twaBtnValues[] = {855, 740, 640, 582};
+const int         twaBtnValues[]     = {839, 711, 616, 544};       // backlight OFF
+const int         twaBtnValuesBlOn[] = {844, 720, 629, 559};       // backlight ON
 
 const char* const cmdsModeBtnNames[] = {"MODE 1","MODE 2","MODE 3","MODE 4","MODE 5","MODE 6"};
-const int         cmdsModeBtnValues[] = {855, 737, 649, 580, 528, 483};
+const int         cmdsModeBtnValues[]     = {846, 721, 628, 557, 500, 453};  // backlight OFF
+const int         cmdsModeBtnValuesBlOn[] = {852, 731, 640, 572, 516, 470};  // backlight ON
 
 const char* const cmdsPrgmBtnNames[] = {"PRGM BIT","PRGM 1","PRGM 2","PRGM 3","PRGM 4"};
-const int         cmdsPrgmBtnValues[] = {855, 735, 645, 578, 522};
+const int         cmdsPrgmBtnValues[]     = {844, 718, 625, 553, 497};  // backlight OFF
+const int         cmdsPrgmBtnValuesBlOn[] = {849, 728, 637, 568, 513};  // backlight ON
 
 const AnalogBtnArrayDef analogBtnArrays[] = {
-  // groupName       panel     pin  numBtn  btnNames           values              tolerance
-  {"TWA Buttons",    PNL_TWA,  A10, 4,      twaBtnNames,       twaBtnValues,      30},
-  {"CMDS MODE",      PNL_CMDS, A11, 6,      cmdsModeBtnNames,  cmdsModeBtnValues, 25},
-  {"CMDS PRGM",      PNL_CMDS, A12, 5,      cmdsPrgmBtnNames,  cmdsPrgmBtnValues, 25},
+  // groupName       panel     pin  numBtn  btnNames           values            valuesBlOn               tolerance
+  {"TWA Buttons",    PNL_TWA,  A10, 4,      twaBtnNames,       twaBtnValues,      twaBtnValuesBlOn,      30},
+  {"CMDS MODE",      PNL_CMDS, A11, 6,      cmdsModeBtnNames,  cmdsModeBtnValues, cmdsModeBtnValuesBlOn, 30},
+  {"CMDS PRGM",      PNL_CMDS, A12, 5,      cmdsPrgmBtnNames,  cmdsPrgmBtnValues, cmdsPrgmBtnValuesBlOn, 30},
 };
 
 #define NUM_ANALOG_ARRAYS (sizeof(analogBtnArrays) / sizeof(analogBtnArrays[0]))
@@ -421,6 +425,12 @@ static int     totalButtons = 0;
 static uint8_t prevBtnState[128];  // debug: previous button states
 static bool backlightIdleOff = false;  // true when backlight is off due to idle
 static bool backlightManualOff = false; // true when manually turned off (DN LOCK REL + Landing Light OFF)
+static bool backlightState = true;     // true = backlight ON (tracks all analogWrite paths)
+
+void setBacklight(bool on) {
+  analogWrite(BACKLIGHT_PIN, on ? 255 : 0);
+  backlightState = on;
+}
 static uint32_t lastInputTime = 0;    // millis() of last switch/button activity
 
 // ================================================================
@@ -564,16 +574,18 @@ void processSwitches() {
 static int analogDebugRaw[NUM_ANALOG_ARRAYS];
 
 void processAnalogButtons() {
+  bool blOn = backlightState;
   for (unsigned int a = 0; a < NUM_ANALOG_ARRAYS; a++) {
     int btn = analogBtnStart[a];
     const AnalogBtnArrayDef& arr = analogBtnArrays[a];
+    const int* vals = (blOn && arr.valuesBlOn) ? arr.valuesBlOn : arr.values;
     int raw = 0;
     for (int s = 0; s < 8; s++) raw += analogRead(arr.pin);
     raw /= 8;
 
     for (int i = 0; i < arr.numButtons; i++) {
-      bool matched = (raw >= arr.values[i] - arr.tolerance) &&
-                     (raw <= arr.values[i] + arr.tolerance);
+      bool matched = (raw >= vals[i] - arr.tolerance) &&
+                     (raw <= vals[i] + arr.tolerance);
       Joystick.button(btn + i, matched);
     }
 
@@ -585,8 +597,9 @@ void processAnalogButtons() {
     for (unsigned int a = 0; a < NUM_ANALOG_ARRAYS; a++)
       if (analogDebugRaw[a] > 10) { any = true; break; }
     if (any)
-      Serial.printf("[Analog] TWA=%d  MODE=%d  PRGM=%d\n",
-        analogDebugRaw[0], analogDebugRaw[1], analogDebugRaw[2]);
+      Serial.printf("[Analog] TWA=%d  MODE=%d  PRGM=%d  BL=%s\n",
+        analogDebugRaw[0], analogDebugRaw[1], analogDebugRaw[2],
+        backlightState ? "ON" : "OFF");
   }
 }
 
@@ -666,7 +679,7 @@ void turnOffAllLeds() {
 }
 
 void welcomeCeremony() {
-  analogWrite(BACKLIGHT_PIN, 255);
+  setBacklight(true);
   turnOffAllLeds();
 
   // Group sequential light-up: Gear → TWA → MISC
@@ -885,9 +898,10 @@ void setup() {
       pinMode(switches[i].pin2, INPUT_PULLUP);
   }
 
-  // Configure analog button array pins
+  // Configure analog button array pins + flush ADC after OUTPUT→INPUT transition
   for (unsigned int i = 0; i < NUM_ANALOG_ARRAYS; i++) {
     pinMode(analogBtnArrays[i].pin, INPUT);
+    for (int d = 0; d < 16; d++) analogRead(analogBtnArrays[i].pin);
   }
 
   // Configure pot pins
@@ -910,7 +924,7 @@ void setup() {
 
   // Configure backlight PWM (MOSFET gate: 0=off, 255=full brightness)
   analogWriteFrequency(BACKLIGHT_PIN, 1000);  // 1kHz PWM
-  analogWrite(BACKLIGHT_PIN, 255);            // Full brightness
+  setBacklight(true);
   lastInputTime = millis();
 
   // Configure pedal pins
@@ -970,7 +984,7 @@ void loop() {
   if (isUSBSuspended()) {
     turnOffAllLeds();
     if (!backlightIdleOff) {
-      analogWrite(BACKLIGHT_PIN, 0);
+      setBacklight(false);
       backlightIdleOff = true;
     }
     asm("wfi");   // CPU sleep until next interrupt (USB resume, timer, etc.)
@@ -1021,16 +1035,22 @@ void loop() {
     }
     updateLedsOffline();
 
-    // Manual backlight control (offline): DN LOCK REL + Landing Light switch
+    // Manual backlight control (offline): hold DN LOCK REL + flip Landing Light switch
     bool dnLockRel = !digitalRead(switches[SW_IDX_DN_LOCK_REL].pin1);  // DN LOCK REL (active-low)
+    static int8_t prevLandingLight = -2;
     if (dnLockRel) {
-      if (swLandingLight == 0 && !backlightManualOff) {
-        analogWrite(BACKLIGHT_PIN, 0);
-        backlightManualOff = true;
-      } else if (swLandingLight != 0 && backlightManualOff) {
-        analogWrite(BACKLIGHT_PIN, 255);
-        backlightManualOff = false;
+      if (prevLandingLight > -2 && swLandingLight != prevLandingLight) {
+        if (swLandingLight == 0) {
+          setBacklight(false);
+          backlightManualOff = true;
+        } else {
+          setBacklight(true);
+          backlightManualOff = false;
+        }
       }
+      prevLandingLight = swLandingLight;
+    } else {
+      prevLandingLight = -2;  // reset when DN LOCK REL released
     }
   }
 
@@ -1040,7 +1060,7 @@ void loop() {
   // Backlight idle auto-off: offline + no input for IDLE_TIMEOUT_MS → turn off
   if (heartbeat >= timeoutTicks) {
     if (!backlightIdleOff && !backlightManualOff && (millis() - lastInputTime > IDLE_TIMEOUT_MS)) {
-      analogWrite(BACKLIGHT_PIN, 0);
+      setBacklight(false);
       backlightIdleOff = true;
     }
   }
