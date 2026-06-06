@@ -278,7 +278,7 @@ def detect_device_type(port):
 
 
 TEENSY_VID = 0x16C0
-PID_AUX     = 0x0487   # Left Aux Misc
+PID_AUX     = 0x0489   # Left Aux Misc
 PID_CONSOLE = 0x048E   # Left Console
 
 PID_NAMES = {

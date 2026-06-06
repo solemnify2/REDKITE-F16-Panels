@@ -29,7 +29,7 @@ SERIAL_BAUD = 1000000
 TEENSY_VID  = 0x16C0
 
 PID_NAMES = {
-    0x0487: "REDKITE F16 Left Aux Misc",
+    0x0489: "REDKITE F16 Left Aux Misc",
     0x048E: "REDKITE F16 Left Console",
 }
 
