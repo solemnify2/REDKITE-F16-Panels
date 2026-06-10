@@ -18,24 +18,20 @@
 // ================================================================
 // Source: DCS-BIOS F-16C_50.json (local)
 
-// --- ELEC Panel Caution Lights ---
-// Address 0x4472: Caution lights group 1
-#define DCSBIOS_CAUTION1_ADDR       0x4472
-#define DCSBIOS_FLCS_RLY_MASK       0x0002  // bit 1  — ELEC FLCS RLY
-#define DCSBIOS_BATT_FAIL_MASK      0x0200  // bit 9  — ELEC BATT FAIL
+// --- ELEC Panel Caution Lights (from DCS-BIOS F-16C_50.json) ---
+// Address 0x447C: FLCS PMG, MAIN GEN, STBY GEN, EPU GEN, EPU PMG, TO FLCS
+#define DCSBIOS_ELEC_GRP1_ADDR     0x447C
+#define DCSBIOS_FLCS_PMG_MASK      0x0200  // bit 9
+#define DCSBIOS_MAIN_GEN_MASK      0x0400  // bit 10
+#define DCSBIOS_STBY_GEN_MASK      0x0800  // bit 11
+#define DCSBIOS_EPU_GEN_MASK       0x2000  // bit 13
+#define DCSBIOS_EPU_PMG_MASK       0x4000  // bit 14
+#define DCSBIOS_BATT_TO_FLCS_MASK  0x8000  // bit 15
 
-// Address 0x4474: Caution lights group 2
-#define DCSBIOS_CAUTION2_ADDR       0x4474
-#define DCSBIOS_ELEC_SYS_MASK       0x0008  // bit 3  — ELEC SYS
-#define DCSBIOS_EPU_GEN_MASK        0x0080  // bit 7  — EPU GEN
-#define DCSBIOS_EPU_PMG_MASK        0x0100  // bit 8  — EPU PMG
-
-// Address 0x4476: Caution lights group 3
-#define DCSBIOS_CAUTION3_ADDR       0x4476
-#define DCSBIOS_FLCS_PMG_MASK       0x0004  // bit 2  — FLCS PMG
-#define DCSBIOS_MAIN_GEN_MASK       0x0008  // bit 3  — MAIN GEN
-#define DCSBIOS_STBY_GEN_MASK       0x0010  // bit 4  — STBY GEN
-#define DCSBIOS_BATT_TO_FLCS_MASK   0x0200  // bit 9  — TO FLCS
+// Address 0x447E: FLCS RLY, BATT FAIL
+#define DCSBIOS_ELEC_GRP2_ADDR     0x447E
+#define DCSBIOS_FLCS_RLY_MASK      0x0001  // bit 0
+#define DCSBIOS_BATT_FAIL_MASK     0x0002  // bit 1
 
 // --- ECM Panel Indicator Lights (74HC595 shift register) ---
 // Address 0x4480: ECM 1 S/A/F
@@ -109,7 +105,7 @@ static uint32_t     dcsBiosLastByte = 0;
 // ================================================================
 
 static const uint16_t dcsBiosWatchAddrs[] = {
-  DCSBIOS_CAUTION1_ADDR, DCSBIOS_CAUTION2_ADDR, DCSBIOS_CAUTION3_ADDR,
+  DCSBIOS_ELEC_GRP1_ADDR, DCSBIOS_ELEC_GRP2_ADDR,
   DCSBIOS_ECM_GRP1_ADDR, DCSBIOS_ECM_GRP2_ADDR, DCSBIOS_ECM_GRP3_ADDR,
 };
 #define DCSBIOS_NUM_WATCH (sizeof(dcsBiosWatchAddrs) / sizeof(dcsBiosWatchAddrs[0]))
@@ -133,26 +129,26 @@ static bool dcsBiosChunkIsInteresting(uint16_t addr, uint16_t count) {
 
 static void dcsBiosOnUpdate(uint16_t addr, uint16_t value) {
   // --- ELEC Panel Caution Lights ---
-  if (addr == DCSBIOS_CAUTION1_ADDR) {
-    writeElecLed(LI_FLCS_RLY,    (value & DCSBIOS_FLCS_RLY_MASK));
-    writeElecLed(LI_BATT_FAIL,   (value & DCSBIOS_BATT_FAIL_MASK));
+  if (addr == DCSBIOS_ELEC_GRP1_ADDR || addr == DCSBIOS_ELEC_GRP2_ADDR) {
+    if (ALLOW_DEBUG) Serial.printf("[DCS-ELEC] addr=0x%04X val=0x%04X\n", addr, value);
   }
-  else if (addr == DCSBIOS_CAUTION2_ADDR) {
-    // ELEC SYS is on the right panel (Caution Light Panel), not here
-    writeElecLed(LI_EPU_GEN,     (value & DCSBIOS_EPU_GEN_MASK));
-    writeElecLed(LI_EPU_PMG,     (value & DCSBIOS_EPU_PMG_MASK));
-  }
-  else if (addr == DCSBIOS_CAUTION3_ADDR) {
+  if (addr == DCSBIOS_ELEC_GRP1_ADDR) {
     writeElecLed(LI_FLCS_PMG,    (value & DCSBIOS_FLCS_PMG_MASK));
     writeElecLed(LI_MAIN_GEN,    (value & DCSBIOS_MAIN_GEN_MASK));
     writeElecLed(LI_STBY_GEN,    (value & DCSBIOS_STBY_GEN_MASK));
+    writeElecLed(LI_EPU_GEN,     (value & DCSBIOS_EPU_GEN_MASK));
+    writeElecLed(LI_EPU_PMG,     (value & DCSBIOS_EPU_PMG_MASK));
     writeElecLed(LI_BATT_TO_FLCS,(value & DCSBIOS_BATT_TO_FLCS_MASK));
+  }
+  else if (addr == DCSBIOS_ELEC_GRP2_ADDR) {
+    writeElecLed(LI_FLCS_RLY,    (value & DCSBIOS_FLCS_RLY_MASK));
+    writeElecLed(LI_BATT_FAIL,   (value & DCSBIOS_BATT_FAIL_MASK));
   }
   // --- ECM Panel Indicator Lights (shift register) ---
   // SR index: ecmSrLedNames[] order = ECM_1_S(0), ECM_1_A(1), ECM_1_F(2), ECM_1_T(3), ...
-  if (ALLOW_DEBUG && (addr == DCSBIOS_ECM_GRP1_ADDR || addr == DCSBIOS_ECM_GRP2_ADDR || addr == DCSBIOS_ECM_GRP3_ADDR)) {
-    Serial.printf("[DCS-ECM] addr=0x%04X val=0x%04X\n", addr, value);
-  }
+  //if (ALLOW_DEBUG && (addr == DCSBIOS_ECM_GRP1_ADDR || addr == DCSBIOS_ECM_GRP2_ADDR || addr == DCSBIOS_ECM_GRP3_ADDR)) {
+  //  Serial.printf("[DCS-ECM] addr=0x%04X val=0x%04X\n", addr, value);
+  //}
   if (addr == DCSBIOS_ECM_GRP1_ADDR) {
     srWrite(0,  (value & DCSBIOS_ECM_1_S_MASK));  // ECM_1_S
     srWrite(1,  (value & DCSBIOS_ECM_1_A_MASK));  // ECM_1_A
@@ -212,7 +208,7 @@ void dcsBiosReset() {
 void dcsBiosCheckTimeout() {
   if (dcsBiosState > DCS_SYNC_4 && dcsBiosLastByte != 0) {
     if (millis() - dcsBiosLastByte > DCS_INTRA_FRAME_TIMEOUT_MS) {
-      if (ALLOW_DEBUG) Serial.println("[DCS] Intra-frame timeout, resync");
+      //if (ALLOW_DEBUG) Serial.println("[DCS] Intra-frame timeout, resync");
       dcsBiosState = DCS_SYNC_1;
       dcsBiosSyncRun = 0;
     }
@@ -230,7 +226,7 @@ void processDcsBiosByte(uint8_t b) {
     if (b == 0x55) {
       dcsBiosSyncRun++;
       if (dcsBiosSyncRun >= 4) {
-        if (ALLOW_DEBUG) Serial.println("[DCS] Resync: found 0x55x4 in data stream");
+        //if (ALLOW_DEBUG) Serial.println("[DCS] Resync: found 0x55x4 in data stream");
         dcsBiosState = DCS_ADDR_LOW;
         dcsBiosSyncRun = 0;
         return;
@@ -261,7 +257,7 @@ void processDcsBiosByte(uint8_t b) {
     case DCS_ADDR_HIGH:
       dcsBiosAddr |= (uint16_t)b << 8;
       if ((dcsBiosAddr & 1) && dcsBiosAddr != 0x5555) {
-        if (ALLOW_DEBUG) Serial.printf("[DCS] Bad addr 0x%04X, resync\n", dcsBiosAddr);
+        //if (ALLOW_DEBUG) Serial.printf("[DCS] Bad addr 0x%04X, resync\n", dcsBiosAddr);
         dcsBiosState = DCS_SYNC_1;
         break;
       }
@@ -278,7 +274,7 @@ void processDcsBiosByte(uint8_t b) {
         break;
       }
       if ((dcsBiosCount & 1) || dcsBiosCount == 0 || dcsBiosCount > 1024) {
-        if (ALLOW_DEBUG) Serial.printf("[DCS] Bad count %u @ 0x%04X, resync\n", dcsBiosCount, dcsBiosAddr);
+        //if (ALLOW_DEBUG) Serial.printf("[DCS] Bad count %u @ 0x%04X, resync\n", dcsBiosCount, dcsBiosAddr);
         dcsBiosState = DCS_SYNC_1;
         break;
       }

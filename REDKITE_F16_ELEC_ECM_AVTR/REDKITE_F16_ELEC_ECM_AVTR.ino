@@ -28,7 +28,7 @@
 //  Constants
 // ================================================================
 
-#define ALLOW_DEBUG       false
+#define ALLOW_DEBUG       true
 #define LOOP_DELAY_MS     50        // 20Hz main loop
 #define SERIAL_TIMEOUT    3         // seconds before protocol reset
 #define BAUDRATE          1000000
@@ -109,9 +109,9 @@ const LedDef leds[] = {
   {"STBY GEN",           5},
   {"EPU GEN",            6},
   {"EPU PMG",            7},
-  {"FLCS RLY",           8},
-  {"BATT FAIL",          9},
-  {"BATT TO FLCS",      10},
+  {"FLCS RLY",          10},
+  {"BATT FAIL",          8},
+  {"BATT TO FLCS",       9},
 };
 
 #define NUM_LEDS (sizeof(leds) / sizeof(leds[0]))
@@ -353,13 +353,13 @@ void processAnalogButtons() {
       }
     }
 
-    if (ALLOW_DEBUG) {
-      static int debugCounter = 0;
-      if (++debugCounter >= 20) {  // print every ~1s
-        Serial.printf("[Analog] %s: raw=%d matched=%d\n", arr.groupName, raw, matched);
-        debugCounter = 0;
-      }
-    }
+    //if (ALLOW_DEBUG) {
+    //  static int debugCounter = 0;
+    //  if (++debugCounter >= 20) {  // print every ~1s
+    //    Serial.printf("[Analog] %s: raw=%d matched=%d\n", arr.groupName, raw, matched);
+    //    debugCounter = 0;
+    //  }
+    //}
 
     for (int b = 0; b < arr.numButtons; b++) {
       Joystick.button(analogBtnStart[a] + b, (b == matched));
