@@ -28,7 +28,7 @@
 //  Constants
 // ================================================================
 
-#define ALLOW_DEBUG       true
+#define ALLOW_DEBUG       false
 #define LOOP_DELAY_MS     50        // 20Hz main loop
 #define SERIAL_TIMEOUT    3         // seconds before protocol reset
 #define BAUDRATE          1000000

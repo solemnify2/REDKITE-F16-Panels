@@ -36,15 +36,9 @@ OFF_FD2_ECMBITS    = 1180   # unsigned int ecmBits[5] (VERSION 19)
 OFF_FD2_ECMOPER    = 1200   # unsigned char ecmOper   (VERSION 19)
 
 # --- LightBits (offset 108) ---
-LB_FLCS_RLY         = 0x00000100  # bit 8
 LB_ADV_STANDBY      = 0x80000000  # bit 31
 
 # --- LightBits2 (offset 124) ---
-LB2_FLCS_PMG        = 0x00000001  # bit 0
-LB2_MAIN_GEN        = 0x00000002  # bit 1
-LB2_STBY_GEN        = 0x00000004  # bit 2
-LB2_EPU_GEN         = 0x00000008  # bit 3
-LB2_EPU_PMG         = 0x00000010  # bit 4
 LB2_AUX_SRCH        = 0x00001000  # bit 12
 LB2_AUX_ACT         = 0x00002000  # bit 13
 LB2_AUX_LOW         = 0x00004000  # bit 14
@@ -53,7 +47,15 @@ LB2_ECM_PWR         = 0x00010000  # bit 16
 LB2_ADV_ACTIVE      = 0x20000000  # bit 29
 LB_GEARHANDLE       = 0x40000000  # bit 30
 
-# --- LightBits3 (offset 128) ---
+# --- LightBits3 (offset 128, from FlightData.h) ---
+LB3_FLCS_PMG        = 0x00000001  # bit 0  — ELEC panel
+LB3_MAIN_GEN        = 0x00000002  # bit 1
+LB3_STBY_GEN        = 0x00000004  # bit 2
+LB3_EPU_GEN         = 0x00000008  # bit 3
+LB3_EPU_PMG         = 0x00000010  # bit 4
+LB3_TO_FLCS         = 0x00000020  # bit 5
+LB3_FLCS_RLY        = 0x00000040  # bit 6
+LB3_BAT_FAIL        = 0x00000080  # bit 7
 LB3_NOSE_GEAR_DN    = 0x00010000  # bit 16
 LB3_LEFT_GEAR_DN    = 0x00020000  # bit 17
 LB3_RIGHT_GEAR_DN   = 0x00040000  # bit 18
@@ -77,17 +79,16 @@ AUX_LED_MAP = [
     (10, OFF_LIGHTBITS,  LB_ADV_STANDBY),    # ADV STANDBY
 ]
 
-# LEFT_CONSOLE: 9 direct GPIO LEDs (ELEC panel)
+# LEFT_CONSOLE: 8 direct GPIO LEDs (ELEC panel, from FlightData.h LightBits3)
 CONSOLE_LED_MAP = [
-    (0,  OFF_LIGHTBITS2, LB2_FLCS_PMG),     # FLCS PMG
-    (1,  OFF_LIGHTBITS2, LB2_MAIN_GEN),     # MAIN GEN
-    (2,  OFF_LIGHTBITS2, LB2_STBY_GEN),     # STBY GEN
-    (3,  OFF_LIGHTBITS2, LB2_EPU_GEN),      # EPU GEN
-    (4,  OFF_LIGHTBITS2, LB2_EPU_PMG),      # EPU PMG
-    (5,  OFF_LIGHTBITS,  LB_FLCS_RLY),      # FLCS RLY
-    # (6, ..., ...),  # BATT FAIL — TODO: find BMS shared memory bit
-    # (7, ..., ...),  # BATT TO FLCS — TODO
-    # (8, ..., ...),  # ELEC SYS — TODO
+    (0,  OFF_LIGHTBITS3, LB3_FLCS_PMG),     # FLCS PMG
+    (1,  OFF_LIGHTBITS3, LB3_MAIN_GEN),     # MAIN GEN
+    (2,  OFF_LIGHTBITS3, LB3_STBY_GEN),     # STBY GEN
+    (3,  OFF_LIGHTBITS3, LB3_EPU_GEN),      # EPU GEN
+    (4,  OFF_LIGHTBITS3, LB3_EPU_PMG),      # EPU PMG
+    (5,  OFF_LIGHTBITS3, LB3_FLCS_RLY),     # FLCS RLY
+    (6,  OFF_LIGHTBITS3, LB3_BAT_FAIL),     # BATT FAIL
+    (7,  OFF_LIGHTBITS3, LB3_TO_FLCS),      # BATT TO FLCS
 ]
 
 # --- EcmBits enum (mutually exclusive states per program) ---
