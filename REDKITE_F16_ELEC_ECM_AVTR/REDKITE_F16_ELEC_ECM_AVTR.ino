@@ -353,13 +353,13 @@ void processAnalogButtons() {
       }
     }
 
-    //if (ALLOW_DEBUG) {
-    //  static int debugCounter = 0;
-    //  if (++debugCounter >= 20) {  // print every ~1s
-    //    Serial.printf("[Analog] %s: raw=%d matched=%d\n", arr.groupName, raw, matched);
-    //    debugCounter = 0;
-    //  }
-    //}
+    if (ALLOW_DEBUG) {
+      static int debugCounter = 0;
+      if (++debugCounter >= 20) {  // print every ~1s
+        Serial.printf("[Analog] %s: raw=%d matched=%d\n", arr.groupName, raw, matched);
+        debugCounter = 0;
+      }
+    }
 
     for (int b = 0; b < arr.numButtons; b++) {
       Joystick.button(analogBtnStart[a] + b, (b == matched));
