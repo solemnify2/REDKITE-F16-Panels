@@ -19,7 +19,7 @@
 #endif
 
 #if PRODUCT_ID != 0x0487
-  #error "PRODUCT_ID must be 0x0489 for Left Aux Misc. Edit USB_SERIAL_HID section in %LOCALAPPDATA%/Arduino15/packages/teensy/hardware/avr/<version>/cores/teensy4/usb_desc.h"
+  #error "PRODUCT_ID must be 0x0487 for Left Aux Misc. Edit USB_SERIAL_HID section in %LOCALAPPDATA%/Arduino15/packages/teensy/hardware/avr/<version>/cores/teensy4/usb_desc.h"
 #endif
 
 // ================================================================
@@ -609,7 +609,9 @@ void processAnalogButtons() {
 
 void processPots() {
   for (unsigned int i = 0; i < NUM_POTS; i++) {
-    setJoystickAxis(pots[i].axis, analogRead(pots[i].pin));
+    int raw = analogRead(pots[i].pin);
+    setJoystickAxis(pots[i].axis, raw);
+    if (ALLOW_DEBUG) Serial.printf("[Pot] %s = %d\n", pots[i].name, raw);
   }
 }
 
