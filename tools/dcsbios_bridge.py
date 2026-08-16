@@ -30,9 +30,9 @@ TEENSY_VID  = 0x16C0
 
 # 새 Teensy 추가 시 여기에 한 줄 추가
 PID_NAMES = {
-    0x0487: "REDKITE F16 Left Aux Misc",
-    0x0489: "REDKITE F16 Left Aux Misc",
-    0x048E: "REDKITE F16 ELEC ECM AVTR",
+    0x0487: "F16 LEFT AUX MISC",
+    0x0489: "F16 LEFT AUX MISC",
+    0x048E: "F16 LEFT CONSOLE",
 }
 
 

@@ -14,7 +14,7 @@
 | 0x23 | GND | VDD | VDD |
 | 0x24 | VDD | GND | GND |
 | 0x25 | VDD | GND | VDD |
-| 0x26 | VDD | GND | VDD |
+| 0x26 | VDD | VDD | GND |
 | 0x27 | VDD | VDD | VDD |
 
 - Max 8 devices on one I2C bus

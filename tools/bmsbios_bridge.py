@@ -44,6 +44,8 @@ LB2_AUX_ACT         = 0x00002000  # bit 13
 LB2_AUX_LOW         = 0x00004000  # bit 14
 LB2_AUX_PWR         = 0x00008000  # bit 15
 LB2_ECM_PWR         = 0x00010000  # bit 16
+LB2_EPU_ON          = 0x00100000  # bit 20 - EPU panel; run light
+LB2_JFS_ON          = 0x00200000  # bit 21 - Eng Jet Start panel; run light
 LB2_ADV_ACTIVE      = 0x20000000  # bit 29
 LB_GEARHANDLE       = 0x40000000  # bit 30
 
@@ -56,6 +58,8 @@ LB3_EPU_PMG         = 0x00000010  # bit 4
 LB3_TO_FLCS         = 0x00000020  # bit 5
 LB3_FLCS_RLY        = 0x00000040  # bit 6
 LB3_BAT_FAIL        = 0x00000080  # bit 7
+LB3_HYDRAZINE       = 0x00000100  # bit 8  - EPU HYDRAZN
+LB3_AIR             = 0x00000200  # bit 9  - EPU AIR
 LB3_NOSE_GEAR_DN    = 0x00010000  # bit 16
 LB3_LEFT_GEAR_DN    = 0x00020000  # bit 17
 LB3_RIGHT_GEAR_DN   = 0x00040000  # bit 18
@@ -79,7 +83,8 @@ AUX_LED_MAP = [
     (10, OFF_LIGHTBITS,  LB_ADV_STANDBY),    # ADV STANDBY
 ]
 
-# LEFT_CONSOLE: 8 direct GPIO LEDs (ELEC panel, from FlightData.h LightBits3)
+# LEFT_CONSOLE: 12 LEDs - ELEC 8 (bit 0-7) + EPU 3 (bit 8-10) + ENGINE RUN (bit 11)
+# 마스크 출처: Falcon BMS 4.38 Tools/SharedMem/FlightData.h
 CONSOLE_LED_MAP = [
     (0,  OFF_LIGHTBITS3, LB3_FLCS_PMG),     # FLCS PMG
     (1,  OFF_LIGHTBITS3, LB3_MAIN_GEN),     # MAIN GEN
@@ -89,6 +94,12 @@ CONSOLE_LED_MAP = [
     (5,  OFF_LIGHTBITS3, LB3_FLCS_RLY),     # FLCS RLY
     (6,  OFF_LIGHTBITS3, LB3_BAT_FAIL),     # BATT FAIL
     (7,  OFF_LIGHTBITS3, LB3_TO_FLCS),      # BATT TO FLCS
+    # --- EPU 패널 3 ---
+    (8,  OFF_LIGHTBITS3, LB3_HYDRAZINE),    # EPU HYDRAZN
+    (9,  OFF_LIGHTBITS3, LB3_AIR),          # EPU AIR
+    (10, OFF_LIGHTBITS2, LB2_EPU_ON),       # EPU RUN
+    # --- ENGINE START 패널 1 ---
+    (11, OFF_LIGHTBITS2, LB2_JFS_ON),       # JFS RUN
 ]
 
 # --- EcmBits enum (mutually exclusive states per program) ---
@@ -203,7 +214,7 @@ DEVICE_PROFILES = {
     },
     'CONSOLE': {
         'led_map': CONSOLE_LED_MAP,
-        'has_backlight': False,
+        'has_backlight': True,   # 좌측 콘솔 확장(EPU/AUDIO/UHF/ENGINE/MPO)에 백라이트 추가됨
         'has_ecm': True,
     },
 }
@@ -280,9 +291,9 @@ TEENSY_VID = 0x16C0
 # device type: 'AUX' or 'CONSOLE' (used for frame format selection)
 # 새 Teensy 추가 시 여기에 한 줄 추가
 PID_DEVICES = {
-    0x0487: ("REDKITE F16 Left Aux Misc",  "AUX"),      # default Teensy PID
-    0x0489: ("REDKITE F16 Left Aux Misc",  "AUX"),
-    0x048E: ("REDKITE F16 ELEC ECM AVTR",  "CONSOLE"),
+    0x0487: ("F16 LEFT AUX MISC",          "AUX"),      # default Teensy PID
+    0x0489: ("F16 LEFT AUX MISC",          "AUX"),
+    0x048E: ("F16 LEFT CONSOLE",           "CONSOLE"),
 }
 
 

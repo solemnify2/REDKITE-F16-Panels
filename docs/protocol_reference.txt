@@ -119,6 +119,40 @@ LightBits Mask Map (used in bmsbios_bridge.py):
   10     ADV Standby   MCP0:9   MCP 0x20    0x447E bit3           LB AdvStandby
 
 
+3-2. LED Index Mapping — F16_LEFT_CONSOLE (0x048E)
+==================================================
+
+  Source: Falcon BMS 4.38  Tools/SharedMem/FlightData.h  (enum LightBits2 / LightBits3)
+
+  ledBits  Name           Location          BMS LightBit              DCS-BIOS
+  -------  -------------  ----------------  ------------------------  --------------
+  0        FLCS PMG       MCP 0x21 GPB0     LB3 FlcsPmg    0x00000001  0x447C bit9
+  1        MAIN GEN       MCP 0x21 GPB1     LB3 MainGen    0x00000002  0x447C bit10
+  2        STBY GEN       MCP 0x21 GPB2     LB3 StbyGen    0x00000004  0x447C bit11
+  3        EPU GEN        MCP 0x21 GPB3     LB3 EpuGen     0x00000008  0x447C bit13
+  4        EPU PMG        MCP 0x21 GPB4     LB3 EpuPmg     0x00000010  0x447C bit14
+  5        FLCS RLY       MCP 0x21 GPB5     LB3 FlcsRly    0x00000040  0x447E bit0
+  6        BATT FAIL      MCP 0x21 GPB6     LB3 BatFail    0x00000080  0x447E bit1
+  7        BATT TO FLCS   MCP 0x21 GPB7     LB3 ToFlcs     0x00000020  0x447C bit15
+  8        EPU HYDRAZN    MCP 0x21 GPA5     LB3 Hydrazine  0x00000100  (미매핑)
+  9        EPU AIR        MCP 0x21 GPA6     LB3 Air        0x00000200  (미매핑)
+  10       EPU RUN        MCP 0x21 GPA7     LB2 EPUOn      0x00100000  (미매핑)
+  11       JFS RUN        Teensy 직결       LB2 JFSOn      0x00200000  (미매핑)
+
+  Backlight: ledBits bit 16  (FlightData2 instrLight > 0)
+  srData   : uint32, ECM 32 LED (74HC595). FlightData2 ecmBits[5] 에서 생성.
+
+  FlightData.h 발췌 (검증된 값):
+    LightBits2:  EPUOn      = 0x00100000   bit 20   "EPU panel; run light"
+                 JFSOn      = 0x00200000   bit 21   "Eng Jet Start panel; run light"
+    LightBits3:  Hydrazine  = 0x00000100   bit 8
+                 Air        = 0x00000200   bit 9
+
+  ※ DCS-BIOS 미매핑 4개(bit 8~11): F-16C_50.json 에서 EPU / JFS RUN 식별자를 찾아
+    DcsBiosParser.h 의 watch 목록과 dcsBiosOnUpdate() 에 추가하면 됩니다.
+    그전까지 DCS 연결 시 해당 LED 는 꺼진 상태로 유지됩니다.
+
+
 4. Protocol Auto-Detection
 ===========================
 

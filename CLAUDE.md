@@ -10,8 +10,8 @@ Redkite Project: a collection of Teensy-based USB joystick controllers for an F-
 
 | Folder | MCU | Description |
 |--------|-----|-------------|
-| `REDKITE_F16_LEFT_AUX_MISC/` | Teensy 4.1 | Left Aux panels (Gear, CMDS, TWA, Alt Gear) + MISC panel via MCP23017 I2C. Pedal axes, backlight, Python bridges. **Primary/most complex sketch.** |
-| `REDKITE_F16_LEFT_CONSOLE/` | Teensy 4.0 | ECM panel (74HC595 shift registers for 32 LEDs, 8-button resistor ladder) + ELEC panel. Standalone, no I2C expansion. |
+| `F16_LEFT_AUX_MISC/` | Teensy 4.1 | Left Aux panels (Gear, CMDS, TWA, Alt Gear) + MISC panel via MCP23017 I2C. Pedal axes, backlight, Python bridges. |
+| `F16_LEFT_CONSOLE/` | Teensy 4.0 / 4.1 | Left console: ECM (74HC595 ×4 for 32 LEDs, 8-button resistor ladder) + ELEC + EPU + AVTR + UHF (6 rotary encoders) + ENGINE START + MPO + AUDIO 1/2 (7 pots). MCP23017 ×3 over I2C (`0x20` `0x21` `0x22`). **Primary/most complex sketch.** Two build stages via `BOARD_REV`: `STAGE_T40` (Teensy 4.0 interim — every panel except the 6 UHF encoders, 41 buttons) and `STAGE_T41` (full, 53 buttons). Buttons 1–41 and all 7 axes are identical across both stages, so upgrading needs no BMS rebinding. |
 
 Each sketch has its own `CLAUDE.md` with detailed architecture — read that first when working in a specific sketch.
 
@@ -19,7 +19,8 @@ Each sketch has its own `CLAUDE.md` with detailed architecture — read that fir
 
 - **IDE**: Arduino IDE with [Teensyduino](https://www.pjrc.com/teensy/td_download.html)
 - **USB Type**: Serial + Keyboard + Mouse + Joystick
-- **Extreme Joystick (LEFT_AUX_MISC only)**: Set `JOYSTICK_SIZE 64` in `usb_desc.h` before building
+- **Extreme Joystick**: Set `JOYSTICK_SIZE 64` in `usb_desc.h`. **Both sketches now require 64**, so the header no longer needs editing between builds. PID differs per device (`0x0487` / `0x048E`) and is enforced by `#error` in each sketch.
+- **Joystick axes**: `JOYSTICK_SIZE 64` exposes 6 named axes (X/Y/Z/Xrotate/Yrotate/Zrotate) **plus `slider(1..17)`** — 23 analog channels, not 6.
 - **Upload**: Open the `.ino` file in Arduino IDE and Upload
 
 ### Python Bridges
