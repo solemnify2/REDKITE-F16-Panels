@@ -122,21 +122,53 @@ MCP 핀 번호: **GPA0–7 = 0–7, GPB0–7 = 8–15**
 
 ---
 
-## 조이스틱 축 (7 / 23)
+## 조이스틱 축 (10 / 23)
 
 Extreme 조이스틱(`JOYSTICK_SIZE 64`)은 명명 축 6개 + `slider(1..17)` = **23채널**입니다.
+단, DirectInput은 최대 8축(6 named + `rglSlider[2]`)만 인식합니다.
 
-| 축 | 신호 | 핀 |
-|----|------|-----|
-| X | AUDIO COMM CH1 | 41 (A17) |
-| Y | AUDIO COMM CH2 | 40 (A16) |
-| Z | AUDIO MSL VOL | 39 (A15) |
-| Xrotate | AUDIO THREAT VOL | 38 (A14) |
-| Yrotate | AUDIO INTERCOM | 27 (A13) |
-| Zrotate | AUDIO ILS VOL | 26 (A12) |
-| `slider(1)` | UHF VOL | 23 (A9) |
+| # | 축 | 신호 | 핀 | DirectInput | BMS 바인딩 |
+|---|-----|------|-----|-------------|-----------|
+| 1 | X | AUDIO COMM CH1 | 22 (A8) | lX | ✓ |
+| 2 | Y | AUDIO COMM CH2 | 21 (A7) | lY | ✓ |
+| 3 | Z | AUDIO MSL VOL | 19 (A5) | lZ | ✓ |
+| 4 | Xrotate | AUDIO THREAT VOL | 17 (A3) | lRx | ✓ |
+| 5 | Yrotate | AUDIO INTERCOM | 16 (A2) | lRy | ✓ |
+| 6 | Zrotate | UHF VOL | 23 (A9) | lRz | ✓ |
+| 7 | `slider(1)` | AUDIO ILS VOL | 14 (A0) | rglSlider[0] | ✓ |
+| 8 | `slider(2)` | AUDIO SECURE VOL | 20 (A6) | rglSlider[1] | ✓ |
+| 9 | `slider(3)` | AUDIO TF VOL | 18 (A4) | (미인식) | ✗ |
+| 10 | `slider(4)` | AUDIO TACAN VOL | 15 (A1) | (미인식) | ✗ |
 
-여유 슬라이더 16채널.
+### usb_desc.c 수정 사항 (시스템 파일, git 미추적)
+
+파일 위치: `%LOCALAPPDATA%/Arduino15/packages/teensy/hardware/avr/<version>/cores/teensy4/usb_desc.c`
+
+Teensyduino 원본은 `JOYSTICK_SIZE 64` 에서 17개 슬라이더를 전부 동일한 Usage ID
+`0x36`(Slider)으로 선언합니다. 이 중복으로 인해 **Windows DirectInput이 슬라이더를
+전혀 인식하지 못합니다** (`rglSlider[0]`, `[1]` 모두 미동작).
+
+**수정**: Report Count 를 23 → 8 로 줄이고, 나머지 15개는 constant padding 처리.
+
+```c
+// 변경 전 (Teensyduino 원본)
+0x95, 23,          // Report Count (23)
+0x09, 0x30~0x36,   // X,Y,Z,Rx,Ry,Rz + Slider ×17
+0x81, 0x02,        // Input (variable, absolute)
+
+// 변경 후
+0x95, 8,           // Report Count (8)
+0x09, 0x30~0x36,   // X,Y,Z,Rx,Ry,Rz + Slider ×2
+0x81, 0x02,        // Input (variable, absolute)
+0x95, 15,          // Report Count (15)
+0x81, 0x01,        // Input (constant) — padding
+```
+
+USB report 크기(64바이트)는 변하지 않으며, `Joystick.slider(1..17)` API도 그대로
+동작합니다. DirectInput이 읽는 8개 축만 정상 매핑되고, 나머지는 무시됩니다.
+
+> ⚠ Arduino IDE / Teensyduino **업데이트 시 이 파일이 덮어씌워집니다**.
+> 업데이트 전에 백업하거나, 업데이트 후 다시 수정해야 합니다.
 
 ---
 
