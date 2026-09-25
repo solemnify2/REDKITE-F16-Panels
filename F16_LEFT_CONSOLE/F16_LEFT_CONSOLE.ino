@@ -43,7 +43,6 @@
   #error "PRODUCT_ID must be 0x048E for Left Console. Edit USB_SERIAL_HID section in usb_desc.h"
 #endif
 
-
 // ================================================================
 //  General Settings
 // ================================================================
@@ -819,10 +818,6 @@ void processEncoders() {
       Joystick.button(dir > 0 ? btnCW : btnCCW, 1);
       rt.holdTicks = ENC_PULSE_TICKS;
       lastInputTime = millis();
-      if (ALLOW_DEBUG)
-        Serial.printf("[ENC] btn%-3d %-20s pinA=%-2d pinB=%-2d %s\n",
-                       dir > 0 ? btnCW : btnCCW, e.name, e.pinA, e.pinB,
-                       dir > 0 ? "CW" : "CCW");
     }
   }
 }
@@ -891,12 +886,6 @@ void processSwitches() {
 // ================================================================
 
 void processAnalogButtons() {
-  static uint32_t lastLadderDebug = 0;
-  static bool lastWasAllNone = false;
-  bool anyMatch = false;
-  int debugBest[NUM_ANALOG_ARRAYS];
-  int debugRaw[NUM_ANALOG_ARRAYS];
-
   for (unsigned int a = 0; a < NUM_ANALOG_ARRAYS; a++) {
     const AnalogBtnArrayDef& arr = analogBtnArrays[a];
     int btn = analogBtnStart[a];
@@ -918,10 +907,6 @@ void processAnalogButtons() {
       int lowerBound = vals[arr.numButtons - 1] - lastGap / 2;
       if (raw < lowerBound) best = -1;
     }
-    if (best >= 0) anyMatch = true;
-    debugBest[a] = best;
-    debugRaw[a] = raw;
-
     for (int b = 0; b < arr.numButtons; b++) {
       int state = (b == best);
       if (prevBtnState[btn + b] != state) {
@@ -930,20 +915,6 @@ void processAnalogButtons() {
       }
       Joystick.button(btn + b, state);
     }
-  }
-
-  if (ALLOW_DEBUG && (millis() - lastLadderDebug >= 1000)) {
-    bool allNone = !anyMatch;
-    if (!(allNone && lastWasAllNone)) {
-      lastWasAllNone = allNone;
-      for (unsigned int a = 0; a < NUM_ANALOG_ARRAYS; a++) {
-        const int* v = analogBtnArrays[a].values[0];  // TODO: [blOn] when backlight added
-        char bestStr[32];
-        if (debugBest[a] >= 0) snprintf(bestStr, sizeof(bestStr), "btn%d(%d/%d)", debugBest[a], debugRaw[a], v[debugBest[a]]); else snprintf(bestStr, sizeof(bestStr), "NONE(%d)", debugRaw[a]);
-        Serial.printf("[Ladder] %s=%s\n", analogBtnArrays[a].groupName, bestStr);
-      }
-    }
-    lastLadderDebug = millis();
   }
 }
 
@@ -958,59 +929,6 @@ void processPots() {
     for (int s = 0; s < 4; s++) raw += analogRead(pots[i].pin);
     raw /= 4;
     setJoystickAxis(pots[i].axis, raw);
-  }
-}
-
-// MCP pin → "PA0"~"PA7","PB0"~"PB7" / Teensy pin → "T41 pin XX"
-static void fmtPin(char* buf, int mcpIdx, uint8_t pin) {
-  if (mcpIdx >= 0)
-    sprintf(buf, "MCP#%d %s%d", mcpIdx, pin < 8 ? "PA" : "PB", pin & 7);
-  else
-    sprintf(buf, "T41 pin%d", pin);
-}
-
-void debugDigitalInputs() {
-  if (!ALLOW_DEBUG) return;
-  char pinStr[16];
-
-  int btn = 1;
-  for (unsigned int i = 0; i < NUM_SWITCHES; i++) {
-    const SwitchDef& sw = switches[i];
-
-    if (sw.type == SW_ON_OFF) {
-      int raw = readSwPin(sw, sw.pin1);
-      int state = !raw;
-      if (prevBtnState[btn] != state) {
-        fmtPin(pinStr, sw.mcpIdx, sw.pin1);
-        Serial.printf("[DIN] btn%-3d %-20s %-12s raw=%d -> %s\n",
-                       btn, sw.name, pinStr, raw, state ? "ON" : "OFF");
-      }
-      btn += 1;
-    } else if (sw.type == SW_ON_OFF_ON) {
-      for (int p = 0; p < 2; p++) {
-        uint8_t pin = (p == 0) ? sw.pin1 : sw.pin2;
-        int raw = readSwPin(sw, pin);
-        int state = !raw;
-        if (prevBtnState[btn + p] != state) {
-          fmtPin(pinStr, sw.mcpIdx, pin);
-          Serial.printf("[DIN] btn%-3d %-20s %-12s raw=%d -> %s\n",
-                         btn + p, sw.name, pinStr, raw, state ? "ON" : "OFF");
-        }
-      }
-      btn += 2;
-    } else if (sw.type == SW_ROTARY) {
-      for (uint8_t p = 0; p < sw.numPos; p++) {
-        uint8_t pin = sw.pin1 + p;
-        int raw = readSwPin(sw, pin);
-        int state = !raw;
-        if (prevBtnState[btn + p] != state) {
-          fmtPin(pinStr, sw.mcpIdx, pin);
-          Serial.printf("[DIN] btn%-3d %-20s %-12s raw=%d -> %s\n",
-                         btn + p, sw.name, pinStr, raw, state ? "ON" : "OFF");
-        }
-      }
-      btn += sw.numPos;
-    }
   }
 }
 
@@ -1266,7 +1184,6 @@ void loop() {
   if (ledsOff) memcpy(prevSnapshot, prevBtnState, sizeof(prevSnapshot));
 
   for (unsigned int d = 0; d < NUM_MCP_DEVICES; d++) mcpReadPorts(d);
-  debugDigitalInputs();
   processSwitches();
   processAnalogButtons();
   processPots();
