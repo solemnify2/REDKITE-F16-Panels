@@ -139,7 +139,7 @@ static bool dcsBiosChunkIsInteresting(uint16_t addr, uint16_t count) {
 static void dcsBiosOnUpdate(uint16_t addr, uint16_t value) {
   // --- ELEC Panel Caution Lights ---
   if (addr == DCSBIOS_ELEC_GRP1_ADDR || addr == DCSBIOS_ELEC_GRP2_ADDR) {
-    if (ALLOW_DEBUG) Serial.printf("[DCS-ELEC] addr=0x%04X val=0x%04X\n", addr, value);
+    //if (ALLOW_DEBUG) Serial.printf("[DCS-ELEC] addr=0x%04X val=0x%04X\n", addr, value);
   }
   if (addr == DCSBIOS_ELEC_GRP1_ADDR) {
     writeElecLed(LI_FLCS_PMG,    (value & DCSBIOS_FLCS_PMG_MASK));
@@ -200,9 +200,9 @@ static void dcsBiosOnUpdate(uint16_t addr, uint16_t value) {
     srWrite(30, (value & DCSBIOS_ECM_SPL_F_MASK));  // ECM_SPL_F
     srWrite(31, (value & DCSBIOS_ECM_SPL_T_MASK));  // ECM_SPL_T
   }
-  // --- Instrument panel backlight (ON/OFF only, no dimming) ---
+  // --- Instrument panel backlight (PWM dimming) ---
   else if (addr == DCSBIOS_INST_PNL_ADDR) {
-    setBacklight(value > 0);
+    setBacklightBrightness(value >> 8);   // 0~65535 → 0~255
   }
 }
 

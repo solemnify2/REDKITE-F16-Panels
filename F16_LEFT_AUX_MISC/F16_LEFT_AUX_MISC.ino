@@ -27,7 +27,7 @@
 // ================================================================
 
 #define BAUDRATE      1000000
-#define ALLOW_DEBUG   false
+#define ALLOW_DEBUG   true
 #define MAX_PIN       55        // Teensy 4.1 max digital pin
 #define LOOP_DELAY_MS 50
 #define SERIAL_TIMEOUT 6        // Serial heartbeat timeout in seconds
@@ -98,16 +98,15 @@ struct McpDeviceDef {
 
 // Resistor-ladder analog button array: multiple buttons on a single analog pin.
 // Each button adds a 220Ω resistor, producing a unique analogRead value.
-// Set 'values' to expected analogRead per button (ascending). 'tolerance' is +/- match window.
+// values[0]=BL OFF, values[1]=BL ON (descending order).
+// Matching: nearest-value, reject if below last value - (adjacent gap / 2).
 struct AnalogBtnArrayDef {
   const char*        groupName;    // group name for logging
   Panel              panel;
   uint8_t            pin;          // analog input pin
   uint8_t            numButtons;
   const char* const* btnNames;     // array of button names, length = numButtons
-  const int*         values;       // expected analogRead per button (backlight OFF)
-  const int*         valuesBlOn;   // expected analogRead per button (backlight ON), NULL = same as values
-  int                tolerance;    // +/- matching window
+  const int*         values[2];    // [0]=BL OFF, [1]=BL ON
 };
 
 // ================================================================
@@ -166,29 +165,29 @@ const SwitchDef switches[] = {
 
 // --- Analog Button Arrays (resistor ladder, multiple buttons on 1 analog pin) ---
 // Each button adds 220Ω in series → unique analogRead value per button.
-// values[] = expected analogRead per button. tolerance = +/- matching window.
+// values[] = expected analogRead per button (descending order).
 // TODO: calibrate values[] by reading actual analogRead with ALLOW_DEBUG = true.
 
 // Resistor ladder: 1kΩ series chain + 4.7kΩ pulldown per ladder.
 // ADC_k = 1023 × 4700 / (k × 1000 + 4700).  Calibrate with ALLOW_DEBUG = true.
 
 const char* const twaBtnNames[] = {"TWA ACT/PWR","TWA SEARCH","TWA ALT","TWA SYS PWR"};
-const int         twaBtnValues[]     = {839, 711, 616, 544};       // backlight OFF
-const int         twaBtnValuesBlOn[] = {844, 720, 629, 559};       // backlight ON
+const int         twaBtnValues[]     = {839, 711, 617, 545};       // backlight OFF (measured, idle~1)
+const int         twaBtnValuesBlOn[] = {854, 735, 660, 592};       // backlight ON (measured, idle~99)  prev: {844, 720, 629, 559}
 
-const char* const cmdsModeBtnNames[] = {"MODE 1","MODE 2","MODE 3","MODE 4","MODE 5","MODE 6"};
-const int         cmdsModeBtnValues[]     = {846, 721, 628, 557, 500, 453};  // backlight OFF
-const int         cmdsModeBtnValuesBlOn[] = {852, 731, 640, 572, 516, 470};  // backlight ON
+const char* const cmdsModeBtnNames[] = {"MODE 1","MODE 2","MODE 3","MODE 4","MODE 5","MODE 6","MODE 7"};
+const int         cmdsModeBtnValues[]     = {847, 722, 629, 558, 501, 454, 415};  // backlight OFF (measured, idle~1)
+const int         cmdsModeBtnValuesBlOn[] = {863, 747, 662, 596, 544, 502, 467};  // backlight ON (measured, idle~90)
 
-const char* const cmdsPrgmBtnNames[] = {"PRGM BIT","PRGM 1","PRGM 2","PRGM 3","PRGM 4"};
-const int         cmdsPrgmBtnValues[]     = {844, 718, 625, 553, 497};  // backlight OFF
-const int         cmdsPrgmBtnValuesBlOn[] = {849, 728, 637, 568, 513};  // backlight ON
+const char* const cmdsPrgmBtnNames[] = {"PRGM BIT","PRGM 1","PRGM 2","PRGM 3","PRGM 4","PRGM 5","PRGM 6"};
+const int         cmdsPrgmBtnValues[]     = {844, 719, 625, 554, 497, 452, 413};  // backlight OFF (measured, idle~1)
+const int         cmdsPrgmBtnValuesBlOn[] = {861, 745, 661, 598, 546, 504, 470};  // backlight ON (measured, idle~90)
 
 const AnalogBtnArrayDef analogBtnArrays[] = {
-  // groupName       panel     pin  numBtn  btnNames           values            valuesBlOn               tolerance
-  {"TWA Buttons",    PNL_TWA,  A10, 4,      twaBtnNames,       twaBtnValues,      twaBtnValuesBlOn,      30},
-  {"CMDS MODE",      PNL_CMDS, A11, 6,      cmdsModeBtnNames,  cmdsModeBtnValues, cmdsModeBtnValuesBlOn, 30},
-  {"CMDS PRGM",      PNL_CMDS, A12, 5,      cmdsPrgmBtnNames,  cmdsPrgmBtnValues, cmdsPrgmBtnValuesBlOn, 30},
+  // groupName       panel     pin  numBtn  btnNames           values{BL_OFF, BL_ON}
+  {"TWA Buttons",    PNL_TWA,  A10, 4,      twaBtnNames,       {twaBtnValues,      twaBtnValuesBlOn}},
+  {"CMDS MODE",      PNL_CMDS, A11, 7,      cmdsModeBtnNames,  {cmdsModeBtnValues, cmdsModeBtnValuesBlOn}},
+  {"CMDS PRGM",      PNL_CMDS, A12, 7,      cmdsPrgmBtnNames,  {cmdsPrgmBtnValues, cmdsPrgmBtnValuesBlOn}},
 };
 
 #define NUM_ANALOG_ARRAYS (sizeof(analogBtnArrays) / sizeof(analogBtnArrays[0]))
@@ -540,7 +539,7 @@ void processSwitches() {
       case SW_ON_OFF: {
         int state = !readSwPin(sw, sw.pin1);
         if (prevBtnState[btn] != state) {
-          if (ALLOW_DEBUG) Serial.printf("[SW] btn %d %s = %s\n", btn, sw.name, state ? "ON" : "OFF");
+          //if (ALLOW_DEBUG) Serial.printf("[SW] btn %d %s = %s\n", btn, sw.name, state ? "ON" : "OFF");
           prevBtnState[btn] = state;
           lastInputTime = millis();
         }
@@ -553,7 +552,7 @@ void processSwitches() {
         int s1 = readSwPin(sw, sw.pin1);
         int s2 = readSwPin(sw, sw.pin2);
         if (prevBtnState[btn] != !s1 || prevBtnState[btn + 1] != !s2) {
-          if (ALLOW_DEBUG) Serial.printf("[SW] btn %d~%d %s = %d/%d\n", btn, btn + 1, sw.name, !s1, !s2);
+          //if (ALLOW_DEBUG) Serial.printf("[SW] btn %d~%d %s = %d/%d\n", btn, btn + 1, sw.name, !s1, !s2);
           prevBtnState[btn] = !s1;
           prevBtnState[btn + 1] = !s2;
           lastInputTime = millis();
@@ -572,34 +571,59 @@ void processSwitches() {
 // ================================================================
 
 static int analogDebugRaw[NUM_ANALOG_ARRAYS];
+static int analogDebugBest[NUM_ANALOG_ARRAYS];
 
 void processAnalogButtons() {
   bool blOn = backlightState;
   for (unsigned int a = 0; a < NUM_ANALOG_ARRAYS; a++) {
     int btn = analogBtnStart[a];
     const AnalogBtnArrayDef& arr = analogBtnArrays[a];
-    const int* vals = (blOn && arr.valuesBlOn) ? arr.valuesBlOn : arr.values;
+    const int* vals = arr.values[blOn ? 1 : 0];
     int raw = 0;
     for (int s = 0; s < 8; s++) raw += analogRead(arr.pin);
     raw /= 8;
 
+    // Nearest-value match; reject below lower boundary (last value - half gap)
+    int best = -1;
+    int bestDist = 32767;
     for (int i = 0; i < arr.numButtons; i++) {
-      bool matched = (raw >= vals[i] - arr.tolerance) &&
-                     (raw <= vals[i] + arr.tolerance);
-      Joystick.button(btn + i, matched);
+      int dist = abs(raw - vals[i]);
+      if (dist < bestDist) { bestDist = dist; best = i; }
+    }
+    // Reject: below last value minus half the gap to its neighbor
+    if (best >= 0 && arr.numButtons >= 2) {
+      int lastGap = vals[arr.numButtons - 2] - vals[arr.numButtons - 1];
+      int lowerBound = vals[arr.numButtons - 1] - lastGap / 2;
+      if (raw < lowerBound) best = -1;
+    }
+    for (int i = 0; i < arr.numButtons; i++) {
+      Joystick.button(btn + i, (i == best));
     }
 
     analogDebugRaw[a] = raw;
+    analogDebugBest[a] = best;
   }
 
   if (ALLOW_DEBUG) {
-    bool any = false;
-    for (unsigned int a = 0; a < NUM_ANALOG_ARRAYS; a++)
-      if (analogDebugRaw[a] > 10) { any = true; break; }
-    if (any)
-      Serial.printf("[Analog] TWA=%d  MODE=%d  PRGM=%d  BL=%s\n",
-        analogDebugRaw[0], analogDebugRaw[1], analogDebugRaw[2],
+    static int lastBest[NUM_ANALOG_ARRAYS] = {-2, -2, -2};
+    bool changed = (analogDebugBest[0] != lastBest[0] ||
+                    analogDebugBest[1] != lastBest[1] ||
+                    analogDebugBest[2] != lastBest[2]);
+    if (changed) {
+      lastBest[0] = analogDebugBest[0];
+      lastBest[1] = analogDebugBest[1];
+      lastBest[2] = analogDebugBest[2];
+      // order: TWA(0), PRGM(2), MODE(1)
+      bool bl = backlightState;
+      char twa[32], prgm[32], mode[32];
+      auto ref = [&](int a) { return analogBtnArrays[a].values[bl ? 1 : 0][analogDebugBest[a]]; };
+      if (analogDebugBest[0] >= 0) snprintf(twa,  sizeof(twa),  "btn%d(%d/%d)", analogDebugBest[0], analogDebugRaw[0], ref(0)); else snprintf(twa,  sizeof(twa),  "NONE(%d)", analogDebugRaw[0]);
+      if (analogDebugBest[2] >= 0) snprintf(prgm, sizeof(prgm), "btn%d(%d/%d)", analogDebugBest[2], analogDebugRaw[2], ref(2)); else snprintf(prgm, sizeof(prgm), "NONE(%d)", analogDebugRaw[2]);
+      if (analogDebugBest[1] >= 0) snprintf(mode, sizeof(mode), "btn%d(%d/%d)", analogDebugBest[1], analogDebugRaw[1], ref(1)); else snprintf(mode, sizeof(mode), "NONE(%d)", analogDebugRaw[1]);
+      Serial.printf("[Ladder] TWA=%s PRGM=%s MODE=%s BL=%s\n",
+        twa, prgm, mode,
         backlightState ? "ON" : "OFF");
+    }
   }
 }
 
@@ -611,7 +635,7 @@ void processPots() {
   for (unsigned int i = 0; i < NUM_POTS; i++) {
     int raw = analogRead(pots[i].pin);
     setJoystickAxis(pots[i].axis, raw);
-    if (ALLOW_DEBUG) Serial.printf("[Pot] %s = %d\n", pots[i].name, raw);
+    //if (ALLOW_DEBUG) Serial.printf("[Pot] %s = %d\n", pots[i].name, raw);
   }
 }
 
@@ -803,7 +827,7 @@ void resetProtocol() {
   dcsBiosReset();
   bmsBiosReset();
   turnOffAllLeds();
-  if (ALLOW_DEBUG) Serial.println("[Proto] Reset to UNKNOWN");
+  //if (ALLOW_DEBUG) Serial.println("[Proto] Reset to UNKNOWN");
 }
 
 // Read all available serial bytes, auto-detect protocol, and route.
@@ -831,7 +855,7 @@ bool detectAndRouteSerial() {
             syncCount = 0;
             turnOffAllLeds();
             writeLed(LI_TWA_LOW, 1);
-            if (ALLOW_DEBUG) Serial.println("[Proto] Detected DCS-BIOS");
+            //if (ALLOW_DEBUG) Serial.println("[Proto] Detected DCS-BIOS");
             // The 4 sync bytes are consumed; parser starts at ADDR_LOW
             dcsBiosReset();
             dcsBiosState = DCS_ADDR_LOW;  // already past sync
@@ -846,7 +870,7 @@ bool detectAndRouteSerial() {
           turnOffAllLeds();
           writeLed(LI_TWA_POWER, 1);
           writeLed(LI_TWA_LOW, 1);
-          if (ALLOW_DEBUG) Serial.println("[Proto] Detected BMS-BIOS");
+          //if (ALLOW_DEBUG) Serial.println("[Proto] Detected BMS-BIOS");
           bmsBiosReset();
           // First frame sync already consumed; start at payload
           bbBufIdx = 0;

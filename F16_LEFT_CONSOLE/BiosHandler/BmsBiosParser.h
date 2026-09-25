@@ -53,10 +53,10 @@ static void bmsBiosApply() {
     writeElecLed(i, (ledBits >> i) & 1);
   }
 
-  // Bit 16: backlight from instrLight (0 = off, 1 = on).
-  // Same bit position as the LEFT_AUX_MISC device — the bridge sends
-  // one unified frame format to every Teensy.
-  setBacklight((ledBits & (1UL << 16)) != 0);
+  // Byte 2 (bits 16~23): backlight brightness from instrLight (0=off, 1~255=brightness).
+  // LEFT_AUX_MISC uses bit 16 as on/off — 밝기 값이 들어가도 AUX 호환 유지.
+  uint8_t brightness = (ledBits >> 16) & 0xFF;
+  setBacklightBrightness(brightness);
 
   // ECM panel shift register LEDs (32 bits in logical order)
   uint32_t ecmBits = bbBuf[4] | ((uint32_t)bbBuf[5] << 8) |

@@ -109,7 +109,7 @@ static void dcsBiosOnUpdate(uint16_t addr, uint16_t value) {
     writeLed(LI_GEAR_WARN, (value & DCSBIOS_GEAR_WARN_MASK));
   }
   else if (addr == DCSBIOS_TWA_ADDR) {
-    if (ALLOW_DEBUG) Serial.printf("[DCS] 0x447E = 0x%04X  ACT=%d STB=%d\n", value, !!(value & DCSBIOS_ADV_ACTIVE_MASK), !!(value & DCSBIOS_ADV_STBY_MASK));
+    //if (ALLOW_DEBUG) Serial.printf("[DCS] 0x447E = 0x%04X  ACT=%d STB=%d\n", value, !!(value & DCSBIOS_ADV_ACTIVE_MASK), !!(value & DCSBIOS_ADV_STBY_MASK));
     writeLed(LI_ADV_ACTIVE, (value & DCSBIOS_ADV_ACTIVE_MASK));
     writeLed(LI_ADV_STANDBY, (value & DCSBIOS_ADV_STBY_MASK));
     writeLed(LI_TWA_POWER, (value & DCSBIOS_TWA_POWER_MASK));
@@ -147,7 +147,7 @@ void dcsBiosReset() {
 void dcsBiosCheckTimeout() {
   if (dcsBiosState > DCS_SYNC_4 && dcsBiosLastByte != 0) {
     if (millis() - dcsBiosLastByte > DCS_INTRA_FRAME_TIMEOUT_MS) {
-      if (ALLOW_DEBUG) Serial.println("[DCS] Intra-frame timeout, resync");
+      //if (ALLOW_DEBUG) Serial.println("[DCS] Intra-frame timeout, resync");
       dcsBiosState = DCS_SYNC_1;
       dcsBiosSyncRun = 0;
     }
@@ -168,7 +168,7 @@ void processDcsBiosByte(uint8_t b) {
       dcsBiosSyncRun++;
       if (dcsBiosSyncRun >= 4) {
         // New sync found mid-parse — force resync
-        if (ALLOW_DEBUG) Serial.println("[DCS] Resync: found 0x55x4 in data stream");
+        //if (ALLOW_DEBUG) Serial.println("[DCS] Resync: found 0x55x4 in data stream");
         dcsBiosState = DCS_ADDR_LOW;
         dcsBiosSyncRun = 0;
         return;
@@ -203,7 +203,7 @@ void processDcsBiosByte(uint8_t b) {
       // Allow 0x5555 (frame end marker) and typical F-16 range 0x0000–0x8000.
       if ((dcsBiosAddr & 1) && dcsBiosAddr != 0x5555) {
         // Odd address (except end marker) = desync
-        if (ALLOW_DEBUG) Serial.printf("[DCS] Bad addr 0x%04X, resync\n", dcsBiosAddr);
+        //if (ALLOW_DEBUG) Serial.printf("[DCS] Bad addr 0x%04X, resync\n", dcsBiosAddr);
         dcsBiosState = DCS_SYNC_1;
         break;
       }
@@ -224,7 +224,7 @@ void processDcsBiosByte(uint8_t b) {
 
       // Count sanity check: must be even and reasonable (DCS-BIOS chunks are small)
       if ((dcsBiosCount & 1) || dcsBiosCount == 0 || dcsBiosCount > 1024) {
-        if (ALLOW_DEBUG) Serial.printf("[DCS] Bad count %u @ 0x%04X, resync\n", dcsBiosCount, dcsBiosAddr);
+        //if (ALLOW_DEBUG) Serial.printf("[DCS] Bad count %u @ 0x%04X, resync\n", dcsBiosCount, dcsBiosAddr);
         dcsBiosState = DCS_SYNC_1;
         break;
       }

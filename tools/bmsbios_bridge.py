@@ -91,9 +91,9 @@ CONSOLE_LED_MAP = [
     (2,  OFF_LIGHTBITS3, LB3_STBY_GEN),     # STBY GEN
     (3,  OFF_LIGHTBITS3, LB3_EPU_GEN),      # EPU GEN
     (4,  OFF_LIGHTBITS3, LB3_EPU_PMG),      # EPU PMG
-    (5,  OFF_LIGHTBITS3, LB3_FLCS_RLY),     # FLCS RLY
-    (6,  OFF_LIGHTBITS3, LB3_BAT_FAIL),     # BATT FAIL
-    (7,  OFF_LIGHTBITS3, LB3_TO_FLCS),      # BATT TO FLCS
+    (5,  OFF_LIGHTBITS3, LB3_TO_FLCS),      # BATT TO FLCS
+    (6,  OFF_LIGHTBITS3, LB3_FLCS_RLY),     # FLCS RLY
+    (7,  OFF_LIGHTBITS3, LB3_BAT_FAIL),     # BATT FAIL
     # --- EPU 패널 3 ---
     (8,  OFF_LIGHTBITS3, LB3_HYDRAZINE),    # EPU HYDRAZN
     (9,  OFF_LIGHTBITS3, LB3_AIR),          # EPU AIR
@@ -223,6 +223,10 @@ DEVICE_PROFILES = {
 #  Device Class
 # ================================================================
 
+DIM_PWM_DEFAULT = 255   # DIM 초기값 (BRT 미수신 시 최대 밝기)
+DIM_PWM_LOWERED = 50    # BRT 수신 후 DIM 밝기
+BRT_PWM         = 255
+
 class Device:
     def __init__(self, port, dev_type, ser):
         self.port = port
@@ -230,14 +234,24 @@ class Device:
         self.ser = ser
         self.prev_frame = None
         self.profile = DEVICE_PROFILES[dev_type]
+        self.brt_seen = False   # instrLight=2 수신 여부
 
     def build_and_send(self, lbits, shm2):
         led_bits = compute_led_bits(self.profile['led_map'], lbits)
 
         if self.profile['has_backlight'] and shm2 is not None:
             instr = read_byte(shm2, OFF_FD2_INSTRLIGHT)
-            if instr > 0:
-                led_bits |= (1 << 16)
+            if instr >= 2 and not self.brt_seen:
+                self.brt_seen = True
+                print(f"[{self.port}] instrLight=2(BRT) 감지 — DIM 밝기 {DIM_PWM_LOWERED}로 전환")
+            # 0=OFF, 1=DIM, 2+=BRT
+            if instr == 0:
+                brightness = 0
+            elif instr >= 2:
+                brightness = BRT_PWM
+            else:  # instr == 1 (DIM)
+                brightness = DIM_PWM_LOWERED if self.brt_seen else DIM_PWM_DEFAULT
+            led_bits |= (brightness << 16)
 
         sr_data = compute_ecm_sr_data(shm2) if self.profile['has_ecm'] and shm2 else b'\x00\x00\x00\x00'
         frame = build_frame(led_bits, sr_data)
@@ -410,7 +424,8 @@ def main():
                     lbits = {OFF_LIGHTBITS: lb, OFF_LIGHTBITS2: lb2, OFF_LIGHTBITS3: lb3}
 
                     if args.debug:
-                        print(f"  LB=0x{lb:08X}  LB2=0x{lb2:08X}  LB3=0x{lb3:08X}", end="\r")
+                        instr_dbg = read_byte(shm2, OFF_FD2_INSTRLIGHT) if shm2 else -1
+                        print(f"  LB=0x{lb:08X}  LB2=0x{lb2:08X}  LB3=0x{lb3:08X}  instrLight={instr_dbg}")
 
                     for dev in devices:
                         dev.build_and_send(lbits, shm2)
