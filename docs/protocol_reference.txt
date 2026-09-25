@@ -60,7 +60,7 @@ Protocol:
   - Binary, sync 0xAA 0xBB
   - Payload: ledBits (uint32 LE, 4 bytes)
     - Bits 0–10: LED states (see LED Index Mapping)
-    - Bit 16: Backlight (1=ON from instrLight)
+    - Bits 16~23: Backlight PWM brightness (from instrLight)
   - Checksum: XOR of 4 payload bytes (1 byte)
   - Total: 7 bytes per frame
   - Baud: 1,000,000
@@ -139,7 +139,10 @@ LightBits Mask Map (used in bmsbios_bridge.py):
   10       EPU RUN        MCP 0x21 GPA7     LB2 EPUOn      0x00100000  (미매핑)
   11       JFS RUN        Teensy 직결       LB2 JFSOn      0x00200000  (미매핑)
 
-  Backlight: ledBits bit 16  (FlightData2 instrLight > 0)
+  Backlight: ledBits byte 2 (bits 16~23) = PWM brightness
+             Bridge: instrLight 0=OFF→0, 1=DIM→255(기본)/50(BRT감지후), 2=BRT→255
+             BRT(instrLight=2) 미수신 시 DIM=255(풀), 수신 후 DIM=50으로 자동 전환
+             Offline 수동 조절: UHF STATUS + TF pot → PWM 0~255 (bridge offline일 때만)
   srData   : uint32, ECM 32 LED (74HC595). FlightData2 ecmBits[5] 에서 생성.
 
   FlightData.h 발췌 (검증된 값):

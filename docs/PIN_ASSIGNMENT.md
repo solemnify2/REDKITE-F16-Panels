@@ -5,12 +5,13 @@
 - **Board**: Teensy 4.1 (헤더 핀 0–41, 아날로그 A0–A17)
 - **USB**: PID `0x048E`, `JOYSTICK_SIZE 64` (128버튼)
 - **I2C**: `Wire2` — SCL2 = pin 24, SDA2 = pin 25 @ 100kHz
-- **사용 31 / 42핀, 여유 11핀** (12, 28–37)
+- **사용 34 / 42핀, 여유 8핀** (12, 31–37)
 
 > **이 문서는 STAGE_T41(Teensy 4.1 전체 구성) 기준입니다.**
-> Teensy 4.0 임시 구성(엔코더를 제외한 전 패널, 19핀, DX 41, 축 7)은
-> [LEFT_CONSOLE_PIN_TREE.md](LEFT_CONSOLE_PIN_TREE.md#stage_t40--teensy-40) 참조.
-> 두 단계에서 **버튼 1~41과 축 7개가 완전히 동일**합니다 — 확장 시 재바인딩이 필요 없습니다.
+> Teensy 4.0 임시 구성(엔코더를 제외한 전 패널, 22핀, DX 44, 축 7)은
+> [LEFT_CONSOLE_PIN_TREE2.md](LEFT_CONSOLE_PIN_TREE2.md#stage_t40--teensy-40) 참조.
+> 두 단계에서 **버튼 번호와 축 7개가 완전히 동일**합니다 — T40 도 엔코더 자리(42~53)를
+> 비워 두고 예약하므로 확장 시 엔코더 외에는 재바인딩이 필요 없습니다.
 
 > UHF 스위치 10개와 AUDIO 1 COMM 1/2 모드 로터리 2개는 패널 위 **MCP23017 `0x20`** 가 받습니다.
 > 덕분에 Teensy 직결 핀 16개가 절약되고, UHF 케이블도 17선으로 줄어듭니다.
@@ -47,7 +48,10 @@
 | 25 | A11 | – | I2C SDA2 |
 | 26 | A12 | AUDIO 2 | ILS VOL |
 | 27 | A13 | AUDIO 2 | INTERCOM |
-| **28–37** | | – | **여유 10** (비ADC) |
+| 28 | | ENGINE | MAX POWER |
+| 29 | | ENGINE | AB RESET |
+| 30 | | ENGINE | ENG DATA |
+| **31–37** | | – | **여유 7** (비ADC) |
 | 38 | A14 | AUDIO 1 | THREAT VOL |
 | 39 | A15 | AUDIO 1 | MSL VOL |
 | 40 | A16 | AUDIO 1 | COMM CH2 |
@@ -136,7 +140,7 @@ Extreme 조이스틱(`JOYSTICK_SIZE 64`)은 명명 축 6개 + `slider(1..17)` = 
 
 ---
 
-## DX 버튼 맵 (53 / 128)
+## DX 버튼 맵 (56 / 128)
 
 | 버튼 | 패널 | 신호 |
 |------|------|------|
@@ -159,7 +163,13 @@ Extreme 조이스틱(`JOYSTICK_SIZE 64`)은 명명 축 6개 + `slider(1..17)` = 
 | 28–30 | AUDIO 1 | COMM 1 MODE — OFF / SQL / GD XMT |
 | 31–33 | AUDIO 1 | COMM 2 MODE — OFF / SQL / GD XMT |
 | 34–41 | ECM | 저항 래더 — ECM 1~6, FRM, SPL |
-| 42–53 | UHF | 엔코더 6개 × (CW / CCW) |
+| 42–53 | UHF | 엔코더 6개 × (CW / CCW) — **T40 에서는 미사용(예약)** |
+| 54–55 | ENGINE | MAX POWER / AB RESET |
+| 56 | ENGINE | ENG DATA |
+
+> 54번부터는 `switches[]` 배열 맨 뒤(`SWITCH_LATE_START` 이후)에 있는 항목입니다.
+> 래더·엔코더 **뒤에** 배정해서, 스위치를 새로 추가해도 기존 버튼 1~53 의
+> 바인딩이 그대로 유지되도록 한 구조입니다.
 
 ---
 
@@ -200,7 +210,7 @@ ECM 1~6 / FRM / SPL × (S, A, F, T). `srMap[]`이 논리 인덱스를 물리 출
 
 | 케이블 | 대상 | 신호 | 내역 | 합계 |
 |---|------|------|------|------|
-| **1** | ENGINE + MPO | 5 | JFS ×2, ENG CONT, MPO, **RUN LED** | **6선** (+GND) |
+| **C1** | ENGINE + MPO | 8 | JFS ×2, ENG CONT, MPO, MAX PWR, AB RESET, ENG DATA, **RUN LED** | **9선** (+GND) |
 | **I1** | UHF 패널 · I2C | 2 | SDA, SCL | **8선** (LAN, +3.3V ×2, GND ×4) |
 | **C2** | UHF 패널 · VOL + 엔코더 | 7 | **POT 1개**(VOL) + 10MHz, 1MHz, 0.1MHz × A/B | **8선** (LAN, +GND) |
 | **C3** | UHF 패널 · 엔코더 | 6 | PRESET, 100MHz, 0.025MHz × A/B | **8선** (LAN, +GND ×2) |
@@ -237,7 +247,7 @@ ECM 1~6 / FRM / SPL × (S, A, F, T). `srMap[]`이 논리 인덱스를 물리 출
 | → ECM 패널 | LAN ×2 — **I3**(체인): SDA/GND, SCL/GND, 3.3V/GND ×2 · **C6**: DS/GND, **래더/GND**, SH_CP/GND, ST_CP/3.3V |
 | → ELEC 패널 | LAN ×1 — **I2**(체인): SDA/GND, SCL/GND, 3.3V/GND ×2 |
 | → UHF | LAN ×3 — **I1**: SDA/GND, SCL/GND, 3.3V/GND ×2 · **C2**: 엔코더 A/B 3쌍 + **VOL/GND** · **C3**: 엔코더 A/B 3쌍 + GND 페어 |
-| → ENGINE+MPO | **1** — 6선 일반 (RUN LED 포함) |
+| → ENGINE+MPO | **C1** — 9선 일반 (RUN LED 포함) |
 | → AUDIO | **C4** 6선 / **C5** 4선. 와이퍼는 각각 GND와 트위스트 페어 |
 
 아날로그선(ECM 래더, UHF VOL, AUDIO 와이퍼 6)은 **전부 GND와 트위스트 페어**로 처리합니다.

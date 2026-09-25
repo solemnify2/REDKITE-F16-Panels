@@ -12,7 +12,7 @@ Teensy 4.1-based USB joystick controller for the F-16 left console. Covers ECM, 
 - **Board**: Teensy 4.1
 - **USB Type**: Serial + Keyboard + Mouse + Joystick
 - **PID**: `0x048E` (set in `usb_desc.h`)
-- **JOYSTICK_SIZE**: **64** — 53 buttons exceeds the 32-button limit of size 12. Both sketches in this repo now use 64, so `usb_desc.h` no longer needs editing between builds.
+- **JOYSTICK_SIZE**: **64** — 58 buttons exceeds the 32-button limit of size 12. Both sketches in this repo now use 64, so `usb_desc.h` no longer needs editing between builds.
 - **Upload**: Open `F16_LEFT_CONSOLE.ino` in Arduino IDE and Upload
 
 ## Architecture
@@ -29,7 +29,9 @@ All hardware is declared in config arrays under the **HARDWARE CONFIGURATION** s
 - `leds[]` — ELEC panel LEDs, indexed by `LedIdx` enum
 - `ecmSrLedNames[]` / `srMap[]` — ECM panel LEDs via 74HC595
 
-Joystick button numbers are auto-assigned at runtime in this order: `switches[]` → `analogBtnArrays[]` → `encoders[]` (2 buttons each: CW then CCW).
+Joystick button numbers are auto-assigned at runtime in this order: `switches[]` (38) → `analogBtnArrays[]` (8) → `encoders[]` (12, 2 each: CW then CCW) = **58 buttons**.
+
+⚠ Inserting a switch anywhere but the end of `switches[]` renumbers every button after it, which invalidates existing BMS bindings. Append to the end of the array when adding hardware.
 
 ### What Cannot Go on the MCP23017
 
@@ -110,7 +112,7 @@ SOF-based via `USB1_FRINDEX`. No frame change for 50ms → suspended. All LEDs a
 | `ALLOW_DEBUG` | false | Serial debug output |
 | `LOOP_DELAY_MS` | **10** | 100Hz main loop — raised from 50ms for encoder pulse throughput |
 | `SERIAL_TIMEOUT` | 3 | Seconds before protocol reset |
-| `BACKLIGHT_PIN` | **13** (양 단계 공통) | MOSFET gate (HIGH = on). 온보드 LED가 상태 표시등 |
+| `BACKLIGHT_PIN` | **13** | MOSFET gate (HIGH = on). 온보드 LED가 상태 표시등 |
 | `IDLE_TIMEOUT_MS` | 30 min | Offline idle before backlight auto-off |
 | `MCP_WIRE` | `Wire2` | SCL2 = 24, SDA2 = 25 |
 | `MCP_I2C_CLOCK` | 100000 | Standard Mode — 데이지 체인 `I1`→`I2`→`I3` 단일 버스. 풀업 4.7kΩ ×3 병렬 ≈ 1.57kΩ, 체인 총 용량 ≈ 265pF → tr ≈ 352ns (400kHz 규격 300ns 초과, 100kHz 여유) |

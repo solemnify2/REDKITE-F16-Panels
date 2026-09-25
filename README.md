@@ -23,7 +23,7 @@ VR 전용 미니멀 데스크핏을 지향합니다. VR 헤드셋을 쓰고 손�
 
 ## Devices
 
-독립된 USB 디바이스 2대로 구성됩니다. 각각 별도의 Teensy와 스케치를 사용하며(콘솔 보드는 `BOARD_REV` 로 Teensy 4.0 임시 구성 / 4.1 최종 구성을 전환), Python 브릿지는 VID/PID로 두 대를 동시에 인식해 같은 프레임을 전송합니다.
+독립된 USB 디바이스 2대로 구성됩니다. 각각 별도의 Teensy 4.1과 스케치를 사용하며, Python 브릿지는 VID/PID로 두 대를 동시에 인식해 같은 프레임을 전송합니다.
 
 | 디바이스 | 폴더 | PID | 담당 |
 |---|---|---|---|
@@ -54,11 +54,11 @@ VR 전용 미니멀 데스크핏을 지향합니다. VR 헤드셋을 쓰고 손�
 | EPU | Switch (MCP23017) | OFF / NORM / ON |
 | AVTR | Switch (MCP23017) | OFF / AUTO / ON |
 | UHF | Switch, **Rotary Encoder ×6**, Analog | FUNCTION(4), MODE(3), SQUELCH, T-TONE, STATUS + PRESET·주파수 5자리 엔코더 + VOL |
-| ENGINE START | Switch | JFS (OFF/START1/START2), ENG CONT (PRI/SEC) |
+| ENGINE START | Switch | JFS (OFF/START1/START2), ENG CONT (PRI/SEC), MAX PWR / NORM / AB RESET, ENG DATA |
 | MPO | Switch | Manual Pitch Override |
 | AUDIO 1/2 | Analog, Switch (MCP23017) | 볼륨 6개 (COMM CH1/CH2, MSL, THREAT, INTERCOM, ILS) + COMM 1/2 모드 3단 로터리 2개 |
 
-**DX 버튼 53개 / 조이스틱 축 7개**를 사용합니다. 상세 배치는 [docs/PIN_ASSIGNMENT.md](docs/PIN_ASSIGNMENT.md) 참조.
+**DX 버튼 56개 / 조이스틱 축 7개**를 사용합니다. 상세 배치는 [docs/PIN_ASSIGNMENT.md](docs/PIN_ASSIGNMENT.md) 참조.
 
 ## Hardware
 
@@ -320,7 +320,7 @@ const AnalogBtnArrayDef analogBtnArrays[] = {
 
 ### Extreme 조이스틱 설정
 
-Windows의 기본 Joystick은 32버튼까지만 지원하지만, Teensyduino의 Extreme Joystick 모드는 128버튼을 지원합니다. AUX 보드가 49버튼, 콘솔 보드가 53버튼을 쓰므로 **두 스케치 모두** 이 모드가 필요합니다. Teensy 빌드 전 `%LOCALAPPDATA%\Arduino15\packages\teensy\hardware\avr\<version>\cores\teensy4\usb_desc.h`에서 `JOYSTICK_SIZE`를 `64`로 변경:
+Windows의 기본 Joystick은 32버튼까지만 지원하지만, Teensyduino의 Extreme Joystick 모드는 128버튼을 지원합니다. AUX 보드가 49버튼, 콘솔 보드가 56버튼을 쓰므로 **두 스케치 모두** 이 모드가 필요합니다. Teensy 빌드 전 `%LOCALAPPDATA%\Arduino15\packages\teensy\hardware\avr\<version>\cores\teensy4\usb_desc.h`에서 `JOYSTICK_SIZE`를 `64`로 변경:
 
 ```c
 #define JOYSTICK_SIZE         64    //  12 = normal, 64 = extreme joystick
