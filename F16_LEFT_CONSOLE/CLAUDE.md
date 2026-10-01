@@ -11,8 +11,10 @@ Teensy 4.1-based USB joystick controller for the F-16 left console. Covers ECM, 
 - **IDE**: Arduino IDE with [Teensyduino](https://www.pjrc.com/teensy/td_download.html)
 - **Board**: Teensy 4.1
 - **USB Type**: Serial + Keyboard + Mouse + Joystick
-- **PID**: `0x048E` (set in `usb_desc.h`)
-- **JOYSTICK_SIZE**: **64** — 58 buttons exceeds the 32-button limit of size 12. Both sketches in this repo now use 64, so `usb_desc.h` no longer needs editing between builds.
+- **PID**: `0x048E` (set in `usb_desc.h`). Compile-time `#error` if mismatch.
+- **JOYSTICK_SIZE**: **64** — 59 buttons exceeds the 32-button limit of size 12. Both sketches use 64, so `usb_desc.h` no longer needs editing between builds.
+- **usb_desc.c patch**: Report Count 23→8 + 15 constant padding (fixes DirectInput slider recognition). See `docs/teensyduino_upgrade.md`.
+- **Auto-patch after IDE update**: `python tools/patch_usb_desc_h.py` and `python tools/patch_usb_desc_c.py`
 - **Upload**: Open `F16_LEFT_CONSOLE.ino` in Arduino IDE and Upload
 
 ## Architecture
@@ -29,7 +31,7 @@ All hardware is declared in config arrays under the **HARDWARE CONFIGURATION** s
 - `leds[]` — ELEC panel LEDs, indexed by `LedIdx` enum
 - `ecmSrLedNames[]` / `srMap[]` — ECM panel LEDs via 74HC595
 
-Joystick button numbers are auto-assigned at runtime in this order: `switches[]` (38) → `analogBtnArrays[]` (8) → `encoders[]` (12, 2 each: CW then CCW) = **58 buttons**.
+Joystick button numbers are auto-assigned at runtime in this order: `switches[]` (39) → `analogBtnArrays[]` (8) → `encoders[]` (12, 2 each: CW then CCW) = **59 buttons**.
 
 ⚠ Inserting a switch anywhere but the end of `switches[]` renumbers every button after it, which invalidates existing BMS bindings. Append to the end of the array when adding hardware.
 
@@ -82,13 +84,21 @@ LEDs are sourced (cathode common to GND), so the binding limit is **VDD inflow 1
 - 3-second heartbeat timeout triggers protocol reset and re-detection
 - All LEDs off when the bridge goes offline
 
-`ledBits` bit 16 carries the backlight state (same bit as the LEFT_AUX_MISC device — the bridge sends one unified frame format to every Teensy). DCS uses `LIGHT_INST_PNL` (0x4484).
+`ledBits` byte 2 (bits 16–23) carries the backlight PWM brightness. DCS uses `LIGHT_INST_PNL` (0x4484) directly on Teensy.
 
-### Backlight
+### Backlight (PWM Dimming)
 
-ON/OFF only, no dimming. A Teensy pin drives a MOSFET gate — pin 13 on both stages (the on-board LED mirrors backlight state). Powered by a **separate 12V adapter**, not USB — the adapter GND must be tied to Teensy GND at a single point or the MOSFET has no valid gate reference.
+Pin 13 drives a MOSFET gate via 1kΩ resistor (10kΩ pulldown to GND). On-board LED mirrors backlight state. Powered by a **separate 12V adapter**, not USB — the adapter GND must be tied to Teensy GND at a single point or the MOSFET has no valid gate reference.
 
-Turns off on USB suspend and after `IDLE_TIMEOUT_MS` (30 min) of no input while offline; any input or bridge reconnect restores it.
+**Brightness control by source:**
+
+| Source | How | Detail |
+|--------|-----|--------|
+| BMS | Bridge sends PWM in `ledBits` byte 2 | Adaptive: DIM(instrLight=1)→PWM 255 by default; if BRT(=2) ever received, DIM drops to 50, BRT=255. instrLight=0→OFF |
+| DCS | Teensy direct | `LIGHT_INST_PNL` (0x4484) 0–65535 → `>>8` → PWM 0–255 |
+| Offline manual | UHF STATUS (held) + TF pot | `checkManualBacklight()` — 10-bit ADC → 8-bit PWM |
+| Idle auto-off | 30 min no input while offline | `backlightIdleOff` flag, any input restores |
+| USB suspend | SOF silence >50ms | All LEDs + backlight off, `wfi` sleep |
 
 ### USB Suspend Detection
 
@@ -103,6 +113,9 @@ SOF-based via `USB1_FRINDEX`. No frame change for 50ms → suspended. All LEDs a
 | `BiosHandler/BmsBiosParser.h` | BMS-BIOS frame parser (packed LED bitfield + SR bitfield + backlight) |
 | `name.c` | USB device name override |
 | `backup/` | Pre-expansion Teensy 4.0 version |
+| `../tools/patch_usb_desc_h.py` | Auto-patch `usb_desc.h` after IDE update (JOYSTICK_SIZE + PID) |
+| `../tools/patch_usb_desc_c.py` | Auto-patch `usb_desc.c` HID slider descriptor |
+| `../docs/teensyduino_upgrade.md` | Manual upgrade guide for both files |
 
 ## Key Constants
 
@@ -112,8 +125,10 @@ SOF-based via `USB1_FRINDEX`. No frame change for 50ms → suspended. All LEDs a
 | `ALLOW_DEBUG` | false | Serial debug output |
 | `LOOP_DELAY_MS` | **10** | 100Hz main loop — raised from 50ms for encoder pulse throughput |
 | `SERIAL_TIMEOUT` | 3 | Seconds before protocol reset |
-| `BACKLIGHT_PIN` | **13** | MOSFET gate (HIGH = on). 온보드 LED가 상태 표시등 |
+| `BACKLIGHT_PIN` | **13** | MOSFET gate (PWM). 온보드 LED가 상태 표시등. Circuit: Drain←LED-RTN, Source→GND, Gate←1kΩ←pin13, Gate→10kΩ→GND |
 | `IDLE_TIMEOUT_MS` | 30 min | Offline idle before backlight auto-off |
+| `PIN_UHF_STATUS` | **41** | Manual backlight trigger (active-low, held) |
+| `PIN_POT_TF` | **A4 (18)** | Manual backlight brightness source (offline only) |
 | `MCP_WIRE` | `Wire2` | SCL2 = 24, SDA2 = 25 |
 | `MCP_I2C_CLOCK` | 100000 | Standard Mode — 데이지 체인 `I1`→`I2`→`I3` 단일 버스. 풀업 4.7kΩ ×3 병렬 ≈ 1.57kΩ, 체인 총 용량 ≈ 265pF → tr ≈ 352ns (400kHz 규격 300ns 초과, 100kHz 여유) |
 | `ENC_PULSE_TICKS` | 4 | DX pulse width (~40ms) |
@@ -126,7 +141,7 @@ SOF-based via `USB1_FRINDEX`. No frame change for 50ms → suspended. All LEDs a
 - MCP pin numbering: GPA0–7 = 0–7, GPB0–7 = 8–15
 - New switch: add to `switches[]`. New encoder: `encoders[]`. New pot: `pots[]` + a free `JoyAxis`
 - New ELEC LED: `leds[]` + `LedIdx` enum. New ECM LED: `ecmSrLedNames[]` + `srMap[]`
-- Extreme joystick (`JOYSTICK_SIZE 64`) exposes 6 named axes **plus `slider(1..17)`** — 23 analog channels total, not 6
+- Extreme joystick (`JOYSTICK_SIZE 64`) exposes 6 named axes + `slider(1..17)` — but only 8 axes (6 named + 2 sliders) are visible to DirectInput/joy.cpl due to the `usb_desc.c` HID patch. 10 pots total: 7 BMS-bindable (axes 1–7), 3 DirectInput-invisible (slider 3–4)
 
 ## Constraints to Watch
 

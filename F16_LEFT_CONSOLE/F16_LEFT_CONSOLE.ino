@@ -249,12 +249,14 @@ const SwitchDef switches[] = {
   {"ECM BIT",             PNL_ECM,     SW_ON_OFF,        2,  14,   0,  0},  // GPB6  momentary
   {"ECM RESET",           PNL_ECM,     SW_ON_OFF,        2,  15,   0,  0},  // GPB7  momentary
 
-  // ---- ELEC Panel (MCP 0x21, GPB0~2) ----                  btn 7~9
-  {"ELEC MAIN PWR",       PNL_ELEC,    SW_ON_OFF_ON,     1,   8,   9,  0},  // GPB0/GPB1  MAIN/OFF
+  // ---- EPU Panel (MCP 0x21) ----                           btn 7~8
+  {"EPU",                 PNL_EPU,     SW_ON_OFF_ON,     1,   8,   9,  0},  // GPB0/GPB1  OFF/NORM/ON (배선 교차)
+
+  // ---- ELEC Panel (MCP 0x21) ----                          btn 9
   {"ELEC CAUTION RST",    PNL_ELEC,    SW_ON_OFF,        1,  10,   0,  0},  // GPB2  momentary (CAUTION RST)
 
   // ---- AVTR Panel (MCP 0x22) ----                        btn 10~11
-  {"AVTR",                PNL_AVTR,    SW_ON_OFF_ON,     2,   6,   7,  0},  // GPA6/GPA7  OFF/AUTO/ON
+  {"AVTR",                PNL_AVTR,    SW_ON_OFF_ON,     2,   8,   9,  0},  // GPB0/GPB1  UNTHRD/RECORD/EVENT MRK
 
   // ---- ENGINE START Panel (Teensy direct) ----           btn 12~14
   {"JFS",       PNL_ENGINE, SW_ON_OFF_ON, -1, PIN_JFS1, PIN_JFS2, 0},  // OFF/START1/START2
@@ -263,8 +265,8 @@ const SwitchDef switches[] = {
   // ---- MPO (Teensy direct) ----                          btn 15
   {"MPO",       PNL_MPO,    SW_ON_OFF,    -1, PIN_MPO,        0,  0},  // NORM/OVRD
 
-  // ---- EPU Panel (MCP 0x21) ----                         btn 16~17
-  {"EPU",                 PNL_EPU,     SW_ON_OFF_ON,     1,  14,  15,  0},  // GPB6/GPB7  OFF/NORM/ON
+  // ---- ELEC MAIN PWR (MCP 0x21) ----                     btn 16~17
+  {"ELEC MAIN PWR",       PNL_ELEC,    SW_ON_OFF_ON,     1,  14,  15,  0},  // GPB6/GPB7  MAIN/OFF (배선 교차)
 
   // ---- UHF Panel (MCP 0x20, 패널 실장) ----               btn 18~27
   // SW_ROTARY 는 pin1 부터 numPos 개 연속 GPIO 를 읽습니다.
@@ -384,7 +386,7 @@ const LedDef leds[] = {
   // ---- EPU 패널 (MCP 0x21 GPB3~5) ----
   {"EPU HYDRAZN",       PNL_EPU,   11,   1},   // GPB3
   {"EPU AIR",           PNL_EPU,   12,   1},   // GPB4
-  {"EPU RUN",           PNL_EPU,   13,   1},   // GPB5
+  {"EPU RUN",           PNL_EPU,    7,   2},   // MCP 0x22 GPA7 (0x21 GPB5 핀 불량으로 이설)
   // ---- ENGINE START 패널 (Teensy 직결, 케이블 1에 탑음) ----
   {"JFS RUN",           PNL_ENGINE, PIN_LED_JFS_RUN, -1},
 };
@@ -688,9 +690,12 @@ static uint32_t  protoDetectStart = 0;
 //  Button Assignment
 // ================================================================
 
+#define NUM_COVERS 3                      // ENG CONT, EPU OFF, EPU ON
+
 static uint8_t switchBtnStart[NUM_SWITCHES];
 static uint8_t analogBtnStart[NUM_ANALOG_ARRAYS];
 static uint8_t encoderBtnStart[NUM_ENCODERS];
+static uint8_t coverBtnBase;             // DCS 커버 자동화 DX 시작 번호
 static int     totalButtons = 0;
 
 static uint8_t prevBtnState[128];
@@ -721,9 +726,76 @@ void assignButtons() {
     btn += 2;                       // CW, CCW
   }
 
+  // DCS 커버 자동화 (ENG CONT cover, EPU OFF cover, EPU ON cover)
+  coverBtnBase = btn;
+  btn += NUM_COVERS;
+
   totalButtons = btn - 1;
   if (totalButtons > 128)
     Serial.printf("ERROR: %d buttons assigned, max is 128\n", totalButtons);
+}
+
+
+// ================================================================
+//  DCS Cover Automation
+// ================================================================
+//
+//  ENG CONT, EPU 스위치 커버를 자동 제어합니다.
+//  ON 시: 커버 먼저 열림 → COVER_DELAY_TICKS 후 스위치 ON
+//  OFF 시: 스위치 먼저 OFF → COVER_DELAY_TICKS 후 커버 닫힘
+//  DCS에서 해당 DX를 커버 열기/닫기에 바인딩하세요.
+//
+//  DX 59: ENG CONT COVER
+//  DX 60: EPU OFF COVER
+//  DX 61: EPU ON COVER
+
+#define SW_IDX_ENG_CONT  8    // switches[] 인덱스 — 변경 시 함께 수정
+#define SW_IDX_EPU       4
+
+#define COVER_DELAY_TICKS 10  // 100ms @ 100Hz — 커버/스위치 간 시차
+
+struct CoverDef {
+  uint8_t switchIdx;
+  uint8_t btnOffset;   // ON_OFF_ON: 0=pin1, 1=pin2
+};
+static const CoverDef coverDefs[NUM_COVERS] = {
+  {SW_IDX_ENG_CONT, 0},   // ENG CONT COVER
+  {SW_IDX_EPU,      0},   // EPU OFF COVER
+  {SW_IDX_EPU,      1},   // EPU ON COVER
+};
+
+struct CoverRuntime {
+  uint8_t openTicks;    // >0: 커버 열림 대기, 스위치 억제
+  uint8_t closeTicks;   // >0: 커버 닫힘 대기, 커버 유지
+  uint8_t lastSwState;
+};
+static CoverRuntime coverRt[NUM_COVERS];
+
+void processCovers() {
+  for (uint8_t i = 0; i < NUM_COVERS; i++) {
+    uint8_t swBtn   = switchBtnStart[coverDefs[i].switchIdx] + coverDefs[i].btnOffset;
+    uint8_t swState = prevBtnState[swBtn];
+    CoverRuntime& rt = coverRt[i];
+
+    // 전환 감지
+    if (swState && !rt.lastSwState)  rt.openTicks  = COVER_DELAY_TICKS;
+    if (!swState && rt.lastSwState)  rt.closeTicks = COVER_DELAY_TICKS;
+    rt.lastSwState = swState;
+
+    if (rt.openTicks > 0) {
+      // Opening: 커버 ON, 스위치 억제 (DCS가 커버 열릴 시간 확보)
+      Joystick.button(coverBtnBase + i, 1);
+      Joystick.button(swBtn, 0);
+      rt.openTicks--;
+    } else if (rt.closeTicks > 0) {
+      // Closing: 스위치 OFF (이미 processSwitches에서 처리), 커버는 아직 ON 유지
+      Joystick.button(coverBtnBase + i, 1);
+      rt.closeTicks--;
+    } else {
+      // 정상: 커버 = 스위치 상태 미러링
+      Joystick.button(coverBtnBase + i, swState);
+    }
+  }
 }
 
 
@@ -789,7 +861,6 @@ void encoderPollISR() {
 
 void processEncoders() {
   for (unsigned int i = 0; i < NUM_ENCODERS; i++) {
-    const EncoderDef& e = encoders[i];
     EncRuntime& rt = encRt[i];
 
     // --- Drain ISR delta ---
@@ -1048,7 +1119,10 @@ bool detectAndRouteSerial() {
 void setup() {
   Serial.begin(BAUDRATE);
   Joystick.useManualSend(true);
-  Joystick.hat(1, -1);
+  Joystick.hat(1, 360);  // 360 = 중립 (val=15). -1은 NE로 인식됨
+  Joystick.hat(2, 360);
+  Joystick.hat(3, 360);
+  Joystick.hat(4, 360);
 
   // --- Backlight PWM ---
   analogWriteFrequency(BACKLIGHT_PIN, 1000);  // 1kHz PWM
@@ -1139,6 +1213,9 @@ void setup() {
   for (unsigned int i = 0; i < NUM_ENCODERS; i++)
     Serial.printf("  btn %-3d~%-3d : %-20s [enc CW/CCW]\n", encoderBtnStart[i],
                   encoderBtnStart[i] + 1, encoders[i].name);
+  Serial.printf("  btn %-3d     : %-20s [cover auto]\n", coverBtnBase,     "ENG CONT COVER");
+  Serial.printf("  btn %-3d     : %-20s [cover auto]\n", coverBtnBase + 1, "EPU OFF COVER");
+  Serial.printf("  btn %-3d     : %-20s [cover auto]\n", coverBtnBase + 2, "EPU ON COVER");
   Serial.println("=========================");
 
   welcomeCeremony();
@@ -1184,7 +1261,9 @@ void loop() {
   if (ledsOff) memcpy(prevSnapshot, prevBtnState, sizeof(prevSnapshot));
 
   for (unsigned int d = 0; d < NUM_MCP_DEVICES; d++) mcpReadPorts(d);
+
   processSwitches();
+  processCovers();    // 커버 자동화: 스위치보다 커버가 먼저 열리고, 나중에 닫힘
   processAnalogButtons();
   processPots();
   processEncoders();
