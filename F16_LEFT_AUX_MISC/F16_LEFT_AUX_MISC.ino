@@ -27,7 +27,7 @@
 // ================================================================
 
 #define BAUDRATE      1000000
-#define ALLOW_DEBUG   true
+#define ALLOW_DEBUG   false
 #define MAX_PIN       55        // Teensy 4.1 max digital pin
 #define LOOP_DELAY_MS 50
 #define SERIAL_TIMEOUT 6        // Serial heartbeat timeout in seconds
@@ -909,7 +909,10 @@ void setup() {
 #if JOYSTICK_SIZE == 12
   Joystick.hat(-1);
 #elif JOYSTICK_SIZE == 64
-  Joystick.hat(0, -1);
+  Joystick.hat(1, 360);  // 360 = 중립 (val=15). -1은 NE로 인식됨
+  Joystick.hat(2, 360);
+  Joystick.hat(3, 360);
+  Joystick.hat(4, 360);
 #endif
 
   // Default all pins to OUTPUT (reduce power)
