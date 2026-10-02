@@ -5,11 +5,14 @@
     Sync:     0xAA 0xBB          (2 bytes)
     ledBits:  uint32 LE          (bits 0-N for leds[])
     srData:   uint32 LE          (ECM shift register, ignored on this device)
-    checksum: XOR of 8 payload bytes
-    Total: 11 bytes per frame
+    uhfFreq:  uint32 LE          (BUP UHF frequency, ignored on this device)
+    uhfPreset:uint8              (BUP UHF preset,    ignored on this device)
+    checksum: XOR of 13 payload bytes
+    Total: 16 bytes per frame
 
   The bridge sends the same unified frame to all Teensy devices.
-  This device uses only ledBits; srData is parsed but ignored.
+  This device uses only ledBits; the rest is parsed but ignored.
+  ⚠ 길이는 LEFT_CONSOLE 의 BmsBiosParser.h 와 반드시 동일해야 합니다.
 */
 
 #ifndef BMSBIOS_PARSER_H
@@ -19,7 +22,7 @@
 //  Protocol Constants
 // ================================================================
 
-#define BB_FRAME_PAYLOAD  8   // 4 bytes (ledBits) + 4 bytes (srData, ignored)
+#define BB_FRAME_PAYLOAD  13  // ledBits(4) + srData(4) + uhfFreq(4) + uhfPreset(1)
 
 // ================================================================
 //  Parser State Machine

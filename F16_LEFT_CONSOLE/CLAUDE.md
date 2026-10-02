@@ -79,7 +79,9 @@ LEDs are sourced (cathode common to GND), so the binding limit is **VDD inflow 1
 
 ### Protocol Auto-Detection
 
-- **BMS-BIOS**: sync `0xAA 0xBB`, 11-byte frames (ledBits 4 + srData 4 + XOR). `BiosHandler/BmsBiosParser.h`
+- **BMS-BIOS**: sync `0xAA 0xBB`, **16-byte frames** (ledBits 4 + srData 4 + uhfFreq 4 + uhfPreset 1 + XOR). `BiosHandler/BmsBiosParser.h`
+  - **Both devices receive this same frame**; LEFT_AUX_MISC uses only `ledBits` and ignores the rest. `BB_FRAME_PAYLOAD` must stay identical in both `BmsBiosParser.h` files — if you change the frame, re-flash **both** boards.
+  - Source: BMS `FlightData2.uhf_panel_frequency` (offset **+52**, kHz) and `uhf_panel_preset` (offset **+48**). The bridge zeroes a frequency outside 100000–999999 so the panel shows dashes.
 - **DCS-BIOS**: sync `0x55 ×4`, address/count/data chunks. `BiosHandler/DcsBiosParser.h`
 - 3-second heartbeat timeout triggers protocol reset and re-detection
 - All LEDs off when the bridge goes offline
@@ -104,13 +106,30 @@ Pin 13 drives a MOSFET gate via 1kΩ resistor (10kΩ pulldown to GND). On-board 
 
 SOF-based via `USB1_FRINDEX`. No frame change for 50ms → suspended. All LEDs and backlight off, CPU enters `wfi`. On resume the welcome ceremony runs at the next input change.
 
+### UHF 7-Segment Display (MAX7219)
+
+8 × 0.36" common-cathode digits on the UHF panel — 6 for frequency (decimal point on DIG2) and 2 for the preset channel. Board: `f-16-cockpit-uhf-radio-panel/display/pcb`, driven through a 74AHCT125 level shifter from 5 V.
+
+**It uses no edge pins.** The Teensy 4.1 SD-card interface on the underside carries SPI2, broken out with an SD extension cable:
+
+| Teensy | SPI2 | J1 |
+|---|---|---|
+| 43 | MOSI2 | DIN |
+| 45 | SCK2 | CLK |
+| 44 | CS2 | CS (toggled in software) |
+
+Toggle the whole feature with `HAS_UHF_DISPLAY` in the sketch. `displayFrequency()` falls back to dashes outside 100000–999999 kHz, and the panel shows dashes whenever the bridge is offline (`resetProtocol()`), blanking only on USB suspend. Writes are cached per digit, so a steady display costs no SPI traffic.
+
+⚠ These pins are shared with the microSD socket — an SD card cannot be used on this board.
+
 ### Key Files
 
 | File | Purpose |
 |------|---------|
 | `F16_LEFT_CONSOLE.ino` | Config arrays, MCP23017/74HC595/encoder drivers, processing, protocol detection, main loop |
 | `BiosHandler/DcsBiosParser.h` | DCS-BIOS frame parser + F-16C ELEC/ECM/backlight address map |
-| `BiosHandler/BmsBiosParser.h` | BMS-BIOS frame parser (packed LED bitfield + SR bitfield + backlight) |
+| `BiosHandler/BmsBiosParser.h` | BMS-BIOS frame parser (packed LED bitfield + SR bitfield + backlight + UHF display) |
+| `Display/Max7219Display.h` | UHF 7-segment display driver (MAX7219 over SPI2) |
 | `name.c` | USB device name override |
 | `backup/` | Pre-expansion Teensy 4.0 version |
 | `../tools/patch_usb_desc_h.py` | Auto-patch `usb_desc.h` after IDE update (JOYSTICK_SIZE + PID) |

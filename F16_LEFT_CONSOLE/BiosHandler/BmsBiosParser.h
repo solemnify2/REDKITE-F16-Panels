@@ -5,11 +5,14 @@
     Sync:     0xAA 0xBB          (2 bytes)
     ledBits:  uint32 LE          (bits 0-N for direct GPIO LEDs)
     srData:   uint32 LE          (ECM shift register, 32 outputs)
-    checksum: XOR of 8 payload bytes
-    Total: 11 bytes per frame
+    uhfFreq:  uint32 LE          (BUP UHF frequency, kHz — FlightData2 +52)
+    uhfPreset:uint8              (BUP UHF preset channel 1~20 — FlightData2 +48)
+    checksum: XOR of 13 payload bytes
+    Total: 16 bytes per frame
 
-  The bridge sends the same unified frame to all Teensy devices.
-  This device uses ledBits for ELEC LEDs and srData for ECM LEDs.
+  브릿지는 모든 Teensy 장치에 같은 16바이트 프레임을 보냅니다.
+  LEFT_AUX_MISC 는 ledBits 만 쓰고 나머지는 무시합니다.
+  ⚠ 길이는 LEFT_AUX_MISC 의 BmsBiosParser.h 와 반드시 동일해야 합니다.
 */
 
 #ifndef BMSBIOS_PARSER_H
@@ -19,7 +22,7 @@
 //  Protocol Constants
 // ================================================================
 
-#define BB_FRAME_PAYLOAD  8   // 4 bytes (ledBits) + 4 bytes (srData)
+#define BB_FRAME_PAYLOAD  13  // ledBits(4) + srData(4) + uhfFreq(4) + uhfPreset(1)
 
 // ================================================================
 //  Parser State Machine
@@ -65,6 +68,15 @@ static void bmsBiosApply() {
     srWrite(i, (ecmBits >> i) & 1);
   }
   srFlush();
+
+  // UHF 7세그 디스플레이 — 주파수(kHz)와 프리셋 채널
+#if HAS_UHF_DISPLAY
+  uint32_t uhfFreq = bbBuf[8]  | ((uint32_t)bbBuf[9]  << 8) |
+                     ((uint32_t)bbBuf[10] << 16) | ((uint32_t)bbBuf[11] << 24);
+  displayOn(true);
+  displayFrequency(uhfFreq);     // 범위를 벗어나면 드라이버가 대시를 표시
+  displayChannel(bbBuf[12]);
+#endif
 }
 
 // ================================================================
