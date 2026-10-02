@@ -34,6 +34,8 @@ OFF_LIGHTBITS3 = 128
 OFF_FD2_INSTRLIGHT = 1104
 OFF_FD2_ECMBITS    = 1180   # unsigned int ecmBits[5] (VERSION 19)
 OFF_FD2_ECMOPER    = 1200   # unsigned char ecmOper   (VERSION 19)
+OFF_FD2_UHF_PRESET = 48     # int uhf_panel_preset    (BUP UHF 채널)
+OFF_FD2_UHF_FREQ   = 52     # int uhf_panel_frequency (BUP UHF 주파수)
 
 # --- LightBits (offset 108) ---
 LB_ADV_STANDBY      = 0x80000000  # bit 31
@@ -117,17 +119,45 @@ MAX_ECM_PROGRAMS = 5
 SYNC = b'\xAA\xBB'
 
 # ================================================================
-#  Frame Builder (unified)
+#  Frame Builder
 # ================================================================
 
-def build_frame(led_bits: int, sr_data: bytes = b'\x00\x00\x00\x00') -> bytes:
-    """Unified 12 bytes: sync(2) + ledBits(4) + srData(4) + checksum(1)
-    All devices receive the same frame; each ignores irrelevant fields."""
-    payload = struct.pack('<I', led_bits) + sr_data
+ZERO4 = bytes(4)
+
+
+def build_frame(led_bits: int, sr_data: bytes = ZERO4, uhf=(0, 0)) -> bytes:
+    """통합 16바이트 프레임
+      sync(2) + ledBits(4) + srData(4) + uhfFreq(4) + uhfPreset(1) + checksum(1)
+
+    모든 Teensy 장치가 같은 프레임을 받고, 필요 없는 필드는 무시합니다.
+      AUX     : ledBits 만 사용
+      CONSOLE : 전부 사용 (srData = ECM 시프트레지스터, uhf* = 7세그 디스플레이)"""
+    khz, preset = uhf
+    payload = (struct.pack('<I', led_bits) + sr_data
+               + struct.pack('<IB', khz & 0xFFFFFFFF, preset & 0xFF))
     checksum = 0
     for b in payload:
         checksum ^= b
     return SYNC + payload + bytes([checksum])
+
+
+def read_uhf(shm2):
+    """BUP UHF 주파수(kHz)와 프리셋 채널을 FlightData2 에서 읽습니다.
+
+    주파수 단위가 BMS 버전에 따라 다를 수 있어, 100000~999999 kHz 를
+    벗어나면 0 으로 보내 Teensy 가 대시를 표시하게 합니다."""
+    if shm2 is None:
+        return (0, 0)
+    try:
+        preset = read_int32(shm2, OFF_FD2_UHF_PRESET)
+        freq   = read_int32(shm2, OFF_FD2_UHF_FREQ)
+    except Exception:
+        return (0, 0)
+    if not (100000 <= freq <= 999999):
+        freq = 0
+    if not (0 <= preset <= 99):
+        preset = 0
+    return (freq, preset)
 
 # ================================================================
 #  Shared Memory Reader
@@ -214,7 +244,8 @@ DEVICE_PROFILES = {
     },
     'CONSOLE': {
         'led_map': CONSOLE_LED_MAP,
-        'has_backlight': True,   # 좌측 콘솔 확장(EPU/AUDIO/UHF/ENGINE/MPO)에 백라이트 추가됨
+        # 좌측 콘솔 확장(EPU/AUDIO/UHF/ENGINE/MPO)에 백라이트 추가됨
+        'has_backlight': True,
         'has_ecm': True,
     },
 }
@@ -253,8 +284,9 @@ class Device:
                 brightness = DIM_PWM_LOWERED if self.brt_seen else DIM_PWM_DEFAULT
             led_bits |= (brightness << 16)
 
-        sr_data = compute_ecm_sr_data(shm2) if self.profile['has_ecm'] and shm2 else b'\x00\x00\x00\x00'
-        frame = build_frame(led_bits, sr_data)
+        sr_data = compute_ecm_sr_data(shm2) if self.profile['has_ecm'] and shm2 else ZERO4
+        uhf = read_uhf(shm2)        # 통합 프레임 — AUX 는 이 필드를 무시합니다
+        frame = build_frame(led_bits, sr_data, uhf)
 
         if frame != self.prev_frame:
             try:

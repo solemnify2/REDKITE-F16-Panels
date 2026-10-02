@@ -34,7 +34,8 @@ USB: PID `0x048E`, `JOYSTICK_SIZE 64`.
         ┆ MCP#0  0x20   ├─ C7(x8) ──┤ UHF                   ├─C13(x3)─┤
         ┆               ├─────┐     │ POT x1 (VOL)  ENC x6  ├─C2(x8)──┤
         └╌╌╌┬╌╌╌╌╌╌╌╌╌╌╌┘     │ C8  │ SW x10                ├─C3(x8)──┤
-            │ I2(x8)          │(x9) └───────────────────────┘         │
+            │ I2(x8)          │(x9) │ 7SEG x8 (MAX7219)     ├─C14(x5)─┤
+            │                 │     └───────────────────────┘         │
             │                 │     ┌───────────────────────┐         │
             │                 ├─────┤ AUDIO 1       POT x6  ├─C4(x8)──┤
             │                 │     │ COMM MODE rotary x2   │         │
@@ -81,6 +82,7 @@ USB: PID `0x048E`, `JOYSTICK_SIZE 64`.
 | **C6** | Teensy → ECM 패널 | 74HC595 3선 + ECM 저항 래더 1선 (핀 35~38) | 8선 (LAN) |
 | **C7** | MCP `0x20` → UHF 패널 | FUNCTION 4, MODE 3 (=7, PB1~7) + GND | 8선 | 없음 |
 | **C8** | AUDIO 1·2 → MCP `0x20` | COMM 1/2 모드 로터리 (PA2~7) + HOT MIC·CIPHER (PA0/PA1) | 9선 | 없음 |
+| **C14** | Teensy(SD/SPI2) → UHF 디스플레이 | MAX7219 보드 J1 — +5V, GND, DIN(43), CLK(45), CS(44) | 5선 |
 | **C13** | Teensy → UHF 패널 | **UHF T-TONE, SQUELCH, STATUS** (핀 34/33/41) ⚠ 신설 | 4선 |
 | **C9** | MCP `0x21` → ELEC 패널 | 스위치 3 (PB0~2) + LED 8 (PA0~7) | 13선 | 없음 |
 | **C10** | MCP `0x21` → EPU 패널 | 스위치 2 (PB6~7) + LED 3 (PB3~5) | 7선 | 없음 |
@@ -201,6 +203,26 @@ DX 버튼 번호는 [PIN_ASSIGNMENT.md](PIN_ASSIGNMENT.md) 를 보십시오.
 (엔코더 블록 옆이라 `26–32` 와는 떨어집니다).
 
 **여유 핀** — 12, 39(A15) = 2개.
+
+### 하단 SD 카드 인터페이스 — UHF 디스플레이 (C14)
+
+UHF 7세그 디스플레이(MAX7219)는 **엣지 핀을 쓰지 않습니다.** Teensy 4.1 뒷면
+SD 카드 소켓의 **SPI2** 를 **SD 확장 케이블**로 빼내 연결하므로 위 배치는 그대로입니다.
+
+| Teensy | SPI2 | 디스플레이 J1 |
+|---|---|---|
+| 43 | MOSI2 | J1.3 DIN |
+| 45 | SCK2 | J1.4 CLK |
+| 44 | CS2 | J1.5 CS (소프트웨어 토글) |
+| VIN | – | J1.1 +5V |
+| GND | – | J1.2 GND |
+
+MISO2(42)는 MAX7219 가 단방향이라 쓰지 않습니다. 8MHz 하드웨어 SPI 로 구동하며,
+스케치에서 `HAS_UHF_DISPLAY` 로 켜고 끕니다.
+
+> ⚠ **SD 카드와 공존 불가** — 같은 핀을 공유하므로 이 보드에서는 microSD 를 쓸 수 없습니다.
+> ⚠ **밝기** — `DISP_DEFAULT_INTENSITY = 0x08`. MAX7219 는 VIN(5V)에서 급전되어
+> 3.3V 레귤레이터와는 무관하지만, 0x0F 로 올리면 USB 예산에 최대 약 208mA 가 더해집니다.
 
 ---
 

@@ -40,7 +40,9 @@ Joystick button numbers are auto-assigned at runtime. `mcpIdx = -1` means direct
 ### Protocol Auto-Detection
 
 Teensy receives serial bytes and auto-detects the protocol:
-- **BMS-BIOS**: sync `0xAA 0xBB`, 7-byte frames with XOR checksum. Parsed by `BiosHandler/BmsBiosParser.h`.
+- **BMS-BIOS**: sync `0xAA 0xBB`, **16-byte frames** (ledBits 4 + srData 4 + uhfFreq 4 + uhfPreset 1 + XOR). Parsed by `BiosHandler/BmsBiosParser.h`.
+  - The bridge sends one unified frame to every device. This board uses only `ledBits`; `srData` (console ECM shift register) and `uhf*` (console UHF 7-segment display) are parsed and discarded.
+  - ⚠ `BB_FRAME_PAYLOAD` must stay identical to `F16_LEFT_CONSOLE/BiosHandler/BmsBiosParser.h`. Changing the frame means re-flashing **both** boards — and flash the boards *before* updating the bridge, or the old firmware will reject every frame on the checksum.
 - **DCS-BIOS**: sync `0x55 x4`, address/count/data chunks. Parsed by `BiosHandler/DcsBiosParser.h`.
 - 6-second heartbeat timeout triggers protocol reset and re-detection.
 

@@ -91,6 +91,8 @@
 //    B  40     MPO (C1)
 //    B  13     백라이트 MOSFET
 //    B  41     UHF STATUS (C13)
+//    하단 SD  43/44/45 = MOSI2/CS2/SCK2 -> UHF 7세그 디스플레이 (C14)
+//             SD 확장 케이블로 빼냅니다. 엣지 핀은 쓰지 않습니다.
 //    여유: 12, 39(A15)
 //  ※ docs/LEFT_CONSOLE_PIN_TREE2.md 의 핀 배열도는 바닥면(납땜면) 기준이라
 //    엣지 A 가 그림의 오른쪽 열, 엣지 B 가 왼쪽 열로 나옵니다.
@@ -137,6 +139,15 @@
 
 // UHF STATUS (핀 41)
 #define PIN_UHF_STATUS    41      // A17
+
+// ---- C14: UHF 7세그 디스플레이 (MAX7219) ----------------------------------
+// Teensy 4.1 하단 SD 카드 인터페이스의 SPI2 를 SD 확장 케이블로 빼내 씁니다.
+// 엣지 핀(0~41)은 전혀 쓰지 않으므로 기존 배치가 그대로 유지됩니다.
+// ⚠ SD 카드를 쓰게 되면 충돌합니다.
+#define HAS_UHF_DISPLAY   1
+#define PIN_DISP_DIN      43      // MOSI2 -> J1.3 DIN
+#define PIN_DISP_CS       44      // CS2   -> J1.5 CS (소프트웨어 토글)
+#define PIN_DISP_CLK      45      // SCK2  -> J1.4 CLK
 
 // Encoder -> DX pulse timing (in main-loop ticks)
 #define ENC_PULSE_TICKS   4         // pulse held ~40ms @100Hz
@@ -648,6 +659,10 @@ void turnOffAllLeds() {
 //  BIOS Handlers (DCS-BIOS + BMS-BIOS)
 // ================================================================
 
+#if HAS_UHF_DISPLAY
+#include "Display/Max7219Display.h"
+#endif
+
 #include "BiosHandler/DcsBiosParser.h"
 #include "BiosHandler/BmsBiosParser.h"
 
@@ -749,7 +764,7 @@ void assignButtons() {
 //  DX 60: EPU OFF COVER
 //  DX 61: EPU ON COVER
 
-#define SW_IDX_ENG_CONT  8    // switches[] 인덱스 — 변경 시 함께 수정
+#define SW_IDX_ENG_CONT  8    // switches[] 인덱스 — 배열 순서 변경 시 함께 수정
 #define SW_IDX_EPU       4
 
 #define COVER_DELAY_TICKS 10  // 100ms @ 100Hz — 커버/스위치 간 시차
@@ -1013,6 +1028,10 @@ void processPots() {
 
 void welcomeCeremony() {
   setBacklight(true);
+#if HAS_UHF_DISPLAY
+  displayOn(true);
+  displayLampTest(true);        // 전 세그먼트 점등
+#endif
 
   // ECM sweep: column by column (S -> A -> F -> T), previous column off
   for (int col = 0; col < 4; col++) {
@@ -1043,6 +1062,10 @@ void welcomeCeremony() {
   }
 
   turnOffAllLeds();
+#if HAS_UHF_DISPLAY
+  displayLampTest(false);
+  displayDashes();              // 다음 BMS 프레임이 올 때까지 대시
+#endif
 }
 
 
@@ -1058,6 +1081,9 @@ void resetProtocol() {
   dcsBiosReset();
   bmsBiosReset();
   turnOffAllLeds();
+#if HAS_UHF_DISPLAY
+  displayDashes();          // 브릿지 오프라인 표시
+#endif
   //if (ALLOW_DEBUG) Serial.println("[Proto] Reset to UNKNOWN");
 }
 
@@ -1165,6 +1191,12 @@ void setup() {
   for (unsigned int i = 0; i < NUM_LEDS; i++)
     if (leds[i].mcpIdx < 0) pinMode(leds[i].pin, OUTPUT);
 
+#if HAS_UHF_DISPLAY
+  // --- UHF 7세그 디스플레이 (MAX7219) ---
+  displayBegin();
+  displayDashes();          // 브릿지 연결 전에는 대시
+#endif
+
   // --- 74HC595 ---
   pinMode(SR_DATA_PIN,  OUTPUT);
   pinMode(SR_CLOCK_PIN, OUTPUT);
@@ -1231,6 +1263,9 @@ void loop() {
 
   if (isUSBSuspended()) {
     turnOffAllLeds();
+#if HAS_UHF_DISPLAY
+    displayOn(false);
+#endif
     if (!backlightIdleOff) {
       setBacklight(false);
       backlightIdleOff = true;
@@ -1261,7 +1296,6 @@ void loop() {
   if (ledsOff) memcpy(prevSnapshot, prevBtnState, sizeof(prevSnapshot));
 
   for (unsigned int d = 0; d < NUM_MCP_DEVICES; d++) mcpReadPorts(d);
-
   processSwitches();
   processCovers();    // 커버 자동화: 스위치보다 커버가 먼저 열리고, 나중에 닫힘
   processAnalogButtons();
