@@ -99,4 +99,18 @@ LED sweep animation runs on: startup, USB resume from suspend, bridge online (of
 
 ## Pin Assignment
 
-See `docs/LEFT_AUX_PIN_TREE.md` for the cable tree, full Teensy pin map, MCP GPIO map, DX button map, joystick axes, and the build checklist. Pin 27 conflict (Gear Warn LED vs HMCS Brightness A13) has been resolved — Gear Warn LED moved to pin 12.
+See `docs/LEFT_AUX_PIN_TREE.md` for the cable tree, full Teensy pin map, MCP GPIO map, DX button map, joystick axes, the CMDS lamp wiring, and the build checklist. Pin 27 conflict (Gear Warn LED vs HMCS Brightness A13) has been resolved — Gear Warn LED moved to pin 12.
+
+All 42 header pins are used. The six CMDS lamps hang off the **bottom microSD pads (42–47)**, broken out with an SD extension cable — no soldering, no header pins consumed.
+
+### CMDS EWS Lamps
+
+Six LEDs driven 1:1 from pins 42–47 (`HIGH` = lit, individual series resistor, cathodes to the SD connector GND). BMS supplies only three signals, so `AUX_LED_MAP` in the bridge maps one bit to several `leds[]` indices — NO GO to two, RDY to three — and a group always lights together.
+
+| Lamp | LEDs | Pins | `lightBits2` (offset 124) |
+|---|---|---|---|
+| GO | 1 | 42 | `Go` `0x40` |
+| NO GO | 2 | 43, 44 | `NoGo` `0x80` |
+| RDY | 3 | 45, 46, 47 | `Rdy` `0x200` |
+
+Keep LED Vf under ~3.0 V — these run straight off 3.3 V logic, same as the GEAR/TWA LEDs. DCS-BIOS does not drive these yet.

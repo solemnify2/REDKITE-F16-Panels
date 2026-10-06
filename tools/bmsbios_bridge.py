@@ -41,6 +41,9 @@ OFF_FD2_UHF_FREQ   = 52     # int uhf_panel_frequency (BUP UHF 주파수)
 LB_ADV_STANDBY      = 0x80000000  # bit 31
 
 # --- LightBits2 (offset 124) ---
+LB2_EWS_GO          = 0x00000040  # bit 6  - CMDS GO (정상 동작)
+LB2_EWS_NOGO        = 0x00000080  # bit 7  - CMDS NO GO (고장)
+LB2_EWS_RDY         = 0x00000200  # bit 9  - CMDS DISPENSE RDY
 LB2_AUX_SRCH        = 0x00001000  # bit 12
 LB2_AUX_ACT         = 0x00002000  # bit 13
 LB2_AUX_LOW         = 0x00004000  # bit 14
@@ -83,6 +86,13 @@ AUX_LED_MAP = [
     (8,  OFF_LIGHTBITS2, LB2_ECM_PWR),       # ECM
     (9,  OFF_LIGHTBITS2, LB2_ADV_ACTIVE),    # ADV ACTIVE
     (10, OFF_LIGHTBITS,  LB_ADV_STANDBY),    # ADV STANDBY
+    # CMDS EWS 램프 — 신호 3개가 LED 6개를 구동 (같은 비트를 여러 LED 에 중복 매핑)
+    (11, OFF_LIGHTBITS2, LB2_EWS_GO),        # CMDS GO      LED x1
+    (12, OFF_LIGHTBITS2, LB2_EWS_NOGO),      # CMDS NO GO 1
+    (13, OFF_LIGHTBITS2, LB2_EWS_NOGO),      # CMDS NO GO 2
+    (14, OFF_LIGHTBITS2, LB2_EWS_RDY),       # CMDS RDY 1
+    (15, OFF_LIGHTBITS2, LB2_EWS_RDY),       # CMDS RDY 2
+    (16, OFF_LIGHTBITS2, LB2_EWS_RDY),       # CMDS RDY 3
 ]
 
 # LEFT_CONSOLE: 12 LEDs - ELEC 8 (bit 0-7) + EPU 3 (bit 8-10) + ENGINE RUN (bit 11)

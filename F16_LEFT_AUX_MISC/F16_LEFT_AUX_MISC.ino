@@ -206,6 +206,9 @@ enum LedIdx {
   LI_NOSE_GEAR, LI_LEFT_GEAR, LI_RIGHT_GEAR, LI_GEAR_WARN,
   LI_TWA_POWER, LI_TWA_LOW, LI_TWA_SEARCH, LI_TWA_ACT,
   LI_ECM, LI_ADV_ACTIVE, LI_ADV_STANDBY,
+  LI_CMDS_GO,
+  LI_CMDS_NOGO_1, LI_CMDS_NOGO_2,
+  LI_CMDS_RDY_1,  LI_CMDS_RDY_2,  LI_CMDS_RDY_3,
 };
 
 // pin 번호가 direct LED와 MCP LED에서 중복될 경우, MCP 쪽이 우선 적용됩니다.
@@ -223,6 +226,15 @@ const LedDef leds[] = {
   {"ECM",          PNL_MISC,  7,   0},    // MCP device 0, GPA7
   {"ADV Active",   PNL_MISC,  9,   0},   // MCP device 0, GPB0
   {"ADV Standby",  PNL_MISC,  8,   0},   // MCP device 0, GPB1
+  // CMDS EWS 램프 — 하단 SD 패드 42~47 을 SD 확장 케이블로 인출해 LED 6개를 1:1 직결.
+  //   BMS 신호는 3개뿐이라 브릿지가 NO GO / RDY 비트를 해당 LED 들에 동일하게 보냅니다.
+  //   (GO = LED 1개, NO GO = LED 2개, RDY = LED 3개 — 그룹은 항상 함께 점등)
+  {"CMDS GO",      PNL_CMDS,  42,  -1},   // SD DAT0 / MISO2
+  {"CMDS NO GO 1", PNL_CMDS,  43,  -1},   // SD CMD  / MOSI2
+  {"CMDS NO GO 2", PNL_CMDS,  44,  -1},   // SD DAT3 / CS2
+  {"CMDS RDY 1",   PNL_CMDS,  45,  -1},   // SD CLK  / SCK2
+  {"CMDS RDY 2",   PNL_CMDS,  46,  -1},   // SD DAT1
+  {"CMDS RDY 3",   PNL_CMDS,  47,  -1},   // SD DAT2
 };
 
 // --- MCP23017 Devices ---

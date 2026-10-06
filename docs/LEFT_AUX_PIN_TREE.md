@@ -23,7 +23,7 @@
         ┌───────────────────────────────────────────────────────────────┐
         │ Teensy 4.1    LEFT AUX + MISC    PID 0x0487                   │
         └───┬─────────────────────────────────────────────────────────┬─┘
-            │ I1 (I2C, LAN)                                           │ C1~C6
+            │ I1 (I2C, LAN)                                           │ C1~C7
         ┌╌╌╌┬╌╌╌╌╌╌╌╌╌╌╌┐           ┌───────────────────────┐         │
         ┆ MCP#0  0x20   ├─ M1(x14) ─┤ MISC                  │         │
         └╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┘           │ SW x11  LED x3        │         │
@@ -35,6 +35,7 @@
                                     ┌───────────────────────┐         │
                                     │ CMDS                  ├─C2(x10)─┤
                                     │ SW x8  LADDER x2      │         │
+                                    │ LED x6 (GO/NOGO/RDY)  ├─C7(x6)──┤
                                     └───────────────────────┘         │
                                     ┌───────────────────────┐         │
                                     │ TWA                   ├─C3(x5)──┤
@@ -52,6 +53,7 @@
 
   I2C             I1 Teensy(18/19) > 0x20 — 스타 토폴로지, LAN (hotplug_spec.md 준용)
   Teensy direct   C1 GEAR   C2 CMDS   C3 TWA   C4 ALT GEAR   C5 HMCS   C6 PEDALS
+                  C7 CMDS 램프 — 헤더가 아니라 하단 SD 패드(42~47)에서 SD 확장 케이블로 인출
   MCP > panel     M1 0x20 > MISC (모듈-패널 하니스)
   12V             backlight: pin 0 PWM > MOSFET > 스텝업 5V→12V (backlight_spec.md, not drawn)
 
@@ -68,6 +70,7 @@
 | **C4** | Teensy → ALT GEAR | Handle, Reset | 2 |
 | **C5** | Teensy → HMCS | 포트 3 (Brightness / Contrast / Symbology) | 3 |
 | **C6** | Teensy → 페달 | 포트 2 (Left / Right) | 2 |
+| **C7** | Teensy 하단 SD 패드 → CMDS 램프 | LED 6 (GO 1 / NO GO 2 / RDY 3) | 6 (+GND, LAN 7심) |
 | 12V | 스텝업 → 백라이트 | 게이트는 핀 0 PWM | 2 |
 
 콘솔 장치와 달리 MCP가 1장뿐이라 **I2C는 체인이 아닌 스타(단일 링크)**입니다.
@@ -117,7 +120,25 @@ MCP 단선 시 **GEAR WARN LED가 점등**되어 패널에서 바로 알 수 있
       pin 27 (A13) is now HMCS Brightness only.
 ```
 
-하단 SMT 패드(42–54)는 쓰지 않습니다.
+### 하단 SD 패드 — CMDS 램프 (C7)
+
+헤더 42핀이 모두 차 있어 **CMDS 램프 6개는 하단 microSD 패드에서 뽑습니다.**
+SD 확장 케이블을 끼우면 납땜 없이 6신호 + 3.3V + GND 가 한 번에 나옵니다
+(LEFT_CONSOLE 의 UHF 디스플레이와 같은 방식). SD 카드는 쓰지 않으므로 충돌이 없습니다.
+
+| microSD 핀 | 신호 | Teensy 핀 | 용도 |
+|---|---|---|---|
+| 1 | DAT2 | **47** | CMDS RDY 3 |
+| 2 | CD/DAT3 (CS2) | **44** | CMDS NO GO 2 |
+| 3 | CMD (MOSI2) | **43** | CMDS NO GO 1 |
+| 4 | VDD | 3.3V | (미사용 — LED 는 핀에서 직접 구동) |
+| 5 | CLK (SCK2) | **45** | CMDS RDY 1 |
+| 6 | VSS | GND | LED 공통 캐소드 |
+| 7 | DAT0 (MISO2) | **42** | CMDS GO |
+| 8 | DAT1 | **46** | CMDS RDY 2 |
+
+> 확장 케이블 제품마다 패드 번호 표기가 다를 수 있으니, 연결 후 `ALLOW_DEBUG`
+> 또는 LED 를 하나씩 켜 보며 매핑을 확인하세요. 순서가 다르면 `leds[]` 의 핀 번호만 바꾸면 됩니다.
 
 ---
 
@@ -158,6 +179,50 @@ MCP 단선 시 **GEAR WARN LED가 점등**되어 패널에서 바로 알 수 있
 > **주소 점퍼 = 공장 출하 그대로** (A0/A1/A2 전부 GND) → `0x20`.
 > 여유 GPIO 는 **PA6, PB7** 두 개입니다.
 > 스위치는 전부 입력(내부 풀업), LED 3개(PA7, PB0, PB1)는 출력입니다.
+
+---
+
+## CMDS 램프 (GO / NO GO / RDY)
+
+LED **6개를 Teensy 핀에 1:1 직결**합니다. 드라이버 IC 가 없습니다.
+BMS 신호는 3개뿐이라, 브릿지가 NO GO 비트를 LED 2개에, RDY 비트를 LED 3개에 **같은 값으로** 내려보냅니다.
+그래서 그룹은 항상 함께 켜지면서도, 펌웨어 쪽에서는 LED 하나하나가 독립 제어 가능한 상태로 남습니다.
+
+| 램프 | LED | Teensy 핀 | `leds[]` 인덱스 | BMS `lightBits2` (offset 124) |
+|---|---|---|---|---|
+| GO | 1 | 42 | 11 | `Go` `0x40` |
+| NO GO | 2 | 43, 44 | 12, 13 | `NoGo` `0x80` |
+| RDY | 3 | 45, 46, 47 | 14, 15, 16 | `Rdy` `0x200` |
+
+### 결선
+
+```
+   Teensy 42 ──[ R ]──►├── GO
+   Teensy 43 ──[ R ]──►├── NO GO 1
+   Teensy 44 ──[ R ]──►├── NO GO 2        LED 는 핀이 소스(HIGH = 점등),
+   Teensy 45 ──[ R ]──►├── RDY 1          캐소드는 전부 GND 공통
+   Teensy 46 ──[ R ]──►├── RDY 2
+   Teensy 47 ──[ R ]──►├── RDY 3
+                        │
+   SD GND ──────────────┴───────── GND
+```
+
+LED 마다 **개별 직렬저항**을 답니다. 3.3V 구동이므로
+
+  R = (3.3V − Vf) / I ≈ (3.3 − 2.0) / 8mA ≈ 160Ω → **180Ω** (적색 기준)
+
+밝으면 330~470Ω 으로 올리면 됩니다. 핀당 8mA, 6개 합쳐 약 48mA 로
+Teensy 4.1 GPIO 한계(핀당 연속 10mA 권장) 안에 들어옵니다.
+
+> **LED 색 주의** — Vf 가 3.0V 를 넘는 고휘도 녹색·청색은 3.3V 로 제대로 켜지지 않습니다.
+> 기존 GEAR·TWA LED 와 같은 종류(3.3V 직결로 동작하는 것)를 쓰세요.
+> 굳이 고Vf LED 를 써야 하면 5V + ULN2003A 싱크 드라이버 경로가 필요합니다.
+
+### 케이블
+
+신호 6 + GND = **7심**이라 LAN 케이블 한 가닥에 들어갑니다.
+
+> DCS-BIOS 는 아직 이 램프를 구동하지 않습니다 (BMS 전용). DCS 주소 맵을 확인한 뒤 `DcsBiosParser.h` 에 추가하면 됩니다.
 
 ---
 
@@ -215,9 +280,11 @@ MCP 단선 시 **GEAR WARN LED가 점등**되어 패널에서 바로 알 수 있
 | 항목 | 값 |
 |---|---|
 | **Teensy 헤더 핀** | **42 / 42** (여유 없음) |
+| **하단 SD 패드** | **6 / 6** (42~47 = CMDS 램프) |
 | ├ 아날로그 입력 | 8 / 18 (래더 3 + HMCS 3 + 페달 2) — A0~A9 는 CMDS 스위치·I2C 가 디지털로 점유 |
 | └ 여유 핀 | 없음 |
 | **MCP23017 GPIO** | 14 / 16 (여유 PA6, PB7) |
+| LED | 17 (GEAR 4 + TWA 4 + MISC 3 + CMDS 6) |
 | **DX 버튼** | **49 / 128** |
 | 조이스틱 축 | 6 / 23 |
 | I2C | `Wire`(18/19) 100kHz, `0x20` 1장 |
@@ -236,3 +303,4 @@ MCP 단선 시 **GEAR WARN LED가 점등**되어 패널에서 바로 알 수 있
 | 5 | **MCP 주소 점퍼** — 출하 상태 그대로 (`0x20`) |
 | 6 | **백라이트** — 핀 0 PWM → MOSFET → 5V→12V 스텝업 ([backlight_spec.md](backlight_spec.md), [stepup_en_control.md](stepup_en_control.md)). 오프라인 수동 제어: DN LOCK REL 누른 채 Landing Light 조작 |
 | 7 | **스위치 배선** — 전부 액티브 로우 + 내부 풀업 (공통 단자 GND) |
+| 8 | **CMDS 램프** — 하단 SD 확장 케이블 → LED 6개 직결(각 180Ω, 캐소드 GND 공통). 확장 케이블 핀 매핑을 실측 확인하고, Vf 3.0V 이상 LED 는 쓰지 말 것 |
