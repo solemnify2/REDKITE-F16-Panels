@@ -165,10 +165,21 @@ Toggle the whole feature with `HAS_UHF_DISPLAY` in the sketch. `displayFrequency
 ## Constraints to Watch
 
 - **74HC595 is at 32/32.** Adding a chip overflows the BMS-BIOS `srData` 32-bit field and requires changing `BB_FRAME_PAYLOAD`, both `BmsBiosParser.h` files, and `bmsbios_bridge.py`.
-- **Peak current**: `welcomeCeremony()` lights all 32 SR LEDs plus every entry in `leds[]` (8 ELEC + 3 EPU + JFS RUN) at once. Two separate ceilings apply, and the tighter one is not USB:
-  - **Teensy 3.3V regulator (~250mA, PJRC guidance)** — the 74HC595s and all MCP23017s are fed from this single rail, so full illumination (~430mA) exceeds it. A USB 3.0 port does not help. Stagger the blink phase, or move the '595s to **74HCT595 on 5V/Vin** (HCT's VIH is 2.0V, so 3.3V logic still drives it; recalculate the LED series resistors).
-  - **USB 2.0 port (500mA)** — the ~548mA total peak also exceeds this.
-  - **74HC595 package (~70mA/chip)** — normal operation lights 2 of 8 outputs per chip (~20mA), but the ceremony and the `ALL_LIT` ECM state light all 8.
+- **Peak current**: every LED on this board uses a **220Ω series resistor** at 3.3V. Current depends on the driver's own output impedance, so it differs slightly per path:
+
+  | Path | LEDs | Driver Rout @3.3V | Per LED | Total |
+  |---|---|---|---|---|
+  | ECM — 74HC595 ×4 | 32 | ~60–100Ω | ~4.5mA | ~145mA |
+  | ELEC/EPU — MCP23017 | 11 | ~100Ω (Voh spec'd Vdd−0.7V @3mA) | ~4.1mA | ~45mA |
+  | JFS RUN — Teensy pin | 1 | ~35Ω | ~5.1mA | ~5mA |
+  | MCP23017 ×3 quiescent | — | — | — | ~3mA |
+  | **All lit** | **44** | | | **~200mA** |
+
+  That is about 80% of the ~250mA the Teensy 3.3V regulator offers to external loads. It fits, but there is no margin to add LEDs or lower the resistors. Per-chip limits are fine: 74HC595 sees 8 × 4.5 ≈ 36mA against ~70mA, and MCP `0x21` (10 LEDs) sees ~41mA against its 125mA VDD budget. Note the MCP LEDs run ~10% dimmer than the ECM ones because of the higher output impedance.
+- **`welcomeCeremony()` is staggered** (`ecmSweep()`): ECM is driven one *column* (S/A/F/T) at a time — 8 LEDs spread 2-per-chip — so the ceremony peaks at panel 12 + ECM 8 = 20 LEDs (~90mA) instead of all 44. Keep any new animation within that shape; never call `srWrite()` on all 32 outputs at once.
+- **ECM LED headroom is only 1.3V**, and that is the mechanism behind the ECM/CMDS resistor-ladder drift. The LED current is drawn through C6's single 3.3V wire, so a 100mV droop moves the LED current by ~8% and shifts the ladder reference by the ~30 ADC counts measured on the bench. Moving the '595s to **74HCT595 on 5V/Vin** fixes both: 3V of headroom makes the same droop a ~3% effect, and the ECM current leaves the 3.3V rail entirely. HCT is required — its VIH is 2.0V, so 3.3V logic still drives it, whereas plain HC at 5V needs 3.5V.
+  - **Change the resistors when you do.** Keeping 220Ω at 5V gives (5 − 2.0)/(220 + 60) ≈ 10.7mA, i.e. 86mA per chip, over the ~70mA package limit. Use **390Ω or 470Ω**.
+  - This is now a stability/brightness fix rather than an over-budget fix — BMS can set every ECM group to `ALL_LIT` and light all 32 SR LEDs, but at 4.5mA each that stays inside the 3.3V budget.
 - **Teensy pin 13** is shared with the on-board LED. As an *output* that is its native role — both stages use it for the backlight MOSFET, so the LED mirrors backlight state. Avoid using it as an *input*: the LED path can pull it below VIH and make it read permanently pressed.
 
 ## Pin Assignment
