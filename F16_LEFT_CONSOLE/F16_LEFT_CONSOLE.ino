@@ -1023,8 +1023,25 @@ void processPots() {
 //  Welcome Ceremony
 // ================================================================
 //
-//  NOTE: peak current. All 32 SR LEDs + 8 ELEC LEDs light together in the
-//  blink phase. If running on a USB 2.0 port (500mA), stagger these instead.
+//  피크 전류 설계
+//    Teensy 4.1 의 3.3V 레귤레이터는 외부 부하에 약 250mA 까지만 내줍니다.
+//    ECM LED 는 직렬저항 220옴, 74HC595 를 3.3V 로 구동 — 595 의 출력 내부저항
+//    (3.3V 에서 대략 60~100옴)까지 넣으면 LED 당 (3.3-2.0)/(220+70) 약 4.5mA 입니다.
+//    전부 켜면 ECM 32 + 패널 12 = 44 개, 약 200mA 로 예산의 80% 를 씁니다.
+//    세리머니까지 그 피크를 만들 이유가 없으므로 ECM 은 항상 "한 열(8개)" 단위로만 켭니다.
+//    열(S/A/F/T)은 8개 그룹에 흩어져 있어 74HC595 4장에 칩당 2개씩 고르게 분산됩니다
+//    (칩당 약 9mA — 74HC595 의 패키지 한계 70mA 대비 충분).
+//    최대 동시 점등은 패널 12 + ECM 8 = 20 개, 약 90mA 입니다.
+
+// ECM 열 단위 스윕. 한 번에 한 열(8개)만 켜고 이전 열은 끕니다.
+// 원래 동작과 같이 마지막 열은 켜진 채로 남습니다 (turnOffAllLeds 로 정리).
+static void ecmSweep(uint16_t holdMs) {
+  for (int col = 0; col < 4; col++) {
+    for (int i = 0; i < SR_NUM_OUTPUTS; i++) srWrite(i, (i % 4) == col);
+    srFlush();
+    delay(holdMs);
+  }
+}
 
 void welcomeCeremony() {
   setBacklight(true);
@@ -1034,13 +1051,7 @@ void welcomeCeremony() {
 #endif
 
   // ECM sweep: column by column (S -> A -> F -> T), previous column off
-  for (int col = 0; col < 4; col++) {
-    if (col > 0)
-      for (int grp = 0; grp < 8; grp++) srWrite(grp * 4 + (col - 1), false);
-    for (int grp = 0; grp < 8; grp++) srWrite(grp * 4 + col, true);
-    srFlush();
-    delay(200);
-  }
+  ecmSweep(200);
 
   // ELEC LEDs in sequence
   for (unsigned int i = 0; i < NUM_LEDS; i++) {
@@ -1050,15 +1061,14 @@ void welcomeCeremony() {
   }
   delay(300);
 
-  // Blink all twice
+  // 피날레 — 패널 LED 를 두 번 점멸시키면서 ECM 을 열 단위로 훑습니다.
+  // (예전에는 44개를 동시에 켰습니다 — 3.3V 예산 초과)
   for (int b = 0; b < 2; b++) {
     turnOffAllLeds();
-    delay(150);
-    for (int i = 0; i < SR_NUM_OUTPUTS; i++) srWrite(i, true);
-    srFlush();
+    delay(120);
     for (unsigned int i = 0; i < NUM_LEDS; i++) writeElecLed(i, true);
     mcpFlushOutputs();
-    delay(150);
+    ecmSweep(60);
   }
 
   turnOffAllLeds();
