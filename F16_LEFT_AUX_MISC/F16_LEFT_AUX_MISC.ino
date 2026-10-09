@@ -435,12 +435,18 @@ static uint8_t analogBtnStart[NUM_ANALOG_ARRAYS];
 static int     totalButtons = 0;
 static uint8_t prevBtnState[128];  // debug: previous button states
 static bool backlightIdleOff = false;  // true when backlight is off due to idle
-static bool backlightManualOff = false; // true when manually turned off (DN LOCK REL + Landing Light OFF)
+static bool backlightManualOff = false; // true when manually turned off via DN LOCK REL + HMCS pot
 static bool backlightState = true;     // true = backlight ON (tracks all analogWrite paths)
+static uint8_t manualBrightness = 255; // offline 수동 밝기 (기본 최대)
 
 void setBacklight(bool on) {
   analogWrite(BACKLIGHT_PIN, on ? 255 : 0);
   backlightState = on;
+}
+
+void setBacklightBrightness(uint8_t brightness) {
+  analogWrite(BACKLIGHT_PIN, brightness);
+  backlightState = (brightness > 0);
 }
 static uint32_t lastInputTime = 0;    // millis() of last switch/button activity
 
@@ -1076,22 +1082,15 @@ void loop() {
     }
     updateLedsOffline();
 
-    // Manual backlight control (offline): hold DN LOCK REL + flip Landing Light switch
+    // Manual backlight control (offline): hold DN LOCK REL + turn HMCS Brightness pot
     bool dnLockRel = !digitalRead(switches[SW_IDX_DN_LOCK_REL].pin1);  // DN LOCK REL (active-low)
-    static int8_t prevLandingLight = -2;
     if (dnLockRel) {
-      if (prevLandingLight > -2 && swLandingLight != prevLandingLight) {
-        if (swLandingLight == 0) {
-          setBacklight(false);
-          backlightManualOff = true;
-        } else {
-          setBacklight(true);
-          backlightManualOff = false;
-        }
+      uint8_t brightness = (1023 - analogRead(A15)) >> 2;  // 10-bit → 8-bit, reversed (HMCS Symbology pot)
+      if (brightness != manualBrightness) {
+        manualBrightness = brightness;
+        setBacklightBrightness(manualBrightness);
+        backlightManualOff = (manualBrightness == 0);
       }
-      prevLandingLight = swLandingLight;
-    } else {
-      prevLandingLight = -2;  // reset when DN LOCK REL released
     }
   }
 

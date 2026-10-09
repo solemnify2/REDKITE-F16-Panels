@@ -474,10 +474,10 @@ void setBacklightBrightness(uint8_t brightness) {
   backlightState = (brightness > 0);
 }
 
-// Offline 수동 밝기 조절: UHF STATUS 누른 채 TF pot 으로 조절
+// Offline 수동 밝기 조절: UHF STATUS 누른 채 UHF VOL 으로 조절
 void checkManualBacklight() {
   if (!digitalRead(PIN_UHF_STATUS)) {  // active-low: 눌림 = LOW
-    int raw = analogRead(PIN_POT_TF);
+    int raw = analogRead(PIN_POT_UHFVOL);
     uint8_t brightness = raw >> 2;     // 10-bit → 8-bit
     if (brightness != manualBrightness) {
       manualBrightness = brightness;
@@ -1333,7 +1333,7 @@ void loop() {
     if (currentProto != PROTO_UNKNOWN) resetProtocol();
     wasOffline = true;
 
-    // Offline 수동 밝기 조절 (UHF STATUS + TF pot)
+    // Offline 수동 밝기 조절 (UHF STATUS + UHF VOL)
     checkManualBacklight();
 
     // Backlight idle auto-off (offline only)

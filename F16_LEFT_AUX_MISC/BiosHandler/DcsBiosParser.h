@@ -121,8 +121,8 @@ static void dcsBiosOnUpdate(uint16_t addr, uint16_t value) {
     writeLed(LI_ECM, (value & DCSBIOS_ECM_MASK));
   }
   else if (addr == DCSBIOS_INST_PNL_ADDR) {
-    // Instrument panel backlight: any brightness > 0 → backlight ON
-    setBacklight(value > 0);
+    // Instrument panel backlight: PWM dimming (0~65535 → 0~255)
+    setBacklightBrightness(value >> 8);
   }
 }
 
