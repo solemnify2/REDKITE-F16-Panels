@@ -46,7 +46,7 @@ Teensy receives serial bytes and auto-detects the protocol:
 - **DCS-BIOS**: sync `0x55 x4`, address/count/data chunks. Parsed by `BiosHandler/DcsBiosParser.h`.
 - 6-second heartbeat timeout triggers protocol reset and re-detection.
 
-The parsers call `writeLed()` and `analogWrite(BACKLIGHT_PIN, ...)` to control hardware. When offline, `updateLedsOffline()` simulates gear LEDs based on switch state.
+The parsers call `writeLed()` and `setBacklightBrightness()` to control hardware. When offline, `updateLedsOffline()` simulates gear LEDs based on switch state.
 
 ### Key Files
 
@@ -67,9 +67,21 @@ MCP23017 chips add 16 GPIO pins each over I2C. Used for MISC panel (addr 0x20). 
 
 SOF(Start-of-Frame)-based suspend detection using `USB1_FRINDEX`. When PC enters sleep, USB SOF packets stop — if no frame change for 50ms, Teensy considers USB suspended. On suspend: all LEDs off, backlight off, CPU enters `wfi` (Wait For Interrupt) sleep. On resume: welcome ceremony runs automatically.
 
-### Backlight Control
+### Backlight Control (PWM Dimming)
 
-Step-Up converter (5V->12V) controlled via MOSFET on `BACKLIGHT_PIN` (pin 0, PWM). In-game sync: BMS uses `instrLight` from shared memory, DCS uses `LIGHT_INST_PNL` (0x4484). Currently ON/OFF only (no dimming). Offline manual control: hold DN LOCK REL + flip Landing Light switch (OFF=backlight off, TAXI/LANDING=backlight on). Idle auto-off after 30 min of no input; any switch press wakes (unless manually turned off). Bridge reconnect always restores backlight and triggers welcome ceremony.
+Step-Up converter (5V→12V) controlled via MOSFET on `BACKLIGHT_PIN` (pin 13, PWM 1kHz).
+
+**Brightness control by source:**
+
+| Source | How | Detail |
+|--------|-----|--------|
+| BMS | Bridge sends PWM in `ledBits` byte 2 | bits 16~23 = brightness 0~255 |
+| DCS | Teensy direct | `LIGHT_INST_PNL` (0x4484) 0–65535 → `>>8` → PWM 0–255 |
+| Offline manual | DN LOCK REL (held) + HMCS Symbology pot | A15, reversed (CW=dark, CCW=bright) |
+| Idle auto-off | 30 min no input while offline | `backlightIdleOff` flag, any input restores |
+| USB suspend | SOF silence >50ms | All LEDs + backlight off, `wfi` sleep |
+
+Bridge reconnect always restores backlight and triggers welcome ceremony.
 
 ### Welcome Ceremony
 
@@ -83,7 +95,9 @@ LED sweep animation runs on: startup, USB resume from suspend, bridge online (of
 | `ALLOW_DEBUG` | false | Set true for serial debug output (analog calibration, switch states) |
 | `LOOP_DELAY_MS` | 50 | Main loop interval (20Hz) |
 | `SERIAL_TIMEOUT` | 6 | Seconds before protocol reset on no data |
+| `BACKLIGHT_PIN` | **13** | MOSFET gate (PWM 1kHz). Step-Up 5V→12V 제어 |
 | `IDLE_TIMEOUT_MS` | 30 min | Offline idle before backlight auto-off |
+| `SW_IDX_DN_LOCK_REL` | 13 | Manual backlight modifier key (switches[] index) |
 | `USB_SUSPEND_THRESHOLD_MS` | 50 | SOF silence threshold for suspend detection |
 
 ## Conventions
