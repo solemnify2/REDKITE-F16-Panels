@@ -14,12 +14,13 @@ VR 전용 미니멀 데스크핏을 지향합니다. VR 헤드셋을 쓰고 손�
 - **Left Aux/MISC Panel 위주로 제작** — 사용 빈도가 높은 Gear, CMDS, TWA, Alt Gear로 구성된 Left Aux Panels과 MISC 패널 위주로 제작
 - **이동식/수납식 구조** — Left/Right MFD Enclosure를 독립적으로 미니멀하게 제작하고 ICP 스탠드를 사이에 제작하여 안 쓸 때 MFD 쪽으로 내려 모니터 시야를 확보. 또한, PC 데스크톱 본체 위에 슬라이딩 마운트를 제작하여 Left Aux Console을 거치하고 안 쓸 때 테이블 밑으로 밀어 넣는 구조
 - **MCP23017 I2C 확장** — I2C(MCP23017)를 이용하여 새로운 패널을 여러 개 추가 가능. MISC 패널은 MCP23017으로 제작하여 Left Aux Panels의 slave 장치로 동작
-- **USB 3.0 백라이트** — 백라이트가 콕핏 패널의 백미. 별도 전원 없이 USB 3.0으로 공급 가능한 전력 범위 내에서 백라이트를 구현
+- **PWM 백라이트 디밍** — 백라이트가 콕핏 패널의 백미. MOSFET PWM으로 인게임 조명 노브에 연동되는 무단계 밝기 조절. AUX는 USB 3.0 + Step-Up, 콘솔은 별도 12V 어댑터
 - **USB Suspend 감지** — PC 절전 시 LED 소등 및 MCU 저전력 모드 진입으로 숙면 지원
 - **프로토콜 자동 감지** — BMS-BIOS(바이너리) / DCS-BIOS(바이너리) 자동 판별해서 패널의 LED들을 연동
 - **74HC595 시프트 레지스터** — ECM 패널의 S/A/F/T 32개 LED를 3핀으로 구동. 데이지체인이라 칩을 늘려도 핀이 늘지 않음
 - **로터리 엔코더** — UHF 백업 무전기의 PRESET 채널과 주파수 5자리를 엔코더 6개로 구현. 1kHz 인터럽트 폴링으로 빠른 회전에도 펄스 유실 없음
 - **좌측 콘솔 확장** — 콜드앤다크 스타트에서 쓰는 ECM / ELEC / EPU / AVTR / UHF / ENGINE START / MPO / AUDIO 패널을 두 번째 Teensy로 구성
+- **DCS 커버 자동화** — DCS에서 ENG CONT, EPU 스위치 조작 시 커버를 자동으로 열고 닫음 (100ms 선행/후행)
 
 ## Devices
 
@@ -27,22 +28,23 @@ VR 전용 미니멀 데스크핏을 지향합니다. VR 헤드셋을 쓰고 손�
 
 | 디바이스 | 폴더 | PID | 담당 |
 |---|---|---|---|
-| **Left Aux + MISC** | `F16_LEFT_AUX_MISC/` | `0x0487` | Gear, CMDS, TWA, Alt Gear, MISC, Pedal |
+| **Left Aux + MISC** | `F16_LEFT_AUX_MISC/` | `0x0489` | Gear, CMDS, TWA, Alt Gear, MISC, HMCS, Pedal |
 | **Left Console** | `F16_LEFT_CONSOLE/` | `0x048E` | ECM, ELEC, EPU, AVTR, UHF, ENGINE START, MPO, AUDIO 1/2 |
 
 두 스케치 모두 `JOYSTICK_SIZE 64`(Extreme, 128버튼)를 요구하므로 빌드 사이에 `usb_desc.h`를 고칠 필요가 없습니다. PID만 디바이스별로 다르며, 각 스케치가 `#error`로 검증합니다.
 
 ## Supported Panels and Input
 
-### Left Aux + MISC (`0x0487`)
+### Left Aux + MISC (`0x0489`)
 
 | Panel | Type | Description |
 |-------|------|-------------|
 | Gear | Switch, LED | Landing Gear, Hook, Anti-skid, Landing Light, Gear Warning 등 |
 | Alt Gear | Switch | ALT Gear Handle / Reset |
 | MISC | Switch, LED (MCP23017) | Master ARM, Laser ARM, RF, Autopilot Pitch/Roll, ECM LED 등 |
-| CMDS | Switch, Analog Ladder | RWR, JMR, MWS, JETT, MODE (6-pos), PRGM (5-pos) 등 |
+| CMDS | Switch, Analog Ladder, LED | RWR, JMR, MWS, JETT, MODE (6-pos), PRGM (5-pos), GO/NO GO/RDY EWS 램프 |
 | TWA | Analog Ladder, LED | Threat Warning Aux — Search, Act/Pwr, Low, Power |
+| HMCS | Analog | Brightness, Contrast, Symbology 포텐셔미터 3개 |
 | Pedal | Analog | Rudder + Left/Right Brake (auto calibration) |
 
 ### Left Console (`0x048E`)
@@ -58,7 +60,7 @@ VR 전용 미니멀 데스크핏을 지향합니다. VR 헤드셋을 쓰고 손�
 | MPO | Switch | Manual Pitch Override |
 | AUDIO 1/2 | Analog, Switch (MCP23017) | 볼륨 6개 (COMM CH1/CH2, MSL, THREAT, INTERCOM, ILS) + COMM 1/2 모드 3단 로터리 2개 |
 
-**DX 버튼 56개 / 조이스틱 축 7개**를 사용합니다. 상세 배치는 [docs/PIN_ASSIGNMENT.md](docs/PIN_ASSIGNMENT.md) 참조.
+**DX 버튼 61개 / 조이스틱 축 10개**를 사용합니다. DCS에서는 ENG CONT, EPU 커버 자동화용 DX 3개(59~61)가 추가됩니다. 상세 배치는 [docs/PIN_ASSIGNMENT.md](docs/PIN_ASSIGNMENT.md) 참조.
 
 ## Hardware
 
@@ -169,7 +171,7 @@ Stand는 두 버전이 있으며, new 버전 사용을 권장합니다.
 | Step-Up 컨버터 5V→12V (EN 핀 포함) | 2 | AUX 보드 백라이트 전원 |
 | 12V DC 어댑터 (1A) | 1 | **콘솔 보드 백라이트 전용** — LED 40개 때문에 USB 예산 부족 |
 | USB 2.0 패널 마운트 커넥터 | 1 | |
-| RJ45 패널 마운트 커넥터 / 키스톤 잭 | 7 | 콘솔 보드 케이블 I1, C2, C3, I2, C6, 5 + AUX |
+| RJ45 패널 마운트 커넥터 / 키스톤 잭 | 7 | 콘솔 보드 케이블 I1, C2, C3, I2, C6, 5 + AUX + MISC |
 | Cat5e LAN 케이블 | 7가닥 | **콘솔 보드 신호 배선 전량** — 1, I1/C2/C3, C4/C5, I2/C6, 5 |
 | [GX076-30MB](https://www.alibaba.com/product-detail/7-6-Inch-Square-LCD-Display_1601257654342.html) 7.6" Square LCD | 2 | MFD용, Alibaba |
 | 자석 15x3mm | 6 | |
@@ -267,12 +269,18 @@ MCP23017 패널은 Teensy와 LAN(Cat5e RJ45) 케이블로 연결합니다. 각 �
 
 ### 백라이트
 
-백라이트는 콕핏 패널의 백미이므로 생략할 수 없지만, 별도 전원 없이 USB 3.0으로 감당 가능한 수준으로 간략하게 구성합니다.
+백라이트는 콕핏 패널의 백미이므로 생략할 수 없습니다. **양쪽 보드 모두 MOSFET PWM 디밍**을 지원하며, 인게임 조명 노브에 연동됩니다.
 
-- **전원**: Teensy 4.1의 Vin 핀에서 Step-Up 컨버터로 12V boost. Vin은 USB 5V가 온보드 레귤레이터를 거치지 않고 직접 나오는 핀이므로, USB 3.0의 전력 예산(900mA)을 최대한 활용할 수 있다. 3.3V 핀은 온보드 레귤레이터를 거쳐 공급 전류가 제한(~250mA)되므로 백라이트 전원으로 부적합
-- **ON/OFF 제어**: Teensy GPIO → MOSFET(IRLML6244) → Step-Up EN 핀 제어 ([상세 설명](docs/stepup_en_control.md))
-- **인게임 연동**: 온라인(BMS/DCS 연결) 시 인게임 INST PNL 조명 노브에 연동되어 자동 ON/OFF. BMS는 FlightData2 `instrLight`, DCS는 `LIGHT_INST_PNL`(0x4484) 값 사용. 현재 EN 핀 제어 방식으로 단순 ON/OFF만 지원하며, PWM 디밍은 별도 MOSFET 회로 추가 필요
-- **오프라인 수동 제어**: 시뮬레이터 미연결(오프라인) 시 DN LOCK REL을 누른 채 Landing Light 스위치로 백라이트를 수동 제어 가능. OFF 위치=백라이트 끔, TAXI/LANDING 위치=백라이트 켬. 브릿지 연결 시 자동 복구
+- **전원**:
+  - **AUX 보드**: Teensy Vin → Step-Up 컨버터 5V→12V. USB 3.0 전력 예산(900mA) 내 운용
+  - **콘솔 보드**: 별도 12V DC 어댑터 (LED 40개로 USB 예산 초과). 어댑터 GND와 Teensy GND를 반드시 연결
+- **PWM 디밍**: Teensy pin 13 → 1kΩ → MOSFET Gate, 10kΩ 풀다운. MOSFET Drain←LED-RTN, Source→GND. `analogWrite` 1kHz PWM으로 0~255 무단계 밝기 조절
+- **인게임 연동**:
+  - BMS: `instrLight` → 브릿지가 `ledBits` byte 2(bits 16~23)로 brightness 0~255 전송
+  - DCS: Teensy가 직접 처리. `LIGHT_INST_PNL`(0x4484) 0~65535 → >>8 → PWM 0~255
+- **오프라인 수동 제어**:
+  - **AUX 보드**: DN LOCK REL을 누른 채 HMCS Symbology 포텐셔미터(A15)로 밝기 조절 (방향 반전)
+  - **콘솔 보드**: UHF STATUS를 누른 채 UHF VOL 포텐셔미터(A9)로 밝기 조절
 - **LED**: 3V / 20mA 녹색 고휘도 3mm LED
 - **회로 구성**: LED 3개 + 220Ω 저항 1개로 구성된 직렬 스트링을 최대 15개까지 병렬로 분산 배치 (20mA × 15 = 300mA @ 12V)
 - **패널 구조**: PC Flights 패널은 2중 구조. 전면은 흰색 판넬에 검정 도색 + 글자 흰색 각인, 후면은 투명 패널
@@ -282,7 +290,7 @@ MCP23017 패널은 Teensy와 LAN(Cat5e RJ45) 케이블로 연결합니다. 각 �
 ![Backlight LED 배치 — 후면 투명 패널에서 1~2cm 간격](docs/backlight_photo.jpg)
 - **전력 계산**: Teensy 4.1(~100mA) + MCP23017(~1mA) + 백라이트(300mA @ 12V) 감안하여 USB 3.0 전력 예산(900mA @ 5V) 내에서 운용
 
-> **왜 MOSFET이 필요한가?** Step-Up EN 핀은 5V 도메인에서 동작하는데, Teensy GPIO는 3.3V라서 HIGH(3.3V)가 5V HIGH로 인식되지 않아 컨버터가 꺼지지 않는 문제가 있고, EN 내부 5V 풀업으로 인해 5V tolerant 하지 않은 Teensy GPIO가 손상될 위험이 있다. N-ch MOSFET으로 EN-GND 사이를 스위칭하면 두 문제를 모두 해결할 수 있다.
+> **왜 MOSFET이 필요한가?** AUX 보드: Step-Up EN 핀은 5V 도메인이라 3.3V Teensy GPIO로 직접 제어가 안 됨. 콘솔 보드: 12V 어댑터를 직접 제어할 수단이 필요. 양쪽 모두 N-ch MOSFET(IRLML6244)을 low-side switching으로 사용하며, PWM으로 LED 밝기를 무단계 조절합니다.
 
 > **Note:** EN 핀 특성(GND=ON, Float=OFF)은 Aliexpress에서 구매한 Step-Up 모듈 기준이며, 다른 제조사/모듈은 EN 핀 동작이 다를 수 있습니다. 사용 전 데이터시트를 반드시 확인하세요.
 
@@ -324,7 +332,7 @@ Windows의 기본 Joystick은 32버튼까지만 지원하지만, Teensyduino의 
 
 ```c
 #define JOYSTICK_SIZE         64    //  12 = normal, 64 = extreme joystick
-#define PRODUCT_ID            0x0487  // AUX 보드 / 콘솔 보드는 0x048E
+#define PRODUCT_ID            0x0489  // AUX 보드 / 콘솔 보드는 0x048E
 ```
 
 두 보드가 `JOYSTICK_SIZE`를 공유하므로 빌드 사이에 이 값을 고칠 필요는 없고, **`PRODUCT_ID`만 디바이스에 맞게 바꿔** 빌드합니다. 값이 틀리면 각 스케치의 `#error`가 빌드를 막아줍니다.
@@ -346,8 +354,8 @@ ECM 8버튼 래더는 PCB가 이미 제작되어 값이 고정(10kΩ 체인 + 20
 **74HC595 32/32 소진**
 칩을 추가하면 BMS-BIOS 프레임의 `srData` 32비트를 넘으므로 `BB_FRAME_PAYLOAD`, 양쪽 `BmsBiosParser.h`, `bmsbios_bridge.py`를 모두 수정해야 합니다.
 
-**백라이트는 별도 12V 어댑터**
-콘솔 보드는 인디케이터 LED만 40개(ECM 32 + ELEC 8)라 USB 900mA로는 백라이트까지 감당이 안 됩니다. 12V 어댑터를 따로 쓰고 Step-Up 컨버터는 생략합니다. **어댑터 GND와 Teensy GND를 단일점으로 반드시 연결**해야 MOSFET 게이트 기준이 성립합니다.
+**백라이트는 별도 12V 어댑터 + PWM 디밍**
+콘솔 보드는 인디케이터 LED만 40개(ECM 32 + ELEC 8)라 USB 900mA로는 백라이트까지 감당이 안 됩니다. 12V 어댑터를 따로 쓰고 Step-Up 컨버터는 생략합니다. **어댑터 GND와 Teensy GND를 단일점으로 반드시 연결**해야 MOSFET 게이트 기준이 성립합니다. 오프라인 수동 밝기 조절은 UHF STATUS + UHF VOL 포텐셔미터로 가능합니다.
 
 배선·핀 배치 상세는 [docs/PIN_ASSIGNMENT.md](docs/PIN_ASSIGNMENT.md) 참조.
 
@@ -357,7 +365,7 @@ Arduino IDE에서 해당 `.ino`를 열고 Upload합니다. `usb_desc.h`의 `PROD
 
 | 보드 | 파일 | PRODUCT_ID |
 |---|---|---|
-| Left Aux + MISC | `F16_LEFT_AUX_MISC.ino` | `0x0487` |
+| Left Aux + MISC | `F16_LEFT_AUX_MISC.ino` | `0x0489` |
 | Left Console | `F16_LEFT_CONSOLE.ino` | `0x048E` |
 
 ## DCS-BIOS / BMS-BIOS Protocol Support
@@ -370,7 +378,7 @@ Arduino IDE에서 해당 `.ino`를 열고 Upload합니다. `usb_desc.h`의 `PROD
 - Python 브릿지(`tools/bmsbios_bridge.py`)가 BMS 공유 메모리에서 LED 상태를 읽어 Teensy로 전송
 - BMS 실행 전에 bridge를 먼저 실행해도 안전 (공유 메모리 생성하지 않음)
 - 브릿지는 VID/PID로 **두 디바이스를 동시에 인식**해 각각에 맞는 프레임을 보냅니다
-- 프레임: `sync(2) + ledBits(4) + srData(4) + XOR(1)` = 11바이트. AUX는 `ledBits`만, 콘솔은 `ledBits` + `srData`(ECM 32 LED)를 사용하며, **비트 16이 백라이트**로 양쪽 공통입니다
+- 프레임: `sync(2) + ledBits(4) + srData(4) + uhfFreq(4) + uhfPreset(1) + XOR(1)` = 16바이트. AUX는 `ledBits`만, 콘솔은 `ledBits` + `srData`(ECM 32 LED) + `uhfFreq`/`uhfPreset`(UHF 7-seg)를 사용하며, **ledBits byte 2(bits 16~23)가 백라이트 brightness**로 양쪽 공통입니다
 - 사용법:
   ```
   pip install pyserial
@@ -395,27 +403,29 @@ Arduino IDE에서 해당 `.ino`를 열고 Upload합니다. `usb_desc.h`의 `PROD
 
 ```
 REDKITE-F16-Panels/
-├── F16_LEFT_AUX_MISC/             # Teensy 4.1 (PID 0x0487)
-│   │                              #   Gear, CMDS, TWA, Alt Gear, MISC, Pedal
+├── F16_LEFT_AUX_MISC/             # Teensy 4.1 (PID 0x0489)
+│   │                              #   Gear, CMDS, TWA, Alt Gear, MISC, HMCS, Pedal
 │   ├── F16_LEFT_AUX_MISC.ino
 │   ├── BiosHandler/               # DcsBiosParser.h / BmsBiosParser.h
-│   ├── name.c
-│   └── backup/
+│   ├── CLAUDE.md
+│   └── name.c
 ├── F16_LEFT_CONSOLE/              # Teensy 4.1 (PID 0x048E)
 │   │                              #   ECM, ELEC, EPU, AVTR, UHF,
 │   │                              #   ENGINE START, MPO, AUDIO 1/2
 │   ├── F16_LEFT_CONSOLE.ino
 │   ├── BiosHandler/
-│   ├── name.c
-│   └── backup/                    # 확장 이전 Teensy 4.0 버전
+│   ├── Display/                   # Max7219Display.h (UHF 7-seg)
+│   ├── CLAUDE.md
+│   └── name.c
 ├── tools/                         # Python 브릿지 (BMS/DCS → Teensy)
 │   ├── bmsbios_bridge.py          #   VID/PID로 두 디바이스 동시 인식
 │   ├── dcsbios_bridge.py
-│   └── reset_joystick_name.bat
+│   ├── reset_joystick_name.bat
+│   └── backup_to_synology.ps1
 ├── docs/                          # 배선도, 사양서, 프로토콜 참조
 │   ├── PIN_ASSIGNMENT.md          #   콘솔 보드 핀·배선 상세 (표)
-│   ├── LEFT_CONSOLE_PIN_TREE.md   #   콘솔 보드 연결 트리 (케이블·패널 단위)
-│   ├── teensy_direct_pins.txt     #   AUX 보드 핀 배치
+│   ├── LEFT_CONSOLE_PIN_TREE2.md  #   콘솔 보드 연결 트리 (케이블·패널 단위)
+│   ├── LEFT_AUX_MISC_LAN_WIRING.md #  AUX↔MISC LAN 배선도
 │   ├── backlight_spec.md / hotplug_spec.md / stepup_en_control.md
 │   └── 3d stl/                    #   3D 프린트용 STL 파일
 ├── CLAUDE.md                      # Claude Code 가이드
