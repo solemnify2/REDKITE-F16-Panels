@@ -39,7 +39,7 @@
 //  Type Definitions
 // ================================================================
 
-enum SwitchType { SW_ON_OFF, SW_ON_OFF_ON };
+enum SwitchType { SW_ON_OFF, SW_ON_OFF_ON, SW_ON_OFF_NC };
 
 enum JoyAxis {
   AXIS_X, AXIS_Y, AXIS_Z,
@@ -129,7 +129,7 @@ const SwitchDef switches[] = {
   // MCP pin mapping: GPA0–7 = 0–7, GPB0–7 = 8–15
   {"RF",                    PNL_MISC,       SW_ON_OFF_ON,    0,   4,   5,  NULL},   // GPA4, GPA5
   {"Laser ARM",             PNL_MISC,       SW_ON_OFF,       0,   3,   0,  NULL},   // GPA3
-  {"ALT REL",               PNL_MISC,       SW_ON_OFF,       0,   2,   0,  NULL},   // GPA2
+  {"ALT REL",               PNL_MISC,       SW_ON_OFF_NC,    0,   2,   0,  NULL},   // GPA2 (normally closed)
   {"Master ARM",            PNL_MISC,       SW_ON_OFF_ON,    0,   0,   1,  NULL},   // GPA0, GPA1
   {"ADV MODE",              PNL_MISC,       SW_ON_OFF,       0,   10,  0,  NULL},   // GPB2
   {"Roll AP",               PNL_MISC,       SW_ON_OFF_ON,    0,   11,  12,  NULL},  // GPB3, GPB4
@@ -457,6 +457,7 @@ static uint32_t lastInputTime = 0;    // millis() of last switch/button activity
 int switchButtonCount(SwitchType type) {
   switch (type) {
     case SW_ON_OFF:     return 1;
+    case SW_ON_OFF_NC:  return 1;
     case SW_ON_OFF_ON:  return 2;
   }
   return 1;
@@ -554,8 +555,10 @@ void processSwitches() {
     const SwitchDef& sw = switches[i];
 
     switch (sw.type) {
-      case SW_ON_OFF: {
-        int state = !readSwPin(sw, sw.pin1);
+      case SW_ON_OFF:
+      case SW_ON_OFF_NC: {
+        int raw = readSwPin(sw, sw.pin1);
+        int state = (sw.type == SW_ON_OFF_NC) ? raw : !raw;  // NC: LOW=OFF, NO: LOW=ON
         if (prevBtnState[btn] != state) {
           //if (ALLOW_DEBUG) Serial.printf("[SW] btn %d %s = %s\n", btn, sw.name, state ? "ON" : "OFF");
           prevBtnState[btn] = state;
