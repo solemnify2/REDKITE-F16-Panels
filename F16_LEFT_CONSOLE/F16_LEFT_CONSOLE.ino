@@ -228,7 +228,7 @@ struct AnalogBtnArrayDef {
   uint8_t            pin;
   uint8_t            numButtons;
   const char* const* btnNames;
-  const int*         values[2];   // [0]=BL OFF, [1]=BL ON
+  const int*         values;
 };
 
 
@@ -361,11 +361,11 @@ const char* const ecmBtnNames[] = {
   "ECM 1", "ECM 2", "ECM 3", "ECM 4",
   "ECM 5", "ECM 6", "ECM FRM", "ECM SPL"
 };
-const int ecmBtnValues[] = {1023, 679, 509, 406, 338, 289, 253, 225};  // measured, idle~0
+const int ecmBtnValues[] = {1013, 674, 504, 402, 335, 287, 251, 223};  // measured, BL OFF/ON identical
 
 const AnalogBtnArrayDef analogBtnArrays[] = {
-  // groupName      panel     pin  numBtn  btnNames      values{BL_OFF, BL_ON}
-  {"ECM Buttons",   PNL_ECM,  PIN_LADDER, 8,      ecmBtnNames,  {ecmBtnValues, ecmBtnValues}},
+  // groupName      panel     pin  numBtn  btnNames      values
+  {"ECM Buttons",   PNL_ECM,  PIN_LADDER, 8,      ecmBtnNames,  ecmBtnValues},
 };
 
 // --- ELEC Panel LEDs (MCP 0x21, GPA port) ---
@@ -982,7 +982,7 @@ void processAnalogButtons() {
 
     int best = -1;
     int bestDist = 32767;
-    const int* vals = arr.values[0];  // TODO: arr.values[blOn] when backlight added
+    const int* vals = arr.values;
     for (int b = 0; b < arr.numButtons; b++) {
       int dist = abs(raw - vals[b]);
       if (dist < bestDist) { bestDist = dist; best = b; }
@@ -1000,6 +1000,17 @@ void processAnalogButtons() {
         lastInputTime = millis();
       }
       Joystick.button(btn + b, state);
+    }
+
+    if (ALLOW_DEBUG) {
+      static int lastBest = -2;
+      if (best != lastBest) {
+        lastBest = best;
+        if (best >= 0)
+          Serial.printf("[Ladder] ECM btn%d (raw=%d ref=%d)\n", best, raw, vals[best]);
+        else
+          Serial.printf("[Ladder] ECM NONE (raw=%d)\n", raw);
+      }
     }
   }
 }

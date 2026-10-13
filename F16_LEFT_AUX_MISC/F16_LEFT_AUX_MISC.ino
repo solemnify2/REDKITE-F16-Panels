@@ -98,15 +98,15 @@ struct McpDeviceDef {
 
 // Resistor-ladder analog button array: multiple buttons on a single analog pin.
 // Each button adds a 220Ω resistor, producing a unique analogRead value.
-// values[0]=BL OFF, values[1]=BL ON (descending order).
-// Matching: nearest-value, reject if below last value - (adjacent gap / 2).
+// values[] in descending order.
+// Matching: nearest-value, reject if below 100 (noise floor).
 struct AnalogBtnArrayDef {
   const char*        groupName;    // group name for logging
   Panel              panel;
   uint8_t            pin;          // analog input pin
   uint8_t            numButtons;
   const char* const* btnNames;     // array of button names, length = numButtons
-  const int*         values[2];    // [0]=BL OFF, [1]=BL ON
+  const int*         values;
 };
 
 // ================================================================
@@ -172,22 +172,19 @@ const SwitchDef switches[] = {
 // ADC_k = 1023 × 4700 / (k × 1000 + 4700).  Calibrate with ALLOW_DEBUG = true.
 
 const char* const twaBtnNames[] = {"TWA ACT/PWR","TWA SEARCH","TWA ALT","TWA SYS PWR"};
-const int         twaBtnValues[]     = {839, 711, 617, 545};       // backlight OFF (measured, idle~1)
-const int         twaBtnValuesBlOn[] = {854, 735, 660, 592};       // backlight ON (measured, idle~99)  prev: {844, 720, 629, 559}
+const int         twaBtnValues[] = {839, 711, 617, 545};       // measured (BL OFF/ON identical within ±4)
 
 const char* const cmdsModeBtnNames[] = {"MODE 1","MODE 2","MODE 3","MODE 4","MODE 5","MODE 6","MODE 7"};
-const int         cmdsModeBtnValues[]     = {847, 722, 629, 558, 501, 454, 415};  // backlight OFF (measured, idle~1)
-const int         cmdsModeBtnValuesBlOn[] = {863, 747, 662, 596, 544, 502, 467};  // backlight ON (measured, idle~90)
+const int         cmdsModeBtnValues[] = {847, 722, 629, 558, 501, 454, 415};
 
 const char* const cmdsPrgmBtnNames[] = {"PRGM BIT","PRGM 1","PRGM 2","PRGM 3","PRGM 4","PRGM 5","PRGM 6"};
-const int         cmdsPrgmBtnValues[]     = {844, 719, 625, 554, 497, 452, 413};  // backlight OFF (measured, idle~1)
-const int         cmdsPrgmBtnValuesBlOn[] = {861, 745, 661, 598, 546, 504, 470};  // backlight ON (measured, idle~90)
+const int         cmdsPrgmBtnValues[] = {844, 719, 625, 554, 497, 452, 413};
 
 const AnalogBtnArrayDef analogBtnArrays[] = {
-  // groupName       panel     pin  numBtn  btnNames           values{BL_OFF, BL_ON}
-  {"TWA Buttons",    PNL_TWA,  A10, 4,      twaBtnNames,       {twaBtnValues,      twaBtnValuesBlOn}},
-  {"CMDS MODE",      PNL_CMDS, A11, 7,      cmdsModeBtnNames,  {cmdsModeBtnValues, cmdsModeBtnValuesBlOn}},
-  {"CMDS PRGM",      PNL_CMDS, A12, 7,      cmdsPrgmBtnNames,  {cmdsPrgmBtnValues, cmdsPrgmBtnValuesBlOn}},
+  // groupName       panel     pin  numBtn  btnNames           values
+  {"TWA Buttons",    PNL_TWA,  A10, 4,      twaBtnNames,       twaBtnValues},
+  {"CMDS MODE",      PNL_CMDS, A11, 7,      cmdsModeBtnNames,  cmdsModeBtnValues},
+  {"CMDS PRGM",      PNL_CMDS, A12, 7,      cmdsPrgmBtnNames,  cmdsPrgmBtnValues},
 };
 
 #define NUM_ANALOG_ARRAYS (sizeof(analogBtnArrays) / sizeof(analogBtnArrays[0]))
@@ -595,11 +592,10 @@ static int analogDebugRaw[NUM_ANALOG_ARRAYS];
 static int analogDebugBest[NUM_ANALOG_ARRAYS];
 
 void processAnalogButtons() {
-  bool blOn = backlightState;
   for (unsigned int a = 0; a < NUM_ANALOG_ARRAYS; a++) {
     int btn = analogBtnStart[a];
     const AnalogBtnArrayDef& arr = analogBtnArrays[a];
-    const int* vals = arr.values[blOn ? 1 : 0];
+    const int* vals = arr.values;
     int raw = 0;
     for (int s = 0; s < 8; s++) raw += analogRead(arr.pin);
     raw /= 8;
@@ -611,12 +607,8 @@ void processAnalogButtons() {
       int dist = abs(raw - vals[i]);
       if (dist < bestDist) { bestDist = dist; best = i; }
     }
-    // Reject: below last value minus half the gap to its neighbor
-    if (best >= 0 && arr.numButtons >= 2) {
-      int lastGap = vals[arr.numButtons - 2] - vals[arr.numButtons - 1];
-      int lowerBound = vals[arr.numButtons - 1] - lastGap / 2;
-      if (raw < lowerBound) best = -1;
-    }
+    // Reject: below 100 (noise floor)
+    if (raw < 100) best = -1;
     for (int i = 0; i < arr.numButtons; i++) {
       Joystick.button(btn + i, (i == best));
     }
@@ -635,9 +627,8 @@ void processAnalogButtons() {
       lastBest[1] = analogDebugBest[1];
       lastBest[2] = analogDebugBest[2];
       // order: TWA(0), PRGM(2), MODE(1)
-      bool bl = backlightState;
       char twa[32], prgm[32], mode[32];
-      auto ref = [&](int a) { return analogBtnArrays[a].values[bl ? 1 : 0][analogDebugBest[a]]; };
+      auto ref = [&](int a) { return analogBtnArrays[a].values[analogDebugBest[a]]; };
       if (analogDebugBest[0] >= 0) snprintf(twa,  sizeof(twa),  "btn%d(%d/%d)", analogDebugBest[0], analogDebugRaw[0], ref(0)); else snprintf(twa,  sizeof(twa),  "NONE(%d)", analogDebugRaw[0]);
       if (analogDebugBest[2] >= 0) snprintf(prgm, sizeof(prgm), "btn%d(%d/%d)", analogDebugBest[2], analogDebugRaw[2], ref(2)); else snprintf(prgm, sizeof(prgm), "NONE(%d)", analogDebugRaw[2]);
       if (analogDebugBest[1] >= 0) snprintf(mode, sizeof(mode), "btn%d(%d/%d)", analogDebugBest[1], analogDebugRaw[1], ref(1)); else snprintf(mode, sizeof(mode), "NONE(%d)", analogDebugRaw[1]);
