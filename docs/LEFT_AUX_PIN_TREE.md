@@ -55,7 +55,7 @@
   Teensy direct   C1 GEAR   C2 CMDS   C3 TWA   C4 ALT GEAR   C5 HMCS   C6 PEDALS
                   C7 CMDS 램프 — 헤더가 아니라 하단 SD 패드(42~47)에서 SD 확장 케이블로 인출
   MCP > panel     M1 0x20 > MISC (모듈-패널 하니스)
-  12V             backlight: pin 13 PWM 1kHz > MOSFET > 스텝업 5V→12V (backlight_spec.md)
+  12V             backlight: pin 13 PWM 1kHz > MOSFET > 별도 12V 어댑터
   LAN 배선도      docs/LEFT_AUX_MISC_LAN_WIRING.md
 
   xN = 신호선 수 (3.3V/GND 제외)   SW = switch GPIO 수   LADDER = resistor ladder   POT = potentiometer
@@ -300,6 +300,6 @@ Teensy 4.1 GPIO 한계(핀당 연속 10mA 권장) 안에 들어옵니다.
 | 3 | **래더 캘리브레이션** — TWA·CMDS MODE·PRGM. PWM 디밍 방식 변경 후 BL OFF/ON 값 동일(±4)하여 1세트로 통합. `ALLOW_DEBUG = true` 로 실측 |
 | 4 | **I2C 핫플러그 보호** — SDA/SCL 직렬 100Ω, 보드 3.3V에 10µF + 100nF ([hotplug_spec.md](hotplug_spec.md)). 단선 시 GEAR WARN 점등, 500ms 재접속 |
 | 5 | **MCP 주소 점퍼** — 출하 상태 그대로 (`0x20`) |
-| 6 | **백라이트** — 핀 13 PWM 1kHz → MOSFET → 5V→12V 스텝업 ([backlight_spec.md](backlight_spec.md)). 오프라인 수동 밝기: DN LOCK REL 누른 채 HMCS Symbology pot (A15, 방향 반전). [LAN 배선도](LEFT_AUX_MISC_LAN_WIRING.md) |
+| 6 | **백라이트** — 핀 13 PWM 1kHz → MOSFET → 별도 12V 어댑터 (Step-Up은 래더 ADC 노이즈 유발). 오프라인 수동 밝기: DN LOCK REL 누른 채 HMCS Symbology pot (A15, 방향 반전). [LAN 배선도](LEFT_AUX_MISC_LAN_WIRING.md) |
 | 7 | **스위치 배선** — 전부 액티브 로우 + 내부 풀업 (공통 단자 GND) |
 | 8 | **CMDS 램프** — 하단 SD 확장 케이블 → LED 6개 직결(각 180Ω, 캐소드 GND 공통). 확장 케이블 핀 매핑을 실측 확인하고, Vf 3.0V 이상 LED 는 쓰지 말 것 |

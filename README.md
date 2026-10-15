@@ -99,7 +99,7 @@ Stand는 Enclosure 뒷면에 에폭시 접착제로 부착합니다. new 버전 
 [Teensy 4.1](https://www.pjrc.com/store/teensy41.html) × 2대. 선택 이유:
 - USB 조이스틱 128버튼 네이티브 지원 (Arduino Mega 등은 USB HID 미지원)
 - 600MHz ARM Cortex-M7 — 다중 작업에 충분한 성능
-- VIN 핀을 통한 USB 5V 직접 출력 — 백라이트 Step-Up 전원 공급
+- 42 GPIO + 하단 SD 패드 — 충분한 핀 수
 
 ### 1-4. 부품 목록
 
@@ -158,8 +158,7 @@ Stand는 Enclosure 뒷면에 에폭시 접착제로 부착합니다. new 버전 
 
 | 부품 | 수량 | 비고 |
 |------|------|------|
-| Step-Up 컨버터 5V→12V (EN 핀 포함) | 1 | AUX 보드 백라이트 전원 |
-| 12V DC 어댑터 (1A) | 1 | 콘솔 보드 백라이트 전용 |
+| 12V DC 어댑터 (1A) | 2 | 백라이트 전용 (AUX 1 + 콘솔 1). Step-Up은 래더 ADC 노이즈 유발 |
 | RJ45 패널 마운트 커넥터 / 키스톤 잭 | 7+ | I2C, 엔코더, 아날로그 신호 케이블 |
 | Cat5e LAN 케이블 | 7+ | 신호 배선용 |
 
@@ -283,8 +282,10 @@ AUX↔MISC 패널 LAN 배선 상세: [docs/LEFT_AUX_MISC_LAN_WIRING.md](docs/LEF
 
 | 보드 | 전원 | 비고 |
 |---|---|---|
-| **AUX** | Teensy Vin → Step-Up 5V→12V | USB 3.0 전력 예산(900mA) 내 운용 |
-| **콘솔** | 별도 12V DC 어댑터 | LED 40개로 USB 예산 초과. **어댑터 GND ↔ Teensy GND 반드시 단일점 연결** |
+| **AUX** | 별도 12V DC 어댑터 | Step-Up 5V→12V는 래더 ADC에 노이즈 유발하여 어댑터로 변경 |
+| **콘솔** | 별도 12V DC 어댑터 | LED 40개로 USB 예산 초과 |
+
+**양쪽 모두 어댑터 GND ↔ Teensy GND를 단일점(star)으로 반드시 연결하세요.** MOSFET Gate 기준이 없으면 백라이트가 동작하지 않습니다.
 
 **밝기 제어:**
 
