@@ -184,4 +184,4 @@ Toggle the whole feature with `HAS_UHF_DISPLAY` in the sketch. `displayFrequency
 
 ## Pin Assignment
 
-See `docs/LEFT_CONSOLE_PIN_TREE.md` for the cable/panel wiring tree, and `docs/PIN_ASSIGNMENT.md` for the full pin table, MCP GPIO map, encoder ranges, DX button map, per-panel wiring, and power topology.
+See `docs/LEFT_CONSOLE_PIN_TREE.md` for the full pin tree: cable/panel wiring, Teensy pin layout, MCP GPIO map, DX button map, axis map, per-cable wiring detail, and power topology.

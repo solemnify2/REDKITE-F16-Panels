@@ -3,13 +3,12 @@
 `F16_LEFT_CONSOLE/` 스케치의 물리 배선도입니다.
 핀 번호·버튼 번호는 `.ino`의 config 배열에서 그대로 가져온 값입니다.
 
-USB: PID `0x048E`, `JOYSTICK_SIZE 64`.
+- **Board**: Teensy 4.1 (헤더 핀 0–41)
+- **USB**: PID `0x048E`, `JOYSTICK_SIZE 64` (128버튼)
+- **I2C**: `Wire2` — SCL2 = pin 24, SDA2 = pin 25 @ 100kHz, MCP23017 3장 (`0x20` `0x21` `0x22`)
+- **DX 버튼 58, 축 10**, 메인 루프 20Hz
 
-| 보드 | 구성 | 핀 | DX 버튼 | 축 |
-|---|---|---|---|---|
-| Teensy 4.1 | 전 패널 + UHF 엔코더 6 + POT 10 + SW 6 | 40 / 42 | 58 | 10 |
-
-표 형식 상세 배치는 [PIN_ASSIGNMENT.md](PIN_ASSIGNMENT.md) 참조.
+케이블 이름(C1~C14, M1~M6, I1~I3)은 이 문서에서 부여한 명명입니다.
 
 ---
 
@@ -20,7 +19,7 @@ USB: PID `0x048E`, `JOYSTICK_SIZE 64`.
   (블록 배치는 연결 관계 기준입니다 — 실제 콘솔 패널 배치가 아닙니다)
 
         ┌───────────────────────────────────────────────────────────────┐
-        │ Teensy    STAGE_T40: 4.0  /  STAGE_T41: 4.1                   │
+        │ Teensy 4.1    LEFT CONSOLE    PID 0x048E                      │
         └───┬─────────────────────────────────────────────────────────┬─┘
             │ I1 (I2C x8)                                             │ C1~C6
             │                       ┌───────────────────────┐         │
@@ -80,15 +79,15 @@ USB: PID `0x048E`, `JOYSTICK_SIZE 64`.
 | **C4** | Teensy → AUDIO 1 | **POT 6개** (COMM CH1, COMM CH2, SECURE, MSL, TF, THREAT) | 8선 (LAN) |
 | **C5** | Teensy → AUDIO 2 | **POT 3개** (INTERCOM, TACAN, ILS) | 5선 |
 | **C6** | Teensy → ECM 패널 | 74HC595 3선 + ECM 저항 래더 1선 (핀 35~38) | 8선 (LAN) |
-| **C7** | MCP `0x20` → UHF 패널 | FUNCTION 4, MODE 3 (=7, PB1~7) + GND | 8선 | 없음 |
-| **C8** | AUDIO 1·2 → MCP `0x20` | COMM 1/2 모드 로터리 (PA2~7) + HOT MIC·CIPHER (PA0/PA1) | 9선 | 없음 |
+| **C7** | MCP `0x20` → UHF 패널 | FUNCTION 4, MODE 3 (=7, PB1~7) + GND | 8선 |
+| **C8** | AUDIO 1·2 → MCP `0x20` | COMM 1/2 모드 로터리 (PA2~7) + HOT MIC·CIPHER (PA0/PA1) | 9선 |
+| **C9** | MCP `0x21` → ELEC 패널 | 스위치 3 (PB0~2) + LED 8 (PA0~7) | 13선 |
+| **C10** | MCP `0x21` → EPU 패널 | 스위치 2 (PB6~7) + LED 3 (PB3~5) | 7선 |
+| **C11** | MCP `0x22` → ECM 패널 | ECM 스위치 6 → PB2~PB7 | 7선 |
+| **C12** | MCP `0x22` → AVTR 패널 | AVTR 스위치 2 → PA6/PA7 | 3선 |
+| **C13** | Teensy → UHF 패널 | **UHF T-TONE, SQUELCH, STATUS** (핀 34/33/41) | 4선 |
 | **C14** | Teensy(SD/SPI2) → UHF 디스플레이 | MAX7219 보드 J1 — +5V, GND, DIN(43), CLK(45), CS(44) | 5선 |
-| **C13** | Teensy → UHF 패널 | **UHF T-TONE, SQUELCH, STATUS** (핀 34/33/41) ⚠ 신설 | 4선 |
-| **C9** | MCP `0x21` → ELEC 패널 | 스위치 3 (PB0~2) + LED 8 (PA0~7) | 13선 | 없음 |
-| **C10** | MCP `0x21` → EPU 패널 | 스위치 2 (PB6~7) + LED 3 (PB3~5) | 7선 | 없음 |
-| **C11** | MCP `0x22` → ECM 패널 | ECM 스위치 6 → PB2~PB7 | 7선 | 없음 |
-| **C12** | MCP `0x22` → AVTR 패널 | AVTR 스위치 2 → PA6/PA7 | 3선 | 없음 |
-| 12V | 어댑터 → 백라이트 | 전 패널 데이지체인 | 2선 | 없음 |
+| 12V | 어댑터 → 백라이트 | 전 패널 데이지체인 | 2선 |
 
 선 수에는 3.3V / GND 가 포함되어 있습니다.
 
@@ -96,7 +95,7 @@ USB: PID `0x048E`, `JOYSTICK_SIZE 64`.
 
 | 구분 | 케이블 | 성격 |
 |---|---|---|
-| Teensy 직결 | `C1`~`C6` | MCP 를 거칠 수 없는 신호 (맨 아래 **「MCP 를 거칠 수 없는 신호」** 참조). 패널마다 독립 배선 |
+| Teensy 직결 | `C1`~`C6`, `C13`, `C14` | MCP 를 거칠 수 없는 신호 (맨 아래 참조). 패널마다 독립 배선 |
 | I2C 체인 | `I1`→`I2`→`I3` | MCP 3장을 한 줄로 연결 |
 | MCP ↔ 패널 | `C7`~`C12` | MCP 모듈에서 바로 옆 패널로 가는 짧은 하니스 (저속 신호뿐이라 리본·낱선 무방) |
 
@@ -105,11 +104,11 @@ LAN 이 필요한 것은 I2C(`I1`~`I3`)와 아날로그·고속선(`C2` `C3` `C6
 > **MCP 를 한 기판(확장보드)에 모으지 않습니다.** 실제 콘솔 배치상 `0x22`(ECM·AVTR)과
 > `0x21`(ELEC·EPU)이 콘솔의 반대편 끝에 있어, 한 기판에 모으면 어느 한쪽
 > 팬아웃이 길어집니다. 그래서 담당 패널 옆에 각각 두고 I2C 로 체인합니다.
-> 덕분에 **`C6` 가 통과 배선이 아니라 ECM 직결**이 됩니다 (배선 요령은 **「케이블 C6」** 절).
+> 덕분에 **`C6` 가 통과 배선이 아니라 ECM 직결**이 됩니다.
 
 ---
 
-### I2C 체인
+## I2C 체인
 
 Teensy 의 SDA·SCL 한 쌍에서 출발해 MCP 3장을 **한 줄로 꿰는 단일 버스**입니다.
 브레이크아웃 모듈의 **2열 7핀 헤더**(한 열로 받고 다른 열로 넘김)가 이 용도입니다.
@@ -140,13 +139,9 @@ Teensy 의 SDA·SCL 한 쌍에서 출발해 MCP 3장을 **한 줄로 꿰는 단�
 > 버스 용량 약 350pF → **약 265pF**, 라이즈타임 465ns → **약 352ns**.
 > 그래도 400kHz 규격(300ns)은 못 맞추므로 `MCP_I2C_CLOCK` 은 **100kHz 유지**입니다.
 
-신호별 Teensy 핀 번호는 아래 **물리 핀 배열**,
-MCP 쪽 배치는 그 다음 **MCP23017 모듈 물리 핀 배열**,
-DX 버튼 번호는 [PIN_ASSIGNMENT.md](PIN_ASSIGNMENT.md) 를 보십시오.
-
 ---
 
-## Teensy 4.1 — 물리 핀 배열
+## Teensy 4.1 물리 핀 배열
 
 핀 순서는 PJRC 핀아웃 카드([`teensy/card11a_rev4_web.pdf`](teensy/card11a_rev4_web.pdf))
 에서 좌표를 추출해 검증했습니다. **양쪽 열 모두 24포지션**이며,
@@ -188,7 +183,7 @@ DX 버튼 번호는 [PIN_ASSIGNMENT.md](PIN_ASSIGNMENT.md) 를 보십시오.
                                   └─────────────┘
 
   [!] pin 13 is shared with the Teensy on-board LED. Used as an OUTPUT here,
-      so the on-board LED simply mirrors the backlight state (same as T40).
+      so the on-board LED simply mirrors the backlight state (same as LEFT_AUX).
 ```
 
 **엔코더 쌍은 모두 같은 엣지에 있습니다.** Teensy 4.1 의 두 엣지는 `0–12`+`24–32` 와
@@ -199,8 +194,7 @@ DX 버튼 번호는 [PIN_ASSIGNMENT.md](PIN_ASSIGNMENT.md) 를 보십시오.
 
 **`C1` 만 두 엣지로 나뉩니다.** ENGINE 스위치 7개는 `26–32`, **MPO 만 `40`** 입니다.
 `24/25` 가 I2C 라 `26–32` 7핀이 그 엣지 하단 블록의 전부여서 8번째 신호를 넣을 자리가
-없기 때문입니다. 한 엣지로 몰고 싶으면 MPO 를 여유 핀 `12` 로 옮기면 됩니다
-(엔코더 블록 옆이라 `26–32` 와는 떨어집니다).
+없기 때문입니다. 한 엣지로 몰고 싶으면 MPO 를 여유 핀 `12` 로 옮기면 됩니다.
 
 **여유 핀** — 12, 39(A15) = 2개.
 
@@ -226,8 +220,7 @@ MISO2(42)는 MAX7219 가 단방향이라 쓰지 않습니다. 8MHz 하드웨어 
 
 ---
 
-## 공통 — MCP23017 모듈 물리 핀 배열
-
+## MCP23017 모듈 물리 핀 배열
 
 ### MCP #0  `0x20` — UHF + AUDIO 1 COMM  (UHF 패널 실장)
 
@@ -368,50 +361,121 @@ MISO2(42)는 MAX7219 가 단방향이라 쓰지 않습니다. 8MHz 하드웨어 
 > 이설 후 `i2cdetect` 상당 스캔(스케치 시리얼 로그)으로 `0x20 0x21 0x22` 세 개가
 > 모두 보이는지 확인하십시오.
 
+---
+
+## DX 버튼 맵 (56 / 128)
+
+버튼 번호는 `switches[]` → `analogBtnArrays[]` → `encoders[]` → `switches[]`(LATE) 순서로 런타임에 자동 배정됩니다.
+
+| 버튼 | 패널 | 신호 |
+|------|------|------|
+| 1–2 | ECM | OPR / STBY |
+| 3–4 | ECM | XMIT 1 / XMIT 3 |
+| 5 | ECM | BIT |
+| 6 | ECM | RESET |
+| 7–8 | ELEC | BATT / MAIN |
+| 9 | ELEC | CAUTION RST |
+| 10–11 | AVTR | AUTO / ON |
+| 12–13 | ENGINE | JFS START 1 / START 2 |
+| 14 | ENGINE | ENG CONT |
+| 15 | MPO | MANUAL PITCH OVERRIDE |
+| 16–17 | EPU | NORM / ON |
+| 18–21 | UHF | FUNCTION OFF / MAIN / BOTH / ADF |
+| 22–24 | UHF | MODE MNL / PRESET / GRD |
+| 25 | UHF | SQUELCH |
+| 26 | UHF | T-TONE |
+| 27 | UHF | STATUS |
+| 28–30 | AUDIO 1 | COMM 1 MODE — OFF / SQL / GD XMT |
+| 31–33 | AUDIO 1 | COMM 2 MODE — OFF / SQL / GD XMT |
+| 34–41 | ECM | 저항 래더 — ECM 1~6, FRM, SPL |
+| 42–53 | UHF | 엔코더 6개 × (CW / CCW) |
+| 54–55 | ENGINE | MAX POWER / AB RESET |
+| 56 | ENGINE | ENG DATA |
+
+> 54번부터는 `switches[]` 배열 맨 뒤(`SWITCH_LATE_START` 이후)에 있는 항목입니다.
+> 래더·엔코더 **뒤에** 배정해서, 스위치를 새로 추가해도 기존 버튼 1~53 의
+> 바인딩이 그대로 유지되도록 한 구조입니다.
 
 ---
 
-## 12V 백라이트 하니스 (별도 어댑터)
+## 조이스틱 축 (10 / 23)
 
-신호 케이블과 **물리적으로 분리**해서 포설합니다.
+Extreme 조이스틱(`JOYSTICK_SIZE 64`)은 명명 축 6개 + `slider(1..17)` = **23채널**입니다.
+단, DirectInput은 최대 8축(6 named + `rglSlider[2]`)만 인식합니다.
 
+| # | 축 | 신호 | 핀 | DirectInput | BMS 바인딩 |
+|---|-----|------|-----|-------------|-----------|
+| 1 | X | AUDIO COMM CH1 | 22 (A8) | lX | ✓ |
+| 2 | Y | AUDIO COMM CH2 | 21 (A7) | lY | ✓ |
+| 3 | Z | AUDIO MSL VOL | 19 (A5) | lZ | ✓ |
+| 4 | Xrotate | AUDIO THREAT VOL | 17 (A3) | lRx | ✓ |
+| 5 | Yrotate | AUDIO INTERCOM | 16 (A2) | lRy | ✓ |
+| 6 | Zrotate | UHF VOL | 23 (A9) | lRz | ✓ |
+| 7 | `slider(1)` | AUDIO ILS VOL | 14 (A0) | rglSlider[0] | ✓ |
+| 8 | `slider(2)` | AUDIO SECURE VOL | 20 (A6) | rglSlider[1] | ✓ |
+| 9 | `slider(3)` | AUDIO TF VOL | 18 (A4) | (미인식) | ✗ |
+| 10 | `slider(4)` | AUDIO TACAN VOL | 15 (A1) | (미인식) | ✗ |
+
+### usb_desc.c 수정 사항 (시스템 파일, git 미추적)
+
+파일 위치: `%LOCALAPPDATA%/Arduino15/packages/teensy/hardware/avr/<version>/cores/teensy4/usb_desc.c`
+
+Teensyduino 원본은 `JOYSTICK_SIZE 64` 에서 17개 슬라이더를 전부 동일한 Usage ID
+`0x36`(Slider)으로 선언합니다. 이 중복으로 인해 **Windows DirectInput이 슬라이더를
+전혀 인식하지 못합니다** (`rglSlider[0]`, `[1]` 모두 미동작).
+
+**수정**: Report Count 를 23 → 8 로 줄이고, 나머지 15개는 constant padding 처리.
+
+```c
+// 변경 전 (Teensyduino 원본)
+0x95, 23,          // Report Count (23)
+0x09, 0x30~0x36,   // X,Y,Z,Rx,Ry,Rz + Slider ×17
+0x81, 0x02,        // Input (variable, absolute)
+
+// 변경 후
+0x95, 8,           // Report Count (8)
+0x09, 0x30~0x36,   // X,Y,Z,Rx,Ry,Rz + Slider ×2
+0x81, 0x02,        // Input (variable, absolute)
+0x95, 15,          // Report Count (15)
+0x81, 0x01,        // Input (constant) — padding
 ```
-  12V ADAPTER (1A)
-      │
-      ├─ 12V+ ──┬─ ECM ─ ELEC ─ EPU ─ AVTR ─ UHF ─ AUDIO ─ ENGINE ──┐
-      │         │       (each strip: LED x3 series + 220Ω = 13.6mA)  │
-      │         │                                                      │
-      │         │   LED-RTN (cathode common) <─────────────────────────┘
-      │         │       │
-      │         │     Drain
-      │         │       │
-      │         │    MOSFET (IRLML6344, N-ch)
-      │         │       │
-      │         │    Source
-      │         │       │
-      │         │      GND ─── 12V adapter GND
-      │         │
-      │         │              Gate
-      │         │               ├────┤1kΩ├──── Teensy pin 13
-      │         │               │
-      │         │              10kΩ
-      │         │               │
-      │         │              GND
-      │
-      └─ GND ═══ ! single-point (star) tie to Teensy GND — REQUIRED
-```
 
-**어댑터 GND와 Teensy GND를 연결하지 않으면 MOSFET 게이트 기준이 없어 백라이트 제어가
-아예 동작하지 않습니다.** 그라운드 루프를 피하려면 한 지점에서만 접속합니다.
+USB report 크기(64바이트)는 변하지 않으며, `Joystick.slider(1..17)` API도 그대로
+동작합니다. DirectInput이 읽는 8개 축만 정상 매핑되고, 나머지는 무시됩니다.
 
-### 밝기 제어
+> ⚠ Arduino IDE / Teensyduino **업데이트 시 이 파일이 덮어씌워집니다**.
+> 업데이트 전에 백업하거나, 업데이트 후 다시 수정해야 합니다.
 
-| 상태 | 제어 방식 |
-|------|-----------|
-| **BMS online** | bridge가 `instrLight` → PWM 변환 (adaptive: BRT 미수신 시 DIM=255, 수신 후 DIM=50/BRT=255) |
-| **DCS online** | Teensy가 `LIGHT_INST_PNL` (0~65535) → PWM 0~255 직접 변환 |
-| **Offline 수동** | UHF STATUS 버튼을 누른 채 AUDIO1 TF pot → PWM 0~255 |
-| **Idle 30분** | 자동 꺼짐. 입력 시 복귀 |
+---
+
+## ECM 저항 래더 (PCB 고정)
+
+10kΩ 직렬 체인 + 20kΩ 풀다운. `ADC_k = 1023 × 20000 / (k × 10000 + 20000)`
+
+| 버튼 | 기대값 | 인접 경계 | 노이즈 여유 |
+|------|--------|-----------|-------------|
+| ECM 1 | 1024 | 852 | ±172 |
+| ECM 2 | 680 | 594 | ±86 |
+| ECM 3 | 509 | 457 | ±52 |
+| ECM 4 | 406 | 372 | ±34 |
+| ECM 5 | 338 | 314 | ±24 |
+| ECM 6 | 290 | 271 | ±18 |
+| ECM FRM | 253 | 239 | **±14** |
+| ECM SPL | 225 | 239 | **±14** |
+
+**판별은 최근접값(nearest-value) 방식**입니다. 창 겹침으로 인한 동시 매칭·오인식이 구조적으로 발생하지 않습니다. 8회 오버샘플링으로 ADC 노이즈가 약 ±2카운트라 최악 조합(FRM/SPL)에서도 7배 마진을 확보합니다.
+
+`maxDist = 60` 을 넘으면 무입력으로 처리합니다 (대기 시 ADC ≈ 0).
+
+> 12비트(`analogReadResolution(12)`)로 올리려면 `ecmBtnValues[]`와 `maxDist`를 모두 **×4** 해야 합니다. 현재는 기존 캘리브레이션을 보존하기 위해 10비트를 유지합니다.
+
+---
+
+## 74HC595 — ECM LED 32개
+
+ECM 1~6 / FRM / SPL × (S, A, F, T). `srMap[]`이 논리 인덱스를 물리 출력으로 리맵합니다.
+
+**32 / 32 전부 사용 중.** 칩을 추가하면 BMS-BIOS 프레임의 `srData` 32비트를 초과하므로 `BB_FRAME_PAYLOAD`, 양쪽 `BmsBiosParser.h`, `bmsbios_bridge.py`를 모두 수정해야 합니다.
 
 ---
 
@@ -482,9 +546,6 @@ MISO2(42)는 MAX7219 가 단방향이라 쓰지 않습니다. 8MHz 하드웨어 
 필요해 LAN 3가닥이 되는데, 위와 같은 이유로 그럴 필요가 없습니다.
 엔코더 공통 단자는 GND 로, **전원은 필요 없습니다** (내부 풀업 `INPUT_PULLUP` 사용).
 
-
----
-
 ### 케이블 C6 — ECM 직결 (RJ45 T568B)
 
 | 핀 | 신호 | 페어 | 색상 |
@@ -503,6 +564,101 @@ MISO2(42)는 MAX7219 가 단방향이라 쓰지 않습니다. 8MHz 하드웨어 
 
 > RJ45 핀 3과 6은 같은 페어(녹색)입니다. 번호 순서대로 묶으면 트위스트 페어가 깨집니다.
 
+### 케이블 권장
+
+| 구간 | 구성 |
+|------|------|
+| → ECM 패널 | LAN ×2 — **I3**(체인): SDA/GND, SCL/GND, 3.3V/GND ×2 · **C6**: DS/GND, **래더/GND**, SH_CP/GND, ST_CP/3.3V |
+| → ELEC 패널 | LAN ×1 — **I2**(체인): SDA/GND, SCL/GND, 3.3V/GND ×2 |
+| → UHF | LAN ×3 — **I1**: SDA/GND, SCL/GND, 3.3V/GND ×2 · **C2**: 엔코더 A/B 3쌍 + **VOL/GND** · **C3**: 엔코더 A/B 3쌍 + GND 페어 |
+| → ENGINE+MPO | **C1** — 9선 일반 (RUN LED 포함) |
+| → AUDIO | **C4** 8선(LAN) / **C5** 5선. 와이퍼는 각각 GND와 트위스트 페어 |
+
+아날로그선(ECM 래더, UHF VOL, AUDIO 와이퍼 6)은 **전부 GND와 트위스트 페어**로 처리합니다.
+
+I2C 핫플러그 보호: SDA/SCL 직렬 100Ω, 각 보드 3.3V에 10µF + 100nF.
+
+---
+
+## 12V 백라이트 하니스 (별도 어댑터)
+
+신호 케이블과 **물리적으로 분리**해서 포설합니다.
+
+```
+  12V ADAPTER (1A)
+      │
+      ├─ 12V+ ──┬─ ECM ─ ELEC ─ EPU ─ AVTR ─ UHF ─ AUDIO ─ ENGINE ──┐
+      │         │       (each strip: LED x3 series + 220Ω = 13.6mA)  │
+      │         │                                                      │
+      │         │   LED-RTN (cathode common) <─────────────────────────┘
+      │         │       │
+      │         │     Drain
+      │         │       │
+      │         │    MOSFET (IRLML6344, N-ch)
+      │         │       │
+      │         │    Source
+      │         │       │
+      │         │      GND ─── 12V adapter GND
+      │         │
+      │         │              Gate
+      │         │               ├────┤1kΩ├──── Teensy pin 13
+      │         │               │
+      │         │              10kΩ
+      │         │               │
+      │         │              GND
+      │
+      └─ GND ═══ ! single-point (star) tie to Teensy GND — REQUIRED
+```
+
+**어댑터 GND와 Teensy GND를 연결하지 않으면 MOSFET 게이트 기준이 없어 백라이트 제어가
+아예 동작하지 않습니다.** 그라운드 루프를 피하려면 한 지점에서만 접속합니다.
+
+### 밝기 제어
+
+| 상태 | 제어 방식 |
+|------|-----------|
+| **BMS online** | bridge가 `instrLight` → PWM 변환 (adaptive: BRT 미수신 시 DIM=255, 수신 후 DIM=50/BRT=255) |
+| **DCS online** | Teensy가 `LIGHT_INST_PNL` (0~65535) → PWM 0~255 직접 변환 |
+| **Offline 수동** | UHF STATUS 버튼을 누른 채 UHF VOL pot → PWM 0~255 |
+| **Idle 30분** | 자동 꺼짐. 입력 시 복귀 |
+
+---
+
+## 전원
+
+```
+USB 5V (900mA)
+    └─ Teensy 4.1 ─┬─ 3.3V ─┬─ MCP23017 x3 (0x20 / 0x21 / 0x22)
+                   │        ├─ 74HC595 x4
+                   │        └─ indicator LEDs x43 (ECM 32 + ELEC/EPU 11)
+                   GND ─────────────┐
+                                    │  ! common ground required (single point)
+12V adapter ─┬─ 12V+ ─> backlight strips (all panels, daisy-chain)
+            └─ GND ──┴─ LED-RTN ─> MOSFET(IRLML6344) ─> GND
+                                      Gate <- 1kΩ <- pin 13
+                                             10kΩ pull-down -> GND
+```
+
+| 항목 | 값 |
+|------|-----|
+| 백라이트 전원 | **별도 12V 어댑터 (1A 권장)** — MT3608 스텝업 불필요 |
+| USB 예산 | 900mA − Teensy 100 − 로직 10 − LED 최대 440 ≈ **여유 350mA** |
+| 12V 하니스 | `12V+` / `LED-RTN` 2선, 신호 케이블과 물리적 분리 |
+
+---
+
+## MCP 를 거칠 수 없는 신호
+
+| 신호 | 이유 |
+|---|---|
+| 74HC595 제어 3선 | 32비트 시프트 = MCP 경유 시 약 38ms (루프 예산 초과) |
+| ECM 저항 래더 | MCP23017에 ADC 없음 |
+| 로터리 엔코더 12선 | 인터럽트 필요 — I2C 폴링으로 펄스 유실 |
+| POT 10개 | MCP23017에 ADC 없음 |
+
+이 신호들만 Teensy 직결입니다. 나머지 **스위치 28 GPIO 와 LED 11개는 전부 I2C 2선**에
+실립니다 (`0x20` 15 + `0x21` 16 + `0x22` 8 = 39 GPIO).
+
 ---
 
 ## 리소스 사용
@@ -513,7 +669,7 @@ MISO2(42)는 MAX7219 가 단방향이라 쓰지 않습니다. 8MHz 하드웨어 
 | ├ 아날로그 입력 | 11 / 18 (여유 ADC: A15 = 1개) |
 | └ 여유 핀 | 12, 39 |
 | **MCP23017 GPIO** | 39 / 48 |
-| 74HC595 출력 | 32 / 32 ⚠ |
+| 74HC595 출력 | 32 / 32 |
 | **DX 버튼** | **58 / 128** |
 | 조이스틱 축 | 10 / 23 |
 | I2C 주소 | `0x20` `0x21` `0x22` |
@@ -538,20 +694,6 @@ MISO2(42)는 MAX7219 가 단방향이라 쓰지 않습니다. 8MHz 하드웨어 
 | 12 | **MCP#1 LED 전류** — LED **11개**(PA0~7 8개 + PB3~5 3개). 소싱 구성이라 `VDD` 유입 **125mA** 가 한계 → **개당 10mA 이하** (11 × 10 = 110mA) |
 | 13 | **핀 13** — 백라이트 **출력**. 온보드 LED 공유는 출력이라 무해하고 LED가 상태 표시등이 됨. **입력으로는 쓰지 말 것** (LED 경로 때문에 상시 눌림 위험) |
 | 14 | **엔코더 방향** — CW/CCW가 반대면 `encoders[]` 의 `pinA`/`pinB` 교체 |
-| 15 | **⚠ Teensy 3.3V 레일** — ECM 32 LED(74HC595)와 MCP LED 11개가 **전부 Teensy 3.3V 레귤레이터**에서 나옵니다. 전점등 시 약 430mA 로 PJRC 권장 **250mA** 를 넘습니다. 세리머니 순차 점등은 필수이고, 상시 여유가 필요하면 **74HCT595 를 5V(Vin) 급전**으로 바꾸십시오 (HCT 는 VIH 2.0V 라 3.3V 로직으로 구동 가능, 직렬저항 재계산 필요) |
+| 15 | **Teensy 3.3V 레일** — ECM 32 LED(74HC595)와 MCP LED 11개가 **전부 Teensy 3.3V 레귤레이터**에서 나옵니다. 전점등 시 약 430mA 로 PJRC 권장 **250mA** 를 넘습니다. 세리머니 순차 점등은 필수이고, 상시 여유가 필요하면 **74HCT595 를 5V(Vin) 급전**으로 바꾸십시오 (HCT 는 VIH 2.0V 라 3.3V 로직으로 구동 가능, 직렬저항 재계산 필요) |
 | 16 | **74HC595 패키지 전류** — VCC/GND 절대최대 약 **70mA/칩**. 정상 운용은 칩당 2점등(약 20mA)이라 무관하지만 **세리머니·`ALL_LIT` 상태에서 8점등**이면 초과합니다 |
 | 17 | **USB 포트** — `welcomeCeremony()` 피크가 약 548mA. USB 2.0(500mA)에서는 순차 점등으로 변경 |
-
----
-
-## MCP 를 거칠 수 없는 신호
-
-| 신호 | 이유 |
-|---|---|
-| 74HC595 제어 3선 | 32비트 시프트 = MCP 경유 시 약 38ms (루프 예산 초과) |
-| ECM 저항 래더 | MCP23017에 ADC 없음 |
-| 로터리 엔코더 12선 | 인터럽트 필요 — I2C 폴링으로 펄스 유실 |
-| POT 10개 | MCP23017에 ADC 없음 |
-
-이 신호들만 Teensy 직결입니다. 나머지 **스위치 28 GPIO 와 LED 11개는 전부 I2C 2선**에
-실립니다 (`0x20` 15 + `0x21` 16 + `0x22` 8 = 39 GPIO).
