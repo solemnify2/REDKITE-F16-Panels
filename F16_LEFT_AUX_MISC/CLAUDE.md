@@ -69,7 +69,7 @@ SOF(Start-of-Frame)-based suspend detection using `USB1_FRINDEX`. When PC enters
 
 ### Backlight Control (PWM Dimming)
 
-Step-Up converter (5V→12V) controlled via MOSFET on `BACKLIGHT_PIN` (pin 13, PWM 1kHz).
+Separate 12V adapter controlled via MOSFET on `BACKLIGHT_PIN` (pin 13, PWM 1kHz). Step-Up 5V→12V was replaced due to ADC noise on resistor ladders.
 
 **Brightness control by source:**
 
@@ -95,7 +95,7 @@ LED sweep animation runs on: startup, USB resume from suspend, bridge online (of
 | `ALLOW_DEBUG` | false | Set true for serial debug output (analog calibration, switch states) |
 | `LOOP_DELAY_MS` | 50 | Main loop interval (20Hz) |
 | `SERIAL_TIMEOUT` | 6 | Seconds before protocol reset on no data |
-| `BACKLIGHT_PIN` | **13** | MOSFET gate (PWM 1kHz). Step-Up 5V→12V 제어 |
+| `BACKLIGHT_PIN` | **13** | MOSFET gate (PWM 1kHz). 별도 12V 어댑터 제어 |
 | `IDLE_TIMEOUT_MS` | 30 min | Offline idle before backlight auto-off |
 | `SW_IDX_DN_LOCK_REL` | 13 | Manual backlight modifier key (switches[] index) |
 | `USB_SUSPEND_THRESHOLD_MS` | 50 | SOF silence threshold for suspend detection |
