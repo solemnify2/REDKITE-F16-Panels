@@ -159,7 +159,6 @@ const SwitchDef switches[] = {
 
   // ---- Alt Gear Panel (left aux console) ----
   {"ALT GEAR Handle",       PNL_ALT_GEAR,   SW_ON_OFF,      -1,  33,   0,  NULL},     // wire too short for other than pin 33
-  {"ALT GEAR Reset",        PNL_ALT_GEAR,   SW_ON_OFF,      -1,   0,   0,  NULL},
 
 };
 
@@ -193,8 +192,6 @@ const AnalogBtnArrayDef analogBtnArrays[] = {
 // --- Analog Pots ---
 const PotDef pots[] = {
   // name              panel       pin   axis
-  {"HMCS Brightness",  PNL_HMCS,   A13,  AXIS_X},
-  {"HMCS Contrast",    PNL_HMCS,   A14,  AXIS_Y},
   {"HMCS Symbology",   PNL_HMCS,   A15,  AXIS_Z},
 };
 
