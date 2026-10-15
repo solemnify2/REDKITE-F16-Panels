@@ -698,7 +698,7 @@ void processPedal() {
 
   setJoystickAxis(PEDAL_AXIS_LBRAKE, brakeMode ? lb : 0);
   setJoystickAxis(PEDAL_AXIS_RBRAKE, brakeMode ? rb : 0);
-  setJoystickAxis(PEDAL_AXIS_RUDDER, brakeMode ? (1024 / 2) : ((1023 - lb + rb) / 2));
+  setJoystickAxis(PEDAL_AXIS_RUDDER, (1023 - lb + rb) / 2);
 #endif
 }
 
