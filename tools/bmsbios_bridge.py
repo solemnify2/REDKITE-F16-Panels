@@ -41,9 +41,10 @@ OFF_FD2_UHF_FREQ   = 52     # int uhf_panel_frequency (BUP UHF 주파수)
 LB_ADV_STANDBY      = 0x80000000  # bit 31
 
 # --- LightBits2 (offset 124) ---
-LB2_EWS_GO          = 0x00000040  # bit 6  - CMDS GO (정상 동작)
-LB2_EWS_NOGO        = 0x00000080  # bit 7  - CMDS NO GO (고장)
-LB2_EWS_RDY         = 0x00000200  # bit 9  - CMDS DISPENSE RDY
+LB2_EWS_GO          = 0x00000040  # bit 6  - CMDS GO
+LB2_EWS_NOGO        = 0x00000080  # bit 7  - CMDS NO GO
+LB2_EWS_DISP        = 0x00000100  # bit 8  - CMDS DISPENSE
+LB2_EWS_RDY         = 0x00000200  # bit 9  - CMDS RDY
 LB2_AUX_SRCH        = 0x00001000  # bit 12
 LB2_AUX_ACT         = 0x00002000  # bit 13
 LB2_AUX_LOW         = 0x00004000  # bit 14
@@ -73,7 +74,7 @@ LB3_RIGHT_GEAR_DN   = 0x00040000  # bit 18
 #  Device Profiles
 # ================================================================
 
-# LEFT_AUX: 11 direct GPIO LEDs + backlight (bit 16)
+# LEFT_AUX: 16 LEDs (11 direct GPIO + 5 CMDS SD pads) + backlight (byte 2)
 AUX_LED_MAP = [
     (0,  OFF_LIGHTBITS3, LB3_NOSE_GEAR_DN),  # NOSE GEAR
     (1,  OFF_LIGHTBITS3, LB3_LEFT_GEAR_DN),  # LEFT GEAR
@@ -86,13 +87,12 @@ AUX_LED_MAP = [
     (8,  OFF_LIGHTBITS2, LB2_ECM_PWR),       # ECM
     (9,  OFF_LIGHTBITS2, LB2_ADV_ACTIVE),    # ADV ACTIVE
     (10, OFF_LIGHTBITS,  LB_ADV_STANDBY),    # ADV STANDBY
-    # CMDS EWS 램프 — 신호 3개가 LED 6개를 구동 (같은 비트를 여러 LED 에 중복 매핑)
-    (11, OFF_LIGHTBITS2, LB2_EWS_GO),        # CMDS GO      LED x1
-    (12, OFF_LIGHTBITS2, LB2_EWS_NOGO),      # CMDS NO GO 1
-    (13, OFF_LIGHTBITS2, LB2_EWS_NOGO),      # CMDS NO GO 2
-    (14, OFF_LIGHTBITS2, LB2_EWS_RDY),       # CMDS RDY 1
-    (15, OFF_LIGHTBITS2, LB2_EWS_RDY),       # CMDS RDY 2
-    (16, OFF_LIGHTBITS2, LB2_EWS_RDY),       # CMDS RDY 3
+    # CMDS EWS 램프 — µSD 핀 순서(1→2→3→5→7) 배치. 개별 320Ω(220+100). pin 46 = spare.
+    (11, OFF_LIGHTBITS2, LB2_EWS_NOGO),      # CMDS NO GO    pin 47  µSD 1  (2 LEDs parallel)
+    (12, OFF_LIGHTBITS2, LB2_EWS_GO),        # CMDS GO       pin 44  µSD 2  (1 LED)
+    (13, OFF_LIGHTBITS2, LB2_EWS_DISP),      # CMDS DISP 1   pin 43  µSD 3  (2 LEDs parallel)
+    (14, OFF_LIGHTBITS2, LB2_EWS_DISP),      # CMDS DISP 2   pin 45  µSD 5  (1 LED)
+    (15, OFF_LIGHTBITS2, LB2_EWS_RDY),       # CMDS RDY      pin 42  µSD 7  (2 LEDs parallel)
 ]
 
 # LEFT_CONSOLE: 12 LEDs - ELEC 8 (bit 0-7) + EPU 3 (bit 8-10) + ENGINE RUN (bit 11)
