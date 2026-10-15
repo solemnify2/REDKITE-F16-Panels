@@ -60,7 +60,7 @@ VR 전용 미니멀 데스크핏을 지향합니다. VR 헤드셋을 쓰고 손�
 | MPO | Switch | Manual Pitch Override |
 | AUDIO 1/2 | Analog, Switch (MCP23017) | 볼륨 6개 (COMM CH1/CH2, MSL, THREAT, INTERCOM, ILS) + COMM 1/2 모드 3단 로터리 2개 |
 
-**DX 버튼 61개 / 조이스틱 축 10개**를 사용합니다. DCS에서는 ENG CONT, EPU 커버 자동화용 DX 3개(59~61)가 추가됩니다. 상세 배치는 [docs/PIN_ASSIGNMENT.md](docs/PIN_ASSIGNMENT.md) 참조.
+**DX 버튼 61개 / 조이스틱 축 10개**를 사용합니다. DCS에서는 ENG CONT, EPU 커버 자동화용 DX 3개(59~61)가 추가됩니다. 상세 배치는 [docs/LEFT_CONSOLE_PIN_TREE.md](docs/LEFT_CONSOLE_PIN_TREE.md) 참조.
 
 ## Hardware
 
@@ -220,8 +220,8 @@ Stand는 두 버전이 있으며, new 버전 사용을 권장합니다.
 
 | 보드 | 핀 배치 문서 |
 |---|---|
-| Left Aux + MISC | [docs/teensy_direct_pins.txt](docs/teensy_direct_pins.txt) |
-| Left Console | [docs/PIN_ASSIGNMENT.md](docs/PIN_ASSIGNMENT.md) — 핀표, MCP GPIO 맵, 엔코더, DX 버튼 맵, 패널별 배선, 전원 계통 |
+| Left Aux + MISC | [docs/LEFT_AUX_PIN_TREE.md](docs/LEFT_AUX_PIN_TREE.md) |
+| Left Console | [docs/LEFT_CONSOLE_PIN_TREE.md](docs/LEFT_CONSOLE_PIN_TREE.md) — 케이블 트리, 핀 배열, MCP GPIO 맵, DX 버튼 맵, 배선 상세, 전원 계통 |
 
 ### 저항 래더 (Resistor Ladder)
 
@@ -357,7 +357,7 @@ ECM 8버튼 래더는 PCB가 이미 제작되어 값이 고정(10kΩ 체인 + 20
 **백라이트는 별도 12V 어댑터 + PWM 디밍**
 콘솔 보드는 인디케이터 LED만 40개(ECM 32 + ELEC 8)라 USB 900mA로는 백라이트까지 감당이 안 됩니다. 12V 어댑터를 따로 쓰고 Step-Up 컨버터는 생략합니다. **어댑터 GND와 Teensy GND를 단일점으로 반드시 연결**해야 MOSFET 게이트 기준이 성립합니다. 오프라인 수동 밝기 조절은 UHF STATUS + UHF VOL 포텐셔미터로 가능합니다.
 
-배선·핀 배치 상세는 [docs/PIN_ASSIGNMENT.md](docs/PIN_ASSIGNMENT.md) 참조.
+배선·핀 배치 상세는 [docs/LEFT_CONSOLE_PIN_TREE.md](docs/LEFT_CONSOLE_PIN_TREE.md) 참조.
 
 ### Upload
 
@@ -423,8 +423,7 @@ REDKITE-F16-Panels/
 │   ├── reset_joystick_name.bat
 │   └── backup_to_synology.ps1
 ├── docs/                          # 배선도, 사양서, 프로토콜 참조
-│   ├── PIN_ASSIGNMENT.md          #   콘솔 보드 핀·배선 상세 (표)
-│   ├── LEFT_CONSOLE_PIN_TREE2.md  #   콘솔 보드 연결 트리 (케이블·패널 단위)
+│   ├── LEFT_CONSOLE_PIN_TREE.md   #   콘솔 보드 핀 트리·배선·DX맵·전원 (통합)
 │   ├── LEFT_AUX_MISC_LAN_WIRING.md #  AUX↔MISC LAN 배선도
 │   ├── backlight_spec.md / hotplug_spec.md / stepup_en_control.md
 │   └── 3d stl/                    #   3D 프린트용 STL 파일
