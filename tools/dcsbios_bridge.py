@@ -11,7 +11,7 @@ DCS-BIOS UDP 멀티캐스트 데이터를 여러 Teensy COM 포트로 동시 전
   python dcsbios_bridge.py --debug
 
 필요 패키지:
-  pip install pyserial
+  pip install pyserial hidapi
 """
 
 import socket
@@ -27,6 +27,56 @@ SERIAL_BAUD = 1000000
 
 
 TEENSY_VID  = 0x16C0
+LIGHT_INST_PNL = 0x4484   # DCS-BIOS address for instrument panel light (0~65535)
+
+# ================================================================
+#  Cougar MFD Backlight (HID)
+# ================================================================
+
+MFD_VID = 0x044F
+MFD_PIDS = [0xB351, 0xB352]   # F16 MFD 1, F16 MFD 2
+
+
+class MfdBacklight:
+    """Thrustmaster Cougar MFD backlight via HID feature report."""
+
+    def __init__(self):
+        self.devices = []
+        self.prev_brightness = -1
+
+    def open(self):
+        try:
+            import hid
+        except ImportError:
+            print("[MFD] Cougar MFD 백라이트 동기화를 사용하려면: pip install hidapi")
+            return
+        for pid in MFD_PIDS:
+            for info in hid.enumerate(MFD_VID, pid):
+                try:
+                    dev = hid.device()
+                    dev.open_path(info['path'])
+                    name = info.get('product_string', f'PID:0x{pid:04X}')
+                    self.devices.append((dev, name))
+                    print(f"  [MFD] {name} connected")
+                except Exception as e:
+                    print(f"  [MFD] PID:0x{pid:04X} open failed: {e}")
+
+    def set_brightness(self, brightness):
+        if brightness == self.prev_brightness:
+            return
+        self.prev_brightness = brightness
+        for dev, name in self.devices:
+            try:
+                dev.send_feature_report(bytes([0x00, 0x01, brightness]))
+            except Exception:
+                pass
+
+    def close(self):
+        for dev, _ in self.devices:
+            try:
+                dev.close()
+            except Exception:
+                pass
 
 # 새 Teensy 추가 시 여기에 한 줄 추가
 PID_NAMES = {
@@ -60,6 +110,27 @@ def find_teensy_ports():
             descriptions.append(f"  {p.device}: {name}")
     return found, descriptions
 
+
+
+def update_mfd_from_dcsbios(data, mfd):
+    """Parse DCS-BIOS frame for LIGHT_INST_PNL and update MFD brightness."""
+    i = 0
+    while i + 3 < len(data) and data[i] == 0x55 and data[i+1] == 0x55 and data[i+2] == 0x55 and data[i+3] == 0x55:
+        i += 4
+    while i + 3 < len(data):
+        addr = data[i] | (data[i+1] << 8)
+        count = data[i+2] | (data[i+3] << 8)
+        i += 4
+        if addr == 0x5555 and count == 0x5555:
+            break
+        if i + count > len(data):
+            break
+        if addr <= LIGHT_INST_PNL < addr + count:
+            off = LIGHT_INST_PNL - addr
+            if i + off + 1 < len(data):
+                val = data[i + off] | (data[i + off + 1] << 8)
+                mfd.set_brightness(val >> 8)
+        i += count
 
 
 def parse_dcsbios_frame(data, watch_addrs):
@@ -142,6 +213,10 @@ def main():
     if not serials:
         sys.exit(1)
 
+    # Cougar MFD backlight
+    mfd = MfdBacklight()
+    mfd.open()
+
     # UDP 멀티캐스트 소켓
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
     sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -175,6 +250,9 @@ def main():
                         except serial.SerialException:
                             pass
 
+                    if mfd.devices:
+                        update_mfd_from_dcsbios(data, mfd)
+
                     if watch_addrs:
                         parse_dcsbios_frame(data, watch_addrs)
 
@@ -206,6 +284,7 @@ def main():
     except KeyboardInterrupt:
         print(f"\n종료. 총 {packet_count} 패킷, {total_bytes} bytes 전송됨.")
     finally:
+        mfd.close()
         for _, s in serials:
             s.close()
         sock.close()
