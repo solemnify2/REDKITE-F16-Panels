@@ -27,7 +27,7 @@ Each sketch has its own `CLAUDE.md` with detailed architecture — read that fir
 
 Located in `tools/`. COM port auto-detect by VID/PID (VID `0x16C0`):
 ```
-pip install pyserial
+pip install pyserial hidapi
 python tools/bmsbios_bridge.py               # Falcon BMS (auto-detect)
 python tools/dcsbios_bridge.py               # DCS World (auto-detect)
 ```

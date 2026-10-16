@@ -6,7 +6,7 @@
 - **Board**: Teensy 4.1 (헤더 핀 0–41)
 - **USB**: PID `0x0489`, `JOYSTICK_SIZE 64` (128버튼) — 콘솔 장치(`0x048E`)와 헤더 공유
 - **I2C**: `Wire` — SDA = pin 18, SCL = pin 19 @ 100kHz, MCP23017 1장 (`0x20`, MISC 패널)
-- **DX 버튼 51, 축 1**, 메인 루프 20Hz
+- **DX 버튼 51, 축 4**, 메인 루프 20Hz
 
 케이블 이름(C1~C6, M1, I1)은 이 문서에서 부여한 명명입니다.
 관련 문서: [LEFT_AUX_MISC_LAN_WIRING.md](LEFT_AUX_MISC_LAN_WIRING.md)

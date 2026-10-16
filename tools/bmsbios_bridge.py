@@ -243,6 +243,73 @@ def compute_ecm_sr_data(shm2):
     return struct.pack('<I', sr_bits)
 
 # ================================================================
+#  Cougar MFD Backlight (HID)
+# ================================================================
+
+MFD_VID = 0x044F
+MFD_PIDS = [0xB351, 0xB352]   # F16 MFD 1, F16 MFD 2
+
+
+class MfdBacklight:
+    """Thrustmaster Cougar MFD backlight via HID feature report."""
+
+    def __init__(self):
+        self.devices = []       # list of (hid.device, product_string)
+        self.prev_brightness = -1
+        self.brt_seen = False
+
+    def open(self):
+        try:
+            import hid
+        except ImportError:
+            print("[MFD] Cougar MFD 백라이트 동기화를 사용하려면: pip install hidapi")
+            return
+        for pid in MFD_PIDS:
+            for info in hid.enumerate(MFD_VID, pid):
+                try:
+                    dev = hid.device()
+                    dev.open_path(info['path'])
+                    name = info.get('product_string', f'PID:0x{pid:04X}')
+                    self.devices.append((dev, name))
+                    print(f"  [MFD] {name} connected")
+                except Exception as e:
+                    print(f"  [MFD] PID:0x{pid:04X} open failed: {e}")
+
+    def set_brightness(self, brightness):
+        """Set backlight brightness (0-255) on all MFDs."""
+        if brightness == self.prev_brightness:
+            return
+        self.prev_brightness = brightness
+        for dev, name in self.devices:
+            try:
+                dev.send_feature_report(bytes([0x00, 0x01, brightness]))
+            except Exception:
+                pass
+
+    def update(self, shm2):
+        """Read instrLight from shared memory and update MFD brightness."""
+        if not self.devices or shm2 is None:
+            return
+        instr = read_byte(shm2, OFF_FD2_INSTRLIGHT)
+        if instr >= 2 and not self.brt_seen:
+            self.brt_seen = True
+        if instr == 0:
+            brightness = 0
+        elif instr >= 2:
+            brightness = BRT_PWM
+        else:
+            brightness = DIM_PWM_LOWERED if self.brt_seen else DIM_PWM_DEFAULT
+        self.set_brightness(brightness)
+
+    def close(self):
+        for dev, _ in self.devices:
+            try:
+                dev.close()
+            except Exception:
+                pass
+
+
+# ================================================================
 #  Device Profiles — per-device LED map + frame builder
 # ================================================================
 
@@ -439,6 +506,10 @@ def main():
     if not devices:
         sys.exit(1)
 
+    # Cougar MFD backlight
+    mfd = MfdBacklight()
+    mfd.open()
+
     print(f"\n[BMS-BIOS] Update rate: {args.hz} Hz")
     print(f"[BMS-BIOS] Waiting for Falcon BMS shared memory...")
 
@@ -472,6 +543,8 @@ def main():
                     for dev in devices:
                         dev.build_and_send(lbits, shm2)
 
+                    mfd.update(shm2)
+
                     # Periodic heartbeat
                     if int(time.time() * args.hz) % args.hz == 0:
                         for dev in devices:
@@ -495,6 +568,7 @@ def main():
     except KeyboardInterrupt:
         print("\n[BMS-BIOS] Stopped.")
     finally:
+        mfd.close()
         for dev in devices:
             dev.ser.close()
         if shm: shm.close()

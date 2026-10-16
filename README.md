@@ -325,8 +325,11 @@ Arduino IDE에서 해당 `.ino`를 열고 Upload합니다. `usb_desc.h`의 `PROD
 스위치 입력은 USB Joystick으로 직접 전달되지만, **LED 상태는 시뮬레이터에서 받아와야 합니다.** Python 브릿지가 시뮬레이터 데이터를 읽어 시리얼로 Teensy에 전송합니다.
 
 ```bash
-pip install pyserial
+pip install pyserial hidapi
 ```
+
+- `pyserial` — Teensy 시리얼 통신 (필수)
+- `hidapi` — Cougar MFD 백라이트 동기화 (선택, 없으면 MFD 건너뜀)
 
 ### Falcon BMS (BMS-BIOS)
 
@@ -339,6 +342,7 @@ python tools/bmsbios_bridge.py --debug                  # LightBits 실시간 �
 - `0xAA 0xBB` sync로 자동 감지
 - BMS 공유 메모리에서 LED 상태를 읽어 Teensy로 전송
 - 프레임: `sync(2) + ledBits(4) + srData(4) + uhfFreq(4) + uhfPreset(1) + XOR(1)` = 16바이트
+- Cougar MFD 연결 시 `instrLight`에 따라 백라이트 자동 동기화
 - BMS 실행 전에 bridge를 먼저 실행해도 안전
 
 ### DCS World (DCS-BIOS)
