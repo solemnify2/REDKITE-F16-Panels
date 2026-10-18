@@ -835,6 +835,8 @@ void resetProtocol() {
   dcsBiosReset();
   bmsBiosReset();
   turnOffAllLeds();
+  manualBrightness = 51;  // bridge offline → 20% brightness
+  setBacklightBrightness(manualBrightness);
   //if (ALLOW_DEBUG) Serial.println("[Proto] Reset to UNKNOWN");
 }
 

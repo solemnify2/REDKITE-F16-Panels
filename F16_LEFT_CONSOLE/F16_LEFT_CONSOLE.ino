@@ -1102,6 +1102,8 @@ void resetProtocol() {
   dcsBiosReset();
   bmsBiosReset();
   turnOffAllLeds();
+  manualBrightness = 51;  // bridge offline → 20% brightness
+  setBacklightBrightness(manualBrightness);
 #if HAS_UHF_DISPLAY
   displayDashes();          // 브릿지 오프라인 표시
 #endif

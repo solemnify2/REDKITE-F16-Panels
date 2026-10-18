@@ -302,6 +302,7 @@ class MfdBacklight:
         self.set_brightness(brightness)
 
     def close(self):
+        self.set_brightness(0)
         for dev, _ in self.devices:
             try:
                 dev.close()
@@ -510,6 +511,15 @@ def main():
     mfd = MfdBacklight()
     mfd.open()
 
+    # 콘솔 창 닫기(X 버튼) 시에도 MFD 소등
+    if sys.platform == 'win32':
+        _HANDLER_TYPE = ctypes.WINFUNCTYPE(ctypes.c_bool, ctypes.c_ulong)
+        def _console_handler(event):
+            mfd.set_brightness(0)
+            return False
+        _handler_ref = _HANDLER_TYPE(_console_handler)   # prevent GC
+        ctypes.windll.kernel32.SetConsoleCtrlHandler(_handler_ref, True)
+
     print(f"\n[BMS-BIOS] Update rate: {args.hz} Hz")
     print(f"[BMS-BIOS] Waiting for Falcon BMS shared memory...")
 
@@ -562,6 +572,7 @@ def main():
                     shm2 = None
                     for dev in devices:
                         dev.prev_frame = None
+                    mfd.set_brightness(0)  # sim offline → off
 
             time.sleep(interval)
 
