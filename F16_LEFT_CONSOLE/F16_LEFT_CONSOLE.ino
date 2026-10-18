@@ -706,11 +706,13 @@ static uint32_t  protoDetectStart = 0;
 // ================================================================
 
 #define NUM_COVERS 3                      // ENG CONT, EPU OFF, EPU ON
+#define NUM_COMM_PWR 4                    // COMM1 ON/OFF, COMM2 ON/OFF
 
 static uint8_t switchBtnStart[NUM_SWITCHES];
 static uint8_t analogBtnStart[NUM_ANALOG_ARRAYS];
 static uint8_t encoderBtnStart[NUM_ENCODERS];
 static uint8_t coverBtnBase;             // DCS 커버 자동화 DX 시작 번호
+static uint8_t commPwrBtnBase;           // COMM 전원 DX 시작 번호
 static int     totalButtons = 0;
 
 static uint8_t prevBtnState[128];
@@ -744,6 +746,10 @@ void assignButtons() {
   // DCS 커버 자동화 (ENG CONT cover, EPU OFF cover, EPU ON cover)
   coverBtnBase = btn;
   btn += NUM_COVERS;
+
+  // COMM1/COMM2 Power ON/OFF (pot threshold)
+  commPwrBtnBase = btn;
+  btn += NUM_COMM_PWR;
 
   totalButtons = btn - 1;
   if (totalButtons > 128)
@@ -809,6 +815,63 @@ void processCovers() {
     } else {
       // 정상: 커버 = 스위치 상태 미러링
       Joystick.button(coverBtnBase + i, swState);
+    }
+  }
+}
+
+
+// ================================================================
+//  COMM1/COMM2 Power ON/OFF (pot threshold → DX pulse)
+// ================================================================
+//
+//  COMM1, COMM2 볼륨 노브에 전원 스위치가 있어,
+//  pot ADC 값이 threshold 미만이면 OFF, 이상이면 ON.
+//  상태 전환 시 모멘터리 DX 펄스를 발생시킵니다.
+//
+//  COMM1 PWR OFF = DX 62
+//  COMM1 PWR ON  = DX 63
+//  COMM2 PWR OFF = DX 64
+//  COMM2 PWR ON  = DX 65
+
+#define COMM_PWR_THRESHOLD  5     // ADC threshold (10-bit, 0~1023)
+#define COMM_PWR_PULSE_TICKS 4    // ~40ms pulse @ 100Hz
+
+struct CommPwrRuntime {
+  bool    prevOn;
+  uint8_t pulseTicks;   // >0: DX pulse active
+  uint8_t btnOffset;    // 0=ON, 1=OFF within this COMM channel
+};
+static CommPwrRuntime commPwrRt[2];  // [0]=COMM1, [1]=COMM2
+
+static const uint8_t commPotIdx[] = {0, 1};  // pots[] index: COMM1=0, COMM2=1
+
+void processCommPower() {
+  for (int ch = 0; ch < 2; ch++) {
+    int raw = 0;
+    for (int s = 0; s < 4; s++) raw += analogRead(pots[commPotIdx[ch]].pin);
+    raw /= 4;
+
+    bool isOn = (raw >= COMM_PWR_THRESHOLD);
+    CommPwrRuntime& rt = commPwrRt[ch];
+
+    // State transition → start pulse
+    if (isOn != rt.prevOn) {
+      rt.prevOn = isOn;
+      rt.btnOffset = isOn ? 1 : 0;  // 0=OFF, 1=ON
+      rt.pulseTicks = COMM_PWR_PULSE_TICKS;
+      lastInputTime = millis();
+    }
+
+    // Emit DX pulse
+    uint8_t offBtn = commPwrBtnBase + ch * 2;       // COMM{ch} PWR OFF
+    uint8_t onBtn  = commPwrBtnBase + ch * 2 + 1;   // COMM{ch} PWR ON
+    if (rt.pulseTicks > 0) {
+      Joystick.button(offBtn, rt.btnOffset == 0 ? 1 : 0);
+      Joystick.button(onBtn,  rt.btnOffset == 1 ? 1 : 0);
+      rt.pulseTicks--;
+    } else {
+      Joystick.button(offBtn, 0);
+      Joystick.button(onBtn, 0);
     }
   }
 }
@@ -1234,6 +1297,14 @@ void setup() {
   assignButtons();
   memset(prevBtnState, 0, sizeof(prevBtnState));
 
+  // COMM power: read initial pot state to avoid false trigger at startup
+  for (int ch = 0; ch < 2; ch++) {
+    int raw = 0;
+    for (int s = 0; s < 4; s++) raw += analogRead(pots[commPotIdx[ch]].pin);
+    commPwrRt[ch].prevOn = (raw / 4 >= COMM_PWR_THRESHOLD);
+    commPwrRt[ch].pulseTicks = 0;
+  }
+
   // --- Startup summary ---
   Serial.println("=========================");
   Serial.println(" F16 LEFT CONSOLE");
@@ -1323,6 +1394,7 @@ void loop() {
   processCovers();    // 커버 자동화: 스위치보다 커버가 먼저 열리고, 나중에 닫힘
   processAnalogButtons();
   processPots();
+  processCommPower();
   processEncoders();
   Joystick.send_now();
 
