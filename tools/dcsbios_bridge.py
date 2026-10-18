@@ -18,6 +18,7 @@ import socket
 import struct
 import sys
 import time
+import ctypes
 import serial
 import serial.tools.list_ports
 
@@ -72,6 +73,7 @@ class MfdBacklight:
                 pass
 
     def close(self):
+        self.set_brightness(0)
         for dev, _ in self.devices:
             try:
                 dev.close()
@@ -217,6 +219,15 @@ def main():
     mfd = MfdBacklight()
     mfd.open()
 
+    # 콘솔 창 닫기(X 버튼) 시에도 MFD 소등
+    if sys.platform == 'win32':
+        _HANDLER_TYPE = ctypes.WINFUNCTYPE(ctypes.c_bool, ctypes.c_ulong)
+        def _console_handler(event):
+            mfd.set_brightness(0)
+            return False
+        _handler_ref = _HANDLER_TYPE(_console_handler)   # prevent GC
+        ctypes.windll.kernel32.SetConsoleCtrlHandler(_handler_ref, True)
+
     # UDP 멀티캐스트 소켓
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
     sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -276,6 +287,7 @@ def main():
                 if receiving:
                     print(f"\n[!] UDP 데이터 수신 중단됨. 대기 중...")
                     receiving = False
+                    mfd.set_brightness(0)  # sim offline → off
 
             # Read serial output from Teensy (always, even without UDP data)
             for port, s in serials:
