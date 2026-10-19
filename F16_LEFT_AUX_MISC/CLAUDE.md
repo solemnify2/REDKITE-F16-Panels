@@ -119,13 +119,13 @@ All 42 header pins are used. The CMDS lamps hang off the **bottom microSD pads (
 
 ### CMDS EWS Lamps
 
-8 LEDs on 5 pins (pin 46 = spare). Assigned in microSD pin order (1→2→3→5→7). Multi-LED groups use **parallel wiring** with individual 320Ω (220+100 series) resistors (~4.1mA/LED, ~8.1mA/pin for pairs). `AUX_LED_MAP` in the bridge maps one BMS bit to multiple `leds[]` indices for DISP (2 entries).
+8 LEDs on 6 pins (pin 45 = spare). Assigned in microSD pin order (1→2→3→7→8). Multi-LED groups use **parallel wiring** with individual 320Ω (220+100 series) resistors (~4.1mA/LED, ~8.1mA/pin for pairs). `AUX_LED_MAP` in the bridge maps one BMS bit to multiple `leds[]` indices for DISP (2 entries).
 
 | Lamp | LEDs | µSD pin | Teensy pin | Wiring | `lightBits2` (offset 124) |
 |---|---|---|---|---|---|
-| NO GO | 2 | 1 | 47 | 2 parallel | `NoGo` `0x80` |
-| GO | 1 | 2 | 44 | 1 LED | `Go` `0x40` |
-| DISP | 3 | 3, 5 | 43, 45 | 43: 2 parallel, 45: 1 | `Disp` `0x100` |
-| RDY | 2 | 7 | 42 | 2 parallel | `Rdy` `0x200` |
+| DISP | 3 | 1, 2 | 47, 44 | 47: 2 parallel, 44: 1 | `Disp` `0x100` |
+| RDY | 2 | 3 | 43 | 2 parallel | `Rdy` `0x200` |
+| NO GO | 2 | 7 | 42 | 2 parallel | `NoGo` `0x80` |
+| GO | 1 | 8 | 46 | 1 LED | `Go` `0x40` |
 
 Keep LED Vf under ~3.0 V — these run straight off 3.3 V logic, same as the GEAR/TWA LEDs. DCS-BIOS does not drive these yet.

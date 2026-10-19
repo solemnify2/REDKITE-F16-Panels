@@ -200,10 +200,10 @@ enum LedIdx {
   LI_NOSE_GEAR, LI_LEFT_GEAR, LI_RIGHT_GEAR, LI_GEAR_WARN,
   LI_TWA_POWER, LI_TWA_LOW, LI_TWA_SEARCH, LI_TWA_ACT,
   LI_ECM, LI_ADV_ACTIVE, LI_ADV_STANDBY,
+  LI_CMDS_DISP_12,  LI_CMDS_DISP_3,
+  LI_CMDS_RDY,
   LI_CMDS_NOGO,
   LI_CMDS_GO,
-  LI_CMDS_DISP_1,  LI_CMDS_DISP_2,
-  LI_CMDS_RDY,
 };
 
 // pin 번호가 direct LED와 MCP LED에서 중복될 경우, MCP 쪽이 우선 적용됩니다.
@@ -222,12 +222,12 @@ const LedDef leds[] = {
   {"ADV Active",   PNL_MISC,  9,   0},   // MCP device 0, GPB0
   {"ADV Standby",  PNL_MISC,  8,   0},   // MCP device 0, GPB1
   // CMDS EWS 램프 — 하단 SD 패드에서 SD 확장 케이블로 인출.
-  //   microSD 핀 순서(1→2→3→5→7)에 맞춰 배치. 개별 320Ω(220+100). pin 46 = spare.
-  {"CMDS NO GO",   PNL_CMDS,  47,  -1},   // SD DAT2 (µSD 1)  — 2 LEDs parallel
-  {"CMDS GO",      PNL_CMDS,  44,  -1},   // SD DAT3 (µSD 2)  — 1 LED
-  {"CMDS DISP 1",  PNL_CMDS,  43,  -1},   // SD CMD  (µSD 3)  — 2 LEDs parallel
-  {"CMDS DISP 2",  PNL_CMDS,  45,  -1},   // SD CLK  (µSD 5)  — 1 LED
-  {"CMDS RDY",     PNL_CMDS,  42,  -1},   // SD DAT0 (µSD 7)  — 2 LEDs parallel
+  //   microSD 핀 순서(1→2→3→7→8) 배치. 개별 320Ω(220+100). pin 45(µSD 5) = spare.
+  {"CMDS DISP 12", PNL_CMDS,  47,  -1},   // SD DAT2 (µSD 1)  — 2 LEDs parallel
+  {"CMDS DISP 3",  PNL_CMDS,  44,  -1},   // SD DAT3 (µSD 2)  — 1 LED
+  {"CMDS RDY",     PNL_CMDS,  43,  -1},   // SD CMD  (µSD 3)  — 2 LEDs parallel
+  {"CMDS NO GO",   PNL_CMDS,  42,  -1},   // SD DAT0 (µSD 7)  — 2 LEDs parallel
+  {"CMDS GO",      PNL_CMDS,  46,  -1},   // SD DAT1 (µSD 8)  — 1 LED
 };
 
 // --- MCP23017 Devices ---
