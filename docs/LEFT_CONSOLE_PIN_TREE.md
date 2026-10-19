@@ -6,7 +6,7 @@
 - **Board**: Teensy 4.1 (헤더 핀 0–41)
 - **USB**: PID `0x048E`, `JOYSTICK_SIZE 64` (128버튼)
 - **I2C**: `Wire2` — SCL2 = pin 24, SDA2 = pin 25 @ 100kHz, MCP23017 3장 (`0x20` `0x21` `0x22`)
-- **DX 버튼 58, 축 10**, 메인 루프 20Hz
+- **DX 버튼 65, 축 10**, 메인 루프 100Hz
 
 케이블 이름(C1~C14, M1~M6, I1~I3)은 이 문서에서 부여한 명명입니다.
 
@@ -86,7 +86,7 @@
 | **C11** | MCP `0x22` → ECM 패널 | ECM 스위치 6 → PB2~PB7 | 7선 |
 | **C12** | MCP `0x22` → AVTR 패널 | AVTR 스위치 2 → PA6/PA7 | 3선 |
 | **C13** | Teensy → UHF 패널 | **UHF T-TONE, SQUELCH, STATUS** (핀 34/33/41) | 4선 |
-| **C14** | Teensy(SD/SPI2) → UHF 디스플레이 | MAX7219 보드 J1 — +5V, GND, DIN(43), CLK(45), CS(44) | 5선 |
+| **C14** | Teensy(SD/SPI2) → UHF 디스플레이 | MAX7219 보드 J1 — +5V, GND, DIN(43), CLK(45), CS(42). µSD 3→5→6→7 순차 배선 | 5선 |
 | 12V | 어댑터 → 백라이트 | 전 패널 데이지체인 | 2선 |
 
 선 수에는 3.3V / GND 가 포함되어 있습니다.
@@ -205,13 +205,14 @@ SD 카드 소켓의 **SPI2** 를 **SD 확장 케이블**로 빼내 연결하므�
 
 | Teensy | SPI2 | 디스플레이 J1 |
 |---|---|---|
-| 43 | MOSI2 | J1.3 DIN |
-| 45 | SCK2 | J1.4 CLK |
-| 44 | CS2 | J1.5 CS (소프트웨어 토글) |
+| 43 | MOSI2 (µSD 3) | J1.3 DIN |
+| 45 | SCK2 (µSD 5) | J1.4 CLK |
+| 42 | GPIO (µSD 7) | J1.5 CS (소프트웨어 토글) |
 | VIN | – | J1.1 +5V |
-| GND | – | J1.2 GND |
+| GND | – (µSD 6) | J1.2 GND |
 
-MISO2(42)는 MAX7219 가 단방향이라 쓰지 않습니다. 8MHz 하드웨어 SPI 로 구동하며,
+µSD 3→5→6→7 순차 배선으로 리본 케이블에서 깔끔하게 인출됩니다.
+44(µSD 2), 46(µSD 8), 47(µSD 1) 은 미사용. 8MHz 하드웨어 SPI 로 구동하며,
 스케치에서 `HAS_UHF_DISPLAY` 로 켜고 끕니다.
 
 > ⚠ **SD 카드와 공존 불가** — 같은 핀을 공유하므로 이 보드에서는 microSD 를 쓸 수 없습니다.
@@ -363,9 +364,9 @@ MISO2(42)는 MAX7219 가 단방향이라 쓰지 않습니다. 8MHz 하드웨어 
 
 ---
 
-## DX 버튼 맵 (56 / 128)
+## DX 버튼 맵 (65 / 128)
 
-버튼 번호는 `switches[]` → `analogBtnArrays[]` → `encoders[]` → `switches[]`(LATE) 순서로 런타임에 자동 배정됩니다.
+버튼 번호는 `switches[]` → `analogBtnArrays[]` → `encoders[]` → `switches[]`(LATE) → covers → COMM power 순서로 런타임에 자동 배정됩니다.
 
 | 버튼 | 패널 | 신호 |
 |------|------|------|
@@ -391,10 +392,19 @@ MISO2(42)는 MAX7219 가 단방향이라 쓰지 않습니다. 8MHz 하드웨어 
 | 42–53 | UHF | 엔코더 6개 × (CW / CCW) |
 | 54–55 | ENGINE | MAX POWER / AB RESET |
 | 56 | ENGINE | ENG DATA |
+| 57–58 | AUDIO 2 | HOT MIC / CIPHER |
+| 59 | ENGINE | ENG CONT COVER (DCS 커버 자동화) |
+| 60–61 | EPU | EPU OFF COVER / EPU ON COVER (DCS 커버 자동화) |
+| 62–63 | AUDIO 1 | COMM1 PWR OFF / ON (pot threshold) |
+| 64–65 | AUDIO 1 | COMM2 PWR OFF / ON (pot threshold) |
 
 > 54번부터는 `switches[]` 배열 맨 뒤(`SWITCH_LATE_START` 이후)에 있는 항목입니다.
 > 래더·엔코더 **뒤에** 배정해서, 스위치를 새로 추가해도 기존 버튼 1~53 의
 > 바인딩이 그대로 유지되도록 한 구조입니다.
+>
+> DX 59~61 은 DCS 커버 자동화용으로, DCS에서만 사용됩니다.
+> DX 62~65 는 COMM1/COMM2 볼륨 pot의 전원 스위치입니다.
+> pot ADC < 5 → OFF, ≥ 5 → ON 전환 시 모멘터리 DX 펄스를 발생시킵니다.
 
 ---
 
@@ -670,7 +680,7 @@ USB 5V (900mA)
 | └ 여유 핀 | 12, 39 |
 | **MCP23017 GPIO** | 39 / 48 |
 | 74HC595 출력 | 32 / 32 |
-| **DX 버튼** | **58 / 128** |
+| **DX 버튼** | **65 / 128** |
 | 조이스틱 축 | 10 / 23 |
 | I2C 주소 | `0x20` `0x21` `0x22` |
 

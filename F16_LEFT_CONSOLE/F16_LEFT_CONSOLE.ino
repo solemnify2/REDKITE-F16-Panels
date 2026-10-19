@@ -145,9 +145,9 @@
 // 엣지 핀(0~41)은 전혀 쓰지 않으므로 기존 배치가 그대로 유지됩니다.
 // ⚠ SD 카드를 쓰게 되면 충돌합니다.
 #define HAS_UHF_DISPLAY   1
-#define PIN_DISP_DIN      43      // MOSI2 -> J1.3 DIN
-#define PIN_DISP_CS       44      // CS2   -> J1.5 CS (소프트웨어 토글)
-#define PIN_DISP_CLK      45      // SCK2  -> J1.4 CLK
+#define PIN_DISP_DIN      43      // MOSI2 (µSD 3) -> J1.3 DIN
+#define PIN_DISP_CLK      45      // SCK2  (µSD 5) -> J1.4 CLK
+#define PIN_DISP_CS       42      // GPIO  (µSD 7) -> J1.5 CS (소프트웨어 토글)
 
 // Encoder -> DX pulse timing (in main-loop ticks)
 #define ENC_PULSE_TICKS   4         // pulse held ~40ms @100Hz

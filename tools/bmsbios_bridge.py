@@ -87,12 +87,12 @@ AUX_LED_MAP = [
     (8,  OFF_LIGHTBITS2, LB2_ECM_PWR),       # ECM
     (9,  OFF_LIGHTBITS2, LB2_ADV_ACTIVE),    # ADV ACTIVE
     (10, OFF_LIGHTBITS,  LB_ADV_STANDBY),    # ADV STANDBY
-    # CMDS EWS 램프 — µSD 핀 순서(1→2→3→5→7) 배치. 개별 320Ω(220+100). pin 46 = spare.
-    (11, OFF_LIGHTBITS2, LB2_EWS_NOGO),      # CMDS NO GO    pin 47  µSD 1  (2 LEDs parallel)
-    (12, OFF_LIGHTBITS2, LB2_EWS_GO),        # CMDS GO       pin 44  µSD 2  (1 LED)
-    (13, OFF_LIGHTBITS2, LB2_EWS_DISP),      # CMDS DISP 1   pin 43  µSD 3  (2 LEDs parallel)
-    (14, OFF_LIGHTBITS2, LB2_EWS_DISP),      # CMDS DISP 2   pin 45  µSD 5  (1 LED)
-    (15, OFF_LIGHTBITS2, LB2_EWS_RDY),       # CMDS RDY      pin 42  µSD 7  (2 LEDs parallel)
+    # CMDS EWS 램프 — µSD 핀 순서(1→2→3→7→8) 배치. 개별 320Ω(220+100). pin 45(µSD 5) = spare.
+    (11, OFF_LIGHTBITS2, LB2_EWS_DISP),      # CMDS DISP 12  pin 47  µSD 1  (2 LEDs parallel)
+    (12, OFF_LIGHTBITS2, LB2_EWS_DISP),      # CMDS DISP 3   pin 44  µSD 2  (1 LED)
+    (13, OFF_LIGHTBITS2, LB2_EWS_RDY),       # CMDS RDY      pin 43  µSD 3  (2 LEDs parallel)
+    (14, OFF_LIGHTBITS2, LB2_EWS_NOGO),      # CMDS NO GO    pin 42  µSD 7  (2 LEDs parallel)
+    (15, OFF_LIGHTBITS2, LB2_EWS_GO),        # CMDS GO       pin 46  µSD 8  (1 LED)
 ]
 
 # LEFT_CONSOLE: 12 LEDs - ELEC 8 (bit 0-7) + EPU 3 (bit 8-10) + ENGINE RUN (bit 11)
