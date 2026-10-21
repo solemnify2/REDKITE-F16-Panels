@@ -1145,7 +1145,7 @@ void welcomeCeremony() {
 
   turnOffAllLeds();
   displayLampTest(false);
-  displayDashes();              // 다음 BMS 프레임이 올 때까지 대시
+  displayOn(false);             // 번인 방지: 브릿지 수신 전까지 꺼둠
 }
 
 
@@ -1163,7 +1163,7 @@ void resetProtocol() {
   turnOffAllLeds();
   manualBrightness = 51;  // bridge offline → 20% brightness
   setBacklightBrightness(manualBrightness);
-  displayDashes();          // 브릿지 오프라인 표시
+  displayOn(false);         // 번인 방지: 브릿지 오프라인 시 디스플레이 OFF
   //if (ALLOW_DEBUG) Serial.println("[Proto] Reset to UNKNOWN");
 }
 
@@ -1273,7 +1273,7 @@ void setup() {
 
   // --- UHF 7세그 디스플레이 (MAX7219) ---
   displayBegin();
-  displayDashes();          // 브릿지 연결 전에는 대시
+  displayOn(false);         // 번인 방지: 브릿지 연결 전까지 꺼둠
 
   // --- 74HC595 ---
   pinMode(SR_DATA_PIN,  OUTPUT);
