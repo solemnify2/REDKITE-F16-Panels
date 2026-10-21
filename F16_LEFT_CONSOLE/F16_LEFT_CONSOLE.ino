@@ -145,9 +145,12 @@
 // 엣지 핀(0~41)은 전혀 쓰지 않으므로 기존 배치가 그대로 유지됩니다.
 // ⚠ SD 카드를 쓰게 되면 충돌합니다.
 #define HAS_UHF_DISPLAY   1
-#define PIN_DISP_DIN      43      // MOSI2 (µSD 3) -> J1.3 DIN
-#define PIN_DISP_CLK      45      // SCK2  (µSD 5) -> J1.4 CLK
-#define PIN_DISP_CS       42      // GPIO  (µSD 7) -> J1.5 CS (소프트웨어 토글)
+// 핀↔µSD 접점 대응은 핀아웃 카드 card11b_rev4 기준. MOSI2·SCK2 는 실리콘 고정이고
+// CS 만 자유로운데, 46 에 두면 FPC 도선이 J1.2->J1.5 순서로 15 -> 12 -> 6 -> 4
+// 내림차순이 되어 리본이 교차하지 않습니다 (오름차순은 MOSI2/SCK2 위치상 불가능).
+#define PIN_DISP_DIN      43      // MOSI2 / SD DAT0 (µSD 7, FPC 12) -> J1.3 DIN
+#define PIN_DISP_CLK      45      // SCK2  / SD CMD  (µSD 3, FPC  6) -> J1.4 CLK
+#define PIN_DISP_CS       46      // GPIO  / SD DAT3 (µSD 2, FPC  4) -> J1.5 CS (소프트웨어 토글)
 
 // Encoder -> DX pulse timing (in main-loop ticks)
 #define ENC_PULSE_TICKS   4         // pulse held ~40ms @100Hz

@@ -221,13 +221,16 @@ const LedDef leds[] = {
   {"ECM",          PNL_MISC,  7,   0},    // MCP device 0, GPA7
   {"ADV Active",   PNL_MISC,  9,   0},   // MCP device 0, GPB0
   {"ADV Standby",  PNL_MISC,  8,   0},   // MCP device 0, GPB1
-  // CMDS EWS 램프 — 하단 SD 패드에서 SD 확장 케이블로 인출.
-  //   microSD 핀 순서(1→2→3→7→8) 배치. 개별 320Ω(220+100). pin 45(µSD 5) = spare.
-  {"CMDS DISP 12", PNL_CMDS,  47,  -1},   // SD DAT2 (µSD 1)  — 2 LEDs parallel
-  {"CMDS DISP 3",  PNL_CMDS,  44,  -1},   // SD DAT3 (µSD 2)  — 1 LED
-  {"CMDS RDY",     PNL_CMDS,  43,  -1},   // SD CMD  (µSD 3)  — 2 LEDs parallel
-  {"CMDS NO GO",   PNL_CMDS,  42,  -1},   // SD DAT0 (µSD 7)  — 2 LEDs parallel
-  {"CMDS GO",      PNL_CMDS,  46,  -1},   // SD DAT1 (µSD 8)  — 1 LED
+  // CMDS EWS 램프 — 하단 SD 패드에서 15핀 FPC 확장 케이블로 인출. 개별 320Ω(220+100).
+  //   핀↔µSD 접점 대응은 핀아웃 카드 card11b_rev4 기준 (SD 소켓은 SDIO 배선이라
+  //   SPI2 이름과 SD 신호명이 어긋납니다). FPC 도선 번호가 낮은 쪽부터
+  //   RDY → DISP 3 → DISP 1·2 → GO → NO GO 순으로 늘어서 리본이 꼬이지 않습니다.
+  //   pin 44 (CLK/CS2, µSD 5, FPC 10) = spare, 공통 캐소드는 FPC 9.
+  {"CMDS DISP 12", PNL_CMDS,  45,  -1},   // CMD /SCK2  µSD 3, FPC  6 — 2 LEDs parallel
+  {"CMDS DISP 3",  PNL_CMDS,  46,  -1},   // DAT3       µSD 2, FPC  4 — 1 LED
+  {"CMDS RDY",     PNL_CMDS,  47,  -1},   // DAT2       µSD 1, FPC  2 — 2 LEDs parallel
+  {"CMDS NO GO",   PNL_CMDS,  42,  -1},   // DAT1/MISO2 µSD 8, FPC 14 — 2 LEDs parallel
+  {"CMDS GO",      PNL_CMDS,  43,  -1},   // DAT0/MOSI2 µSD 7, FPC 12 — 1 LED
 };
 
 // --- MCP23017 Devices ---
