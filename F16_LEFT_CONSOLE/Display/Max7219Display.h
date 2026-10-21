@@ -128,6 +128,6 @@ void displayChannel(uint8_t ch) {
     return;
   }
   uint8_t tens = ch / 10;
-  maxDigit(6, (tens == 0) ? CB_BLANK : tens);
+  maxDigit(6, tens);
   maxDigit(7, ch % 10);
 }
