@@ -83,6 +83,13 @@
 // Address 0x4484: LIGHT_INST_PNL — instrument panel backlight (0-65535)
 #define DCSBIOS_INST_PNL_ADDR      0x4484
 
+// --- UHF Display (string outputs) ---
+// Address 0x45B0: UHF_CHAN_DISP — 2-char string (" 1"~"20")
+// Address 0x45B2: UHF_FREQ_DISP — 7-char string ("305.000")
+#define DCSBIOS_UHF_CHAN_ADDR      0x45B0
+#define DCSBIOS_UHF_FREQ_ADDR     0x45B2
+#define DCSBIOS_UHF_FREQ_LEN      7
+
 // ================================================================
 //  Parser State Machine
 // ================================================================
@@ -116,7 +123,14 @@ static const uint16_t dcsBiosWatchAddrs[] = {
   DCSBIOS_ELEC_GRP1_ADDR, DCSBIOS_ELEC_GRP2_ADDR,
   DCSBIOS_ECM_GRP1_ADDR, DCSBIOS_ECM_GRP2_ADDR, DCSBIOS_ECM_GRP3_ADDR,
   DCSBIOS_INST_PNL_ADDR,
+  DCSBIOS_UHF_CHAN_ADDR,
+  DCSBIOS_UHF_FREQ_ADDR, DCSBIOS_UHF_FREQ_ADDR + 2,
+  DCSBIOS_UHF_FREQ_ADDR + 4, DCSBIOS_UHF_FREQ_ADDR + 6,
 };
+
+// UHF display string buffers
+static char uhfFreqBuf[8] = {0};   // 7 chars + null
+static char uhfChanBuf[3] = {0};   // 2 chars + null
 #define DCSBIOS_NUM_WATCH (sizeof(dcsBiosWatchAddrs) / sizeof(dcsBiosWatchAddrs[0]))
 
 static bool dcsBiosIsInteresting(uint16_t addr) {
@@ -203,6 +217,38 @@ static void dcsBiosOnUpdate(uint16_t addr, uint16_t value) {
   // --- Instrument panel backlight (PWM dimming) ---
   else if (addr == DCSBIOS_INST_PNL_ADDR) {
     setBacklightBrightness(value >> 8);   // 0~65535 → 0~255
+  }
+  // --- UHF Display (string outputs → 7-seg) ---
+  else if (addr == DCSBIOS_UHF_CHAN_ADDR) {
+    uhfChanBuf[0] = value & 0xFF;
+    uhfChanBuf[1] = (value >> 8) & 0xFF;
+    // " 1"~"20" → integer 1~20
+    int ch = 0;
+    for (int i = 0; i < 2; i++) {
+      char c = uhfChanBuf[i];
+      if (c >= '0' && c <= '9') ch = ch * 10 + (c - '0');
+    }
+    displayOn(true);
+    displayChannel(ch);
+  }
+  else if (addr >= DCSBIOS_UHF_FREQ_ADDR &&
+           addr <= DCSBIOS_UHF_FREQ_ADDR + 6) {
+    uint16_t off = addr - DCSBIOS_UHF_FREQ_ADDR;
+    uhfFreqBuf[off]     = value & 0xFF;
+    if (off + 1 < DCSBIOS_UHF_FREQ_LEN)
+      uhfFreqBuf[off + 1] = (value >> 8) & 0xFF;
+    // "305.000" → 305000 kHz (소수점 제거)
+    uint32_t khz = 0;
+    bool valid = false;
+    for (int i = 0; i < DCSBIOS_UHF_FREQ_LEN; i++) {
+      char c = uhfFreqBuf[i];
+      if (c >= '0' && c <= '9') { khz = khz * 10 + (c - '0'); valid = true; }
+      else if (c == '.') { /* skip */ }
+      else { valid = false; break; }
+    }
+    displayOn(true);
+    if (valid) displayFrequency(khz);
+    else       displayDashes();
   }
 }
 

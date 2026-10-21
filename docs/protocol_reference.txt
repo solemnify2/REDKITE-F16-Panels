@@ -33,6 +33,13 @@ Backlight Control:
 
   LIGHT_INST_PNL           17540         0x4484        0xFFFF     -    Instrument Panel Lighting (0–65535)
 
+UHF Display (string outputs):
+
+  Identifier           Address(dec)  Address(hex)  Type     Length  Description
+  -------------------  -----------   -----------   ------   ------  -----------
+  UHF_CHAN_DISP        17840         0x45B0        string   2       UHF Channel Display (" 1"~"20")
+  UHF_FREQ_DISP        17842         0x45B2        string   7       UHF Manual Frequency Display ("305.000")
+
 Not currently used but available:
 
   LIGHT_RWR_POWER      17534         0x447E        0x8000     15   RWR Power
