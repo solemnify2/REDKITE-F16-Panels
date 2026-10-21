@@ -118,7 +118,7 @@ SOF-based via `USB1_FRINDEX`. No frame change for 50ms → suspended. All LEDs a
 | 45 | SCK2 | CLK |
 | 44 | CS2 | CS (toggled in software) |
 
-Toggle the whole feature with `HAS_UHF_DISPLAY` in the sketch. `displayFrequency()` falls back to dashes outside 100000–999999 kHz, and the panel shows dashes whenever the bridge is offline (`resetProtocol()`), blanking only on USB suspend. Writes are cached per digit, so a steady display costs no SPI traffic.
+The display is always built in — there is no compile-time switch. `displayFrequency()` falls back to dashes outside 100000–999999 kHz, and the panel shows dashes whenever the bridge is offline (`resetProtocol()`), blanking only on USB suspend. Writes are cached per digit, so a steady display costs no SPI traffic.
 
 ⚠ These pins are shared with the microSD socket — an SD card cannot be used on this board.
 

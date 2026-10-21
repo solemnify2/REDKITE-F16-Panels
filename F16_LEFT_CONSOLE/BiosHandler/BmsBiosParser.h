@@ -70,13 +70,11 @@ static void bmsBiosApply() {
   srFlush();
 
   // UHF 7세그 디스플레이 — 주파수(kHz)와 프리셋 채널
-#if HAS_UHF_DISPLAY
   uint32_t uhfFreq = bbBuf[8]  | ((uint32_t)bbBuf[9]  << 8) |
                      ((uint32_t)bbBuf[10] << 16) | ((uint32_t)bbBuf[11] << 24);
   displayOn(true);
   displayFrequency(uhfFreq);     // 범위를 벗어나면 드라이버가 대시를 표시
   displayChannel(bbBuf[12]);
-#endif
 }
 
 // ================================================================

@@ -144,7 +144,6 @@
 // Teensy 4.1 하단 SD 카드 인터페이스의 SPI2 를 SD 확장 케이블로 빼내 씁니다.
 // 엣지 핀(0~41)은 전혀 쓰지 않으므로 기존 배치가 그대로 유지됩니다.
 // ⚠ SD 카드를 쓰게 되면 충돌합니다.
-#define HAS_UHF_DISPLAY   1
 // 핀↔µSD 접점 대응은 핀아웃 카드 card11b_rev4 기준. MOSI2·SCK2 는 실리콘 고정이고
 // CS 만 자유로운데, 46 에 두면 FPC 도선이 J1.2->J1.5 순서로 15 -> 12 -> 6 -> 4
 // 내림차순이 되어 리본이 교차하지 않습니다 (오름차순은 MOSI2/SCK2 위치상 불가능).
@@ -662,9 +661,7 @@ void turnOffAllLeds() {
 //  BIOS Handlers (DCS-BIOS + BMS-BIOS)
 // ================================================================
 
-#if HAS_UHF_DISPLAY
 #include "Display/Max7219Display.h"
-#endif
 
 #include "BiosHandler/DcsBiosParser.h"
 #include "BiosHandler/BmsBiosParser.h"
@@ -1122,10 +1119,8 @@ static void ecmSweep(uint16_t holdMs) {
 
 void welcomeCeremony() {
   setBacklight(true);
-#if HAS_UHF_DISPLAY
   displayOn(true);
   displayLampTest(true);        // 전 세그먼트 점등
-#endif
 
   // ECM sweep: column by column (S -> A -> F -> T), previous column off
   ecmSweep(200);
@@ -1149,10 +1144,8 @@ void welcomeCeremony() {
   }
 
   turnOffAllLeds();
-#if HAS_UHF_DISPLAY
   displayLampTest(false);
   displayDashes();              // 다음 BMS 프레임이 올 때까지 대시
-#endif
 }
 
 
@@ -1170,9 +1163,7 @@ void resetProtocol() {
   turnOffAllLeds();
   manualBrightness = 51;  // bridge offline → 20% brightness
   setBacklightBrightness(manualBrightness);
-#if HAS_UHF_DISPLAY
   displayDashes();          // 브릿지 오프라인 표시
-#endif
   //if (ALLOW_DEBUG) Serial.println("[Proto] Reset to UNKNOWN");
 }
 
@@ -1280,11 +1271,9 @@ void setup() {
   for (unsigned int i = 0; i < NUM_LEDS; i++)
     if (leds[i].mcpIdx < 0) pinMode(leds[i].pin, OUTPUT);
 
-#if HAS_UHF_DISPLAY
   // --- UHF 7세그 디스플레이 (MAX7219) ---
   displayBegin();
   displayDashes();          // 브릿지 연결 전에는 대시
-#endif
 
   // --- 74HC595 ---
   pinMode(SR_DATA_PIN,  OUTPUT);
@@ -1360,9 +1349,7 @@ void loop() {
 
   if (isUSBSuspended()) {
     turnOffAllLeds();
-#if HAS_UHF_DISPLAY
     displayOn(false);
-#endif
     if (!backlightIdleOff) {
       setBacklight(false);
       backlightIdleOff = true;
