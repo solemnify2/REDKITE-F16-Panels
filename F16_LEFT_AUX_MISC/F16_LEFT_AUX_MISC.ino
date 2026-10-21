@@ -225,12 +225,12 @@ const LedDef leds[] = {
   //   핀↔µSD 접점 대응은 핀아웃 카드 card11b_rev4 기준 (SD 소켓은 SDIO 배선이라
   //   SPI2 이름과 SD 신호명이 어긋납니다). FPC 도선 번호가 낮은 쪽부터
   //   RDY → DISP 3 → DISP 1·2 → GO → NO GO 순으로 늘어서 리본이 꼬이지 않습니다.
-  //   pin 44 (CLK/CS2, µSD 5, FPC 10) = spare, 공통 캐소드는 FPC 9.
+  //   pin 42 (DAT1/MISO2, µSD 8, FPC 14) = spare, 공통 캐소드는 FPC 15.
   {"CMDS DISP 12", PNL_CMDS,  45,  -1},   // CMD /SCK2  µSD 3, FPC  6 — 2 LEDs parallel
   {"CMDS DISP 3",  PNL_CMDS,  46,  -1},   // DAT3       µSD 2, FPC  4 — 1 LED
   {"CMDS RDY",     PNL_CMDS,  47,  -1},   // DAT2       µSD 1, FPC  2 — 2 LEDs parallel
-  {"CMDS NO GO",   PNL_CMDS,  42,  -1},   // DAT1/MISO2 µSD 8, FPC 14 — 2 LEDs parallel
-  {"CMDS GO",      PNL_CMDS,  43,  -1},   // DAT0/MOSI2 µSD 7, FPC 12 — 1 LED
+  {"CMDS NO GO",   PNL_CMDS,  43,  -1},   // DAT0/MOSI2 µSD 7, FPC 12 — 2 LEDs parallel
+  {"CMDS GO",      PNL_CMDS,  44,  -1},   // CLK /CS2   µSD 5, FPC 10 — 1 LED
 };
 
 // --- MCP23017 Devices ---

@@ -52,7 +52,7 @@
 
   I2C             I1 Teensy(18/19) > 0x20 — 스타 토폴로지, LAN (hotplug_spec.md 준용)
   Teensy direct   C1 GEAR   C2 CMDS   C3 TWA   C4 ALT GEAR   C5 HMCS   C6 PEDALS
-                  C7 CMDS 램프 — 하단 SD 패드에서 15핀 FPC 확장 케이블로 인출 (44 미사용)
+                  C7 CMDS 램프 — 하단 SD 패드에서 15핀 FPC 확장 케이블로 인출 (42 미사용)
   MCP > panel     M1 0x20 > MISC (모듈-패널 하니스)
   12V             backlight: pin 13 PWM 1kHz > MOSFET > 별도 12V 어댑터
   LAN 배선도      docs/LEFT_AUX_MISC_LAN_WIRING.md
@@ -70,7 +70,7 @@
 | **C4** | Teensy → ALT GEAR | Handle (Reset 미연결) | 1 |
 | **C5** | Teensy → HMCS | Symbology 1개 (Brightness / Contrast 미연결) | 1 |
 | **C6** | Teensy → 페달 | 포트 2 (Left / Right) | 2 |
-| **C7** | Teensy 하단 SD 패드 → CMDS 램프 | LED 8 (DISPENSE RDY 5 / NO GO 2 / GO 1) on 5 pins | 5 (+GND, LAN 6심, pin 44 미사용) |
+| **C7** | Teensy 하단 SD 패드 → CMDS 램프 | LED 8 (DISPENSE RDY 5 / NO GO 2 / GO 1) on 5 pins | 5 (+GND, LAN 6심, pin 42 미사용) |
 | 12V | 별도 12V 어댑터 → 백라이트 | 게이트는 핀 13 PWM 1kHz (MOSFET) | 2 |
 
 콘솔 장치와 달리 MCP가 1장뿐이라 **I2C는 체인이 아닌 스타(단일 링크)**입니다.
@@ -180,13 +180,13 @@ MCP 단선 시 **GEAR WARN LED가 점등**되어 패널에서 바로 알 수 있
 
 | FPC | microSD 핀 | SDIO | SPI2 | Teensy 핀 | 용도 | BMS `lightBits2` (offset 124) |
 |---|---|---|---|---|---|---|
-| 15 | 6 | VSS | — | GND |  |  |
-| 14 | 8 | DAT1 | MISO2 | **42** | **NO GO 1·2** (병렬) | `NoGo` `0x80` |
+| 15 | 6 | VSS | — | **GND** | **LED 공통 캐소드** |  |
+| 14 | 8 | DAT1 | MISO2 | 42 | 미사용 |  |
 | 13 | 6 | VSS | — | GND |  |  |
-| 12 | 7 | DAT0 | MOSI2 | **43** | **GO** | `Go` `0x40` |
+| 12 | 7 | DAT0 | MOSI2 | **43** | **NO GO 1·2** (병렬) | `NoGo` `0x80` |
 | 11 | 6 | VSS | — | GND |  |  |
-| 10 | 5 | CLK | CS2 | 44 | 미사용 |  |
-| 9 | 6 | VSS | — | **GND** | **LED 공통 캐소드** |  |
+| 10 | 5 | CLK | CS2 | **44** | **GO** | `Go` `0x40` |
+| 9 | 6 | VSS | — | GND |  |  |
 | 8 | 4 | VDD | — | 3.3V | 미사용 — LED 는 핀에서 직접 구동 |  |
 | 7 | 6 | VSS | — | GND |  |  |
 | 6 | 3 | CMD | SCK2 | **45** | **DISP 1·2** (병렬) | `Rdy` `0x200` |
@@ -226,8 +226,8 @@ LED 1개만 연결한 상태에서 **320Ω 양단 = 1.2V** → 단독 전류 **3
 
 | 자리 | LED | 가지당 | 핀 합계 |
 |---|---|---|---|
-| 병렬 2개 (핀 47 · 45 · 42) | 2 | 약 3.5mA | 약 **7.1mA** |
-| 단독 (핀 46 · 43) | 1 | **3.75mA** (실측) | **3.75mA** |
+| 병렬 2개 (핀 47 · 45 · 43) | 2 | 약 3.5mA | 약 **7.1mA** |
+| 단독 (핀 46 · 44) | 1 | **3.75mA** (실측) | **3.75mA** |
 
 8개 전부 켜도 합계 약 **25mA** 입니다.
 
@@ -295,7 +295,7 @@ LED 1개만 연결한 상태에서 **320Ω 양단 = 1.2V** → 단독 전류 **3
 | 항목 | 값 |
 |---|---|
 | **Teensy 헤더 핀** | **39 / 42** (여유 3개: pin 0, A13, A14) |
-| **하단 SD 패드** | **5 / 6** (CMDS 램프 5핀, 44 = 미사용) |
+| **하단 SD 패드** | **5 / 6** (CMDS 램프 5핀, 42 = 미사용) |
 | ├ 아날로그 입력 | 6 / 18 (래더 3 + HMCS 1 + 페달 2) — A0~A9 는 CMDS 스위치·I2C 가 디지털로 점유 |
 | └ 여유 핀 | 3개 (pin 0, A13, A14) |
 | **MCP23017 GPIO** | 14 / 16 (여유 PA6, PB7) |
@@ -318,4 +318,4 @@ LED 1개만 연결한 상태에서 **320Ω 양단 = 1.2V** → 단독 전류 **3
 | 5 | **MCP 주소 점퍼** — 출하 상태 그대로 (`0x20`) |
 | 6 | **백라이트** — 핀 13 PWM 1kHz → MOSFET → 별도 12V 어댑터 (Step-Up은 래더 ADC 노이즈 유발). 오프라인 수동 밝기: DN LOCK REL 누른 채 HMCS Symbology pot (A15, 방향 반전). [LAN 배선도](LEFT_AUX_MISC_LAN_WIRING.md) |
 | 7 | **스위치 배선** — 전부 액티브 로우 + 내부 풀업 (공통 단자 GND) |
-| 8 | **CMDS 램프** — 하단 15핀 FPC 확장 케이블 → 5핀으로 LED 8개 (개별 320Ω = 220+100 직렬, 캐소드는 FPC 9 공통). pin 44 = 미사용. 병렬 자리 핀당 약 7.1mA. Vf 3.0V 이상 LED 는 쓰지 말 것 |
+| 8 | **CMDS 램프** — 하단 15핀 FPC 확장 케이블 → 5핀으로 LED 8개 (개별 320Ω = 220+100 직렬, 캐소드는 FPC 15 공통). pin 42 = 미사용. 병렬 자리 핀당 약 7.1mA. Vf 3.0V 이상 LED 는 쓰지 말 것 |

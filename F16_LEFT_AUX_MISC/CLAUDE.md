@@ -119,15 +119,15 @@ All 42 header pins are used. The CMDS lamps hang off the **bottom microSD pads**
 
 ### CMDS EWS Lamps
 
-**Eight LEDs on five pins**, pin 44 (µSD 5, FPC 10) unused and the common cathode on FPC 9. Pairs are wired in **parallel** with an individual **320Ω** (220 + 100 series) resistor per LED — a paired pin carries both branches, so 220Ω would put it at ~9.8mA against the ~10mA per-pin guideline, while 320Ω gives ~7.1mA and also matches the single-LED branches to within 6%. Measured: 1.2V across 320Ω, i.e. 3.75mA on a single LED.
+**Eight LEDs on five pins**, pin 42 (µSD 8, FPC 14) unused and the common cathode on FPC 15. Pairs are wired in **parallel** with an individual **320Ω** (220 + 100 series) resistor per LED — a paired pin carries both branches, so 220Ω would put it at ~9.8mA against the ~10mA per-pin guideline, while 320Ω gives ~7.1mA and also matches the single-LED branches to within 6%. Measured: 1.2V across 320Ω, i.e. 3.75mA on a single LED.
 
 Pins are assigned in **FPC conductor order** so the ribbon does not cross: RDY, DISP 3, DISP 1·2, GO, NO GO from the low end.
 
 | Lamp | LEDs | Teensy pin | µSD | FPC | `leds[]` | `lightBits2` (offset 124) |
 |---|---|---|---|---|---|---|
 | DISPENSE RDY | 5 | 45 (2), 46 (1), 47 (2) | 3, 2, 1 | 6, 4, 2 | 11, 12, 13 | `Rdy` `0x200` |
-| GO | 1 | 43 | 7 | 12 | 15 | `Go` `0x40` |
-| NO GO | 2 | 42 | 8 | 14 | 14 | `NoGo` `0x80` |
+| GO | 1 | 44 | 5 | 10 | 15 | `Go` `0x40` |
+| NO GO | 2 | 43 | 7 | 12 | 14 | `NoGo` `0x80` |
 
 **`DISPENSE` and `RDY` are one lamp.** BMS supplies a single `Rdy` bit for it — the CMDS top row has three indicators, GO / NO GO / DISPENSE RDY (`TO-BMS1F-16CM-1.pdf` p.34) — so `AUX_LED_MAP` points three `leds[]` entries at that one bit and the five LEDs always light together. `Degr` `0x100` is the separate AUTO DEGR lamp and is not used here.
 

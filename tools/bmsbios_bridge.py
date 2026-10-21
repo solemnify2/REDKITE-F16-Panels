@@ -87,15 +87,15 @@ AUX_LED_MAP = [
     (8,  OFF_LIGHTBITS2, LB2_ECM_PWR),       # ECM
     (9,  OFF_LIGHTBITS2, LB2_ADV_ACTIVE),    # ADV ACTIVE
     (10, OFF_LIGHTBITS,  LB_ADV_STANDBY),    # ADV STANDBY
-    # CMDS EWS 램프 — FPC 도선 오름차순 배치. 개별 320Ω(220+100). pin 44(µSD 5, FPC 10) = spare.
+    # CMDS EWS 램프 — FPC 도선 오름차순 배치. 개별 320Ω(220+100). pin 42(µSD 8, FPC 14) = spare.
     #   DISPENSE 와 RDY 는 한 램프입니다 — BMS 가 주는 신호는 Rdy 하나뿐이라
     #   LED 5개(DISP 3 + RDY 2)가 항상 함께 켜집니다. CMDS 상단 지시등은
     #   GO / NO GO / DISPENSE RDY 셋 (TO-BMS1F-16CM-1.pdf p.34).
     (11, OFF_LIGHTBITS2, LB2_EWS_RDY),       # CMDS DISP 12  pin 45  µSD 3  FPC  6  (2 LEDs parallel)
     (12, OFF_LIGHTBITS2, LB2_EWS_RDY),       # CMDS DISP 3   pin 46  µSD 2  FPC  4  (1 LED)
     (13, OFF_LIGHTBITS2, LB2_EWS_RDY),       # CMDS RDY      pin 47  µSD 1  FPC  2  (2 LEDs parallel)
-    (14, OFF_LIGHTBITS2, LB2_EWS_NOGO),      # CMDS NO GO    pin 42  µSD 8  FPC 14  (2 LEDs parallel)
-    (15, OFF_LIGHTBITS2, LB2_EWS_GO),        # CMDS GO       pin 43  µSD 7  FPC 12  (1 LED)
+    (14, OFF_LIGHTBITS2, LB2_EWS_NOGO),      # CMDS NO GO    pin 43  µSD 7  FPC 12  (2 LEDs parallel)
+    (15, OFF_LIGHTBITS2, LB2_EWS_GO),        # CMDS GO       pin 44  µSD 5  FPC 10  (1 LED)
 ]
 
 # LEFT_CONSOLE: 12 LEDs - ELEC 8 (bit 0-7) + EPU 3 (bit 8-10) + ENGINE RUN (bit 11)
