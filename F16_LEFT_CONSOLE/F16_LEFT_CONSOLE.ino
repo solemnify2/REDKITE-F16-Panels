@@ -625,7 +625,13 @@ void mcpFlushOutputs() {
 void srFlush() {
   digitalWrite(SR_LATCH_PIN, LOW);
   for (int i = SR_NUM_CHIPS - 1; i >= 0; i--) {
-    shiftOut(SR_DATA_PIN, SR_CLOCK_PIN, LSBFIRST, srData[i]);
+    for (int b = 0; b < 8; b++) {
+      digitalWrite(SR_DATA_PIN, (srData[i] >> b) & 1);
+      delayMicroseconds(10);
+      digitalWrite(SR_CLOCK_PIN, HIGH);
+      delayMicroseconds(10);
+      digitalWrite(SR_CLOCK_PIN, LOW);
+    }
   }
   digitalWrite(SR_LATCH_PIN, HIGH);
 }
