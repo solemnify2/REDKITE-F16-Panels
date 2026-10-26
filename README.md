@@ -420,6 +420,9 @@ UHF 엔코더의 CW/CCW가 반대면 `encoders[]`의 `pinA`/`pinB`를 교체하�
 **로터리 엔코더 (UHF 6개)**
 1kHz `IntervalTimer` ISR에서 쿼드러처를 디코딩하고, 메인 루프가 CW/CCW DX 버튼 펄스로 배출합니다. 엔코더는 **MCP23017에 올릴 수 없습니다** — I2C 폴링으로는 펄스를 놓칩니다.
 
+**UHF 7세그 디스플레이 (MAX7219)**
+UHF 주파수 6자리 + 채널 2자리를 표시합니다. DCS에서는 DCS-BIOS가 디스플레이 상태를 직접 제공하므로 UHF OFF 시 자동으로 꺼집니다. BMS 공유 메모리에는 UHF FUNCTION 스위치 상태가 없어서, 펌웨어가 물리 스위치(FUNCTION=OFF) 위치를 직접 읽어 디스플레이를 끕니다. 브릿지 미연결 시에도 번인 방지를 위해 디스플레이가 꺼집니다.
+
 **74HC595 32/32 소진**
 칩을 추가하면 BMS-BIOS 프레임의 `srData` 32비트를 넘으므로 `BB_FRAME_PAYLOAD`, 양쪽 `BmsBiosParser.h`, `bmsbios_bridge.py`를 모두 수정해야 합니다.
 
