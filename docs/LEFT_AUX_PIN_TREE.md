@@ -82,12 +82,55 @@ MCP 단선 시 **GEAR WARN LED가 점등**되어 패널에서 바로 알 수 있
 ## Teensy 4.1 물리 핀 배열
 
 핀 순서는 PJRC 핀아웃 카드([`teensy/card11a_rev4_web.pdf`](teensy/card11a_rev4_web.pdf)) 기준.
-**양쪽 열 모두 24포지션**, 오른쪽 열의 핀 13과 41 사이에 GND가 하나 들어갑니다.
+**양쪽 열 모두 24포지션**, 왼쪽 열의 핀 13과 41 사이에 GND가 하나 들어갑니다.
+
+> ⚠ **이 그림은 바닥면(납땜면)에서 본 배치입니다** — 기판을 뒤집어 놓고 배선할 때
+> 보이는 그대로라 좌우가 PJRC 핀아웃 카드(부품면 기준)와 **반대**입니다.
+> 부품면에서 확인할 때는 좌우를 뒤집어 읽으십시오. LEFT_CONSOLE 도면과 같은 기준입니다.
 
 ```
-  CABLE   SIGNAL                PIN      PIN   SIGNAL                CABLE
-                                  ┌──── USB ────┐
-  ---   GND                  ─────┤ ○         ○ ├─────  Vin                  ---
+  ▼ BOTTOM VIEW (기판을 뒤집어 본 모습)
+
+  CABLE SIGNAL                   PIN                    PIN SIGNAL                   CABLE
+                                      ┌──── USB ────┐
+  ---   Vin                      ─────┤ ○         ○ ├─────  GND                      ---
+  ---   GND                      ─────┤ ○         ○ ├──  0  -- spare --              --
+  ---   3V3                      ─────┤ ○         ○ ├──  1  DN LOCK REL              C1
+  C2    CMDS FL            (A9)  23 ──┤ ○         ○ ├──  2  HORN SILENCER            C1
+  C2    CMDS CH            (A8)  22 ──┤ ○         ○ ├──  3  LANDING LIGHT 1          C1
+  C2    CMDS O2            (A7)  21 ──┤ ○         ○ ├──  4  LANDING LIGHT 2          C1
+  C2    CMDS O1            (A6)  20 ──┤ ○         ○ ├──  5  STORE CAT                C1
+  I1    I2C SCL            (A5)  19 ──┤ ○         ○ ├──  6  ANTI SKID 1              C1
+  I1    I2C SDA            (A4)  18 ──┤ ○         ○ ├──  7  ANTI SKID 2              C1
+  C2    CMDS RWR           (A3)  17 ──┤ ○         ○ ├──  8  BRAKES CHANNEL           C1
+  C2    CMDS JMR           (A2)  16 ──┤ ○         ○ ├──  9  GND JETT ENABLE          C1
+  C2    CMDS MWS           (A1)  15 ──┤ ○         ○ ├── 10  EMER JETTISON            C1
+  C2    CMDS JETT          (A0)  14 ──┤ ○         ○ ├── 11  HOOK                     C1
+  12V   BACKLIGHT [!]LED         13 ──┤ ○         ○ ├── 12  GEAR WARN LED            C1
+  ---   GND                      ─────┤ ○         ○ ├─────  3.3V                     ---
+  C6    PEDAL RIGHT       (A17)  41 ──┤ ○         ○ ├── 24  TWA LADDER        (A10)  C3
+  C6    PEDAL LEFT        (A16)  40 ──┤ ○         ○ ├── 25  CMDS MODE LDR     (A11)  C2
+  C5    HMCS SYMBOL       (A15)  39 ──┤ ○         ○ ├── 26  CMDS PRGM LDR     (A12)  C2
+  --    -- spare --       (A14)  38 ──┤ ○         ○ ├── 27  -- spare --       (A13)  --
+  C3    TWA ACT LED              37 ──┤ ○         ○ ├── 28  LANDING GEAR UP          C1
+  C3    TWA SEARCH LED           36 ──┤ ○         ○ ├── 29  LANDING GEAR DN          C1
+  C3    TWA LOW LED              35 ──┤ ○         ○ ├── 30  NOSE GEAR LED            C1
+  C3    TWA POWER LED            34 ──┤ ○         ○ ├── 31  LEFT GEAR LED            C1
+  C4    ALTGEAR HANDLE           33 ──┤ ○         ○ ├── 32  RIGHT GEAR LED           C1
+                                      └─────────────┘
+
+  [!] pin 13 is shared with the Teensy on-board LED. Used as an OUTPUT here,
+      so the on-board LED simply mirrors the backlight state (same as LEFT_CONSOLE).
+
+  pin 27 conflict resolved: Gear Warn LED moved to pin 12.
+
+  -- spare -- = 여유 핀 (미사용). pin 0, pin 27 (A13), pin 38 (A14)
+```
+
+헤더 42핀 외에 **하단 SD 패드** 5개(43·44·45·46·47)를 CMDS 램프가 씁니다. 42 는 미사용.
+FPC 배선표는 아래 **CMDS 램프** 절에 있습니다.
+
+---
   --    -- spare --           0 ──┤ ○         ○ ├──     GND                  ---
   C1    DN LOCK REL           1 ──┤ ○         ○ ├──     3V3                  ---
   C1    HORN SILENCER         2 ──┤ ○         ○ ├── 23  CMDS FL       (A9)  C2
