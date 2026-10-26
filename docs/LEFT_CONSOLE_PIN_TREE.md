@@ -6,7 +6,7 @@
 - **Board**: Teensy 4.1 (헤더 핀 0–41)
 - **USB**: PID `0x048E`, `JOYSTICK_SIZE 64` (128버튼)
 - **I2C**: `Wire2` — SCL2 = pin 24, SDA2 = pin 25 @ 100kHz, MCP23017 3장 (`0x20` `0x21` `0x22`)
-- **DX 버튼 65, 축 10**, 메인 루프 100Hz
+- **DX 버튼 66, 축 10**, 메인 루프 100Hz
 
 케이블 이름(C1~C14, M1~M6, I1~I3)은 이 문서에서 부여한 명명입니다.
 
@@ -30,7 +30,7 @@
             │                       └───────────────────────┘         │
             │                                                         │
         ┌╌╌╌┬╌╌╌╌╌╌╌╌╌╌╌┐           ┌───────────────────────┐         │
-        ┆ MCP#0  0x20   ├─ C7(x8) ──┤ UHF                   ├─C13(x3)─┤
+        ┆ MCP#0  0x20   ├─ C7(x8) ──┤ UHF                   ├─C13(x4)─┤
         ┆               ├─────┐     │ POT x1 (VOL)  ENC x6  ├─C2(x8)──┤
         └╌╌╌┬╌╌╌╌╌╌╌╌╌╌╌┘     │ C8  │ SW x10                ├─C3(x8)──┤
             │ I2(x8)          │(x9) │ 7SEG x8 (MAX7219)     ├─C14(x5)─┤
@@ -60,7 +60,7 @@
 
   Teensy direct   C1 ENGINE+MPO    C2 UHF VOL + ENC x3    C3 UHF ENC x3 (T41 only)
                   C4 AUDIO 1 (x6)  C5 AUDIO 2 (x3)        C6 74HC595 3wire + ECM ladder
-                  C13 UHF T-TONE + SQUELCH + STATUS
+                  C13 UHF T-TONE + SQUELCH + STATUS + TEST
   MCP > panel     C7 0x20>UHF      C8 AUDIO1·2>0x20  C9 0x21>ELEC  C10 0x21>EPU
                   C11 0x22>ECM     C12 0x22>AVTR
   12V             backlight harness, daisy-chained across all panels (not drawn)
@@ -85,7 +85,7 @@
 | **C10** | MCP `0x21` → EPU 패널 | 스위치 2 (PB6~7) + LED 3 (PB3~5) | 7선 |
 | **C11** | MCP `0x22` → ECM 패널 | ECM 스위치 6 → PB2~PB7 | 7선 |
 | **C12** | MCP `0x22` → AVTR 패널 | AVTR 스위치 2 → PA6/PA7 | 3선 |
-| **C13** | Teensy → UHF 패널 | **UHF T-TONE, SQUELCH, STATUS** (핀 34/33/41) | 4선 |
+| **C13** | Teensy → UHF 패널 | **UHF T-TONE, SQUELCH, STATUS, TEST** (핀 34/33/41/39) | 5선 |
 | **C14** | Teensy(SD/SPI2) → UHF 디스플레이 | MAX7219 보드 J1 — +5V(VIN), GND, DIN(43), CLK(45), CS(46). FPC 15→12→6→4 내림차순 | 5선 |
 | 12V | 어댑터 → 백라이트 | 전 패널 데이지체인 | 2선 |
 
@@ -169,11 +169,11 @@ Teensy 의 SDA·SCL 한 쌍에서 출발해 MCP 3장을 **한 줄로 꿰는 단�
   C5    AUDIO2 INTCOM (A2)   16 ──┤ ○         ○ ├──  9  ENC 0.1M    B      C2
   C5    AUDIO2 TACAN  (A1)   15 ──┤ ○         ○ ├── 10  ENC 0.025M  A      C3
   C5    AUDIO2 ILS    (A0)   14 ──┤ ○         ○ ├── 11  ENC 0.025M  B      C3
-  12V   BACKLIGHT [!]LED     13 ──┤ ○         ○ ├── 12  -- spare --        ---
+  12V   BACKLIGHT [!]LED     13 ──┤ ○         ○ ├── 12  -- spare --       ---
   ---   GND                  ─────┤ ○         ○ ├─────  3.3V                 ---
-  C13   UHF STATUS   (A17)  41 ──┤ ○         ○ ├── 24  I2C SCL2    (A10)  I1
+  C13   UHF STATUS    (A17)  41 ──┤ ○         ○ ├── 24  I2C SCL2    (A10)  I1
   C1    MPO           (A16)  40 ──┤ ○         ○ ├── 25  I2C SDA2    (A11)  I1
-  ---   -- spare --  (A15)  39 ──┤ ○         ○ ├── 26  JFS RUN LED (A12)  C1
+  C13   UHF TEST      (A15)  39 ──┤ ○         ○ ├── 26  JFS RUN LED (A12)  C1
   C6    ECM LADDER    (A14)  38 ──┤ ○         ○ ├── 27  JFS pin1    (A13)  C1
   C6    74HC595 ST_CP        37 ──┤ ○         ○ ├── 28  JFS pin2           C1
   C6    74HC595 SH_CP        36 ──┤ ○         ○ ├── 29  ENG CONT           C1
@@ -196,7 +196,7 @@ Teensy 의 SDA·SCL 한 쌍에서 출발해 MCP 3장을 **한 줄로 꿰는 단�
 `24/25` 가 I2C 라 `26–32` 7핀이 그 엣지 하단 블록의 전부여서 8번째 신호를 넣을 자리가
 없기 때문입니다. 한 엣지로 몰고 싶으면 MPO 를 여유 핀 `12` 로 옮기면 됩니다.
 
-**여유 핀** — 12, 39(A15) = 2개.
+**여유 핀** — 12 = 1개.
 
 ### 하단 SD 카드 인터페이스 — UHF 디스플레이 (C14)
 
@@ -225,6 +225,8 @@ SD 카드 소켓의 **SPI2** 를 **SD 확장 케이블**로 빼내 연결하므�
 C14 는 SD 확장 케이블 4선(DIN · CLK · CS · GND) + VIN 1선 = **5선**입니다.
 핀↔µSD 대응은 `docs/teensy/card11b_rev4_web.pdf` 기준이며, SD 소켓이 SDIO 배선이라
 `CMD` 가 `SCK2` 핀에, `DAT0` 가 `MOSI2` 핀에 올라갑니다.
+
+**스모키 아크릴 창 2개** — 주파수 6자리(DIG0~5)용 **52 × 11 mm**, 채널 2자리(DIG6~7)용 **13 × 11 mm**.
 
 > ⚠ **밝기** — `DISP_DEFAULT_INTENSITY = 0x08`. MAX7219 는 VIN(5V)에서 급전되어
 > 3.3V 레귤레이터와는 무관하지만, 0x0F 로 올리면 USB 예산에 최대 약 208mA 가 더해집니다.
@@ -376,9 +378,10 @@ C14 는 SD 확장 케이블 4선(DIN · CLK · CS · GND) + VIN 1선 = **5선**�
 
 ---
 
-## DX 버튼 맵 (65 / 128)
+## DX 버튼 맵 (66 / 128)
 
-버튼 번호는 `switches[]` → `analogBtnArrays[]` → `encoders[]` → `switches[]`(LATE) → covers → COMM power 순서로 런타임에 자동 배정됩니다.
+버튼 번호는 `switches[0 .. SWITCH_LATE_START-1]` → `analogBtnArrays[]` → `encoders[]`
+→ covers → COMM power → `switches[SWITCH_LATE_START ..]` 순서로 런타임에 자동 배정됩니다.
 
 | 버튼 | 패널 | 신호 |
 |------|------|------|
@@ -386,33 +389,36 @@ C14 는 SD 확장 케이블 4선(DIN · CLK · CS · GND) + VIN 1선 = **5선**�
 | 3–4 | ECM | XMIT 1 / XMIT 3 |
 | 5 | ECM | BIT |
 | 6 | ECM | RESET |
-| 7–8 | ELEC | BATT / MAIN |
+| 7–8 | EPU | NORM / ON |
 | 9 | ELEC | CAUTION RST |
 | 10–11 | AVTR | AUTO / ON |
 | 12–13 | ENGINE | JFS START 1 / START 2 |
 | 14 | ENGINE | ENG CONT |
 | 15 | MPO | MANUAL PITCH OVERRIDE |
-| 16–17 | EPU | NORM / ON |
-| 18–21 | UHF | FUNCTION OFF / MAIN / BOTH / ADF |
-| 22–24 | UHF | MODE MNL / PRESET / GRD |
+| 16–17 | ELEC | MAIN PWR — BATT / MAIN |
+| 18–21 | UHF | FUNCTION ADF / BOTH / MAIN / OFF |
+| 22–24 | UHF | MODE GRD / PRE / MNL |
 | 25 | UHF | SQUELCH |
 | 26 | UHF | T-TONE |
 | 27 | UHF | STATUS |
 | 28–30 | AUDIO 1 | COMM 1 MODE — OFF / SQL / GD XMT |
 | 31–33 | AUDIO 1 | COMM 2 MODE — OFF / SQL / GD XMT |
-| 34–41 | ECM | 저항 래더 — ECM 1~6, FRM, SPL |
-| 42–53 | UHF | 엔코더 6개 × (CW / CCW) |
-| 54–55 | ENGINE | MAX POWER / AB RESET |
-| 56 | ENGINE | ENG DATA |
-| 57–58 | AUDIO 2 | HOT MIC / CIPHER |
+| 34 | ENGINE | AB RESET |
+| 35 | ENGINE | ENG DATA |
+| 36 | ENGINE | MAX POWER |
+| 37–38 | AUDIO 2 | HOT MIC / CIPHER |
+| 39–46 | ECM | 저항 래더 — ECM 1~6, FRM, SPL |
+| 47–58 | UHF | 엔코더 6개 × (CW / CCW) |
 | 59 | ENGINE | ENG CONT COVER (DCS 커버 자동화) |
 | 60–61 | EPU | EPU OFF COVER / EPU ON COVER (DCS 커버 자동화) |
 | 62–63 | AUDIO 1 | COMM1 PWR OFF / ON (pot threshold) |
 | 64–65 | AUDIO 1 | COMM2 PWR OFF / ON (pot threshold) |
+| 66 | UHF | TEST |
 
-> 54번부터는 `switches[]` 배열 맨 뒤(`SWITCH_LATE_START` 이후)에 있는 항목입니다.
-> 래더·엔코더 **뒤에** 배정해서, 스위치를 새로 추가해도 기존 버튼 1~53 의
-> 바인딩이 그대로 유지되도록 한 구조입니다.
+> **`SWITCH_LATE_START` (현재 32)** — 이 인덱스부터의 `switches[]` 항목은 DX 번호를
+> **맨 마지막**에 받습니다. 새 스위치를 배열 뒤에 추가해도 기존 번호가 밀리지 않아
+> BMS 재바인딩이 필요 없습니다. 스위치를 추가할 때는 이 값을 건드리지 말고
+> 배열 끝에만 붙이십시오.
 >
 > DX 59~61 은 DCS 커버 자동화용으로, DCS에서만 사용됩니다.
 > DX 62~65 는 COMM1/COMM2 볼륨 pot의 전원 스위치입니다.
@@ -692,7 +698,7 @@ USB 5V (900mA)
 | └ 여유 핀 | 12, 39 |
 | **MCP23017 GPIO** | 39 / 48 |
 | 74HC595 출력 | 32 / 32 |
-| **DX 버튼** | **65 / 128** |
+| **DX 버튼** | **66 / 128** |
 | 조이스틱 축 | 10 / 23 |
 | I2C 주소 | `0x20` `0x21` `0x22` |
 

@@ -5,11 +5,12 @@
 //  Board  : Teensy 4.1
 //  Panels : ECM / ELEC / EPU / AVTR / UHF(엔코더 6) / ENGINE START / MPO / AUDIO 1-2
 //  I2C    : Wire2 (SDA2=25, SCL2=24)
-//  Buttons: 58,  축 10,  엔코더 6
-//  사용 핀: 40 / 42 (헤더),  여유 2
+//  Buttons: 66,  축 10,  엔코더 6
+//  사용 핀: 41 / 42 (헤더),  여유 1
 //  백라이트: pin 13 — 온보드 LED가 상태 표시등이 됨
 //
-//  DX 버튼 배정 순서: switches[](39) → analogBtnArrays[](8) → encoders[](12) = 59
+//  DX 버튼 배정 순서: switches[0..31](38) → 래더(8) → 엔코더(12) → 커버(3)
+//                     → COMM PWR(4) → switches[32..](1, SWITCH_LATE_START) = 66
 //  축 10개: AUDIO 1 x6 + AUDIO 2 x3 + UHF VOL x1
 //
 //  USB Type: Serial + Keyboard + Mouse + Joystick
@@ -90,10 +91,11 @@
 //    B  35~38  74HC595 3선 + ECM 래더 (C6)
 //    B  40     MPO (C1)
 //    B  13     백라이트 MOSFET
+//    B  39     UHF TEST (C13)
 //    B  41     UHF STATUS (C13)
 //    하단 SD  43/44/45 = MOSI2/CS2/SCK2 -> UHF 7세그 디스플레이 (C14)
 //             SD 확장 케이블로 빼냅니다. 엣지 핀은 쓰지 않습니다.
-//    여유: 12, 39(A15)
+//    여유: 12
 //  ※ docs/LEFT_CONSOLE_PIN_TREE.md 의 핀 배열도는 바닥면(납땜면) 기준이라
 //    엣지 A 가 그림의 오른쪽 열, 엣지 B 가 왼쪽 열로 나옵니다.
 
@@ -139,6 +141,9 @@
 
 // UHF STATUS (핀 41)
 #define PIN_UHF_STATUS    41      // A17
+
+// UHF TEST (핀 39)
+#define PIN_UHF_TEST      39      // A15
 
 // ---- C14: UHF 7세그 디스플레이 (MAX7219) ----------------------------------
 // Teensy 4.1 하단 SD 카드 인터페이스의 SPI2 를 SD 확장 케이블로 빼내 씁니다.
@@ -314,6 +319,9 @@ const SwitchDef switches[] = {
   // ---- AUDIO 2 스위치 (Teensy direct) ----                btn 37~38
   {"HOT MIC",   PNL_AUDIO2, SW_ON_OFF,     0,   0,            0,  0},  // MCP#0 PA0
   {"CIPHER",    PNL_AUDIO2, SW_ON_OFF,     0,   1,            0,  0},  // MCP#0 PA1
+
+  // ---- UHF TEST (Teensy direct) ----                      btn 40
+  {"UHF TEST",  PNL_UHF,    SW_ON_OFF,    -1, PIN_UHF_TEST,   0,  0},  // Teensy 39 (A15) momentary
 };
 
 // --- Rotary Encoders (Teensy direct, interrupt-polled) ---
@@ -727,10 +735,17 @@ int switchButtonCount(const SwitchDef& sw) {
   return 1;
 }
 
+// switches[] 의 이 인덱스부터는 DX 번호를 **맨 마지막**에 배정합니다.
+// 새 스위치를 배열 뒤에 붙여도 기존 버튼 번호가 밀리지 않아 BMS 재바인딩이 불필요합니다.
+// 스위치를 추가했는데 번호를 밀고 싶지 않으면 이 값은 건드리지 말고 배열 뒤에만 추가하십시오.
+#define SWITCH_LATE_START 32
+static_assert(SWITCH_LATE_START <= NUM_SWITCHES,
+              "SWITCH_LATE_START 가 switches[] 길이를 넘습니다");
+
 void assignButtons() {
   int btn = 1;
 
-  for (unsigned int i = 0; i < NUM_SWITCHES; i++) {
+  for (unsigned int i = 0; i < SWITCH_LATE_START; i++) {
     switchBtnStart[i] = btn;
     btn += switchButtonCount(switches[i]);
   }
@@ -750,6 +765,12 @@ void assignButtons() {
   // COMM1/COMM2 Power ON/OFF (pot threshold)
   commPwrBtnBase = btn;
   btn += NUM_COMM_PWR;
+
+  // 뒤늦게 추가된 스위치 — 맨 마지막 번호
+  for (unsigned int i = SWITCH_LATE_START; i < NUM_SWITCHES; i++) {
+    switchBtnStart[i] = btn;
+    btn += switchButtonCount(switches[i]);
+  }
 
   totalButtons = btn - 1;
   if (totalButtons > 128)
