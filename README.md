@@ -126,7 +126,7 @@ PETG 는 JLC3DP 에서 지원하지 않아 PCBWay 등에 별도 주문해야 합
 
 #### 인클로저 & 스탠드
 
-Stand 는 Enclosure 뒷면에 에폭시 접착제로 부착합니다.
+Stand 는 Center 인클로저 뒷면에 에폭시로 부착합니다 (조립은 [2-1](#2-1-조립-순서)).
 
 | Center Left Enclosure | Center Right Enclosure (new) | Left Stand (new) | Right Stand (new) |
 |:----:|:----:|:----:|:----:|
@@ -152,10 +152,8 @@ Upper / Lower 를 맞물려 조립하고, Bottom 2 종이 바닥판입니다.
 
 #### MFD 홀더
 
-**Thrustmaster(TM) MFD** 를 인클로저에 고정하는 브래킷입니다.
-MFD 뒤에 **Alibaba 에서 구한 7.6인치 정사각 LCD** 를 붙여 한 덩어리로 만든 뒤 인클로저에 넣습니다.
-`…MFDHolder` 는 **인클로저 아래쪽에 에폭시로 접착**하고,
-`…MFDHolderUpper` 는 **인클로저와 MFD 사이에 남는 빈틈을 메우는** 부품입니다.
+**Thrustmaster(TM) MFD** 를 Center 인클로저에 고정하는 브래킷입니다.
+MFD 뒤에는 **Alibaba 에서 구한 7.6인치 정사각 LCD** 를 붙입니다. 조립은 [2-1](#2-1-조립-순서) 참조.
 
 | LeftMFDHolder | LeftMFDHolderUpper | RightMFDHolder | RightMFDHolderUpper |
 |:----:|:----:|:----:|:----:|
@@ -227,7 +225,45 @@ PLA 나 레진 출력으로 충분합니다 — MJF 등 고급 공정은 필요 
 
 ## 2. 조립 및 배선
 
-### 2-1. 보드별 배선도
+### 2-1. 조립 순서
+
+부품 제작은 1-1 · 1-2, 배선은 2-2, 백라이트 회로는 2-3 을 보십시오. 여기서는 조립 순서만 정리합니다.
+
+**1. 패널 적층** — Greenisland 패널은 3 층을 겹칩니다. 스위치 · 로터리 · 푸시버튼은 전부
+맨 뒤 `LED layer` 에 체결되고, 앞의 두 장은 그 위에 얹힙니다.
+
+```
+   Top        아크릴 — 도색 + 각인             ← 전면
+   Diffuser   투명 아크릴                       빛 확산
+   LED layer  투명 PLA                         ← 스위치가 여기에 체결됨
+   ┊
+   ┊ 몇 cm 띄움
+   ┊
+   백라이트 플레이트   PLA · 레진              ← LED 를 여기에 장착
+```
+
+PC Flights 패널(MISC · Gear · CMDS)은 2 층(전면 도색 + 후면 투명)이고,
+후면 투명판 뒤 **1~2 cm** 에서 LED 를 쏩니다.
+
+**2. 백라이트 플레이트** — LED 스트링(LED 3개 + 220Ω)을 플레이트에 심고,
+패널 **뒤쪽 몇 cm 뒤**에 고정합니다. 간격을 두는 이유는 [docs/REF_BACKLIGHT.md](docs/REF_BACKLIGHT.md) 참조.
+
+**3. 인클로저 조립** — 접착은 전부 **에폭시**입니다.
+
+| 붙이는 것 | 붙이는 곳 |
+|-----------|-----------|
+| Stand | Center 인클로저 **뒷면** |
+| MFD 홀더 | Center 인클로저 **아래쪽** |
+
+`…MFDHolderUpper` 는 접착 부품이 아니라, 인클로저와 MFD 사이에 남는 **빈틈을 메우는** 조각입니다.
+
+**4. MFD** — 7.6인치 정사각 LCD 를 Thrustmaster MFD 뒤에 붙여 한 덩어리로 만든 뒤,
+MFD 홀더에 끼워 인클로저에 장착합니다.
+
+**5. 배선** — 2-2 의 배선도대로 결선합니다. 패널을 인클로저에 완전히 고정하기 전에
+스위치 동작을 먼저 확인하는 편이 낫습니다 (5장 참조).
+
+### 2-2. 보드별 배선도
 
 케이블 구성, Teensy 핀 배열, MCP GPIO 맵, DX 버튼 맵, 시공 체크리스트가 아래 두 문서에 있습니다. **배선 전에 반드시 읽으세요.**
 
@@ -239,7 +275,7 @@ PLA 나 레진 출력으로 충분합니다 — MJF 등 고급 공정은 필요 
 스위치 배선은 전부 **액티브 로우 + INPUT_PULLUP** (공통 단자 = GND, 눌림 = LOW = ON).
 저항 래더(CMDS MODE·PRGM, TWA, ECM) 제작법·값, MCP23017 I2C 배선과 핫플러그 보호 부품도 위 문서에 있습니다.
 
-### 2-2. 백라이트
+### 2-3. 백라이트
 
 양쪽 보드 모두 Teensy pin 13 → MOSFET PWM 디밍이고, 12V DC 어댑터 1개를 Y 케이블로 분기해 씁니다.
 회로·전원·밝기 제어·LED 배치는 **[docs/REF_BACKLIGHT.md](docs/REF_BACKLIGHT.md)** 에 있습니다.
