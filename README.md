@@ -246,6 +246,11 @@ PLA 나 레진 출력으로 충분합니다 — MJF 등 고급 공정은 필요 
 PC Flights 패널(MISC · Gear · CMDS)은 2 층(전면 도색 + 후면 투명)이고,
 후면 투명판 뒤 **1~2 cm** 에서 LED 를 쏩니다.
 
+> 적층 상세(체결 순서, 나사 · 스페이서 규격)는 **원본 제공처의 안내를 따르십시오.**
+> Greenisland 패널은 [Cults3D 모델](https://cults3d.com/en/users/Greenisland/3d-models)에 동봉된 매뉴얼,
+> PC Flights 패널은 [제품 페이지](https://pcflights.com/flight-simulator-cockpit-panels/f-16c-viper-home-cockpit-panels/)를 보십시오.
+> 이 문서는 본 프로젝트에서 달라진 부분만 적습니다.
+
 **2. 백라이트 플레이트** — LED 스트링(LED 3개 + 220Ω)을 플레이트에 심고,
 패널 **뒤쪽 몇 cm 뒤**에 고정합니다. 간격을 두는 이유는 [docs/REF_BACKLIGHT.md](docs/REF_BACKLIGHT.md) 참조.
 
