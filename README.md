@@ -194,11 +194,12 @@ PLA 나 레진 출력으로 충분합니다 — MJF 등 고급 공정은 필요 
 | 패널 | [PC Flights](https://pcflights.com) | MISC / Gear / CMDS 패널 3종 | $133 | $31 |
 | 아크릴 재단 · 도색 | [아크릴마켓](https://smartstore.naver.com/acrylicmarket) 등 | Greenisland DXF 패널 11종, 패널당 약 ₩10,000 | ~$80 | - |
 | 3D 프린트 | [JLC3DP](https://jlc3dp.com) / [PCBWay](https://www.pcbway.com) 등 | 구조물 · 플레이트 34종 (아래 수량표) | **견적 참조** | - |
+| MFD LCD | [Alibaba](https://www.alibaba.com/product-detail/In-Stock-IPS-7-6-Inch_1601257654342.html) | 7.6" 정사각 800×800 IPS ×2, 장당 $58 (드라이버 보드 포함) | $116 | 무료 |
 | MCU | [PJRC](https://www.pjrc.com) | Teensy 4.1 ×2 | ~$70 | - |
 | 전자부품 | [AliExpress](https://www.aliexpress.com) | MCP23017, 스위치, LED, 저항 등 | ~$200 | - |
 | 커스텀 PCB | JLCPCB / PCBWay 등 | TWA · ECM · UHF 디스플레이 3종, 장당 약 $5 | ~$15 | - |
 | 노동력 | - | 약 1년간의 설계, 조립, 프로그래밍 | priceless | - |
-| | | **합계** | **~$498** | **~$31** |
+| | | **합계** | **~$614** | **~$31** |
 
 **3D 프린트 수량**
 

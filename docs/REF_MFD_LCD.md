@@ -14,7 +14,8 @@ Thrustmaster MFD 뒤에 겹쳐 쓰는 화면입니다. MFD 베젤의 버튼 배�
 
 | 항목 | 값 | | 항목 | 값 |
 |------|-----|---|------|-----|
-| 패널 | IPS (BOE) | | 해상도 | **800 × 800** |
+| 모델 | **GX076-30MB-A1** | | 해상도 | **800 × 800** |
+| 패널 | IPS (BOE) | | 커넥터 | 30핀 FPC |
 | 화면 크기 | 7.6인치 정사각 | | 색상 수 | 16.7M |
 | 표시 영역 | **135.36 × 135.36 mm** | | 밝기 | 1000 cd/m² |
 | 외형 치수 | **142.56 (H) × 148.24 (V) × 5.1 (D) mm** | | 백라이트 | LED |
@@ -27,6 +28,9 @@ Thrustmaster MFD 뒤에 겹쳐 쓰는 화면입니다. MFD 베젤의 버튼 배�
 해상도 800 × 800 은 표시 영역 135.36 mm 에 대해 약 **150 ppi** 입니다.
 
 **구매처** — [Alibaba: In Stock IPS 7.6 Inch](https://www.alibaba.com/product-detail/In-Stock-IPS-7-6-Inch_1601257654342.html)
+제품명은 *7.6 Inch Square LCD Display 800×800 MIPI Interface 30 Pin TFT LCD Screen Module
+With HDMI Driver Board for Flight Simulator* 이고, **LCD + HDMI 보드가 한 세트**로 옵니다.
+장당 USD 58, 2장 USD 116 에 배송 무료였습니다 (2025-11 기준).
 
 ---
 
