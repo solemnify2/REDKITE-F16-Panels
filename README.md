@@ -96,43 +96,12 @@ Stand는 Enclosure 뒷면에 에폭시 접착제로 부착합니다. new 버전 
 
 ### 1-3. MCU
 
-[Teensy 4.1](https://www.pjrc.com/store/teensy41.html) × 2대. 선택 이유:
+[Teensy 4.1](https://www.pjrc.com/store/teensy41.html) × 2대. 보드마다 한 대씩 독립된 USB 조이스틱으로 잡힙니다.
 - USB 조이스틱 128버튼 네이티브 지원 (Arduino Mega 등은 USB HID 미지원)
 - 600MHz ARM Cortex-M7 — 다중 작업에 충분한 성능
-- 42 GPIO + 하단 SD 패드 — 충분한 핀 수
+- 42 GPIO + 하단 SD 패드 — 그래도 모자라 MCP23017 로 확장 (AUX 1장, 콘솔 3장)
 
-**구조** — Teensy 2대가 각각 독립된 USB 조이스틱으로 잡히고, 모자라는 핀은 MCP23017 I2C 확장으로 채웁니다.
-
-```
-  PC ─USB─ Teensy 4.1  LEFT AUX + MISC  (PID 0x0489)
-             │ 헤더 39/42 + SD 패드 5
-             │
-             └─ I2C ─ [MCP23017 0x20] ─ MISC 패널
-
-
-  PC ─USB─ Teensy 4.1  LEFT CONSOLE     (PID 0x048E)
-             │ 헤더 41/42 + SD 패드 3
-             │
-             ├─ I2C ─ [MCP23017 0x20] ─ [MCP23017 0x21] ─ [MCP23017 0x22]
-             │          UHF + AUDIO        ELEC + EPU        ECM + AVTR
-             │         └──────────── 데이지체인 3장 ────────────┘
-             │
-             └─ 3선 ─ [74HC595] ×4 ─ ECM 32 LED
-```
-
-| | LEFT AUX + MISC | LEFT CONSOLE |
-|---|---|---|
-| Teensy 헤더 핀 | 39 / 42 | 41 / 42 |
-| 하단 SD 패드 | 5 (CMDS 램프) | 3 (UHF 디스플레이) |
-| MCP23017 | **1장** (`0x20`) | **3장** (`0x20`·`0x21`·`0x22`) |
-| 그 외 확장 | — | 74HC595 ×4 (ECM 32 LED) |
-
-**양쪽 다 헤더 핀이 거의 찼습니다.** 스위치·LED 를 더 붙이려면 MCP23017 을 추가하는 쪽이지,
-Teensy 핀을 더 찾는 방향은 막혀 있습니다. MCP 는 칩당 16 GPIO 이고 주소를 `0x20`~`0x27`
-범위에서 고를 수 있어 보드당 8장까지 늘릴 수 있습니다.
-
-> 엔코더만은 MCP 에 올릴 수 없습니다 — I2C 폴링으로는 쿼드러처 펄스를 놓칩니다.
-> UHF 엔코더 6개가 콘솔 Teensy 의 `0`–`11` 을 직접 쓰는 이유입니다.
+핀 배정·MCP 구성·확장 여지는 [3-1. 보드별 배선도](#3-1-보드별-배선도) 의 두 문서에 있습니다.
 
 ### 1-4. 부품 목록
 
@@ -196,7 +165,6 @@ AUX 51버튼, 콘솔 66버튼이므로 **두 스케치 모두** 128버튼 Extrem
 
 스위치 배선은 전부 **액티브 로우 + INPUT_PULLUP** (공통 단자 = GND, 눌림 = LOW = ON).
 저항 래더(CMDS MODE·PRGM, TWA, ECM) 제작법·값, MCP23017 I2C 배선과 핫플러그 보호 부품도 위 문서에 있습니다.
-MCP 를 몇 장 어떻게 붙였는지는 [1-3. MCU](#1-3-mcu) 참조.
 
 ### 3-2. 백라이트
 
