@@ -51,7 +51,7 @@
 | 토글 스위치 On-On (12mm, 3P) | 20 | 실사용 20 |
 | 푸시 스위치 7mm (PBS-110) | 12 | 푸시 실사용 9 (6mm 와 합산) |
 | 모멘터리 푸시 스위치 6mm (3핀) | 5 | 위와 합산 |
-| 택타일 스위치 SMD (6x6x4.3mm) | 20 | 실사용 12 — TWA 4버튼, ECM 8버튼 래더 |
+| 택타일 스위치 SMD (6x6x4.3mm) | 20 | 실사용 12 — TWA 4버튼 + ECM 8버튼. **ECM 8개는 PTH 6.5mm** (기판 BOM) |
 | 리밋 스위치 (12x6mm) | 10 | 실사용 1 — ALT GEAR Handle |
 | 로터리 스위치 SR26 1P12T | 4 | 로터리 실사용 6 — CMDS MODE·PRGM 7P, UHF FUNC 4P, UHF MODE 3P, COMM1·2 3P |
 | 로터리 스위치 RS16 1P6T / 1P5T | 2 / 2 | 위와 합산 |
@@ -64,7 +64,7 @@
 | 부품 | 수량 | 비고 |
 |------|------|------|
 | MCP23017 I2C I/O Expander | 4 | AUX: MISC `0x20` / 콘솔: UHF+AUDIO `0x20`, ELEC+EPU `0x21`, ECM+AVTR `0x22` |
-| 74HC595 시프트 레지스터 | 4 | ECM 패널 32 LED 구동 (데이지체인) |
+| 74HC595 시프트 레지스터 (SO16) | 4 | ECM 패널 32 LED 구동. **ECM 자작 PCB 에 실장** — 아래 절 참조 |
 | IRLML6244 N-ch MOSFET | 2+ | 백라이트 PWM 스위칭 |
 | 로터리 엔코더 EC11 (디텐트) | 6 | UHF — PRESET은 20디텐트 권장 |
 | MAX7219 7세그 디스플레이 보드 (8자리) | 1 | UHF 주파수 6 + 채널 2. **자작 PCB** — 아래 「UHF 7세그 디스플레이 보드」 절 참조 |
@@ -74,7 +74,7 @@
 | 부품 | 수량 | 비고 |
 |------|------|------|
 | 3mm LED Green (백라이트용) | 100 | 고휘도 |
-| LED 키트 3mm/5mm Mixed | 300 | Red, Green, Yellow — 인디케이터 실사용 63개 (ECM 32 포함) |
+| LED 키트 3mm/5mm Mixed | 300 | Red, Green, Yellow — 인디케이터 실사용 63개. **ECM 32개는 Würth WL-TMRC 전용품** |
 
 ## 수동 소자
 
@@ -97,6 +97,34 @@
 | Spade 압착 터미널 2.8mm | 200쌍 | 토글 스위치 연결 |
 | Pin Header 1x30P | 10 | |
 | 수축 튜브 | 750 | |
+
+## ECM 패널 보드
+
+콘솔 ECM 패널의 LED·버튼 기판입니다. 이것도 **직접 발주하는 PCB** 로, 설계 일체는 저장소 **밖**의
+`Redkite Project/ECM Panel/f-16-cockpit-left-console-ecm-panel/` 에 있습니다 —
+거버(`Leiterplatte ECM Panel 2025-03-08.zip`), 조립 가이드 PDF, STL(Top Cover·LED Layer·Diffusor),
+레이저 커팅 DXF.
+
+**PCB 발주 사양** — 2층, **83 × 59 mm**, 두께 1.57 mm.
+
+| 부품 | Ref | 수량 | 사양 | 비고 |
+|------|-----|-----:|------|------|
+| PCB | — | 1 | 2층 83×59mm / 1.57mm | `Leiterplatte ECM Panel 2025-03-08.zip` |
+| 시프트 레지스터 | U1–U4 | 4 | 74HC595D (SO16) | 데이지체인, 32 LED 구동 |
+| LED 3mm THT | D1–D32 | 32 | Würth WL-TMRC `151031SS04000` | ECM 8그룹 × S/A/F/T |
+| LED 직렬저항 | R8–R39 | 32 | 1206 SMD | LED 1개당 1개 |
+| 래더 저항 | R1–R7 | 7 | 1206 SMD | 8버튼 저항 래더. **기판 고정값** — 10kΩ 체인 + 20kΩ 풀다운 |
+| 세라믹 캡 | C1 | 1 | 1nF THT 2.54mm | |
+| 핀 헤더 | J1 | 1 | Würth `61300611121` (1×6, 2.54mm) | 케이블 `C6` — DS·SH_CP·ST_CP·래더 + 3.3V/GND |
+| 모멘터리 푸시 | U$1–U$8 | 8 | **PTH 6.5mm** | ECM 1~6, FRM, SPL |
+
+> 래더 저항이 기판에 고정이라 캘리브레이션으로 바꿀 수 없습니다. 스케치의 `ecmBtnValues[]`
+> 를 실측에 맞추는 방식입니다 — [REF_LEFT_CONSOLE_WIRING.md](REF_LEFT_CONSOLE_WIRING.md) 참조.
+
+> ⚠ 위 **스위치류** 표의 택타일 스위치는 SMD 6×6×4.3mm 인데, 이 기판은 **PTH 6.5mm** 를 씁니다.
+> ECM 8버튼은 기판 BOM 쪽을 따르십시오.
+
+---
 
 ## UHF 7세그 디스플레이 보드
 
