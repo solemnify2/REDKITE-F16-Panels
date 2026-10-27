@@ -106,13 +106,18 @@ Stand는 Enclosure 뒷면에 에폭시 접착제로 부착합니다. new 버전 
 ```
   PC ─USB─ Teensy 4.1  LEFT AUX + MISC  (PID 0x0489)
              │ 헤더 39/42 + SD 패드 5
-             └─I2C─ MCP23017 0x20 ──── MISC 패널
+             │
+             └─ I2C ─ [MCP23017 0x20] ─ MISC 패널
+
 
   PC ─USB─ Teensy 4.1  LEFT CONSOLE     (PID 0x048E)
              │ 헤더 41/42 + SD 패드 3
-             ├─I2C─ MCP23017 0x20 ─ 0x21 ─ 0x22           (데이지체인)
-             │        UHF+AUDIO   ELEC+EPU   ECM+AVTR
-             └─3선─ 74HC595 ×4 ──── ECM 32 LED
+             │
+             ├─ I2C ─ [MCP23017 0x20] ─ [MCP23017 0x21] ─ [MCP23017 0x22]
+             │          UHF + AUDIO        ELEC + EPU        ECM + AVTR
+             │         └──────────── 데이지체인 3장 ────────────┘
+             │
+             └─ 3선 ─ [74HC595] ×4 ─ ECM 32 LED
 ```
 
 | | LEFT AUX + MISC | LEFT CONSOLE |
