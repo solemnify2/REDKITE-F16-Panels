@@ -195,26 +195,10 @@ AUX 51버튼, 콘솔 66버튼이므로 **두 스케치 모두** 128버튼 Extrem
 | Left Console | [docs/REF_LEFT_CONSOLE_WIRING.md](docs/REF_LEFT_CONSOLE_WIRING.md) |
 
 스위치 배선은 전부 **액티브 로우 + INPUT_PULLUP** (공통 단자 = GND, 눌림 = LOW = ON).
-저항 래더(CMDS MODE·PRGM, TWA, ECM) 제작법과 값도 위 문서에 있습니다.
+저항 래더(CMDS MODE·PRGM, TWA, ECM) 제작법·값, MCP23017 I2C 배선과 핫플러그 보호 부품도 위 문서에 있습니다.
+MCP 를 몇 장 어떻게 붙였는지는 [1-3. MCU](#1-3-mcu) 참조.
 
-### 3-2. MCP23017 I2C 확장
-
-Teensy의 직결 핀은 모두 사용 중이므로, 추가 스위치/LED는 MCP23017 I2C 확장으로 추가합니다.
-
-- MCP23017 하나당 16핀 (GPA0–7, GPB0–7)
-- I2C 주소: A0~A2 핀으로 설정, 최대 8개 (0x20~0x27)
-- **AUX 보드**: 1장 (`0x20` = MISC)
-- **콘솔 보드**: 3장 (`0x20` `0x21` `0x22`) 데이지체인
-
-**I2C 핫플러그 보호 (양쪽 공통):**
-- SDA/SCL 각 100Ω 직렬 저항 (MCP 입력단) — 돌입전류 제한
-- 4.7kΩ × 2 I2C 풀업 저항 (AUX) / 모듈 온보드 4.7kΩ × 3 병렬 (콘솔)
-- 10µF + 100nF 바이패스 캡 — MCP23017 VDD 전압 스파이크 흡수
-- MOSFET Gate 10kΩ 풀다운 — 핫플러그 시 OFF 유지
-
-AUX↔MISC 패널 LAN 배선 상세: [docs/REF_LEFT_AUX_WIRING.md](docs/REF_LEFT_AUX_WIRING.md) 의 「I1 — LAN 배선」 절
-
-### 3-3. 백라이트
+### 3-2. 백라이트
 
 양쪽 보드 모두 **MOSFET PWM 디밍**을 지원합니다. Teensy pin 13으로 MOSFET을 PWM 제어하며, 인게임 조명 노브에 연동됩니다.
 
