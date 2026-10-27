@@ -103,64 +103,8 @@ Stand는 Enclosure 뒷면에 에폭시 접착제로 부착합니다. new 버전 
 
 ### 1-4. 부품 목록
 
-**스위치류**
-
-| 부품 | 수량 | 비고 |
-|------|------|------|
-| 토글 스위치 On-Off-On (12mm, 3P) | 20 | |
-| 토글 스위치 On-On (12mm, 3P) | 20 | |
-| 푸시 스위치 7mm (PBS-110) | 12 | |
-| 모멘터리 푸시 스위치 6mm (3핀) | 5 | |
-| 택타일 스위치 SMD (6x6x4.3mm) | 20 | |
-| 리밋 스위치 (12x6mm) | 10 | |
-| 로터리 스위치 SR26 1P12T | 4 | |
-| 로터리 스위치 RS16 1P6T / 1P5T | 2 / 2 | |
-| 포텐셔미터 10kΩ | 10 | |
-| 코리 스위치 | 1 | [HispaPanel](https://hispapanels.com/tienda/en/buttons-encoders/71-korry-type-tactile-switch-momentary.html) |
-| 키보드 스위치 (Brown) | 2 | |
-
-**IC / 반도체**
-
-| 부품 | 수량 | 비고 |
-|------|------|------|
-| MCP23017 I2C I/O Expander | 4 | AUX: MISC `0x20` / 콘솔: UHF+AUDIO `0x20`, ELEC+EPU `0x21`, ECM+AVTR `0x22` |
-| 74HC595 시프트 레지스터 | 4 | ECM 패널 32 LED 구동 (데이지체인) |
-| IRLML6244 N-ch MOSFET | 2+ | 백라이트 PWM 스위칭 |
-| 로터리 엔코더 EC11 (디텐트) | 6 | UHF — PRESET은 20디텐트 권장 |
-
-**LED**
-
-| 부품 | 수량 | 비고 |
-|------|------|------|
-| 3mm LED Green (백라이트용) | 100 | 고휘도 |
-| LED 키트 3mm/5mm Mixed | 300 | Red, Green, Yellow (인디케이터) |
-
-**수동 소자**
-
-| 부품 | 수량 | 비고 |
-|------|------|------|
-| 1/4W 저항 (1K, 4.7K, 10K, 100Ω, 150Ω, 220Ω) | 각 100 | 래더, 풀다운, 풀업 |
-| SMD 1206 저항 (220Ω, 2.2K, 10K) | 각 100 | |
-| 전해 커패시터 25V (10µF / 100µF) | 각 40 | 바이패스 |
-| 세라믹 커패시터 (100nF / 1nF) | 각 100 | 바이패스 |
-
-**커넥터 / 배선**
-
-| 부품 | 수량 | 비고 |
-|------|------|------|
-| 실리콘 와이어 22AWG 5색 | 50m | |
-| Dupont 커넥터 & 점퍼선 | 다수 | 쉘, 핀, F-F 점퍼 |
-| Spade 압착 터미널 2.8mm | 200쌍 | 토글 스위치 연결 |
-| Pin Header 1x30P | 10 | |
-| 수축 튜브 | 750 | |
-
-**모듈 / 기타**
-
-| 부품 | 수량 | 비고 |
-|------|------|------|
-| 12V DC 어댑터 (1A) | 2 | 백라이트 전용 (AUX 1 + 콘솔 1). Step-Up은 래더 ADC 노이즈 유발 |
-| RJ45 패널 마운트 커넥터 / 키스톤 잭 | 7+ | I2C, 엔코더, 아날로그 신호 케이블 |
-| Cat5e LAN 케이블 | 7+ | 신호 배선용 |
+스위치, IC, LED, 수동 소자, 커넥터, 모듈 전체 목록은
+**[docs/REF_PARTS.md](docs/REF_PARTS.md)** 에 있습니다.
 
 ### 1-5. 소요 비용
 
@@ -460,6 +404,7 @@ REDKITE-F16-Panels/
 │   ├── reset_joystick_name.bat
 │   └── backup_to_synology.ps1
 ├── docs/                          # 배선도, 프로토콜 참조
+│   ├── REF_PARTS.md               #   부품 목록
 │   ├── REF_PROTOCOL.md            #   DCS/BMS 프로토콜·LED 주소 맵
 │   ├── REF_LEFT_AUX_WIRING.md     #   AUX 보드 배선·핀 배열·DX맵·LAN
 │   ├── REF_LEFT_CONSOLE_WIRING.md #   콘솔 보드 배선·핀 배열·DX맵·전원
@@ -472,6 +417,7 @@ REDKITE-F16-Panels/
 
 | 문서 | 내용 |
 |---|---|
+| [docs/REF_PARTS.md](docs/REF_PARTS.md) | 스위치·IC·LED·수동 소자·커넥터·모듈 부품 목록 |
 | [docs/REF_PROTOCOL.md](docs/REF_PROTOCOL.md) | DCS-BIOS / BMS-BIOS 프로토콜, LED 주소 맵, LightBits 매핑 |
 | [docs/REF_LEFT_AUX_WIRING.md](docs/REF_LEFT_AUX_WIRING.md) | AUX 보드 케이블 배선, Teensy 핀 배열, MCP GPIO, AUX↔MISC LAN 배선, DX 맵, 시공 체크리스트 |
 | [docs/REF_LEFT_CONSOLE_WIRING.md](docs/REF_LEFT_CONSOLE_WIRING.md) | 콘솔 보드 케이블 배선, Teensy 핀 배열, MCP GPIO, DX 맵, 전원 구성, 시공 체크리스트 |
