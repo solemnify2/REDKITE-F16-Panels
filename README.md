@@ -185,11 +185,11 @@ AUX 51버튼, 콘솔 66버튼이므로 **두 스케치 모두** 128버튼 Extrem
 
 ## 3. 배선
 
-### 3-1. 핀 배치 문서
+### 3-1. 보드별 배선도
 
-각 보드의 전체 핀 배열, DX 버튼 맵, MCP GPIO 맵, 케이블 배선 상세, 시공 체크리스트가 아래 문서에 있습니다. **배선 전에 반드시 읽으세요.**
+케이블 구성, Teensy 핀 배열, MCP GPIO 맵, DX 버튼 맵, 시공 체크리스트가 아래 두 문서에 있습니다. **배선 전에 반드시 읽으세요.**
 
-| 보드 | 핀 배치 문서 |
+| 보드 | 배선도 |
 |---|---|
 | Left Aux + MISC | [docs/REF_LEFT_AUX_WIRING.md](docs/REF_LEFT_AUX_WIRING.md) |
 | Left Console | [docs/REF_LEFT_CONSOLE_WIRING.md](docs/REF_LEFT_CONSOLE_WIRING.md) |
