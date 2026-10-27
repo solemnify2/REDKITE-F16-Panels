@@ -116,16 +116,39 @@ Stand는 Enclosure 뒷면에 에폭시 접착제로 부착합니다. new 버전 
 
 ---
 
-## 2. 개발 환경 & 펌웨어 업로드
+## 2. 배선
 
-### 2-1. Arduino IDE 설치
+### 2-1. 보드별 배선도
+
+케이블 구성, Teensy 핀 배열, MCP GPIO 맵, DX 버튼 맵, 시공 체크리스트가 아래 두 문서에 있습니다. **배선 전에 반드시 읽으세요.**
+
+| 보드 | 배선도 |
+|---|---|
+| Left Aux + MISC | [docs/REF_LEFT_AUX_WIRING.md](docs/REF_LEFT_AUX_WIRING.md) |
+| Left Console | [docs/REF_LEFT_CONSOLE_WIRING.md](docs/REF_LEFT_CONSOLE_WIRING.md) |
+
+스위치 배선은 전부 **액티브 로우 + INPUT_PULLUP** (공통 단자 = GND, 눌림 = LOW = ON).
+저항 래더(CMDS MODE·PRGM, TWA, ECM) 제작법·값, MCP23017 I2C 배선과 핫플러그 보호 부품도 위 문서에 있습니다.
+
+### 2-2. 백라이트
+
+양쪽 보드 모두 Teensy pin 13 → MOSFET PWM 디밍이고, 12V DC 어댑터 1개를 Y 케이블로 분기해 씁니다.
+회로·전원·밝기 제어·LED 배치는 **[docs/REF_BACKLIGHT.md](docs/REF_BACKLIGHT.md)** 에 있습니다.
+
+> **Step-Up(MT3608 등)으로 12V 를 만들지 마십시오.** 저항 래더 판독값이 흔들립니다 — 경위는 위 문서에.
+
+---
+
+## 3. 개발 환경 & 펌웨어 업로드
+
+### 3-1. Arduino IDE 설치
 
 1. [Teensyduino](https://www.pjrc.com/teensy/td_download.html) 설치
 2. Arduino IDE에서:
    - **Board**: Teensy 4.1
    - **USB Type**: Serial + Keyboard + Mouse + Joystick
 
-### 2-2. usb_desc.h 수정 (Extreme Joystick)
+### 3-2. usb_desc.h 수정 (Extreme Joystick)
 
 AUX 51버튼, 콘솔 66버튼이므로 **두 스케치 모두** 128버튼 Extreme 모드가 필요합니다.
 
@@ -142,7 +165,7 @@ AUX 51버튼, 콘솔 66버튼이므로 **두 스케치 모두** 128버튼 Extrem
 
 > Teensyduino 업데이트 시 `usb_desc.h`와 `usb_desc.c`가 덮어씌워집니다. 업데이트 전에 백업하거나, 업데이트 후 다시 수정하세요. 상세는 [docs/teensyduino_upgrade.md](docs/teensyduino_upgrade.md) 참조.
 
-### 2-3. 업로드
+### 3-3. 업로드
 
 Arduino IDE에서 해당 `.ino`를 열고 Upload합니다. `usb_desc.h`의 `PRODUCT_ID`가 보드와 일치하는지 먼저 확인하세요.
 
@@ -152,29 +175,6 @@ Arduino IDE에서 해당 `.ino`를 열고 Upload합니다. `usb_desc.h`의 `PROD
 | Left Console | `F16_LEFT_CONSOLE/F16_LEFT_CONSOLE.ino` | `0x048E` |
 
 라이브러리는 `Wire`, `Keyboard` (모두 built-in)만 필요합니다.
-
----
-
-## 3. 배선
-
-### 3-1. 보드별 배선도
-
-케이블 구성, Teensy 핀 배열, MCP GPIO 맵, DX 버튼 맵, 시공 체크리스트가 아래 두 문서에 있습니다. **배선 전에 반드시 읽으세요.**
-
-| 보드 | 배선도 |
-|---|---|
-| Left Aux + MISC | [docs/REF_LEFT_AUX_WIRING.md](docs/REF_LEFT_AUX_WIRING.md) |
-| Left Console | [docs/REF_LEFT_CONSOLE_WIRING.md](docs/REF_LEFT_CONSOLE_WIRING.md) |
-
-스위치 배선은 전부 **액티브 로우 + INPUT_PULLUP** (공통 단자 = GND, 눌림 = LOW = ON).
-저항 래더(CMDS MODE·PRGM, TWA, ECM) 제작법·값, MCP23017 I2C 배선과 핫플러그 보호 부품도 위 문서에 있습니다.
-
-### 3-2. 백라이트
-
-양쪽 보드 모두 Teensy pin 13 → MOSFET PWM 디밍이고, 12V DC 어댑터 1개를 Y 케이블로 분기해 씁니다.
-회로·전원·밝기 제어·LED 배치는 **[docs/REF_BACKLIGHT.md](docs/REF_BACKLIGHT.md)** 에 있습니다.
-
-> **Step-Up(MT3608 등)으로 12V 를 만들지 마십시오.** 저항 래더 판독값이 흔들립니다 — 경위는 위 문서에.
 
 ---
 
