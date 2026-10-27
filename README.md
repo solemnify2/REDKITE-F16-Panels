@@ -94,21 +94,12 @@ Stand는 Enclosure 뒷면에 에폭시 접착제로 부착합니다. new 버전 
 
 > Left/Right Enclosure STL은 Cults3D 구매 모델 기반이라 저작권 보호를 위해 재배포하지 않습니다.
 
-### 1-3. MCU
-
-[Teensy 4.1](https://www.pjrc.com/store/teensy41.html) × 2대. 보드마다 한 대씩 독립된 USB 조이스틱으로 잡힙니다.
-- USB 조이스틱 128버튼 네이티브 지원 (Arduino Mega 등은 USB HID 미지원)
-- 600MHz ARM Cortex-M7 — 다중 작업에 충분한 성능
-- 42 GPIO + 하단 SD 패드 — 그래도 모자라 MCP23017 로 확장 (AUX 1장, 콘솔 3장)
-
-핀 배정·MCP 구성·확장 여지는 [3-1. 보드별 배선도](#3-1-보드별-배선도) 의 두 문서에 있습니다.
-
-### 1-4. 부품 목록
+### 1-3. 부품 목록
 
 스위치, IC, LED, 수동 소자, 커넥터, 모듈 전체 목록은
 **[docs/REF_PARTS.md](docs/REF_PARTS.md)** 에 있습니다.
 
-### 1-5. 소요 비용
+### 1-4. 소요 비용
 
 | 유형 | 업체 | 내용 | 제품 (USD) | 배송 (USD) |
 |------|------|------|----:|----:|
