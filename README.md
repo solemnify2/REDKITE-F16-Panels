@@ -310,4 +310,8 @@ REDKITE-F16-Panels/
 
 ## License
 
-This project is licensed under the [MIT License](LICENSE).
+코드·문서·설정은 [MIT License](LICENSE).
+
+`docs/3d stl/` 의 자작 STL 은 **CC BY-NC-SA 4.0** 입니다 (MIT 아님).
+구매 모델 기반(Left/Right Enclosure)과 타 프로젝트 패널 STL·거버는 **재배포하지 않습니다** —
+원 출처에서 받으십시오. 상세는 [LICENSE](LICENSE) 의 NOTICE.
