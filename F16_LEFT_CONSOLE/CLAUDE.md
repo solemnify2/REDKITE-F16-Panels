@@ -65,7 +65,7 @@ Encoders never appear in `prevBtnState` change detection; they set `lastInputTim
 
 ### Resistor Ladder — Nearest-Value Matching
 
-The ECM PCB is fixed (10kΩ chain + 20kΩ pulldown), and its top values sit only 28 counts apart. `processAnalogButtons()` therefore picks the **closest** value rather than testing tolerance windows, which makes overlapping windows structurally impossible. Combined with 8× oversampling (~±2 counts of noise), the worst pair (FRM/SPL) keeps a ±14 count margin.
+The ladder is 10kΩ chain + 20kΩ pulldown, and its top values sit only 28 counts apart. The seven chain resistors are 1206 SMD on the ECM board (`R1`–`R7`); **the 20kΩ pulldown is not on the board, it is wired into the harness** — the one hand-soldered joint in the ladder. If it goes open, every reading climbs toward 1023 while ECM 1 (k=0, already 1023) looks unaffected. `processAnalogButtons()` therefore picks the **closest** value rather than testing tolerance windows, which makes overlapping windows structurally impossible. Combined with 8× oversampling (~±2 counts of noise), the worst pair (FRM/SPL) keeps a ±14 count margin.
 
 `maxDist` rejects readings that match nothing (idle ADC ≈ 0).
 
