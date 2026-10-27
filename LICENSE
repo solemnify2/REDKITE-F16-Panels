@@ -30,8 +30,8 @@ this repository. It does NOT cover the items below.
 
 1. 3D models and PCB designs
 
-The STL files under `docs/3d stl/` and the UHF 7-segment display PCB under
-`F16_LEFT_CONSOLE/pcb/` are the author's own designs, released under
+The STL files under `3d stl/` and the UHF 7-segment display PCB under
+`pcb/uhf_display/` are the author's own designs, released under
 CC BY-NC-SA 4.0 rather than MIT:
 
     https://creativecommons.org/licenses/by-nc-sa/4.0/

@@ -1,6 +1,6 @@
 # REDKITE F16 PANELS
 
-![My Cockpit](docs/3d%20stl/MyCockpitv4.png)
+![My Cockpit](3d%20stl/MyCockpitv4.png)
 
 VR 전용 F-16 미니멀 데스크핏
 **Falcon BMS**(BMS-BIOS)와 **DCS World**(DCS-BIOS) 자동 감지로 패널의 LED 연동
@@ -111,7 +111,7 @@ Top · Diffuser 는 동봉된 **아크릴 재단용 DXF** 로 바로 발주할 �
 
 ### 1-2. 3D 프린트 구조물
 
-`docs/3d stl/` 폴더에 STL 파일이 있습니다. 썸네일을 클릭하면 STL 을 내려받습니다.
+`3d stl/` 폴더에 STL 파일이 있습니다. 썸네일을 클릭하면 STL 을 내려받습니다.
 치수는 바운딩 박스 기준입니다.
 
 **출력 재료**
@@ -130,7 +130,7 @@ Stand 는 Center 인클로저 뒷면에 에폭시로 부착합니다 (조립은 
 
 | Center Left Enclosure | Center Right Enclosure (new) | Left Stand (new) | Right Stand (new) |
 |:----:|:----:|:----:|:----:|
-| <img src="docs/3d%20stl/Center%20Left%20Enclosure.png" width="160"><br>278.4 × 142.8 × 193.5 mm | <img src="docs/3d%20stl/Center%20Right%20Enclosure%20-%20new.png" width="160"><br>278.4 × 144.0 × 179.9 mm | <a href="docs/3d%20stl/Left%20Stand%20-%20new.stl"><img src="docs/3d%20stl/Left%20Stand%20-%20new.png" width="160"></a><br>137.1 × 132.3 × 161.2 mm | <a href="docs/3d%20stl/Right%20Stand-%20new.stl"><img src="docs/3d%20stl/Right%20Stand-%20new.png" width="160"></a><br>137.1 × 129.2 × 162.0 mm |
+| <img src="3d%20stl/Center%20Left%20Enclosure.png" width="160"><br>278.4 × 142.8 × 193.5 mm | <img src="3d%20stl/Center%20Right%20Enclosure%20-%20new.png" width="160"><br>278.4 × 144.0 × 179.9 mm | <a href="3d%20stl/Left%20Stand%20-%20new.stl"><img src="3d%20stl/Left%20Stand%20-%20new.png" width="160"></a><br>137.1 × 132.3 × 161.2 mm | <a href="3d%20stl/Right%20Stand-%20new.stl"><img src="3d%20stl/Right%20Stand-%20new.png" width="160"></a><br>137.1 × 129.2 × 162.0 mm |
 
 > Center Left/Right Enclosure 는 **Greenisland 와 Legarsdusofa 의 Cults3D 구매 모델에서
 > 각각 쓸 만한 부분을 잘라 합친 것**입니다. 두 원본 모두 구매품이라 재배포하지 않고,
@@ -140,7 +140,7 @@ Stand 는 Center 인클로저 뒷면에 에폭시로 부착합니다 (조립은 
 
 | LeftAuxEnclosure | LeftAuxFrontPanel | LeftAuxBackPanel |
 |:----:|:----:|:----:|
-| <a href="docs/3d%20stl/LeftAuxEnclosure.stl"><img src="docs/3d%20stl/LeftAuxEnclosure.png" width="160"></a><br>265.8 × 245.0 × 242.0 mm | <a href="docs/3d%20stl/LeftAuxFrontPanel.stl"><img src="docs/3d%20stl/LeftAuxFrontPanel.png" width="160"></a><br>266.2 × 244.8 × 242.0 mm | <a href="docs/3d%20stl/LeftAuxBackPanel.stl"><img src="docs/3d%20stl/LeftAuxBackPanel.png" width="160"></a><br>265.8 × 12.0 × 242.0 mm |
+| <a href="3d%20stl/LeftAuxEnclosure.stl"><img src="3d%20stl/LeftAuxEnclosure.png" width="160"></a><br>265.8 × 245.0 × 242.0 mm | <a href="3d%20stl/LeftAuxFrontPanel.stl"><img src="3d%20stl/LeftAuxFrontPanel.png" width="160"></a><br>266.2 × 244.8 × 242.0 mm | <a href="3d%20stl/LeftAuxBackPanel.stl"><img src="3d%20stl/LeftAuxBackPanel.png" width="160"></a><br>265.8 × 12.0 × 242.0 mm |
 
 #### Left Console
 
@@ -148,7 +148,7 @@ Upper / Lower 를 맞물려 조립하고, Bottom 2 종이 바닥판입니다.
 
 | LeftConsoleUpper | LeftConsoleLower | LeftConsoleBottomUpper | LeftConsoleBottomLower |
 |:----:|:----:|:----:|:----:|
-| <a href="docs/3d%20stl/LeftConsoleUpper.stl"><img src="docs/3d%20stl/LeftConsoleUpper.png" width="160"></a><br>220.2 × 270.5 × 51.4 mm | <a href="docs/3d%20stl/LeftConsoleLower.stl"><img src="docs/3d%20stl/LeftConsoleLower.png" width="160"></a><br>273.6 × 125.2 × 56.1 mm | <a href="docs/3d%20stl/LeftConsoleBottomUpper.stl"><img src="docs/3d%20stl/LeftConsoleBottomUpper.png" width="160"></a><br>124.2 × 239.0 × 19.0 mm | <a href="docs/3d%20stl/LeftConsoleBottomLower.stl"><img src="docs/3d%20stl/LeftConsoleBottomLower.png" width="160"></a><br>273.6 × 125.2 × 13.0 mm |
+| <a href="3d%20stl/LeftConsoleUpper.stl"><img src="3d%20stl/LeftConsoleUpper.png" width="160"></a><br>220.2 × 270.5 × 51.4 mm | <a href="3d%20stl/LeftConsoleLower.stl"><img src="3d%20stl/LeftConsoleLower.png" width="160"></a><br>273.6 × 125.2 × 56.1 mm | <a href="3d%20stl/LeftConsoleBottomUpper.stl"><img src="3d%20stl/LeftConsoleBottomUpper.png" width="160"></a><br>124.2 × 239.0 × 19.0 mm | <a href="3d%20stl/LeftConsoleBottomLower.stl"><img src="3d%20stl/LeftConsoleBottomLower.png" width="160"></a><br>273.6 × 125.2 × 13.0 mm |
 
 #### MFD 홀더
 
@@ -158,7 +158,7 @@ MFD 와 **Alibaba 에서 구한 7.6인치 정사각 LCD** 를 겹쳐 놓고 홀�
 
 | LeftMFDHolder | LeftMFDHolderUpper | RightMFDHolder | RightMFDHolderUpper |
 |:----:|:----:|:----:|:----:|
-| <a href="docs/3d%20stl/LeftMFDHolder.stl"><img src="docs/3d%20stl/LeftMFDHolder.png" width="160"></a><br>146.1 × 10.6 × 35.2 mm | <a href="docs/3d%20stl/LeftMFDHolderUpper.stl"><img src="docs/3d%20stl/LeftMFDHolderUpper.png" width="160"></a><br>145.6 × 7.2 × 5.0 mm | <a href="docs/3d%20stl/RightMFDHolder.stl"><img src="docs/3d%20stl/RightMFDHolder.png" width="160"></a><br>146.1 × 11.0 × 35.2 mm | <a href="docs/3d%20stl/RightMFDHolderUpper.stl"><img src="docs/3d%20stl/RightMFDHolderUpper.png" width="160"></a><br>145.6 × 7.2 × 5.0 mm |
+| <a href="3d%20stl/LeftMFDHolder.stl"><img src="3d%20stl/LeftMFDHolder.png" width="160"></a><br>146.1 × 10.6 × 35.2 mm | <a href="3d%20stl/LeftMFDHolderUpper.stl"><img src="3d%20stl/LeftMFDHolderUpper.png" width="160"></a><br>145.6 × 7.2 × 5.0 mm | <a href="3d%20stl/RightMFDHolder.stl"><img src="3d%20stl/RightMFDHolder.png" width="160"></a><br>146.1 × 11.0 × 35.2 mm | <a href="3d%20stl/RightMFDHolderUpper.stl"><img src="3d%20stl/RightMFDHolderUpper.png" width="160"></a><br>145.6 × 7.2 × 5.0 mm |
 
 #### 백라이트 플레이트
 
@@ -174,13 +174,13 @@ PLA 나 레진 출력으로 충분합니다 — MJF 등 고급 공정은 필요 
 
 | LED Plate - Gear | LED Plate - CMDS | LED Plate - TWA | LED Plate - HMCS |
 |:----:|:----:|:----:|:----:|
-| <a href="docs/3d%20stl/LED%20Plate%20-%20Gear.stl"><img src="docs/3d%20stl/LED%20Plate%20-%20Gear.png" width="160"></a><br>190.1 × 140.4 × 112.1 mm | <a href="docs/3d%20stl/LED%20Plate%20-%20CMDS.stl"><img src="docs/3d%20stl/LED%20Plate%20-%20CMDS.png" width="160"></a><br>144.2 × 81.8 × 81.8 mm | <a href="docs/3d%20stl/LED%20Plate%20-%20TWA.stl"><img src="docs/3d%20stl/LED%20Plate%20-%20TWA.png" width="160"></a><br>47.9 × 68.5 × 68.5 mm | <a href="docs/3d%20stl/LED%20Plate%20-%20HMCS.stl"><img src="docs/3d%20stl/LED%20Plate%20-%20HMCS.png" width="160"></a><br>144.2 × 40.8 × 40.8 mm |
+| <a href="3d%20stl/LED%20Plate%20-%20Gear.stl"><img src="3d%20stl/LED%20Plate%20-%20Gear.png" width="160"></a><br>190.1 × 140.4 × 112.1 mm | <a href="3d%20stl/LED%20Plate%20-%20CMDS.stl"><img src="3d%20stl/LED%20Plate%20-%20CMDS.png" width="160"></a><br>144.2 × 81.8 × 81.8 mm | <a href="3d%20stl/LED%20Plate%20-%20TWA.stl"><img src="3d%20stl/LED%20Plate%20-%20TWA.png" width="160"></a><br>47.9 × 68.5 × 68.5 mm | <a href="3d%20stl/LED%20Plate%20-%20HMCS.stl"><img src="3d%20stl/LED%20Plate%20-%20HMCS.png" width="160"></a><br>144.2 × 40.8 × 40.8 mm |
 
 **Left Console** — `LED Plate1` ~ `4`
 
 | LED Plate1 | LED Plate2 | LED Plate3 | LED Plate4 |
 |:----:|:----:|:----:|:----:|
-| <a href="docs/3d%20stl/LED%20Plate1.stl"><img src="docs/3d%20stl/LED%20Plate1.png" width="160"></a><br>92.8 × 265.2 × 10.7 mm | <a href="docs/3d%20stl/LED%20Plate2.stl"><img src="docs/3d%20stl/LED%20Plate2.png" width="160"></a><br>117.6 × 230.1 × 13.1 mm | <a href="docs/3d%20stl/LED%20Plate3.stl"><img src="docs/3d%20stl/LED%20Plate3.png" width="160"></a><br>124.0 × 86.5 × 13.8 mm | <a href="docs/3d%20stl/LED%20Plate4.stl"><img src="docs/3d%20stl/LED%20Plate4.png" width="160"></a><br>136.5 × 119.0 × 14.6 mm |
+| <a href="3d%20stl/LED%20Plate1.stl"><img src="3d%20stl/LED%20Plate1.png" width="160"></a><br>92.8 × 265.2 × 10.7 mm | <a href="3d%20stl/LED%20Plate2.stl"><img src="3d%20stl/LED%20Plate2.png" width="160"></a><br>117.6 × 230.1 × 13.1 mm | <a href="3d%20stl/LED%20Plate3.stl"><img src="3d%20stl/LED%20Plate3.png" width="160"></a><br>124.0 × 86.5 × 13.8 mm | <a href="3d%20stl/LED%20Plate4.stl"><img src="3d%20stl/LED%20Plate4.png" width="160"></a><br>136.5 × 119.0 × 14.6 mm |
 
 ### 1-3. 부품 목록
 
@@ -205,11 +205,11 @@ PLA 나 레진 출력으로 충분합니다 — MJF 등 고급 공정은 필요 
 | 구분 | 수량 | 재료 | STL 위치 |
 |------|----:|------|----------|
 | 패널 `LED layer` | 11 | 투명 PLA | Greenisland 모델 동봉 |
-| 백라이트 플레이트 | 8 | PLA · 레진 | `docs/3d stl/` |
-| Left Aux 인클로저 | 3 | PLA · PETG | `docs/3d stl/` |
-| Left Console | 4 | PLA · PETG | `docs/3d stl/` |
-| MFD 홀더 | 4 | PLA · PETG | `docs/3d stl/` |
-| 스탠드 | 2 | PLA · PETG | `docs/3d stl/` |
+| 백라이트 플레이트 | 8 | PLA · 레진 | `3d stl/` |
+| Left Aux 인클로저 | 3 | PLA · PETG | `3d stl/` |
+| Left Console | 4 | PLA · PETG | `3d stl/` |
+| MFD 홀더 | 4 | PLA · PETG | `3d stl/` |
+| 스탠드 | 2 | PLA · PETG | `3d stl/` |
 | 인클로저 | 2 | PLA · PETG | Cults3D 구매 모델 |
 | **합계** | **34** | | |
 
@@ -423,7 +423,6 @@ REDKITE-F16-Panels/
 │   │                              #   Gear, CMDS, TWA, Alt Gear, MISC, HMCS, Pedal
 │   ├── F16_LEFT_AUX_MISC.ino
 │   ├── BiosHandler/               # DcsBiosParser.h / BmsBiosParser.h
-│   ├── pcb/                       # TWA 기판 LED 추가 개조 가이드
 │   ├── CLAUDE.md
 │   └── name.c
 ├── F16_LEFT_CONSOLE/              # Teensy 4.1 (PID 0x048E)
@@ -432,7 +431,6 @@ REDKITE-F16-Panels/
 │   ├── F16_LEFT_CONSOLE.ino
 │   ├── BiosHandler/
 │   ├── Display/                   # Max7219Display.h (UHF 7-seg)
-│   ├── pcb/                       # UHF 디스플레이 자작 PCB — 거버·BOM·설계 문서
 │   ├── CLAUDE.md
 │   └── name.c
 ├── tools/                         # Python 브릿지 (BMS/DCS → Teensy)
@@ -445,8 +443,11 @@ REDKITE-F16-Panels/
 │   ├── REF_PARTS.md               #   부품 목록
 │   ├── REF_PROTOCOL.md            #   DCS/BMS 프로토콜·LED 주소 맵
 │   ├── REF_LEFT_AUX_WIRING.md     #   AUX 보드 배선·핀 배열·DX맵·LAN
-│   ├── REF_LEFT_CONSOLE_WIRING.md #   콘솔 보드 배선·핀 배열·DX맵·전원
-│   └── 3d stl/                    #   3D 프린트용 STL 파일
+│   └── REF_LEFT_CONSOLE_WIRING.md #   콘솔 보드 배선·핀 배열·DX맵·전원
+├── 3d stl/                        # 3D 프린트용 STL + 썸네일
+├── pcb/                           # 커스텀 기판
+│   ├── uhf_display/               #   UHF 디스플레이 자작 PCB (거버·BOM·설계)
+│   └── twa_led_mod.md             #   TWA 기판 LED 추가 개조 가이드
 ├── CLAUDE.md                      # Claude Code 가이드
 └── README.md
 ```
@@ -467,7 +468,7 @@ REDKITE-F16-Panels/
 
 코드·문서·설정은 [MIT License](LICENSE).
 
-`docs/3d stl/` 의 자작 STL 은 **CC BY-NC-SA 4.0** 입니다 (MIT 아님).
+`3d stl/` 의 자작 STL 은 **CC BY-NC-SA 4.0** 입니다 (MIT 아님).
 구매 모델을 잘라 합친 것(Center Left/Right Enclosure)과 타 프로젝트 패널 STL·거버는
 **재배포하지 않습니다** —
 원 출처에서 받으십시오. 상세는 [LICENSE](LICENSE) 의 NOTICE.

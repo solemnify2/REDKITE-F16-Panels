@@ -4,7 +4,7 @@ Greenisland 의 TWA 패널 기판(`Schaltplan TWA v35`)에 **Power 계열 LED 3�
 추가**한 개조입니다. 본 프로젝트에서 쓰는 기판은 이 개조를 적용한 `v36` 입니다.
 
 > **개조 파일 자체는 배포하지 않습니다.** 상류 설계가 바탕인 2차적저작물이라, 인클로저와
-> 같은 이유로 저장소에 싣지 않습니다 ([LICENSE](../../LICENSE) NOTICE).
+> 같은 이유로 저장소에 싣지 않습니다 ([LICENSE](../LICENSE) NOTICE).
 > 이 문서는 **무엇을 어떻게 바꿨는지**만 적습니다. 원본은 Cults3D 에서 구매해 받으시고,
 > 아래 내용을 본인 파일에 직접 적용하십시오.
 
@@ -81,7 +81,7 @@ LED 4개를 한 신호핀에서 직접 당기면 핀 전류가 그만큼 늘어�
 4. DRC 를 돌리고 거버를 뽑아 발주합니다.
 
 `VCC` 는 **3.3V 입니다.** 기판 실크에 `5V` 라고 찍혀 있어도 Teensy 3.3V 를 넣으십시오 —
-이유는 [REF_LEFT_AUX_WIRING.md](../../docs/REF_LEFT_AUX_WIRING.md) 의 「다른 래더와의 차이」 절.
+이유는 [REF_LEFT_AUX_WIRING.md](../docs/REF_LEFT_AUX_WIRING.md) 의 「다른 래더와의 차이」 절.
 
 ---
 
@@ -89,6 +89,6 @@ LED 4개를 한 신호핀에서 직접 당기면 핀 전류가 그만큼 늘어�
 
 | 문서 | 내용 |
 |------|------|
-| [REF_LEFT_AUX_WIRING.md](../../docs/REF_LEFT_AUX_WIRING.md) | `C3` 케이블, TWA 래더, LED 핀 배정 (34~37) |
-| [REF_PARTS.md](../../docs/REF_PARTS.md) | 기판 사양, LED·저항 수량 |
-| [REF_BACKLIGHT.md](../../docs/REF_BACKLIGHT.md) | 백라이트 — 이 LED 들과는 별개 회로 |
+| [REF_LEFT_AUX_WIRING.md](../docs/REF_LEFT_AUX_WIRING.md) | `C3` 케이블, TWA 래더, LED 핀 배정 (34~37) |
+| [REF_PARTS.md](../docs/REF_PARTS.md) | 기판 사양, LED·저항 수량 |
+| [REF_BACKLIGHT.md](../docs/REF_BACKLIGHT.md) | 백라이트 — 이 LED 들과는 별개 회로 |
