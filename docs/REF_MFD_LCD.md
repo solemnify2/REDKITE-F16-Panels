@@ -22,8 +22,7 @@ Thrustmaster MFD 뒤에 겹쳐 쓰는 화면입니다. MFD 베젤의 버튼 배�
 | 드라이버 IC | ILI9881C | | 픽셀 피치 | 36.5 (H) × 109.5 (V) |
 | 장착 | PCB | | 동작 온도 | −20 ℃ ~ +70 ℃ |
 | 원산지 | Guangdong, China | | 보관 온도 | −25 ℃ ~ +75 ℃ |
-
-<img src="square_lcd-spec.jpg" width="760">
+| 상표 | Chance | | | |
 
 해상도 800 × 800 은 표시 영역 135.36 mm 에 대해 약 **150 ppi** 입니다.
 
