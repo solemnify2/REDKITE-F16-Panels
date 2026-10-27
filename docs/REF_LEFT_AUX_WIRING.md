@@ -147,7 +147,7 @@ LAN pin 8 ── GND ───┴──┴── MCP23017 GND
 | AUX | 풀업 저항 | 4.7kΩ x2 | I2C 풀업 (SDA, SCL -> 3.3V) |
 | AUX | Gate 직렬 저항 | 1kΩ | MOSFET 스위칭 링잉 방지 |
 | AUX | Gate 풀다운 저항 | 10kΩ | 핫플러그 시 MOSFET OFF 유지 |
-| AUX | MOSFET | IRLML6244 (SOT-23) | N-ch logic-level, Vgs(th) ~1V |
+| AUX | MOSFET | IRLML6244 (SOT-23) | N-ch logic-level, Vgs(th) ~1V. 현재 1개로 AUX·MISC 백라이트를 함께 구동 |
 | MISC | 직렬 저항 | 100Ω x2 | SDA/SCL 돌입전류 제한 (래치업 방지) |
 | MISC | 전해캡 | 10uF (10V+) | MCP VDD 핫플러그 스파이크 흡수 |
 | MISC | 세라믹캡 | 100nF | MCP VDD 고주파 노이즈 필터 (핀 근접 배치) |
@@ -221,40 +221,6 @@ LAN pin 8 ── GND ───┴──┴── MCP23017 GND
 
 헤더 42핀 외에 **하단 SD 패드** 5개(43·44·45·46·47)를 CMDS 램프가 씁니다. 42 는 미사용.
 FPC 배선표는 아래 **CMDS 램프** 절에 있습니다.
-
----
-  --    -- spare --           0 ──┤ ○         ○ ├──     GND                  ---
-  C1    DN LOCK REL           1 ──┤ ○         ○ ├──     3V3                  ---
-  C1    HORN SILENCER         2 ──┤ ○         ○ ├── 23  CMDS FL       (A9)  C2
-  C1    LANDING LIGHT 1       3 ──┤ ○         ○ ├── 22  CMDS CH       (A8)  C2
-  C1    LANDING LIGHT 2       4 ──┤ ○         ○ ├── 21  CMDS O2       (A7)  C2
-  C1    STORE CAT             5 ──┤ ○         ○ ├── 20  CMDS O1       (A6)  C2
-  C1    ANTI SKID 1           6 ──┤ ○         ○ ├── 19  I2C SCL       (A5)  I1
-  C1    ANTI SKID 2           7 ──┤ ○         ○ ├── 18  I2C SDA       (A4)  I1
-  C1    BRAKES CHANNEL        8 ──┤ ○         ○ ├── 17  CMDS RWR      (A3)  C2
-  C1    GND JETT ENABLE       9 ──┤ ○         ○ ├── 16  CMDS JMR      (A2)  C2
-  C1    EMER JETTISON        10 ──┤ ○         ○ ├── 15  CMDS MWS      (A1)  C2
-  C1    HOOK                 11 ──┤ ○         ○ ├── 14  CMDS JETT     (A0)  C2
-  C1    GEAR WARN LED        12 ──┤ ○         ○ ├── 13  BACKLIGHT [!]LED    12V
-  ---   3.3V                 ─────┤ ○         ○ ├─────  GND                  ---
-  C3    TWA LADDER    (A10)  24 ──┤ ○         ○ ├── 41  PEDAL RIGHT  (A17)  C6
-  C2    CMDS MODE LDR (A11)  25 ──┤ ○         ○ ├── 40  PEDAL LEFT   (A16)  C6
-  C2    CMDS PRGM LDR (A12)  26 ──┤ ○         ○ ├── 39  HMCS SYMBOL  (A15)  C5
-  --    -- spare --   (A13)  27 ──┤ ○         ○ ├── 38  -- spare --  (A14)  --
-  C1    LANDING GEAR UP      28 ──┤ ○         ○ ├── 37  TWA ACT LED         C3
-  C1    LANDING GEAR DN      29 ──┤ ○         ○ ├── 36  TWA SEARCH LED      C3
-  C1    NOSE GEAR LED        30 ──┤ ○         ○ ├── 35  TWA LOW LED         C3
-  C1    LEFT GEAR LED        31 ──┤ ○         ○ ├── 34  TWA POWER LED       C3
-  C1    RIGHT GEAR LED       32 ──┤ ○         ○ ├── 33  ALTGEAR HANDLE      C4
-                                  └─────────────┘
-
-  [!] pin 13 is shared with the Teensy on-board LED. Used as an OUTPUT here,
-      so the on-board LED simply mirrors the backlight state (same as LEFT_CONSOLE).
-
-  pin 27 conflict resolved: Gear Warn LED moved to pin 12.
-
-  -- spare -- = 여유 핀 (미사용). pin 0, pin 27 (A13), pin 38 (A14)
-```
 
 ---
 
@@ -451,6 +417,6 @@ LED 1개만 연결한 상태에서 **320Ω 양단 = 1.2V** → 단독 전류 **3
 | 3 | **래더 캘리브레이션** — TWA·CMDS MODE·PRGM. PWM 디밍 방식 변경 후 BL OFF/ON 값 동일(±4)하여 1세트로 통합. `ALLOW_DEBUG = true` 로 실측 |
 | 4 | **I2C 핫플러그 보호** — SDA/SCL 직렬 100Ω, 보드 3.3V에 10µF + 100nF (위 "I1 — LAN 배선" 절). 단선 시 GEAR WARN 점등, 500ms 재접속 |
 | 5 | **MCP 주소 점퍼** — 출하 상태 그대로 (`0x20`) |
-| 6 | **백라이트** — 핀 13 PWM 1kHz → MOSFET → 별도 12V 어댑터 (Step-Up은 래더 ADC 노이즈 유발). 오프라인 수동 밝기: DN LOCK REL 누른 채 HMCS Symbology pot (A15, 방향 반전). 배선은 위 "I1 — LAN 배선" 절 참조 |
+| 6 | **백라이트** — 핀 13 PWM 1kHz → MOSFET → 12V 어댑터 (콘솔과 Y 케이블 공유, Step-Up은 래더 ADC 노이즈 유발). 오프라인 수동 밝기: DN LOCK REL 누른 채 HMCS Symbology pot (A15, 방향 반전). 배선은 위 "I1 — LAN 배선" 절 참조 |
 | 7 | **스위치 배선** — 전부 액티브 로우 + 내부 풀업 (공통 단자 GND) |
 | 8 | **CMDS 램프** — 하단 15핀 FPC 확장 케이블 → 5핀으로 LED 8개 (개별 320Ω = 220+100 직렬, 캐소드는 FPC 15 공통). pin 42 = 미사용. 병렬 자리 핀당 약 7.1mA. Vf 3.0V 이상 LED 는 쓰지 말 것 |
