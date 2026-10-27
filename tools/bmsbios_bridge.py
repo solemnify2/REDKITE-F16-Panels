@@ -363,7 +363,9 @@ class Device:
                 brightness = BRT_PWM
             else:  # instr == 1 (DIM)
                 brightness = DIM_PWM_LOWERED if self.brt_seen else DIM_PWM_DEFAULT
-            led_bits |= (brightness << 16)
+            # bits 16-23: console backlight, bits 24-31: instr panel backlight
+            # BMS에는 instrLight 하나뿐이라 두 채널 동일 값
+            led_bits |= (brightness << 16) | (brightness << 24)
 
         sr_data = compute_ecm_sr_data(shm2) if self.profile['has_ecm'] and shm2 else ZERO4
         uhf = read_uhf(shm2)        # 통합 프레임 — AUX 는 이 필드를 무시합니다

@@ -53,7 +53,8 @@
   Teensy direct   C1 GEAR   C2 CMDS   C3 TWA   C4 ALT GEAR   C5 HMCS   C6 PEDALS
                   C7 CMDS 램프 — 하단 SD 패드에서 15핀 FPC 확장 케이블로 인출 (42 미사용)
   MCP > panel     M1 0x20 > MISC (모듈-패널 하니스)
-  12V             backlight: pin 13 PWM 1kHz > MOSFET > 12V 어댑터 (콘솔과 Y 케이블 공유)
+  12V             AUX backlight: pin 13 PWM > MOSFET > 12V 어댑터
+                  MISC backlight: pin 12 PWM > MOSFET > 12V via LAN (콘솔과 Y 케이블 공유)
 
   xN = 신호선 수 (3.3V/GND 제외)   SW = switch GPIO 수   LADDER = resistor ladder   POT = potentiometer
 ```
@@ -69,7 +70,7 @@
 | **C5** | Teensy → HMCS | Symbology 1개 (Brightness / Contrast 미연결) | 1 |
 | **C6** | Teensy → 페달 | 포트 2 (Left / Right) | 2 |
 | **C7** | Teensy 하단 SD 패드 → CMDS 램프 | LED 8 (DISPENSE RDY 5 / NO GO 2 / GO 1) on 5 pins | 5 (+GND, LAN 6심, pin 42 미사용) |
-| 12V | 12V 어댑터 → 백라이트 | 게이트는 핀 13 PWM 1kHz (MOSFET). 어댑터는 콘솔과 **Y 케이블로 공유** | 2 |
+| 12V | 12V 어댑터 → 백라이트 | MOSFET 2개: pin 13 (AUX 로컬), pin 12 (MISC via LAN). 어댑터는 콘솔과 **Y 케이블로 공유** | 2 |
 
 콘솔 장치와 달리 MCP가 1장뿐이라 **I2C는 체인이 아닌 스타(단일 링크)**입니다.
 MCP 단선 시 **GEAR WARN LED가 점등**되어 패널에서 바로 알 수 있고 (콘솔에는 없는 표시등),
@@ -89,8 +90,8 @@ Teensy(AUX 통) ↔ MCP23017(MISC 패널) 간 Cat5e 한 가닥에 I2C·백라이
 | 2 | Pair 1 | GND | SDA 리턴 |
 | 3 | Pair 2 (Green) | SCL | |
 | 6 | Pair 2 | GND | SCL 리턴 |
-| 4 | Pair 3 (Blue) | 12V dimmed | MOSFET 출력 (PWM) |
-| 5 | Pair 3 | LED return | GND |
+| 4 | Pair 3 (Blue) | 12V+ | 어댑터 12V 직결 (MISC LED 양극) |
+| 5 | Pair 3 | LED-RTN | MISC LED 음극 → AUX 통의 MOSFET₂ Drain으로 복귀 |
 | 7 | Pair 4 (Brown) | 3.3V | MCP23017 전용 |
 | 8 | Pair 4 | GND | 3.3V 리턴 |
 
@@ -108,15 +109,24 @@ Teensy 3.3V ──┬──┤├──── Teensy SDA (18) ──────
 GND ──────────────────────────────────────────────── LAN pin 2
 GND ──────────────────────────────────────────────── LAN pin 6
 
-Teensy pin 13 ──[1kΩ]──┬── MOSFET Gate
-                      [10kΩ]
-                        │
-                       GND
-12V ─────────── MOSFET Drain
-                MOSFET Source ────────────────────── LAN pin 4 (dimmed 12V)
-                                              ┌──── LAN pin 5 (LED return)
-                                              │
-                                             GND
+MOSFET₁ — AUX 로컬 백라이트 (console channel, pin 13)
+                        ┌────────┐
+           GND ───┬─────┤ S 1    │
+               10kΩ     │    D 3 ├──── LED-RTN
+Teensy 13 ── 1kΩ ─┴─────┤ G 2    │
+                        └────────┘
+
+  12V ── AUX LED strips (Gear·CMDS·TWA·HMCS) ── LED-RTN ── D(3)
+
+
+MOSFET₂ — MISC 백라이트 via LAN (instr panel channel, pin 12)
+                        ┌────────┐
+           GND ───┬─────┤ S 1    │
+               10kΩ     │    D 3 ├──── LED-RTN (LAN 5)
+Teensy 12 ── 1kΩ ─┴─────┤ G 2    │
+                        └────────┘
+
+  12V ── LAN 4 ── MISC LED strips ── LAN 5 (LED-RTN) ── D(3)
 
 3.3V ─────────────────────────────────────────────── LAN pin 7
 GND ──────────────────────────────────────────────── LAN pin 8
@@ -130,8 +140,7 @@ LAN pin 3 ──[100Ω]── SCL ── MCP23017 SCL
 LAN pin 2 ── GND
 LAN pin 6 ── GND
 
-LAN pin 4 ── LED+ (12V dimmed)
-LAN pin 5 ── LED- (LED return)
+LAN pin 4 ── 12V+ ── MISC LED strips ── LED-RTN ── LAN pin 5
 
 LAN pin 7 ── 3.3V ──┬──┬── MCP23017 VDD
                      │  │
@@ -147,7 +156,7 @@ LAN pin 8 ── GND ───┴──┴── MCP23017 GND
 | AUX | 풀업 저항 | 4.7kΩ x2 | I2C 풀업 (SDA, SCL -> 3.3V) |
 | AUX | Gate 직렬 저항 | 1kΩ | MOSFET 스위칭 링잉 방지 |
 | AUX | Gate 풀다운 저항 | 10kΩ | 핫플러그 시 MOSFET OFF 유지 |
-| AUX | MOSFET | IRLML6244 (SOT-23) | N-ch logic-level, Vgs(th) ~1V. 현재 1개로 AUX·MISC 백라이트를 함께 구동 |
+| AUX | MOSFET ×2 | IRLML6244 (SOT-23) | N-ch logic-level, Vgs(th) ~1V. pin 13 = AUX 로컬, pin 12 = MISC via LAN |
 | MISC | 직렬 저항 | 100Ω x2 | SDA/SCL 돌입전류 제한 (래치업 방지) |
 | MISC | 전해캡 | 10uF (10V+) | MCP VDD 핫플러그 스파이크 흡수 |
 | MISC | 세라믹캡 | 100nF | MCP VDD 고주파 노이즈 필터 (핀 근접 배치) |
@@ -198,12 +207,12 @@ LAN pin 8 ── GND ───┴──┴── MCP23017 GND
   C2    CMDS JMR           (A2)  16 ──┤ ○         ○ ├──  9  GND JETT ENABLE          C1
   C2    CMDS MWS           (A1)  15 ──┤ ○         ○ ├── 10  EMER JETTISON            C1
   C2    CMDS JETT          (A0)  14 ──┤ ○         ○ ├── 11  HOOK                     C1
-  12V   BACKLIGHT [!]LED         13 ──┤ ○         ○ ├── 12  GEAR WARN LED            C1
+  12V   AUX BACKLIGHT [!]LED     13 ──┤ ○         ○ ├── 12  MISC BACKLIGHT           I1
   ---   GND                      ─────┤ ○         ○ ├─────  3.3V                     ---
   C6    PEDAL RIGHT       (A17)  41 ──┤ ○         ○ ├── 24  TWA LADDER        (A10)  C3
   C6    PEDAL LEFT        (A16)  40 ──┤ ○         ○ ├── 25  CMDS MODE LDR     (A11)  C2
   C5    HMCS SYMBOL       (A15)  39 ──┤ ○         ○ ├── 26  CMDS PRGM LDR     (A12)  C2
-  --    -- spare --       (A14)  38 ──┤ ○         ○ ├── 27  -- spare --       (A13)  --
+  --    -- spare --       (A14)  38 ──┤ ○         ○ ├── 27  GEAR WARN LED    (A13)  C1
   C3    TWA ACT LED              37 ──┤ ○         ○ ├── 28  LANDING GEAR UP          C1
   C3    TWA SEARCH LED           36 ──┤ ○         ○ ├── 29  LANDING GEAR DN          C1
   C3    TWA LOW LED              35 ──┤ ○         ○ ├── 30  NOSE GEAR LED            C1
@@ -212,11 +221,12 @@ LAN pin 8 ── GND ───┴──┴── MCP23017 GND
                                       └─────────────┘
 
   [!] pin 13 is shared with the Teensy on-board LED. Used as an OUTPUT here,
-      so the on-board LED simply mirrors the backlight state (same as LEFT_CONSOLE).
+      so the on-board LED simply mirrors the AUX backlight state (same as LEFT_CONSOLE).
 
-  pin 27 conflict resolved: Gear Warn LED moved to pin 12.
+  pin 12 = MISC backlight MOSFET (instr panel channel). Gear Warn LED는 pin 27로 이설.
+  pin 13 = AUX backlight MOSFET (console channel).
 
-  -- spare -- = 여유 핀 (미사용). pin 0, pin 27 (A13), pin 38 (A14)
+  -- spare -- = 여유 핀 (미사용). pin 0, pin 38 (A14)
 ```
 
 헤더 42핀 외에 **하단 SD 패드** 5개(43·44·45·46·47)를 CMDS 램프가 씁니다. 42 는 미사용.
@@ -470,10 +480,10 @@ LED 1개만 연결한 상태에서 **320Ω 양단 = 1.2V** → 단독 전류 **3
 
 | 항목 | 값 |
 |---|---|
-| **Teensy 헤더 핀** | **39 / 42** (여유 3개: pin 0, A13, A14) |
+| **Teensy 헤더 핀** | **40 / 42** (여유 2개: pin 0, A14) |
 | **하단 SD 패드** | **5 / 6** (CMDS 램프 5핀, 42 = 미사용) |
 | ├ 아날로그 입력 | 6 / 18 (래더 3 + HMCS 1 + 페달 2) — A0~A9 는 CMDS 스위치·I2C 가 디지털로 점유 |
-| └ 여유 핀 | 3개 (pin 0, A13, A14) |
+| └ 여유 핀 | 2개 (pin 0, A14) |
 | **MCP23017 GPIO** | 14 / 16 (여유 PA6, PB7) |
 | LED | 16 (GEAR 4 + TWA 4 + MISC 3 + CMDS 5핀/8LED) |
 | **DX 버튼** | **51 / 128** (switches 33 + ladder 18) |
@@ -481,7 +491,7 @@ LED 1개만 연결한 상태에서 **320Ω 양단 = 1.2V** → 단독 전류 **3
 | I2C | `Wire`(18/19) 100kHz, `0x20` 1장 |
 | 메인 루프 | 20Hz (50ms) |
 
-**확장 여지** — 헤더 여유가 3핀(0, A13, A14)뿐이라 본격적인 추가는 **MCP23017 증설**로 합니다
+**확장 여지** — 헤더 여유가 2핀(0, A14)뿐이라 본격적인 추가는 **MCP23017 증설**로 합니다
 (주소 `0x21`~`0x27`, 칩당 16 GPIO). 현재 `0x20` 에도 PA6·PB7 2핀이 남아 있습니다.
 래더·POT 는 아날로그라 MCP 를 거칠 수 없고 Teensy ADC 핀을 써야 합니다.
 
@@ -491,12 +501,12 @@ LED 1개만 연결한 상태에서 **320Ω 양단 = 1.2V** → 단독 전류 **3
 
 | # | 항목 |
 |---|---|
-| 1 | ~~핀 27 충돌~~ **해결됨** — Gear Warn LED 를 핀 12 로 이설. 핀 27(A13)은 여유 |
+| 1 | ~~핀 27 충돌~~ **해결됨** — Gear Warn LED 는 핀 27, 핀 12 는 MISC 백라이트 MOSFET |
 | 2 | ~~핀 13 확인~~ **해결됨** — 백라이트 출력으로 변경. 온보드 LED가 백라이트 상태를 표시 (LEFT_CONSOLE과 동일). 핀 0은 여유 |
 | 3 | **래더 캘리브레이션** — TWA·CMDS MODE·PRGM. 제작법과 기대값은 위 「저항 래더」 절. PWM 디밍 방식 변경 후 BL OFF/ON 값 동일(±4)하여 1세트로 통합. `ALLOW_DEBUG = true` 로 실측 |
 | 4 | **I2C 핫플러그 보호** — SDA/SCL 직렬 100Ω, 보드 3.3V에 10µF + 100nF (위 "I1 — LAN 배선" 절). 단선 시 GEAR WARN 점등, 500ms 재접속 |
 | 5 | **MCP 주소 점퍼** — 출하 상태 그대로 (`0x20`) |
-| 6 | **백라이트** — 핀 13 PWM 1kHz → MOSFET → 12V 어댑터 (콘솔과 Y 케이블 공유, Step-Up은 래더 ADC 노이즈 유발). 오프라인 수동 밝기: DN LOCK REL 누른 채 HMCS Symbology pot (A15, 방향 반전). 배선은 위 "I1 — LAN 배선" 절 참조 |
+| 6 | **백라이트 2원화** — MOSFET 2개: pin 13 = AUX 로컬 (console channel), pin 12 = MISC via LAN (instr panel channel). 12V 어댑터(콘솔과 Y 케이블 공유). Online: 각 채널 독립 제어. Offline 수동: DN LOCK REL 누른 채 HMCS pot(A15, 반전)로 양쪽 동시 조절. 배선은 위 "I1 — LAN 배선" 절 참조 |
 | 7 | **스위치 배선** — 전부 액티브 로우 + 내부 풀업 (공통 단자 GND) |
 | 8 | **CMDS 램프** — 하단 15핀 FPC 확장 케이블 → 5핀으로 LED 8개 (개별 320Ω = 220+100 직렬, 캐소드는 FPC 15 공통). pin 42 = 미사용. 병렬 자리 핀당 약 7.1mA. Vf 3.0V 이상 LED 는 쓰지 말 것 |
 | 9 | **TWA PCB 급전** — 기판 실크가 `5V` 여도 **Teensy 3.3V** 를 연결할 것. 래더 출력이 A10 으로 직결되는데 Teensy 4.1 은 5V 톨러런트가 아닙니다 (위 「다른 래더와의 차이」 절) |

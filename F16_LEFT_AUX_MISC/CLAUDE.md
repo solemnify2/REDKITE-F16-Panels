@@ -67,21 +67,23 @@ MCP23017 chips add 16 GPIO pins each over I2C. Used for MISC panel (addr 0x20). 
 
 SOF(Start-of-Frame)-based suspend detection using `USB1_FRINDEX`. When PC enters sleep, USB SOF packets stop — if no frame change for 50ms, Teensy considers USB suspended. On suspend: all LEDs off, backlight off, CPU enters `wfi` (Wait For Interrupt) sleep. On resume: welcome ceremony runs automatically.
 
-### Backlight Control (PWM Dimming)
+### Backlight Control (PWM Dimming, Dual-Channel)
 
-Separate 12V adapter controlled via MOSFET on `BACKLIGHT_PIN` (pin 13, PWM 1kHz). Step-Up 5V→12V was replaced due to ADC noise on resistor ladders.
+Separate 12V adapter, two MOSFETs for dual-channel backlight:
+- `BACKLIGHT_PIN` (pin 13) — AUX local panels (console channel)
+- `MISC_BACKLIGHT_PIN` (pin 12) — MISC panel via LAN (instr panel channel)
 
 **Brightness control by source:**
 
 | Source | How | Detail |
 |--------|-----|--------|
-| BMS | Bridge sends PWM in `ledBits` byte 2 | bits 16~23 = brightness 0~255 |
-| DCS | Teensy direct | `LIGHT_INST_PNL` (0x4484) 0–65535 → `>>8` → PWM 0–255 |
-| Offline manual | DN LOCK REL (held) + HMCS Symbology pot | A15, reversed (CW=dark, CCW=bright) |
+| BMS | Bridge sends PWM in `ledBits` | byte 2 (bits 16~23) → pin 13, byte 3 (bits 24~31) → pin 12. BMS는 `instrLight` 하나뿐이라 동일 값 |
+| DCS | Teensy direct | `LIGHT_CONSLES` (0x4482) → pin 13, `LIGHT_INST_PNL` (0x4484) → pin 12 |
+| Offline manual | DN LOCK REL (held) + HMCS Symbology pot | A15, reversed. **양쪽 핀 동시 조절** |
 | Idle auto-off | 30 min no input while offline | `backlightIdleOff` flag, any input restores |
 | USB suspend | SOF silence >50ms | All LEDs + backlight off, `wfi` sleep |
 
-Bridge reconnect always restores backlight and triggers welcome ceremony.
+Bridge reconnect triggers welcome ceremony. Backlight starts OFF — bridge data or manual control turns it on.
 
 ### Welcome Ceremony
 
@@ -95,7 +97,8 @@ LED sweep animation runs on: startup, USB resume from suspend, bridge online (of
 | `ALLOW_DEBUG` | false | Set true for serial debug output (analog calibration, switch states) |
 | `LOOP_DELAY_MS` | 50 | Main loop interval (20Hz) |
 | `SERIAL_TIMEOUT` | 6 | Seconds before protocol reset on no data |
-| `BACKLIGHT_PIN` | **13** | MOSFET gate (PWM 1kHz). 별도 12V 어댑터 제어 |
+| `BACKLIGHT_PIN` | **13** | AUX backlight MOSFET (console channel). 별도 12V 어댑터 |
+| `MISC_BACKLIGHT_PIN` | **12** | MISC backlight MOSFET (instr panel channel). LAN으로 전송 |
 | `IDLE_TIMEOUT_MS` | 30 min | Offline idle before backlight auto-off |
 | `SW_IDX_DN_LOCK_REL` | 13 | Manual backlight modifier key (switches[] index) |
 | `USB_SUSPEND_THRESHOLD_MS` | 50 | SOF silence threshold for suspend detection |
@@ -113,9 +116,9 @@ LED sweep animation runs on: startup, USB resume from suspend, bridge online (of
 
 ## Pin Assignment
 
-See `docs/REF_LEFT_AUX_WIRING.md` for the cable tree, full Teensy pin map, MCP GPIO map, DX button map, joystick axes, the CMDS lamp wiring, the AUX↔MISC LAN wiring, and the build checklist. Pin 27 conflict (Gear Warn LED vs HMCS Brightness A13) has been resolved — Gear Warn LED moved to pin 12.
+See `docs/REF_LEFT_AUX_WIRING.md` for the cable tree, full Teensy pin map, MCP GPIO map, DX button map, joystick axes, the CMDS lamp wiring, the AUX↔MISC LAN wiring, and the build checklist. Pin 27 = Gear Warn LED, pin 12 = MISC backlight MOSFET.
 
-All 42 header pins are used. The CMDS lamps hang off the **bottom microSD pads**, broken out with a 15-pin FPC extension cable — no soldering onto the board, no header pins consumed.
+40/42 header pins are used (spare: pin 0, A14). The CMDS lamps hang off the **bottom microSD pads**, broken out with a 15-pin FPC extension cable — no soldering onto the board, no header pins consumed.
 
 ### CMDS EWS Lamps
 

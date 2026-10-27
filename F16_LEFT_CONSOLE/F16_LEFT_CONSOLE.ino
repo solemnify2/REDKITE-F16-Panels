@@ -489,8 +489,8 @@ extern volatile uint8_t usb_configuration;
 //  Backlight (PWM dimming)
 // ================================================================
 
-static bool backlightState = true;
-static uint8_t manualBrightness = 255;  // offline 수동 밝기 (기본 최대)
+static bool backlightState = false;
+static uint8_t manualBrightness = 0;
 static bool backlightIdleOff = false;
 
 void setBacklight(bool on) {
@@ -503,9 +503,9 @@ void setBacklightBrightness(uint8_t brightness) {
   backlightState = (brightness > 0);
 }
 
-// Offline 수동 밝기 조절: UHF STATUS 누른 채 UHF VOL 으로 조절
+// 수동 밝기 조절: UHF TEST + STATUS 동시에 누른 채 UHF VOL 으로 조절
 void checkManualBacklight() {
-  if (!digitalRead(PIN_UHF_STATUS)) {  // active-low: 눌림 = LOW
+  if (!digitalRead(PIN_UHF_TEST) && !digitalRead(PIN_UHF_STATUS)) {
     int raw = analogRead(PIN_POT_UHFVOL);
     uint8_t brightness = raw >> 2;     // 10-bit → 8-bit
     if (brightness != manualBrightness) {
@@ -1164,7 +1164,7 @@ static void ecmSweep(uint16_t holdMs) {
 }
 
 void welcomeCeremony() {
-  setBacklight(true);
+  setBacklight(true);             // ceremony 동안 백라이트 ON
   displayOn(true);
   displayLampTest(true);        // 전 세그먼트 점등
 
@@ -1192,6 +1192,7 @@ void welcomeCeremony() {
   turnOffAllLeds();
   displayLampTest(false);
   displayOn(false);             // 번인 방지: 브릿지 수신 전까지 꺼둠
+  setBacklight(false);            // ceremony 끝 → 백라이트 OFF (bridge/수동으로 켜짐)
 }
 
 
@@ -1207,8 +1208,8 @@ void resetProtocol() {
   dcsBiosReset();
   bmsBiosReset();
   turnOffAllLeds();
-  manualBrightness = 51;  // bridge offline → 20% brightness
-  setBacklightBrightness(manualBrightness);
+  manualBrightness = 0;
+  setBacklight(false);    // bridge offline → backlight off (수동 조절로 복원 가능)
   displayOn(false);         // 번인 방지: 브릿지 오프라인 시 디스플레이 OFF
   //if (ALLOW_DEBUG) Serial.println("[Proto] Reset to UNKNOWN");
 }
@@ -1278,7 +1279,7 @@ void setup() {
 
   // --- Backlight PWM ---
   analogWriteFrequency(BACKLIGHT_PIN, 1000);  // 1kHz PWM
-  setBacklight(true);
+  setBacklight(false);  // 시작 시 꺼짐 — bridge 또는 수동 조절로만 켜짐
   lastInputTime = millis();
 
   // --- Direct switch pins ---

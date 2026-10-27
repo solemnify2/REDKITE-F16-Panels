@@ -44,7 +44,10 @@
 #define DCSBIOS_ECM_ADDR        0x4544
 #define DCSBIOS_ECM_MASK        0x4000  // bit 14
 
-// Address 0x4484: LIGHT_INST_PNL — instrument panel backlight (0–65535)
+// Address 0x4482: LIGHT_CONSLES — console backlight (0–65535) → pin 13
+#define DCSBIOS_CONSOLE_LIGHT_ADDR  0x4482
+
+// Address 0x4484: LIGHT_INST_PNL — instrument panel backlight (0–65535) → pin 12 (MISC)
 #define DCSBIOS_INST_PNL_ADDR   0x4484
 
 // ================================================================
@@ -80,7 +83,7 @@ static uint32_t     dcsBiosLastByte = 0;     // millis() of last byte received (
 static bool dcsBiosIsInteresting(uint16_t addr) {
   return (addr == DCSBIOS_GEAR_NL_ADDR || addr == DCSBIOS_GEAR_R_ADDR ||
           addr == DCSBIOS_TWA_ADDR || addr == DCSBIOS_ECM_ADDR ||
-          addr == DCSBIOS_INST_PNL_ADDR);
+          addr == DCSBIOS_CONSOLE_LIGHT_ADDR || addr == DCSBIOS_INST_PNL_ADDR);
 }
 
 // Returns true if the chunk [addr, addr+count) overlaps any interesting address
@@ -90,6 +93,7 @@ static bool dcsBiosChunkIsInteresting(uint16_t addr, uint16_t count) {
          (DCSBIOS_GEAR_R_ADDR     >= addr && DCSBIOS_GEAR_R_ADDR     < end) ||
          (DCSBIOS_TWA_ADDR        >= addr && DCSBIOS_TWA_ADDR        < end) ||
          (DCSBIOS_ECM_ADDR        >= addr && DCSBIOS_ECM_ADDR        < end) ||
+         (DCSBIOS_CONSOLE_LIGHT_ADDR >= addr && DCSBIOS_CONSOLE_LIGHT_ADDR < end) ||
          (DCSBIOS_INST_PNL_ADDR   >= addr && DCSBIOS_INST_PNL_ADDR   < end);
 }
 
@@ -120,9 +124,13 @@ static void dcsBiosOnUpdate(uint16_t addr, uint16_t value) {
   else if (addr == DCSBIOS_ECM_ADDR) {
     writeLed(LI_ECM, (value & DCSBIOS_ECM_MASK));
   }
-  else if (addr == DCSBIOS_INST_PNL_ADDR) {
-    // Instrument panel backlight: PWM dimming (0~65535 → 0~255)
+  else if (addr == DCSBIOS_CONSOLE_LIGHT_ADDR) {
+    // Console backlight → pin 13 (0~65535 → 0~255)
     setBacklightBrightness(value >> 8);
+  }
+  else if (addr == DCSBIOS_INST_PNL_ADDR) {
+    // Instrument panel backlight → pin 12 MISC (0~65535 → 0~255)
+    setMiscBacklightBrightness(value >> 8);
   }
 }
 

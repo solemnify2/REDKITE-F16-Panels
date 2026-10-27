@@ -56,9 +56,13 @@ static void bmsBiosApply() {
     writeLed(i, (ledBits >> i) & 1);
   }
 
-  // Byte 2 (bits 16~23): backlight brightness from instrLight (0=off, 1~255=brightness).
-  uint8_t brightness = (ledBits >> 16) & 0xFF;
-  setBacklightBrightness(brightness);
+  // Byte 2 (bits 16~23): console backlight brightness → pin 13
+  uint8_t consoleBrt = (ledBits >> 16) & 0xFF;
+  setBacklightBrightness(consoleBrt);
+
+  // Byte 3 (bits 24~31): instr panel backlight brightness → pin 12 (MISC)
+  uint8_t instrBrt = (ledBits >> 24) & 0xFF;
+  setMiscBacklightBrightness(instrBrt);
 }
 
 // ================================================================

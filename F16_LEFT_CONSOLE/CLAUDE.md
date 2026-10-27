@@ -97,8 +97,8 @@ Pin 13 drives a MOSFET gate via 1kΩ resistor (10kΩ pulldown to GND). On-board 
 | Source | How | Detail |
 |--------|-----|--------|
 | BMS | Bridge sends PWM in `ledBits` byte 2 | Adaptive: DIM(instrLight=1)→PWM 255 by default; if BRT(=2) ever received, DIM drops to 50, BRT=255. instrLight=0→OFF |
-| DCS | Teensy direct | `LIGHT_INST_PNL` (0x4484) 0–65535 → `>>8` → PWM 0–255 |
-| Offline manual | UHF STATUS (held) + UHF VOL | `checkManualBacklight()` — 10-bit ADC → 8-bit PWM |
+| DCS | Teensy direct | `LIGHT_CONSLES` (0x4482) 0–65535 → `>>8` → PWM 0–255 |
+| Offline manual | UHF TEST + STATUS (held) + UHF VOL | `checkManualBacklight()` — 10-bit ADC → 8-bit PWM |
 | Idle auto-off | 30 min no input while offline | `backlightIdleOff` flag, any input restores |
 | USB suspend | SOF silence >50ms | All LEDs + backlight off, `wfi` sleep |
 
@@ -145,7 +145,8 @@ The display is always built in — there is no compile-time switch. `displayFreq
 | `SERIAL_TIMEOUT` | 3 | Seconds before protocol reset |
 | `BACKLIGHT_PIN` | **13** | MOSFET gate (PWM). 온보드 LED가 상태 표시등. Circuit: Drain←LED-RTN, Source→GND, Gate←1kΩ←pin13, Gate→10kΩ→GND |
 | `IDLE_TIMEOUT_MS` | 30 min | Offline idle before backlight auto-off |
-| `PIN_UHF_STATUS` | **41** | Manual backlight trigger (active-low, held) |
+| `PIN_UHF_TEST` | **39** | Manual backlight trigger 1 (active-low, held with STATUS) |
+| `PIN_UHF_STATUS` | **41** | Manual backlight trigger 2 (active-low, held with TEST) |
 | `PIN_POT_UHFVOL` | **A9 (23)** | Manual backlight brightness source (offline only) |
 | `MCP_WIRE` | `Wire2` | SCL2 = 24, SDA2 = 25 |
 | `MCP_I2C_CLOCK` | 100000 | Standard Mode — 데이지 체인 `I1`→`I2`→`I3` 단일 버스. 풀업 4.7kΩ ×3 병렬 ≈ 1.57kΩ, 체인 총 용량 ≈ 265pF → tr ≈ 352ns (400kHz 규격 300ns 초과, 100kHz 여유) |

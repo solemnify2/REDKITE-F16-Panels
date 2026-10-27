@@ -80,8 +80,8 @@
 #define DCSBIOS_ECM_SPL_F_MASK     0x0800  // bit 11
 #define DCSBIOS_ECM_SPL_T_MASK     0x1000  // bit 12
 
-// Address 0x4484: LIGHT_INST_PNL — instrument panel backlight (0-65535)
-#define DCSBIOS_INST_PNL_ADDR      0x4484
+// Address 0x4482: LIGHT_CONSLES — console backlight (0-65535) → pin 13
+#define DCSBIOS_CONSOLE_LIGHT_ADDR 0x4482
 
 // --- UHF Display (string outputs) ---
 // Address 0x45B0: UHF_CHAN_DISP — 2-char string (" 1"~"20")
@@ -122,7 +122,7 @@ static uint32_t     dcsBiosLastByte = 0;
 static const uint16_t dcsBiosWatchAddrs[] = {
   DCSBIOS_ELEC_GRP1_ADDR, DCSBIOS_ELEC_GRP2_ADDR,
   DCSBIOS_ECM_GRP1_ADDR, DCSBIOS_ECM_GRP2_ADDR, DCSBIOS_ECM_GRP3_ADDR,
-  DCSBIOS_INST_PNL_ADDR,
+  DCSBIOS_CONSOLE_LIGHT_ADDR,
   DCSBIOS_UHF_CHAN_ADDR,
   DCSBIOS_UHF_FREQ_ADDR, DCSBIOS_UHF_FREQ_ADDR + 2,
   DCSBIOS_UHF_FREQ_ADDR + 4, DCSBIOS_UHF_FREQ_ADDR + 6,
@@ -214,8 +214,8 @@ static void dcsBiosOnUpdate(uint16_t addr, uint16_t value) {
     srWrite(30, (value & DCSBIOS_ECM_SPL_F_MASK));  // ECM_SPL_F
     srWrite(31, (value & DCSBIOS_ECM_SPL_T_MASK));  // ECM_SPL_T
   }
-  // --- Instrument panel backlight (PWM dimming) ---
-  else if (addr == DCSBIOS_INST_PNL_ADDR) {
+  // --- Console backlight (PWM dimming) ---
+  else if (addr == DCSBIOS_CONSOLE_LIGHT_ADDR) {
     setBacklightBrightness(value >> 8);   // 0~65535 → 0~255
   }
   // --- UHF Display (string outputs → 7-seg) ---

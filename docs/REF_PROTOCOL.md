@@ -25,6 +25,7 @@
 | LIGHT_RWR_ACT_POWER | 0x447E | 0x1000 | 12 | TWA Act/Power |
 | LIGHT_RWR_ALT_LOW | 0x447E | 0x2000 | 13 | TWA Alt Low |
 | LIGHT_ECM | 0x4544 | 0x4000 | 14 | ECM Indicator |
+| LIGHT_CONSLES | 0x4482 | 0xFFFF | - | Console Lighting (0–65535) |
 | LIGHT_INST_PNL | 0x4484 | 0xFFFF | - | Instrument Panel Lighting (0–65535) |
 
 **ECM LED Address Map** (74HC595, 32 outputs):
@@ -49,7 +50,7 @@
 **Protocol:**
 - Binary, sync `0xAA 0xBB`
 - Payload 13바이트:
-  - `ledBits` (uint32 LE, 4B) — bits 0–11: LED states, bits 16–23: backlight PWM
+  - `ledBits` (uint32 LE, 4B) — bits 0–11: LED states, bits 16–23: console backlight PWM, bits 24–31: instr panel backlight PWM
   - `srData` (uint32 LE, 4B) — ECM 시프트 레지스터 32비트
   - `uhfFreq` (uint32 LE, 4B) — UHF 주파수 (kHz)
   - `uhfPreset` (uint8, 1B) — UHF 프리셋 채널 (1–20)
@@ -67,6 +68,7 @@
 | FalconSharedMemoryArea2 | 1104 | uchar | instrLight | 백라이트 (0=OFF, 1=DIM, 2=BRT) |
 | | 48 | int | uhf_panel_preset | UHF 채널 프리셋 |
 | | 52 | int | uhf_panel_frequency | UHF 주파수 (kHz) |
+| | 1168 | uchar | floodConsole | Flood/console 조명 (0~6) — 패널 백라이트와 다른 조명, 미사용 |
 | | 1180 | uint[5] | ecmBits | ECM 프로그램 상태 ×5 |
 
 **LightBits Mask Map** (bmsbios_bridge.py):
@@ -116,7 +118,7 @@ LightBits3 (offset 128):
 | 0 | Nose Gear | 30 | direct | 0x447A bit14 | LB3 NoseGearDown |
 | 1 | Left Gear | 31 | direct | 0x447A bit15 | LB3 LeftGearDown |
 | 2 | Right Gear | 32 | direct | 0x447C bit0 | LB3 RightGearDown |
-| 3 | Gear Warn | 12 | direct | 0x447C bit1 | LB2 GEARHANDLE |
+| 3 | Gear Warn | 27 | direct | 0x447C bit1 | LB2 GEARHANDLE |
 | 4 | TWA Power | 34 | direct | 0x447E bit12 | LB2 AuxPwr |
 | 5 | TWA Low | 35 | direct | 0x447E bit13 | LB2 AuxLow |
 | 6 | TWA Search | 36 | direct | 0x447E bit10 | LB2 AuxSrch |
@@ -142,7 +144,12 @@ LightBits3 (offset 128):
 | 10 | EPU RUN | MCP 0x22 GPA7 | LB2 EPUOn 0x00100000 | 0x447C bit8 |
 | 11 | JFS RUN | Teensy pin 26 | LB2 JFSOn 0x00200000 | 0x447C bit5 |
 
-Backlight: `ledBits` byte 2 (bits 16–23) = PWM brightness. Bridge: `instrLight` 0→OFF, 1→DIM(255 or 50), 2→BRT(255). Offline 수동 조절: UHF STATUS + UHF VOL pot.
+Backlight 2원화:
+- `ledBits` byte 2 (bits 16–23) = console backlight PWM → pin 13 (양쪽 보드)
+- `ledBits` byte 3 (bits 24–31) = instr panel backlight PWM → pin 12 (LEFT_AUX_MISC only, MISC 패널)
+- Bridge: `instrLight` 0→OFF, 1→DIM(255 or 50), 2→BRT(255). BMS는 소스가 하나라 두 채널 동일 값.
+- DCS: `LIGHT_CONSLES`(0x4482) → pin 13, `LIGHT_INST_PNL`(0x4484) → pin 12.
+- Offline 수동 조절: AUX = DN LOCK REL + HMCS pot (양쪽 동시), 콘솔 = UHF TEST + STATUS + VOL.
 
 `srData`: uint32, ECM 32 LED (74HC595). FlightData2 `ecmBits[5]`에서 생성.
 

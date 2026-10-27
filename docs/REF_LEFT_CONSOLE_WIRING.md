@@ -603,25 +603,15 @@ I2C 핫플러그 보호: SDA/SCL 직렬 100Ω, 각 보드 3.3V에 10µF + 100nF.
 ```
   12V ADAPTER (1A)
       │
-      ├─ 12V+ ──┬─ ECM ─ ELEC ─ EPU ─ AVTR ─ UHF ─ AUDIO ─ ENGINE ──┐
-      │         │       (each strip: LED x3 series + 220Ω = 13.6mA)  │
-      │         │                                                      │
-      │         │   LED-RTN (cathode common) <─────────────────────────┘
-      │         │       │
-      │         │     Drain
-      │         │       │
-      │         │    MOSFET (IRLML6244, N-ch)
-      │         │       │
-      │         │    Source
-      │         │       │
-      │         │      GND ─── 12V adapter GND
-      │         │
-      │         │              Gate
-      │         │               ├────┤1kΩ├──── Teensy pin 13
-      │         │               │
-      │         │              10kΩ
-      │         │               │
-      │         │              GND
+      ├─ 12V+ ── ECM ─ ELEC ─ EPU ─ AVTR ─ UHF ─ AUDIO ─ ENGINE
+      │          (each strip: LED x3 series + 220Ω = 13.6mA)
+      │
+      │   MOSFET (IRLML6244 SOT-23, N-ch low-side switching)
+      │                           ┌────────┐
+      │              GND ───┬─────┤ S 1    │
+      │                  10kΩ     │    D 3 ├──── LED-RTN (cathode common)
+      │   Teensy 13 ── 1kΩ ─┴─────┤ G 2    │
+      │                           └────────┘
       │
       └─ GND ═══ ! single-point (star) tie to Teensy GND — REQUIRED
 ```
@@ -634,8 +624,8 @@ I2C 핫플러그 보호: SDA/SCL 직렬 100Ω, 각 보드 3.3V에 10µF + 100nF.
 | 상태 | 제어 방식 |
 |------|-----------|
 | **BMS online** | bridge가 `instrLight` → PWM 변환 (adaptive: BRT 미수신 시 DIM=255, 수신 후 DIM=50/BRT=255) |
-| **DCS online** | Teensy가 `LIGHT_INST_PNL` (0~65535) → PWM 0~255 직접 변환 |
-| **Offline 수동** | UHF STATUS 버튼을 누른 채 UHF VOL pot → PWM 0~255 |
+| **DCS online** | Teensy가 `LIGHT_CONSLES` (0~65535) → PWM 0~255 직접 변환 |
+| **Offline 수동** | UHF TEST + STATUS 동시에 누른 채 UHF VOL pot → PWM 0~255 |
 | **Idle 30분** | 자동 꺼짐. 입력 시 복귀 |
 
 ---

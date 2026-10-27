@@ -1,28 +1,31 @@
 # 백라이트
 
-양쪽 보드 모두 **MOSFET PWM 디밍**을 씁니다. Teensy pin 13 으로 MOSFET 을 PWM 제어하며,
-인게임 조명 노브에 연동됩니다.
+양쪽 보드 모두 **MOSFET PWM 디밍**을 씁니다. 인게임 조명 노브에 연동되며,
+채널은 두 가지입니다:
+
+- **Pin 13 — console backlight**: AUX 로컬 패널(Gear/CMDS/TWA/HMCS) + LEFT CONSOLE 패널
+- **Pin 12 — MISC backlight**: instrument panel 채널 (LEFT_AUX_MISC 전용, LAN 으로 전송)
 
 ---
 
 ## 회로
 
 ```
-12V ─── LED strips (3 LED + 220Ω 직렬) ─── LED-RTN
-                                               │
-                                             Drain
-                                               │
-                                            MOSFET (IRLML6244, N-ch)
-                                               │
-                                             Source
-                                               │
-                                              GND ── 12V adapter GND ═══ Teensy GND (단일점!)
-                                             Gate
-                                              ├──┤1kΩ├── Teensy pin 13
-                                              │
-                                             10kΩ
-                                              │
-                                             GND
+IRLML6244 SOT-23, N-ch low-side switching
+                        ┌────────┐
+           GND ───┬─────┤ S 1    │
+               10kΩ     │    D 3 ├──── LED-RTN
+   Teensy ── 1kΩ ─┴─────┤ G 2    │
+                        └────────┘
+  12V ── LED strips (3 LED + 220Ω 직렬) ── LED-RTN ── D(3)
+  12V adapter GND ═══ Teensy GND (단일점!)
+```
+
+```
+LEFT_AUX_MISC 는 MOSFET 이 2개입니다:
+  pin 13 → MOSFET₁ → AUX 로컬 (Gear·CMDS·TWA·HMCS)   console channel
+  pin 12 → MOSFET₂ → MISC (LAN 으로 전송)               instr panel channel
+Online 일 때 각 채널이 독립 제어됩니다. Offline 수동 조절은 양쪽 동시.
 ```
 
 ## 전원
@@ -47,10 +50,10 @@
 
 | 상태 | 동작 |
 |---|---|
-| BMS online | 브릿지가 `instrLight` → `ledBits` byte 2로 brightness 0~255 전송 |
-| DCS online | Teensy가 `LIGHT_INST_PNL`(0x4484) 0~65535 → >>8 → PWM 0~255 직접 변환 |
-| Offline 수동 (AUX) | DN LOCK REL 누른 채 HMCS Symbology pot(A15)로 밝기 조절 (방향 반전) |
-| Offline 수동 (콘솔) | UHF STATUS 누른 채 UHF VOL pot(A9)로 밝기 조절 |
+| BMS online | 브릿지가 `instrLight` → `ledBits` byte 2 (console, bits 16-23) + byte 3 (instr panel, bits 24-31) 전송. BMS는 소스가 `instrLight` 하나뿐이라 두 채널 동일 값 |
+| DCS online | Teensy가 `LIGHT_CONSLES`(0x4482) → pin 13, `LIGHT_INST_PNL`(0x4484) → pin 12 독립 제어 (0~65535 → >>8 → PWM 0~255) |
+| Offline 수동 (AUX) | DN LOCK REL 누른 채 HMCS Symbology pot(A15)로 **양쪽 핀 동시** 밝기 조절 (방향 반전) |
+| Offline 수동 (콘솔) | UHF TEST + STATUS 동시에 누른 채 UHF VOL pot(A9)로 밝기 조절 |
 | Idle 30분 | 자동 꺼짐. 아무 입력으로 복귀 |
 | USB Suspend | LED + 백라이트 소등, MCU 절전 |
 

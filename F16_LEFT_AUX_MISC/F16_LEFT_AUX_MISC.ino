@@ -31,7 +31,8 @@
 #define MAX_PIN       55        // Teensy 4.1 max digital pin
 #define LOOP_DELAY_MS 50
 #define SERIAL_TIMEOUT 6        // Serial heartbeat timeout in seconds
-#define BACKLIGHT_PIN  13       // Backlight PWM (MOSFET: 0=off, 255=full)
+#define BACKLIGHT_PIN       13  // Console backlight PWM (MOSFET: 0=off, 255=full)
+#define MISC_BACKLIGHT_PIN  12  // MISC (instr panel) backlight PWM (MOSFET on freed Gear Warn pin)
 #define IDLE_TIMEOUT_MS (1000 * 60 * 30)  // offline idle timeout for backlight auto-off (30min)
 
 
@@ -229,7 +230,7 @@ const LedDef leds[] = {
   {"Nose Gear",    PNL_GEAR,  30,  -1},
   {"Left Gear",    PNL_GEAR,  31,  -1},
   {"Right Gear",   PNL_GEAR,  32,  -1},
-  {"Gear Warn",    PNL_GEAR,  12,  -1},   // was pin 27 (A13), moved to avoid HMCS Brightness conflict
+  {"Gear Warn",    PNL_GEAR,  27,  -1},
   {"TWA Power",    PNL_TWA,   34,  -1},
   {"TWA Low",      PNL_TWA,   35,  -1},
   {"TWA Search",   PNL_TWA,   36,  -1},
@@ -448,17 +449,25 @@ static int     totalButtons = 0;
 static uint8_t prevBtnState[128];  // debug: previous button states
 static bool backlightIdleOff = false;  // true when backlight is off due to idle
 static bool backlightManualOff = false; // true when manually turned off via DN LOCK REL + HMCS pot
-static bool backlightState = true;     // true = backlight ON (tracks all analogWrite paths)
-static uint8_t manualBrightness = 255; // offline 수동 밝기 (기본 최대)
+static bool backlightState = false;
+static uint8_t manualBrightness = 0;
 
 void setBacklight(bool on) {
   analogWrite(BACKLIGHT_PIN, on ? 255 : 0);
+  analogWrite(MISC_BACKLIGHT_PIN, on ? 255 : 0);
   backlightState = on;
 }
 
+// Console backlight (pin 13) — online: console lighting knob
 void setBacklightBrightness(uint8_t brightness) {
   analogWrite(BACKLIGHT_PIN, brightness);
   backlightState = (brightness > 0);
+}
+
+// MISC backlight (pin 12) — online: instr panel knob
+void setMiscBacklightBrightness(uint8_t brightness) {
+  analogWrite(MISC_BACKLIGHT_PIN, brightness);
+  if (brightness > 0) backlightState = true;
 }
 static uint32_t lastInputTime = 0;    // millis() of last switch/button activity
 
@@ -732,7 +741,7 @@ void turnOffAllLeds() {
 }
 
 void welcomeCeremony() {
-  setBacklight(true);
+  setBacklight(true);             // ceremony 동안 백라이트 ON
   turnOffAllLeds();
 
   // Group sequential light-up: Gear → TWA → MISC
@@ -762,6 +771,7 @@ void welcomeCeremony() {
   }
 
   turnOffAllLeds();
+  setBacklight(false);            // ceremony 끝 → 백라이트 OFF (bridge/수동으로 켜짐)
 }
 
 void miscReconnectCeremony() {
@@ -854,8 +864,8 @@ void resetProtocol() {
   dcsBiosReset();
   bmsBiosReset();
   turnOffAllLeds();
-  manualBrightness = 51;  // bridge offline → 20% brightness
-  setBacklightBrightness(manualBrightness);
+  manualBrightness = 0;
+  setBacklight(false);    // bridge offline → backlight off (수동 조절로 복원 가능)
   //if (ALLOW_DEBUG) Serial.println("[Proto] Reset to UNKNOWN");
 }
 
@@ -981,8 +991,9 @@ void setup() {
   }
 
   // Configure backlight PWM (MOSFET gate: 0=off, 255=full brightness)
-  analogWriteFrequency(BACKLIGHT_PIN, 1000);  // 1kHz PWM
-  setBacklight(true);
+  analogWriteFrequency(BACKLIGHT_PIN, 1000);       // 1kHz PWM — console backlight
+  analogWriteFrequency(MISC_BACKLIGHT_PIN, 1000);  // 1kHz PWM — MISC backlight
+  setBacklight(false);  // 시작 시 꺼짐 — bridge 또는 수동 조절로만 켜짐
   lastInputTime = millis();
 
   // Configure pedal pins
@@ -1099,7 +1110,8 @@ void loop() {
       uint8_t brightness = (1023 - analogRead(A15)) >> 2;  // 10-bit → 8-bit, reversed (HMCS Symbology pot)
       if (brightness != manualBrightness) {
         manualBrightness = brightness;
-        setBacklightBrightness(manualBrightness);
+        setBacklightBrightness(manualBrightness);   // pin 13 (console)
+        setMiscBacklightBrightness(manualBrightness); // pin 12 (MISC) — offline: 통합 조절
         backlightManualOff = (manualBrightness == 0);
       }
     }
