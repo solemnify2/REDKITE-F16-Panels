@@ -64,7 +64,7 @@
 | **M1** | MCP `0x20` → MISC 패널 | 스위치 GPIO 11 + LED 3 | 14 |
 | **C1** | Teensy → GEAR 패널 | 스위치 GPIO 13 + LED 4 (Nose/Left/Right/Warn) | 17 |
 | **C2** | Teensy → CMDS 패널 | 스위치 8 + 래더 2 (MODE, PRGM) | 10 |
-| **C3** | Teensy → TWA 패널 | 래더 1 + LED 4채널(LED 7개) | 5 |
+| **C3** | Teensy → TWA 패널 | 래더 1 + LED 4채널(LED 7개). **급전은 3.3V** — 기판 `5V` 실크 주의 | 5 |
 | **C4** | Teensy → ALT GEAR | Handle (Reset 미연결) | 1 |
 | **C5** | Teensy → HMCS | Symbology 1개 (Brightness / Contrast 미연결) | 1 |
 | **C6** | Teensy → 페달 | 포트 2 (Left / Right) | 2 |
@@ -327,6 +327,13 @@ CMDS 둘은 위 방식으로 손배선합니다.
 | CMDS PRGM | A12 | 1kΩ / 4.7kΩ | 손배선 |
 | TWA | A10 | 2.2kΩ / 10kΩ | TWA 커스텀 PCB |
 
+> ⚠ **TWA PCB 의 `5V` 실크는 무시하고 Teensy 3.3V 를 넣으십시오.**
+> 기판에 `5V` 라고 찍혀 있지만, 이 레일은 래더 체인의 상단이고 분압 결과가
+> **A10 으로 그대로 들어갑니다.** Teensy 4.1 핀은 5V 톨러런트가 아니므로(최대 3.3V)
+> 5V 를 넣으면 ADC 입력 정격을 넘겨 핀이 손상될 수 있습니다.
+> 위 표의 기대값(839 / 711 / 617 / 545)도 3.3V 기준이라, 5V 에서는 대부분 1023 으로 붙습니다.
+> LED 쪽도 같은 레일을 쓰므로 3.3V 로 통일합니다.
+
 콘솔의 ECM 래더는 또 다릅니다 (10kΩ / 20kΩ, 체인은 ECM 기판·풀다운은 배선) —
 [REF_LEFT_CONSOLE_WIRING.md](REF_LEFT_CONSOLE_WIRING.md) 참조.
 
@@ -492,3 +499,4 @@ LED 1개만 연결한 상태에서 **320Ω 양단 = 1.2V** → 단독 전류 **3
 | 6 | **백라이트** — 핀 13 PWM 1kHz → MOSFET → 12V 어댑터 (콘솔과 Y 케이블 공유, Step-Up은 래더 ADC 노이즈 유발). 오프라인 수동 밝기: DN LOCK REL 누른 채 HMCS Symbology pot (A15, 방향 반전). 배선은 위 "I1 — LAN 배선" 절 참조 |
 | 7 | **스위치 배선** — 전부 액티브 로우 + 내부 풀업 (공통 단자 GND) |
 | 8 | **CMDS 램프** — 하단 15핀 FPC 확장 케이블 → 5핀으로 LED 8개 (개별 320Ω = 220+100 직렬, 캐소드는 FPC 15 공통). pin 42 = 미사용. 병렬 자리 핀당 약 7.1mA. Vf 3.0V 이상 LED 는 쓰지 말 것 |
+| 9 | **TWA PCB 급전** — 기판 실크가 `5V` 여도 **Teensy 3.3V** 를 연결할 것. 래더 출력이 A10 으로 직결되는데 Teensy 4.1 은 5V 톨러런트가 아닙니다 (위 「다른 래더와의 차이」 절) |
