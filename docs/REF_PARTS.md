@@ -64,10 +64,10 @@
 | 부품 | 수량 | 비고 |
 |------|------|------|
 | MCP23017 I2C I/O Expander | 4 | AUX: MISC `0x20` / 콘솔: UHF+AUDIO `0x20`, ELEC+EPU `0x21`, ECM+AVTR `0x22` |
-| 74HC595 시프트 레지스터 (SO16) | 4 | ECM 패널 32 LED 구동. **ECM 자작 PCB 에 실장** — 아래 절 참조 |
+| 74HC595 시프트 레지스터 (SO16) | 4 | ECM 패널 32 LED 구동 — ECM 커스텀 PCB 에 실장 |
 | IRLML6244 N-ch MOSFET | 2+ | 백라이트 PWM 스위칭 |
 | 로터리 엔코더 EC11 (디텐트) | 6 | UHF — PRESET은 20디텐트 권장 |
-| MAX7219 7세그 디스플레이 보드 (8자리) | 1 | UHF 주파수 6 + 채널 2. **자작 PCB** — 아래 「UHF 7세그 디스플레이 보드」 절 참조 |
+| MAX7219 LED 드라이버 | 1 | UHF 디스플레이 커스텀 PCB 에 실장 (주파수 6 + 채널 2자리) |
 
 ## LED
 
@@ -82,11 +82,11 @@
 |------|------|------|
 | 1/4W 저항 (1K, 4.7K, 10K, 100Ω, 150Ω, 220Ω) | 각 100 | 래더, 풀다운, 풀업, LED 직렬 |
 | SMD 1206 저항 (220Ω, 2.2K, 10K) | 각 100 | |
+| 전해 커패시터 25V (10µF / 100µF) | 각 40 | 바이패스 |
+| 세라믹 커패시터 (100nF / 1nF) | 각 100 | 바이패스 |
 
 > **LED 직렬저항** — ECM·GEAR·TWA·MISC 는 220Ω, CMDS 램프 8개는 **320Ω(220+100 직렬)** 입니다.
 > CMDS 는 한 핀에 LED 2개를 병렬로 다는 자리가 셋이라 핀 전류를 낮춰야 합니다.
-| 전해 커패시터 25V (10µF / 100µF) | 각 40 | 바이패스 |
-| 세라믹 커패시터 (100nF / 1nF) | 각 100 | 바이패스 |
 
 ## 커넥터 / 배선
 
@@ -98,83 +98,6 @@
 | Pin Header 1x30P | 10 | |
 | 수축 튜브 | 750 | |
 
-## ECM 패널 보드
-
-콘솔 ECM 패널의 LED·버튼 기판입니다. 이것도 **직접 발주하는 PCB** 로, 설계 일체는 저장소 **밖**의
-`Redkite Project/ECM Panel/f-16-cockpit-left-console-ecm-panel/` 에 있습니다 —
-거버(`Leiterplatte ECM Panel 2025-03-08.zip`), 조립 가이드 PDF, STL(Top Cover·LED Layer·Diffusor),
-레이저 커팅 DXF.
-
-**PCB 발주 사양** — 2층, **83 × 59 mm**, 두께 1.57 mm.
-
-| 부품 | Ref | 수량 | 사양 | 비고 |
-|------|-----|-----:|------|------|
-| PCB | — | 1 | 2층 83×59mm / 1.57mm | `Leiterplatte ECM Panel 2025-03-08.zip` |
-| 시프트 레지스터 | U1–U4 | 4 | 74HC595D (SO16) | 데이지체인, 32 LED 구동 |
-| LED 3mm THT | D1–D32 | 32 | Würth WL-TMRC `151031SS04000` | ECM 8그룹 × S/A/F/T |
-| LED 직렬저항 | R8–R39 | 32 | 1206 SMD | LED 1개당 1개 |
-| 래더 저항 | R1–R7 | 7 | 1206 SMD | 8버튼 저항 래더. **기판 고정값** — 10kΩ 체인 + 20kΩ 풀다운 |
-| 세라믹 캡 | C1 | 1 | 1nF THT 2.54mm | |
-| 핀 헤더 | J1 | 1 | Würth `61300611121` (1×6, 2.54mm) | 케이블 `C6` — DS·SH_CP·ST_CP·래더 + 3.3V/GND |
-| 택타일 스위치 (THT) | U$1–U$8 | 8 | 6×6mm **관통형** — 핀 간격 6.5 × 4.5mm, 드릴 Ø1.0 | ECM 1~6, FRM, SPL. TS-1101 / B3F-10xx 계열 |
-
-> 래더 저항이 기판에 고정이라 캘리브레이션으로 바꿀 수 없습니다. 스케치의 `ecmBtnValues[]`
-> 를 실측에 맞추는 방식입니다 — [REF_LEFT_CONSOLE_WIRING.md](REF_LEFT_CONSOLE_WIRING.md) 참조.
-
-> ⚠ 위 **스위치류** 표는 택타일을 SMD 로 적고 있는데, 이 기판은 **관통형(THT)** 입니다.
-> 몸체는 같은 6×6mm 이고 실장 방식만 다릅니다 — ECM 8개는 다리가 있는 품을 쓰십시오.
-> 거버 드릴 파일 실측: 핀 4개, 간격 6.50 × 4.52mm, 드릴 Ø1.016mm.
-
----
-
-## UHF 7세그 디스플레이 보드
-
-콘솔 UHF 패널의 주파수·채널 표시부입니다. 기성 모듈이 아니라 **직접 발주하는 PCB** 입니다.
-
-설계 일체는 이 저장소 **밖**의 `Redkite Project/f-16-cockpit-uhf-radio-panel/display/pcb/`
-에 있습니다 — 거버(`uhf_display_gerber_revB.zip`), BOM, KiCad 프로젝트, 그리고 설계 문서
-`README.md`. 그쪽 README 의 주요 절:
-
-| 절 | 내용 |
-|---|---|
-| 7.3 | Rset 계산 — 밝기 조정 |
-| 7.4 | Teensy VIN 5V 급전, USB 전류 예산 |
-| 10 | 조립 순서 |
-| 14.3 | PCB 발주 사양 |
-
-**PCB 발주 사양** — 2층, 86×50mm, 두께 1.6mm, 최소 선폭/간격 0.20mm, 최소 드릴 0.30mm,
-HASL 또는 ENIG. JLCPCB·PCBWay·Elecrow 모두 기본 사양이라 추가 요금이 없습니다.
-
-| 부품 | Ref | 수량 | 사양 | 비고 |
-|------|-----|-----:|------|------|
-| PCB | — | 1 | rev B | `uhf_display_gerber_revB.zip` |
-| 0.36" 7세그 (공통 캐소드) | D1–D8 | 8 | 7.5×14×8.5mm, 10핀 | 핀아웃 `A=10 B=9 C=8 D=5 E=4 F=2 G=3 DP=7 COM=1,6`. **색 편차 때문에 같은 로트로** |
-| LED 드라이버 | U1 | 1 | MAX7219CWG+ (SOIC-24W) | MAX7221CWG+ 가 더 좋음 — slew 제한으로 노이즈 적음 |
-| 레벨 시프터 | U2 | 1 | 74AHCT125D (SOIC-14) | 3.3V → 5V. SN74AHCT125D / 74HCT125D 도 가능 |
-| 저항 | R1, R2 | 2 | 10k 1% 0805 | 직렬 20k = Rset, 세그먼트당 26mA 피크 |
-| 세라믹 캡 | C1, C3 | 2 | 100nF THT (104), P5.0 | U1 pin19·U2 pin14 디커플링 |
-| 벌크 캡 | C2 | 1 | 47µF X5R 1210 | **또는** C4–C7 로 대체 |
-| 벌크 캡 (대안) | C4–C7 | 4 | 10µF 25V 전해, D5×11 P2.0 | **눕혀서 실장** — 세우면 높이가 안 맞음 |
-| 핀 헤더 | J1 | 1 | 1×5 2.54mm **라이트앵글** | **뒷면 실장** — 앞면 여유가 5.5mm 뿐 |
-| 스페이서 볼트 | — | 4 | OD 5.5 / ID 3.25 / h 5.5mm | 3D 프린트. 디스플레이 깊이 8.5mm 를 잡아줌 |
-| M3 나사 | — | 4 | M3 × 20mm | 디스플레이 PCB ↔ LED 레이어 |
-| 스모키 아크릴 | — | 2 | 52×11mm (주파수), 13×11mm (채널) | 표시창 |
-
-**밝기 조정** — R1+R2 합이 Rset 입니다. 20k 가 기본, 27k 면 어둡게, 15k 면 최대 밝기입니다.
-
-**전원** — Teensy 4.1 에는 `5V` 핀이 없고 **`VIN` 이 5V 접점**입니다 (USB 급전 시 VUSB↔VIN
-연결, 실측 4.6~5.0V). MAX7219 최소 V+ 가 4.0V 라 동작하지만, V_IH 마진이 없으므로
-**레벨 시프터(U2)는 반드시 필요**합니다. Rset 20k 에 전 자리 최대 밝기면 디스플레이만
-208mA, Teensy 포함 최악 약 320mA 입니다 — 기본 `INTENSITY 0x08` 에서는 절반 수준.
-
-**J1 배선** — [REF_LEFT_CONSOLE_WIRING.md](REF_LEFT_CONSOLE_WIRING.md) 의
-「하단 SD 카드 인터페이스」 절 참조.
-
-> ⚠ 원본 BOM 의 `5-wire harness — VIN / GND / 11 / 13 / 10` 은 SPI0 직결 전제라
-> 이 프로젝트에는 해당하지 않습니다.
-
----
-
 ## 모듈 / 기타
 
 | 부품 | 수량 | 비고 |
@@ -183,3 +106,17 @@ HASL 또는 ENIG. JLCPCB·PCBWay·Elecrow 모두 기본 사양이라 추가 요�
 | RJ45 패널 마운트 커넥터 / 키스톤 잭 | 1 | **AUX 통에 장착** — MISC 패널 연결(`I1`, I2C)용. 다른 LAN 구간은 패널 커넥터를 쓰지 않습니다 |
 | Cat5e LAN 케이블 | 1 | **AUX ↔ MISC 패널(`I1`) 전용.** 그 외 구간은 전부 듀폰 케이블 |
 | microSD 확장 케이블 (15핀 FPC) | 2 | 하단 SD 패드 인출 — AUX CMDS 램프, 콘솔 UHF 디스플레이 |
+
+## 커스텀 PCB
+
+직접 발주하는 기판 3장입니다. 실장 부품은 각 보드 폴더의 BOM 을 따릅니다 (이 문서 범위 밖).
+설계 파일은 모두 이 저장소 **밖**, `Redkite Project/` 아래에 있습니다.
+
+| 기판 | 수량 | 사양 | 설계 위치 / 거버 |
+|------|-----:|------|------|
+| TWA 패널 | 1 | 2층, 42.1 × 53.7 mm, 1.6 mm | `TWA Panel/f-16-cockpit-left-aux-console-threat-warning-aux-panel/KiCad_TWA_v36/` — `TWA_v36_gerber.zip` |
+| ECM 패널 | 1 | 2층, 83 × 59 mm, 1.57 mm | `ECM Panel/f-16-cockpit-left-console-ecm-panel/` — `Leiterplatte ECM Panel 2025-03-08.zip` |
+| UHF 7세그 디스플레이 | 1 | 2층, 86 × 50 mm, 1.6 mm | `f-16-cockpit-uhf-radio-panel/display/pcb/` — `uhf_display_gerber_revB.zip` |
+
+세 기판 모두 조립 가이드와 STL(탑 커버·LED 레이어·디퓨저), 레이저 커팅 DXF 가 같은 폴더에 있습니다.
+UHF 쪽은 KiCad 프로젝트와 설계 문서 `README.md` 도 포함합니다.
