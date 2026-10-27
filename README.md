@@ -108,7 +108,7 @@ Stand는 Enclosure 뒷면에 에폭시 접착제로 부착합니다. new 버전 
 | 3D 프린트 (PETG) | [PCBWay](https://www.pcbway.com) | Enclosure, Stand 등 구조물 | $119 | ~$50 |
 | MCU | [PJRC](https://www.pjrc.com) | Teensy 4.1 ×2 | ~$70 | - |
 | 전자부품 | [AliExpress](https://www.aliexpress.com) | MCP23017, 스위치, LED, 저항 등 | ~$200 | - |
-| 노동력 | - | 약 1달간의 설계, 조립, 프로그래밍 | priceless | - |
+| 노동력 | - | 약 1년간의 설계, 조립, 프로그래밍 | priceless | - |
 | | | **합계** | **~$586** | **~$101** |
 
 > 결론: 시간과 노동력을 고려하면 TEK Creations 등 완제품을 사는 게 현명합니다. 직접 만드는 건 취미입니다.
