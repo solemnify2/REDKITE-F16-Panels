@@ -41,9 +41,11 @@ their original sources:
 
     Center Left / Right     cut and combined from purchased Cults3D models
       Enclosure               by Greenisland and Legarsdusofa
-    ECM, TWA, UHF panel       STL, gerbers and build guides belong to their
-      projects                  respective upstream projects
-    Switch caps, knobs        The_Viper_Project (Cults3D), HispaPanel
+    TWA panel PCB           Greenisland's board, modified here to carry the
+                              LEDs - a derivative, so not redistributed
+    ECM, TWA, UHF panel     STL, gerbers and build guides belong to their
+      projects                respective upstream projects
+    Switch caps, knobs      The_Viper_Project (Cults3D), HispaPanel
 
 
 2. F4ToSerial
