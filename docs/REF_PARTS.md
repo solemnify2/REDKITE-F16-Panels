@@ -20,7 +20,7 @@
 | MCP23017 | 1 (`0x20`) | 3 (`0x20`·`0x21`·`0x22`) | 4 |
 | 74HC595 | — | 4 (ECM 32 LED) | 4 |
 | MAX7219 7세그 보드 | — | 1 (UHF, 8자리) | 1 |
-| 인디케이터 LED | 19 (GEAR 4 · TWA 4 · MISC 3 · CMDS 8) | 44 (ECM 32 · ELEC 8 · EPU 3 · JFS 1) | 63 |
+| 인디케이터 LED | 22 (GEAR 4 · TWA 7 · MISC 3 · CMDS 8) | 44 (ECM 32 · ELEC 8 · EPU 3 · JFS 1) | 66 |
 | 백라이트 MOSFET | 1 | 1 | 2 |
 | microSD 확장 케이블 (15핀 FPC) | 1 (CMDS 램프) | 1 (UHF 디스플레이) | 2 |
 
@@ -72,10 +72,52 @@
 
 ## LED
 
+### 인디케이터 — 66개
+
+| 패널 | 신호 | 수 | 색 / 크기 |
+|---|---|---:|---|
+| ECM (콘솔) | 8그룹 × S/A/F/T | 32 | 녹·청·적·황 **각 8**, 3mm |
+| CMDS | GO 1 · NO GO 2 · DISPENSE RDY 5 | 8 | 녹색 5mm |
+| ELEC | 경고등 8 | 8 | 주황 3mm |
+| TWA | Power 4 · Search 1 | 5 | 녹색 3mm |
+| TWA | Low 1 · Act 1 | 2 | 주황 3mm |
+| GEAR | Nose · Left · Right | 3 | 주황 5mm |
+| GEAR | Gear Warn | 1 | 적색 5mm |
+| EPU | RUN | 1 | 녹색 5mm |
+| EPU | HYDRAZN · AIR | 2 | 주황 3mm |
+| MISC | ECM 표시등 | 1 | 녹색 5mm |
+| MISC | ADV Active | 1 | 녹색 **길쭉한 사각** |
+| MISC | ADV Standby | 1 | 주황 **길쭉한 사각** |
+| ENGINE | JFS RUN | 1 | 녹색 5mm |
+
+### 색·크기별 발주 수량
+
+| 품목 | 실사용 | 비고 |
+|---|---:|---|
+| 3mm 녹색 | 13 | ECM 8 + TWA 5 |
+| 3mm 청색 | 8 | ECM |
+| 3mm 적색 | 8 | ECM |
+| 3mm 황색 | 8 | ECM |
+| 3mm 주황 | 12 | ELEC 8 + TWA 2 + EPU 2 |
+| 5mm 녹색 | 11 | CMDS 8 + EPU 1 + MISC 1 + ENGINE 1 |
+| 5mm 주황 | 3 | GEAR |
+| 5mm 적색 | 1 | GEAR Warn |
+| 길쭉한 사각 녹색 | 1 | MISC ADV Active |
+| 길쭉한 사각 주황 | 1 | MISC ADV Standby |
+| **합** | **66** | |
+
+> ECM 32개는 기판 지정품 **Würth WL-TMRC `151031SS04000`** 입니다 (3mm, 20mA).
+
+### 백라이트
+
 | 부품 | 수량 | 비고 |
 |------|------|------|
-| 3mm LED Green (백라이트용) | 100 | 고휘도 |
-| LED 키트 3mm/5mm Mixed | 300 | Red, Green, Yellow — 인디케이터 실사용 63개. **ECM 32개는 Würth WL-TMRC 전용품** |
+| 3mm LED Green (백라이트용) | 100 | 고휘도. `LED 3개 + 220Ω 직렬 = 1스트링`, 최대 15스트링 병렬(45 LED) |
+
+확인된 구간 — MISC 패널 3스트링(9 LED, 41mA @12V), ECM 기판 8개.
+
+> **LED 직렬저항** — ECM·GEAR·TWA·MISC 는 220Ω, CMDS 램프 8개는 **320Ω(220+100 직렬)** 입니다.
+> CMDS 는 한 핀에 LED 2개를 병렬로 다는 자리가 셋이라 핀 전류를 낮춰야 합니다.
 
 ## 수동 소자
 
