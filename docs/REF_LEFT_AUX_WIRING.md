@@ -53,7 +53,7 @@
   Teensy direct   C1 GEAR   C2 CMDS   C3 TWA   C4 ALT GEAR   C5 HMCS   C6 PEDALS
                   C7 CMDS 램프 — 하단 SD 패드에서 15핀 FPC 확장 케이블로 인출 (42 미사용)
   MCP > panel     M1 0x20 > MISC (모듈-패널 하니스)
-  12V             backlight: pin 13 PWM 1kHz > MOSFET > 별도 12V 어댑터
+  12V             backlight: pin 13 PWM 1kHz > MOSFET > 12V 어댑터 (콘솔과 Y 케이블 공유)
 
   xN = 신호선 수 (3.3V/GND 제외)   SW = switch GPIO 수   LADDER = resistor ladder   POT = potentiometer
 ```
@@ -69,7 +69,7 @@
 | **C5** | Teensy → HMCS | Symbology 1개 (Brightness / Contrast 미연결) | 1 |
 | **C6** | Teensy → 페달 | 포트 2 (Left / Right) | 2 |
 | **C7** | Teensy 하단 SD 패드 → CMDS 램프 | LED 8 (DISPENSE RDY 5 / NO GO 2 / GO 1) on 5 pins | 5 (+GND, LAN 6심, pin 42 미사용) |
-| 12V | 별도 12V 어댑터 → 백라이트 | 게이트는 핀 13 PWM 1kHz (MOSFET) | 2 |
+| 12V | 12V 어댑터 → 백라이트 | 게이트는 핀 13 PWM 1kHz (MOSFET). 어댑터는 콘솔과 **Y 케이블로 공유** | 2 |
 
 콘솔 장치와 달리 MCP가 1장뿐이라 **I2C는 체인이 아닌 스타(단일 링크)**입니다.
 MCP 단선 시 **GEAR WARN LED가 점등**되어 패널에서 바로 알 수 있고 (콘솔에는 없는 표시등),
