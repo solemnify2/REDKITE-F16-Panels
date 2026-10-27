@@ -25,10 +25,7 @@ SOFTWARE.
 NOTICE — scope of the MIT License above
 
 The MIT License covers the source code, documentation and configuration in
-this repository. It does NOT cover the items below.
-
-
-1. 3D models and PCB designs
+this repository. It does NOT cover the 3D models and PCB designs below.
 
 The STL files under `3d stl/` and the UHF 7-segment display PCB under
 `pcb/uhf_display/` are the author's own designs, released under
@@ -46,14 +43,3 @@ their original sources:
     ECM, TWA, UHF panel     STL, gerbers and build guides belong to their
       projects                respective upstream projects
     Switch caps, knobs      The_Viper_Project (Cults3D), HispaPanel
-
-
-2. F4ToSerial
-
-The archived sketches under `F16_LEFT_AUX_MISC/backup/old/` include headers
-from the F4ToSerial project by Music-Junky:
-
-    https://github.com/Music-Junky/F4ToSerial
-
-Those headers are not distributed in this repository. Obtain them from the
-upstream project, where its own licence terms apply.

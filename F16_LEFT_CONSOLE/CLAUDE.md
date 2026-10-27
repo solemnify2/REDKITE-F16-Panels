@@ -131,7 +131,6 @@ The display is always built in — there is no compile-time switch. `displayFreq
 | `BiosHandler/BmsBiosParser.h` | BMS-BIOS frame parser (packed LED bitfield + SR bitfield + backlight + UHF display) |
 | `Display/Max7219Display.h` | UHF 7-segment display driver (MAX7219 over SPI2) |
 | `name.c` | USB device name override |
-| `backup/` | Pre-expansion Teensy 4.0 version |
 | `../tools/patch_usb_desc_h.py` | Auto-patch `usb_desc.h` after IDE update (JOYSTICK_SIZE + PID) |
 | `../tools/patch_usb_desc_c.py` | Auto-patch `usb_desc.c` HID slider descriptor |
 | `../docs/teensyduino_upgrade.md` | Manual upgrade guide for both files |
