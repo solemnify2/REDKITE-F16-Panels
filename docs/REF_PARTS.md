@@ -26,22 +26,37 @@
 
 > CMDS 램프는 LED 8개를 Teensy 핀 5개로 구동합니다 (`leds[]` 항목은 5개).
 
+### 스위치 부품 내역
+
+`switches[]` 59개 항목과 저항 래더 4개가 실제 부품 **63개**에 대응합니다.
+로터리와 3포지션 토글은 한 부품이 여러 항목을 차지합니다.
+
+| 부품 | 수 | 내역 |
+|---|---:|---|
+| 토글 On-Off-On | 14 | `SW_ON_OFF_ON` 13 + AUDIO 2 (HOT MIC‑OFF‑CIPHER) 1 |
+| 토글 On-On | 20 | AUX 13 (Laser ARM, Store CAT, Hook, GND JETT ENABLE, BRAKES Channel, CMDS 8) + 콘솔 7 (ENG CONT·DATA, MAX POWER, AB RESET, MPO, UHF SQUELCH·T-TONE) |
+| 푸시 | 9 | AUX 4 (ALT REL, EMER Jettison, Horn Silencer, DN LOCK REL) + 콘솔 5 (ECM BIT·RESET, ELEC CAUTION RST, UHF STATUS·TEST) |
+| 택타일 | 12 | 래더 — TWA 4버튼, ECM 8버튼 |
+| 로터리 | 6 | UHF FUNC 4P, UHF MODE 3P, COMM1 3P, COMM2 3P, CMDS MODE 7P, CMDS PRGM 7P |
+| 코리 스위치 | 1 | MISC ADV MODE |
+| 마이크로 스위치 | 1 | ALT GEAR Handle |
+
 ---
 
 ## 스위치류
 
 | 부품 | 수량 | 비고 |
 |------|------|------|
-| 토글 스위치 On-Off-On (12mm, 3P) | 20 | |
-| 토글 스위치 On-On (12mm, 3P) | 20 | |
-| 푸시 스위치 7mm (PBS-110) | 12 | |
-| 모멘터리 푸시 스위치 6mm (3핀) | 5 | |
-| 택타일 스위치 SMD (6x6x4.3mm) | 20 | |
-| 리밋 스위치 (12x6mm) | 10 | |
-| 로터리 스위치 SR26 1P12T | 4 | |
-| 로터리 스위치 RS16 1P6T / 1P5T | 2 / 2 | |
+| 토글 스위치 On-Off-On (12mm, 3P) | 20 | 실사용 14 |
+| 토글 스위치 On-On (12mm, 3P) | 20 | 실사용 20 |
+| 푸시 스위치 7mm (PBS-110) | 12 | 푸시 실사용 9 (6mm 와 합산) |
+| 모멘터리 푸시 스위치 6mm (3핀) | 5 | 위와 합산 |
+| 택타일 스위치 SMD (6x6x4.3mm) | 20 | 실사용 12 — TWA 4버튼, ECM 8버튼 래더 |
+| 리밋 스위치 (12x6mm) | 10 | 실사용 1 — ALT GEAR Handle |
+| 로터리 스위치 SR26 1P12T | 4 | 로터리 실사용 6 — CMDS MODE·PRGM 7P, UHF FUNC 4P, UHF MODE 3P, COMM1·2 3P |
+| 로터리 스위치 RS16 1P6T / 1P5T | 2 / 2 | 위와 합산 |
 | 포텐셔미터 10kΩ | 15 | 실사용 11 (콘솔 10 + HMCS 1). 페달 2개는 페달 유닛 내장 |
-| 코리 스위치 | 1 | [HispaPanel](https://hispapanels.com/tienda/en/buttons-encoders/71-korry-type-tactile-switch-momentary.html) |
+| 코리 스위치 | 1 | 실사용 1 (MISC ADV MODE). [HispaPanel](https://hispapanels.com/tienda/en/buttons-encoders/71-korry-type-tactile-switch-momentary.html) |
 | 키보드 스위치 (Brown) | 2 | |
 
 ## IC / 반도체
