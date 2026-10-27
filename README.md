@@ -254,7 +254,8 @@ AUX는 Step-Up 5V→12V가 래더 ADC에 노이즈를 유발해 어댑터로 바
 - PC Flights 패널은 2중 구조 (전면: 검정 도색 + 흰색 각인 / 후면: 투명)
 - 후면 투명 패널 뒤쪽 1~2cm 간격에서 LED를 쏘면 전면 각인 글자가 빛남
 - LED 3개 + 220Ω 저항 1개 = 직렬 스트링. 고휘도 녹색(Vf ≈ 3.0V) 기준 스트링당 약 13.6mA
-- 콘솔 16스트링(48 LED, 약 218mA), MISC 패널 3스트링(9 LED, 41mA)
+- 콘솔 16스트링(48 LED, 218mA) · AUX 12스트링(36 LED, 163mA) · MISC 3스트링(9 LED, 41mA)
+- 합 31스트링 93 LED, 약 422mA — 12V 1A 어댑터 하나로 충분
 
 ![Backlight LED 배치](docs/backlight_photo.jpg)
 
