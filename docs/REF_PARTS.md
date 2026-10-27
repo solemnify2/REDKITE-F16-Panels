@@ -172,7 +172,7 @@ AUX 12스트링(163mA) / MISC 3스트링(41mA) 으로 나뉩니다.
 | Cat5e LAN 케이블 | 1 | **AUX ↔ MISC 패널(`I1`) 전용.** 그 외 구간은 전부 듀폰 케이블 |
 | microSD 확장 케이블 (15핀 FPC) | 2 | 하단 SD 패드 인출 — AUX CMDS 램프, 콘솔 UHF 디스플레이 |
 | Thrustmaster MFD | 2 | 좌·우 1대씩. LCD 와 겹쳐 MFD 홀더가 잡아 줌 (홀더만 인클로저 아래쪽에 에폭시 접착) |
-| 7.6인치 정사각 LCD | 2 | Alibaba. MFD 뒤에 **겹쳐** 놓고 홀더로 함께 고정 — 접착하지 않아 분리 가능. 상세는 [REF_MFD_LCD.md](REF_MFD_LCD.md) |
+| 7.6인치 정사각 LCD (BOE, 800×800 IPS) | 2 | Alibaba. MFD 뒤에 **겹쳐** 놓고 홀더로 함께 고정 — 접착하지 않아 분리 가능. 상세는 [REF_MFD_LCD.md](REF_MFD_LCD.md) |
 
 ## 커스텀 PCB
 
