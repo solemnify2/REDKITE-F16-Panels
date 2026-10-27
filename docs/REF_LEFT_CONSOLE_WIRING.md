@@ -70,15 +70,15 @@
 
 | 케이블 | 구간 | 내용 | 선 수 |
 |---|---|---|---|
-| **I1** | Teensy → MCP `0x20` | I2C 체인 시작 | 8선 |
-| **I2** | MCP `0x20` → MCP `0x21` | I2C 체인 | 8선 |
-| **I3** | MCP `0x21` → MCP `0x22` | I2C 체인 | 8선 |
+| **I1** | Teensy → MCP `0x20` | I2C 체인 시작 | 4선 |
+| **I2** | MCP `0x20` → MCP `0x21` | I2C 체인 | 4선 |
+| **I3** | MCP `0x21` → MCP `0x22` | I2C 체인 | 4선 |
 | **C1** | Teensy → ENGINE START | JFS ×2, ENG CONT, MPO, RUN LED, AB RST, ENG DATA, MAX PWR | 9선 |
 | **C2** | Teensy → UHF 패널 | **POT 1개** (VOL) + 엔코더 3 (10MHz, 1MHz, 0.1MHz) | 8선 |
 | **C3** | Teensy → UHF 패널 | 엔코더 3 (PRESET, 100MHz, 0.025MHz) | 8선 |
 | **C4** | Teensy → AUDIO 1 | **POT 6개** (COMM CH1, COMM CH2, SECURE, MSL, TF, THREAT) | 8선 |
 | **C5** | Teensy → AUDIO 2 | **POT 3개** (INTERCOM, TACAN, ILS) | 5선 |
-| **C6** | Teensy → ECM 패널 | 74HC595 3선 + ECM 저항 래더 1선 (핀 35~38) | 8선 |
+| **C6** | Teensy → ECM 패널 | 74HC595 3선 + ECM 저항 래더 1선 (핀 35~38) | 6선 (ECM 기판 `J1` = 1×6) |
 | **C7** | MCP `0x20` → UHF 패널 | FUNCTION 4, MODE 3 (=7, PB1~7) + GND | 8선 |
 | **C8** | AUDIO 1·2 → MCP `0x20` | COMM 1/2 모드 로터리 (PA2~7) + HOT MIC·CIPHER (PA0/PA1) | 9선 |
 | **C9** | MCP `0x21` → ELEC 패널 | 스위치 3 (PB0~2) + LED 8 (PA0~7) | 13선 |
@@ -574,7 +574,7 @@ Teensy A14(핀 38) 바로 옆에 1~10nF 세라믹을 달아 래더를 필터링�
 |------|------|
 | → ECM 패널 | `I3`(체인) 4선 · `C6` 6선 — 래더에 전용 GND |
 | → ELEC 패널 | `I2`(체인) 4선 |
-| → UHF | `I1` 4선 · `C2` 8선(VOL 전용 GND 포함) · `C3` 8선 · `C13` 5선 · `C14` 5선 |
+| → UHF | `I1` 4선 · `C2` 8선(VOL 전용 GND 포함) · `C3` 8선 · `C13` 5선 · `C14` 5선 (SD 확장) |
 | → ENGINE+MPO | `C1` 9선 |
 | → AUDIO | `C4` 8선 · `C5` 5선 — 와이퍼마다 GND 선을 나란히 |
 
