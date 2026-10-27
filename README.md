@@ -224,16 +224,14 @@ Teensy의 직결 핀은 모두 사용 중이므로, 추가 스위치/LED는 MCP2
 
 - MCP23017 하나당 16핀 (GPA0–7, GPB0–7)
 - I2C 주소: A0~A2 핀으로 설정, 최대 8개 (0x20~0x27)
-- **AUX 보드**: 1장 (`0x20` = MISC), Star 토폴로지
-- **콘솔 보드**: 3장 (`0x20` `0x21` `0x22`), 데이지체인 토폴로지
+- **AUX 보드**: 1장 (`0x20` = MISC)
+- **콘솔 보드**: 3장 (`0x20` `0x21` `0x22`) 데이지체인
 
 **I2C 핫플러그 보호 (양쪽 공통):**
 - SDA/SCL 각 100Ω 직렬 저항 (MCP 입력단) — 돌입전류 제한
 - 4.7kΩ × 2 I2C 풀업 저항 (AUX) / 모듈 온보드 4.7kΩ × 3 병렬 (콘솔)
 - 10µF + 100nF 바이패스 캡 — MCP23017 VDD 전압 스파이크 흡수
 - MOSFET Gate 10kΩ 풀다운 — 핫플러그 시 OFF 유지
-
-![I2C Star Topology](docs/hotplug_wiring_star.png)
 
 AUX↔MISC 패널 LAN 배선 상세: [docs/REF_LEFT_AUX_WIRING.md](docs/REF_LEFT_AUX_WIRING.md) 의 「I1 — LAN 배선」 절
 
