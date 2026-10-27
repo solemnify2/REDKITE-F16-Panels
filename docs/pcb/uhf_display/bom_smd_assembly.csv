@@ -1,0 +1,5 @@
+﻿Comment,Designator,Footprint,LCSC / supplier P/N
+10k 1% 0805,"R1,R2",R0805,
+47uF X5R 6.3V 1210,C2,C1210,
+74AHCT125D,U2,SOIC-14_3.9x8.65mm_P1.27mm,
+MAX7219CWG+,U1,SOIC-24W_7.5x15.4mm_P1.27mm,

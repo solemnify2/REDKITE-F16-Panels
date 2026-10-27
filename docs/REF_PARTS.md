@@ -177,13 +177,27 @@ AUX 12스트링(163mA) / MISC 3스트링(41mA) 으로 나뉩니다.
 ## 커스텀 PCB
 
 직접 발주하는 기판 3장입니다. 실장 부품은 각 보드 폴더의 BOM 을 따릅니다 (이 문서 범위 밖).
-설계 파일은 모두 이 저장소 **밖**, `Redkite Project/` 아래에 있습니다.
+TWA · ECM 은 상류 프로젝트 설계라 이 저장소 **밖**(`Redkite Project/` 아래)에 있습니다.
+**UHF 7세그 디스플레이는 자작 기판**이라 저장소에 함께 싣습니다.
 
 | 기판 | 수량 | 사양 | 설계 위치 / 거버 |
 |------|-----:|------|------|
 | TWA 패널 | 1 | 2층, 42.1 × 53.7 mm, 1.6 mm | `TWA Panel/f-16-cockpit-left-aux-console-threat-warning-aux-panel/KiCad_TWA_v36/` — `TWA_v36_gerber.zip` |
 | ECM 패널 | 1 | 2층, 83 × 59 mm, 1.57 mm | `ECM Panel/f-16-cockpit-left-console-ecm-panel/` — `Leiterplatte ECM Panel 2025-03-08.zip` |
-| UHF 7세그 디스플레이 | 1 | 2층, 86 × 50 mm, 1.6 mm | `f-16-cockpit-uhf-radio-panel/display/pcb/` — `uhf_display_gerber_revB.zip` |
+| UHF 7세그 디스플레이 | 1 | 2층, 86 × 50 mm, 1.6 mm | **자작 — [`docs/pcb/uhf_display/`](pcb/uhf_display/)** 에 거버 · BOM · CPL · 설계 문서 수록 |
 
-세 기판 모두 조립 가이드와 STL(탑 커버·LED 레이어·디퓨저), 레이저 커팅 DXF 가 같은 폴더에 있습니다.
-UHF 쪽은 KiCad 프로젝트와 설계 문서 `README.md` 도 포함합니다.
+TWA · ECM 은 조립 가이드와 STL(탑 커버·LED 레이어·디퓨저), 레이저 커팅 DXF 가 같은 폴더에 있습니다.
+
+UHF 디스플레이는 Greenisland UHF 패널의 2.8" TFT 자리를 **7세그먼트 8자리로 대체**하는 보드입니다.
+MAX7219 + 74AHCT125 레벨시프터 구성이며, 저장소에 실린 파일은 다음과 같습니다.
+
+| 파일 | 내용 |
+|------|------|
+| `uhf_display_gerber_revB.zip` | 거버 + 드릴 — 발주용 |
+| `bom.csv` · `bom_smd_assembly.csv` | 부품 목록 |
+| `cpl_top.csv` · `cpl_smd.csv` | 실장 좌표 |
+| `drc.rpt` | KiCad DRC 결과 (위반 0) |
+| `board_front.png` | 보드 렌더 |
+| `README.md` | 설계 문서 — 치수 검증, 회로, Rset 계산, 조립 순서 |
+
+> 결선은 설계 문서 §9 가 아니라 `C14`(SPI2 — 43 · 45 · 46)를 따릅니다. 핀 13 은 백라이트 PWM 입니다.

@@ -28,10 +28,11 @@ The MIT License covers the source code, documentation and configuration in
 this repository. It does NOT cover the items below.
 
 
-1. 3D models
+1. 3D models and PCB designs
 
-The STL files under `docs/3d stl/` are the author's own designs, released
-under CC BY-NC-SA 4.0 rather than MIT:
+The STL files under `docs/3d stl/` and the UHF 7-segment display PCB under
+`docs/pcb/uhf_display/` are the author's own designs, released under
+CC BY-NC-SA 4.0 rather than MIT:
 
     https://creativecommons.org/licenses/by-nc-sa/4.0/
 
@@ -40,8 +41,8 @@ their original sources:
 
     Center Left / Right     cut and combined from purchased Cults3D models
       Enclosure               by Greenisland and Legarsdusofa
-    ECM, TWA, UHF display     STL, gerbers and build guides belong to their
-      panel projects            respective upstream projects
+    ECM, TWA, UHF panel       STL, gerbers and build guides belong to their
+      projects                  respective upstream projects
     Switch caps, knobs        The_Viper_Project (Cults3D), HispaPanel
 
 

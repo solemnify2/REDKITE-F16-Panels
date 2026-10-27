@@ -1,0 +1,14 @@
+﻿Item,Ref,Qty,Value,Footprint,Description,MPN / Notes
+1,"D1, D2, D3, D4, D5, D6, D7, D8",8,"0.36"" 7-seg, common cathode","7.5 x 14 x 8.5 mm, 10 pin, 5.08 x 2.54",0.36 inch single digit 7-segment LED display,"generic - MUST match the datasheet pinout in display/ (A=10 B=9 C=8 D=5 E=4 F=2 G=3 DP=7 COM=1,6) and be COMMON CATHODE; buy all 8 from one lot so the colour matches"
+2,U1,1,MAX7219,"SOIC-24W (SOW-24, 300 mil)","8-digit LED display driver, SPI, constant current","MAX7219CWG+  (MAX7221CWG+ preferred: slew-limited drivers, less noise)"
+3,U2,1,74AHCT125,SOIC-14,"quad buffer, 3.3 V in / 5 V out level shifter",74AHCT125D or SN74AHCT125D  (74HCT125D also works)
+4,"R1, R2",2,10k 1%,0805,"MAX7219 ISET - two 10k in series = 20k Rset, sets 26 mA/segment peak","R1+R2 total: 27k for a dimmer display (e.g. 10k + 18k = 28k), 15k for maximum brightness (e.g. 10k + 5.1k) - README 7.3"
+5,"C1, C3",2,100n disc ceramic (104),"leaded THT, P5.0","decoupling, C1 at U1 pin 19 (V+), C3 at U2 pin 14 (VCC)","no polarity; square hole = +5V; keep leads short"
+6,C2,1,47u X5R 10V (6.3V min),1210,bulk - the rail is shared with the Teensy 3.3 V regulator input,"22-100 uF total bulk; optional when C4-C7 are fitted (README 7.4)"
+6a,"C4, C5, C6, C7",4,10u 25V aluminium electrolytic,"radial D5 x 11 mm, P2.0 mm, laid flat (THT)","alternative bulk, 4 in parallel = 40 uF","lay flat - 11 mm upright does not fit; square pad = +5V, stripe (-) to round pad"
+7,J1,1,1x5 2.54 mm header,PinHeader_1x05_P2.54mm,+5V / GND / DIN / CLK / CS to the Teensy 4.1,"RIGHT-ANGLE, soldered on the BACK side (front clearance is only 5.5 mm)"
+
+--- mechanical (not on the PCB) ---
+8,-,4,Display Spacer Bolt,OD 5.5 / ID 3.25 / h 5.5 mm,3D printed sleeve from the original kit,reuse - sets the 8.5 mm display depth
+9,-,4,M3 x 20 mm screw,-,display PCB to LED layer,reuse from the original kit
+10,-,1,5-wire harness,-,board J1 to Teensy 4.1,VIN / GND / 11 / 13 / 10
