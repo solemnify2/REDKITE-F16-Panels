@@ -1,4 +1,4 @@
-# F16 LEFT AUX + MISC — 핀 연결 트리
+# F16 LEFT AUX + MISC — 배선도
 
 `F16_LEFT_AUX_MISC/` 스케치의 물리 배선도입니다.
 핀 번호·버튼 번호는 `.ino`의 config 배열에서 그대로 가져온 값입니다.

@@ -200,7 +200,7 @@ AUX 51버튼, 콘솔 58버튼이므로 **두 스케치 모두** 128버튼 Extrem
 
 두 보드가 `JOYSTICK_SIZE 64`를 공유하므로 빌드 사이에 이 값을 고칠 필요는 없습니다. **`PRODUCT_ID`만 디바이스에 맞게** 바꿔 빌드합니다. 값이 틀리면 각 스케치의 `#error`가 빌드를 막아줍니다.
 
-> **축은 6개가 아니라 23개입니다.** Extreme 모드는 명명 축 6개(X/Y/Z/Xrotate/Yrotate/Zrotate)에 더해 `Joystick.slider(1..17)`을 제공합니다. 단, Windows DirectInput은 최대 8축만 인식하므로, `usb_desc.c`에서 Report Count를 8로 줄이고 나머지는 constant padding 처리가 필요합니다. 상세는 [docs/REF_LEFT_CONSOLE_PIN_TREE.md](docs/REF_LEFT_CONSOLE_PIN_TREE.md)의 「usb_desc.c 수정 사항」 참조.
+> **축은 6개가 아니라 23개입니다.** Extreme 모드는 명명 축 6개(X/Y/Z/Xrotate/Yrotate/Zrotate)에 더해 `Joystick.slider(1..17)`을 제공합니다. 단, Windows DirectInput은 최대 8축만 인식하므로, `usb_desc.c`에서 Report Count를 8로 줄이고 나머지는 constant padding 처리가 필요합니다. 상세는 [docs/REF_LEFT_CONSOLE_WIRING.md](docs/REF_LEFT_CONSOLE_WIRING.md)의 「usb_desc.c 수정 사항」 참조.
 
 > Teensyduino 업데이트 시 `usb_desc.h`와 `usb_desc.c`가 덮어씌워집니다. 업데이트 전에 백업하거나, 업데이트 후 다시 수정하세요. 상세는 [docs/teensyduino_upgrade.md](docs/teensyduino_upgrade.md) 참조.
 
@@ -214,8 +214,8 @@ AUX 51버튼, 콘솔 58버튼이므로 **두 스케치 모두** 128버튼 Extrem
 
 | 보드 | 핀 배치 문서 |
 |---|---|
-| Left Aux + MISC | [docs/REF_LEFT_AUX_PIN_TREE.md](docs/REF_LEFT_AUX_PIN_TREE.md) |
-| Left Console | [docs/REF_LEFT_CONSOLE_PIN_TREE.md](docs/REF_LEFT_CONSOLE_PIN_TREE.md) |
+| Left Aux + MISC | [docs/REF_LEFT_AUX_WIRING.md](docs/REF_LEFT_AUX_WIRING.md) |
+| Left Console | [docs/REF_LEFT_CONSOLE_WIRING.md](docs/REF_LEFT_CONSOLE_WIRING.md) |
 
 스위치 배선은 전부 **액티브 로우 + INPUT_PULLUP** (공통 단자 = GND, 눌림 = LOW = ON).
 
@@ -252,7 +252,7 @@ Teensy의 직결 핀은 모두 사용 중이므로, 추가 스위치/LED는 MCP2
 
 ![I2C Star Topology](docs/hotplug_wiring_star.png)
 
-AUX↔MISC 패널 LAN 배선 상세: [docs/REF_LEFT_AUX_PIN_TREE.md](docs/REF_LEFT_AUX_PIN_TREE.md) 의 「I1 — LAN 배선」 절
+AUX↔MISC 패널 LAN 배선 상세: [docs/REF_LEFT_AUX_WIRING.md](docs/REF_LEFT_AUX_WIRING.md) 의 「I1 — LAN 배선」 절
 
 ### 3-4. 백라이트
 
@@ -432,7 +432,7 @@ AUX의 Star와 달리 MCP 3장을 한 줄로 체인합니다. 한 링크가 끊�
 **별도 12V 어댑터**
 인디케이터 LED 40개(ECM 32 + ELEC 8)로 USB 전력 예산을 초과합니다. **어댑터 GND와 Teensy GND를 단일점으로 반드시 연결하세요.**
 
-상세는 [docs/REF_LEFT_CONSOLE_PIN_TREE.md](docs/REF_LEFT_CONSOLE_PIN_TREE.md) 참조.
+상세는 [docs/REF_LEFT_CONSOLE_WIRING.md](docs/REF_LEFT_CONSOLE_WIRING.md) 참조.
 
 ---
 
@@ -459,10 +459,10 @@ REDKITE-F16-Panels/
 │   ├── dcsbios_bridge.py
 │   ├── reset_joystick_name.bat
 │   └── backup_to_synology.ps1
-├── docs/                          # 배선도, 핀 트리, 프로토콜 참조
+├── docs/                          # 배선도, 프로토콜 참조
 │   ├── REF_PROTOCOL.md            #   DCS/BMS 프로토콜·LED 주소 맵
-│   ├── REF_LEFT_AUX_PIN_TREE.md   #   AUX 보드 핀 트리·배선·DX맵·LAN
-│   ├── REF_LEFT_CONSOLE_PIN_TREE.md #  콘솔 보드 핀 트리·배선·DX맵·전원
+│   ├── REF_LEFT_AUX_WIRING.md     #   AUX 보드 배선·핀 배열·DX맵·LAN
+│   ├── REF_LEFT_CONSOLE_WIRING.md #   콘솔 보드 배선·핀 배열·DX맵·전원
 │   └── 3d stl/                    #   3D 프린트용 STL 파일
 ├── CLAUDE.md                      # Claude Code 가이드
 └── README.md
@@ -473,8 +473,8 @@ REDKITE-F16-Panels/
 | 문서 | 내용 |
 |---|---|
 | [docs/REF_PROTOCOL.md](docs/REF_PROTOCOL.md) | DCS-BIOS / BMS-BIOS 프로토콜, LED 주소 맵, LightBits 매핑 |
-| [docs/REF_LEFT_AUX_PIN_TREE.md](docs/REF_LEFT_AUX_PIN_TREE.md) | AUX 보드 핀 트리, DX 맵, MCP GPIO, 케이블 배선, AUX↔MISC LAN 배선, 시공 체크리스트 |
-| [docs/REF_LEFT_CONSOLE_PIN_TREE.md](docs/REF_LEFT_CONSOLE_PIN_TREE.md) | 콘솔 보드 핀 트리, DX 맵, MCP GPIO, 케이블 배선, 시공 체크리스트 |
+| [docs/REF_LEFT_AUX_WIRING.md](docs/REF_LEFT_AUX_WIRING.md) | AUX 보드 케이블 배선, Teensy 핀 배열, MCP GPIO, AUX↔MISC LAN 배선, DX 맵, 시공 체크리스트 |
+| [docs/REF_LEFT_CONSOLE_WIRING.md](docs/REF_LEFT_CONSOLE_WIRING.md) | 콘솔 보드 케이블 배선, Teensy 핀 배열, MCP GPIO, DX 맵, 전원 구성, 시공 체크리스트 |
 
 ---
 

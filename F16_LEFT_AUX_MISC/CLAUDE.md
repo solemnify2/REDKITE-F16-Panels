@@ -113,7 +113,7 @@ LED sweep animation runs on: startup, USB resume from suspend, bridge online (of
 
 ## Pin Assignment
 
-See `docs/REF_LEFT_AUX_PIN_TREE.md` for the cable tree, full Teensy pin map, MCP GPIO map, DX button map, joystick axes, the CMDS lamp wiring, the AUX↔MISC LAN wiring, and the build checklist. Pin 27 conflict (Gear Warn LED vs HMCS Brightness A13) has been resolved — Gear Warn LED moved to pin 12.
+See `docs/REF_LEFT_AUX_WIRING.md` for the cable tree, full Teensy pin map, MCP GPIO map, DX button map, joystick axes, the CMDS lamp wiring, the AUX↔MISC LAN wiring, and the build checklist. Pin 27 conflict (Gear Warn LED vs HMCS Brightness A13) has been resolved — Gear Warn LED moved to pin 12.
 
 All 42 header pins are used. The CMDS lamps hang off the **bottom microSD pads**, broken out with a 15-pin FPC extension cable — no soldering onto the board, no header pins consumed.
 
