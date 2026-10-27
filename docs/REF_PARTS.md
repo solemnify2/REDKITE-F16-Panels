@@ -138,18 +138,8 @@ HASL 또는 ENIG. JLCPCB·PCBWay·Elecrow 모두 기본 사양이라 추가 요�
 **레벨 시프터(U2)는 반드시 필요**합니다. Rset 20k 에 전 자리 최대 밝기면 디스플레이만
 208mA, Teensy 포함 최악 약 320mA 입니다 — 기본 `INTENSITY 0x08` 에서는 절반 수준.
 
-**J1 배선 — 하단 SD 패드 인출이 최종입니다.** 엣지 핀은 쓰지 않습니다.
-
-| J1 | 신호 | Teensy | FPC |
-|---|---|---|---|
-| J1.1 | +5V | **VIN** (FPC 아님) | — |
-| J1.2 | GND | GND | 15 |
-| J1.3 | DIN | 43 (MOSI2) | 12 |
-| J1.4 | CLK | 45 (SCK2) | 6 |
-| J1.5 | CS | 46 | 4 |
-
-15핀 FPC 확장 케이블 4선 + VIN 1선 = 5선입니다.
-상세는 [REF_LEFT_CONSOLE_WIRING.md](REF_LEFT_CONSOLE_WIRING.md) 의 「하단 SD 카드 인터페이스」 절.
+**J1 배선** — [REF_LEFT_CONSOLE_WIRING.md](REF_LEFT_CONSOLE_WIRING.md) 의
+「하단 SD 카드 인터페이스」 절 참조.
 
 > ⚠ 원본 BOM 의 `5-wire harness — VIN / GND / 11 / 13 / 10` 은 SPI0 직결 전제라
 > 이 프로젝트에는 해당하지 않습니다.
