@@ -184,4 +184,4 @@ The display is always built in — there is no compile-time switch. `displayFreq
 
 ## Pin Assignment
 
-See `docs/LEFT_CONSOLE_PIN_TREE.md` for the full pin tree: cable/panel wiring, Teensy pin layout, MCP GPIO map, DX button map, axis map, per-cable wiring detail, and power topology.
+See `docs/REF_LEFT_CONSOLE_PIN_TREE.md` for the full pin tree: cable/panel wiring, Teensy pin layout, MCP GPIO map, DX button map, axis map, per-cable wiring detail, and power topology.

@@ -8,8 +8,7 @@
 - **I2C**: `Wire` — SDA = pin 18, SCL = pin 19 @ 100kHz, MCP23017 1장 (`0x20`, MISC 패널)
 - **DX 버튼 51, 축 4**, 메인 루프 20Hz
 
-케이블 이름(C1~C6, M1, I1)은 이 문서에서 부여한 명명입니다.
-관련 문서: [LEFT_AUX_MISC_LAN_WIRING.md](LEFT_AUX_MISC_LAN_WIRING.md)
+케이블 이름(C1~C7, M1, I1)은 이 문서에서 부여한 명명입니다.
 
 ---
 
@@ -50,12 +49,11 @@
                                     │ PEDALS     POT x2     ├─C6(x2)──┘
                                     └───────────────────────┘
 
-  I2C             I1 Teensy(18/19) > 0x20 — 스타 토폴로지, LAN (hotplug_spec.md 준용)
+  I2C             I1 Teensy(18/19) > 0x20 — 스타 토폴로지, LAN (아래 "I1 — LAN 배선" 참조)
   Teensy direct   C1 GEAR   C2 CMDS   C3 TWA   C4 ALT GEAR   C5 HMCS   C6 PEDALS
                   C7 CMDS 램프 — 하단 SD 패드에서 15핀 FPC 확장 케이블로 인출 (42 미사용)
   MCP > panel     M1 0x20 > MISC (모듈-패널 하니스)
   12V             backlight: pin 13 PWM 1kHz > MOSFET > 별도 12V 어댑터
-  LAN 배선도      docs/LEFT_AUX_MISC_LAN_WIRING.md
 
   xN = 신호선 수 (3.3V/GND 제외)   SW = switch GPIO 수   LADDER = resistor ladder   POT = potentiometer
 ```
@@ -76,6 +74,100 @@
 콘솔 장치와 달리 MCP가 1장뿐이라 **I2C는 체인이 아닌 스타(단일 링크)**입니다.
 MCP 단선 시 **GEAR WARN LED가 점등**되어 패널에서 바로 알 수 있고 (콘솔에는 없는 표시등),
 500ms 간격으로 재접속을 시도합니다.
+
+---
+
+## I1 — LAN 배선 (Teensy ↔ MISC 패널)
+
+Teensy(AUX 통) ↔ MCP23017(MISC 패널) 간 Cat5e 한 가닥에 I2C·백라이트 12V·3.3V 를 함께 싣습니다.
+
+### LAN 핀 배정
+
+| Pin | Pair | Signal | 비고 |
+|-----|------|--------|------|
+| 1 | Pair 1 (Orange) | SDA | |
+| 2 | Pair 1 | GND | SDA 리턴 |
+| 3 | Pair 2 (Green) | SCL | |
+| 6 | Pair 2 | GND | SCL 리턴 |
+| 4 | Pair 3 (Blue) | 12V dimmed | MOSFET 출력 (PWM) |
+| 5 | Pair 3 | LED return | GND |
+| 7 | Pair 4 (Brown) | 3.3V | MCP23017 전용 |
+| 8 | Pair 4 | GND | 3.3V 리턴 |
+
+### 회로도
+
+#### AUX 통 (Teensy 측)
+
+```
+                 4.7kΩ
+Teensy 3.3V ──┬──┤├──── Teensy SDA (18) ──────────── LAN pin 1
+              │
+              └──┤├──── Teensy SCL (19) ──────────── LAN pin 3
+                 4.7kΩ
+
+GND ──────────────────────────────────────────────── LAN pin 2
+GND ──────────────────────────────────────────────── LAN pin 6
+
+Teensy pin 13 ──[1kΩ]──┬── MOSFET Gate
+                      [10kΩ]
+                        │
+                       GND
+12V ─────────── MOSFET Drain
+                MOSFET Source ────────────────────── LAN pin 4 (dimmed 12V)
+                                              ┌──── LAN pin 5 (LED return)
+                                              │
+                                             GND
+
+3.3V ─────────────────────────────────────────────── LAN pin 7
+GND ──────────────────────────────────────────────── LAN pin 8
+```
+
+#### MISC 패널 (MCP23017 측)
+
+```
+LAN pin 1 ──[100Ω]── SDA ── MCP23017 SDA
+LAN pin 3 ──[100Ω]── SCL ── MCP23017 SCL
+LAN pin 2 ── GND
+LAN pin 6 ── GND
+
+LAN pin 4 ── LED+ (12V dimmed)
+LAN pin 5 ── LED- (LED return)
+
+LAN pin 7 ── 3.3V ──┬──┬── MCP23017 VDD
+                     │  │
+                   10uF 100nF
+                     │  │
+LAN pin 8 ── GND ───┴──┴── MCP23017 GND
+```
+
+### 보호 부품
+
+| 위치 | 부품 | 값 | 용도 |
+|------|------|----|------|
+| AUX | 풀업 저항 | 4.7kΩ x2 | I2C 풀업 (SDA, SCL -> 3.3V) |
+| AUX | Gate 직렬 저항 | 1kΩ | MOSFET 스위칭 링잉 방지 |
+| AUX | Gate 풀다운 저항 | 10kΩ | 핫플러그 시 MOSFET OFF 유지 |
+| AUX | MOSFET | IRLML6344 (SOT-23) | N-ch logic-level, Vgs(th) ~1V |
+| MISC | 직렬 저항 | 100Ω x2 | SDA/SCL 돌입전류 제한 (래치업 방지) |
+| MISC | 전해캡 | 10uF (10V+) | MCP VDD 핫플러그 스파이크 흡수 |
+| MISC | 세라믹캡 | 100nF | MCP VDD 고주파 노이즈 필터 (핀 근접 배치) |
+
+### 불필요한 부품
+
+| 부품 | 사유 |
+|------|------|
+| TVS 다이오드 | 3.3V/12V USB 전원 수준, 과전압 파괴 위험 없음 |
+| 페라이트 비드 | 저전류 (~1mA), 노이즈 문제 없음 |
+| 100uF+ 대용량 캡 | 과잉, 돌입전류만 증가 |
+| 외부 풀업 (MISC측) | AUX측 4.7kΩ로 충분 (1m 이내) |
+
+### 설계 근거
+
+- **I2C 풀업 4.7kΩ**: 1m 이내 Cat5e에서 Teensy 내부 풀업(~22kΩ)으로도 동작하나, 외부 4.7kΩ이 더 안정적
+- **100Ω 직렬**: 핫플러그 시 핀 접촉 순서 불규칙 → 과도 전류 제한. I2C 100~400kHz에 영향 미미
+- **10kΩ 풀다운**: LAN 미연결/핫플러그 시 Gate 플로팅 → MOSFET 의도치 않게 ON 방지
+- **Pair 3 (12V + LED return)**: 꼬임쌍 내 전류 왕복 → 자기장 상쇄, 다른 쌍과 간섭 최소
+- **MISC 백라이트 전류**: 3 strips x 13.6mA = 41mA @12V → Cat5e 1선(0.5A 한계)의 8%
 
 ---
 
@@ -357,8 +449,8 @@ LED 1개만 연결한 상태에서 **320Ω 양단 = 1.2V** → 단독 전류 **3
 | 1 | ~~핀 27 충돌~~ **해결됨** — Gear Warn LED 를 핀 12 로 이설. 핀 27(A13)은 여유 |
 | 2 | ~~핀 13 확인~~ **해결됨** — 백라이트 출력으로 변경. 온보드 LED가 백라이트 상태를 표시 (LEFT_CONSOLE과 동일). 핀 0은 여유 |
 | 3 | **래더 캘리브레이션** — TWA·CMDS MODE·PRGM. PWM 디밍 방식 변경 후 BL OFF/ON 값 동일(±4)하여 1세트로 통합. `ALLOW_DEBUG = true` 로 실측 |
-| 4 | **I2C 핫플러그 보호** — SDA/SCL 직렬 100Ω, 보드 3.3V에 10µF + 100nF ([hotplug_spec.md](hotplug_spec.md)). 단선 시 GEAR WARN 점등, 500ms 재접속 |
+| 4 | **I2C 핫플러그 보호** — SDA/SCL 직렬 100Ω, 보드 3.3V에 10µF + 100nF (위 "I1 — LAN 배선" 절). 단선 시 GEAR WARN 점등, 500ms 재접속 |
 | 5 | **MCP 주소 점퍼** — 출하 상태 그대로 (`0x20`) |
-| 6 | **백라이트** — 핀 13 PWM 1kHz → MOSFET → 별도 12V 어댑터 (Step-Up은 래더 ADC 노이즈 유발). 오프라인 수동 밝기: DN LOCK REL 누른 채 HMCS Symbology pot (A15, 방향 반전). [LAN 배선도](LEFT_AUX_MISC_LAN_WIRING.md) |
+| 6 | **백라이트** — 핀 13 PWM 1kHz → MOSFET → 별도 12V 어댑터 (Step-Up은 래더 ADC 노이즈 유발). 오프라인 수동 밝기: DN LOCK REL 누른 채 HMCS Symbology pot (A15, 방향 반전). 배선은 위 "I1 — LAN 배선" 절 참조 |
 | 7 | **스위치 배선** — 전부 액티브 로우 + 내부 풀업 (공통 단자 GND) |
 | 8 | **CMDS 램프** — 하단 15핀 FPC 확장 케이블 → 5핀으로 LED 8개 (개별 320Ω = 220+100 직렬, 캐소드는 FPC 15 공통). pin 42 = 미사용. 병렬 자리 핀당 약 7.1mA. Vf 3.0V 이상 LED 는 쓰지 말 것 |
