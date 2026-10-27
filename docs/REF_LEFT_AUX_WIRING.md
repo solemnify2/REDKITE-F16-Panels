@@ -64,7 +64,7 @@
 | **M1** | MCP `0x20` → MISC 패널 | 스위치 GPIO 11 + LED 3 | 14 |
 | **C1** | Teensy → GEAR 패널 | 스위치 GPIO 13 + LED 4 (Nose/Left/Right/Warn) | 17 |
 | **C2** | Teensy → CMDS 패널 | 스위치 8 + 래더 2 (MODE, PRGM) | 10 |
-| **C3** | Teensy → TWA 패널 | 래더 1 + LED 4 | 5 |
+| **C3** | Teensy → TWA 패널 | 래더 1 + LED 4채널(LED 7개) | 5 |
 | **C4** | Teensy → ALT GEAR | Handle (Reset 미연결) | 1 |
 | **C5** | Teensy → HMCS | Symbology 1개 (Brightness / Contrast 미연결) | 1 |
 | **C6** | Teensy → 페달 | 포트 2 (Left / Right) | 2 |

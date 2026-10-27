@@ -66,6 +66,7 @@
 | MCP23017 I2C I/O Expander | 4 | AUX: MISC `0x20` / 콘솔: UHF+AUDIO `0x20`, ELEC+EPU `0x21`, ECM+AVTR `0x22` |
 | 74HC595 시프트 레지스터 (SO16) | 4 | ECM 패널 32 LED 구동 — ECM 커스텀 PCB 에 실장 |
 | IRLML6244 N-ch MOSFET | 3 | 백라이트 PWM 스위칭. **현재 2개** (콘솔 1 + AUX 1), MISC 전용 1개 추가 예정 |
+| AO3400A N-ch MOSFET | 1 | TWA 기판 `Q1` — TWA Power LED 4개 묶음 구동 |
 | 로터리 엔코더 EC11 (디텐트) | 6 | UHF — PRESET은 20디텐트 권장 |
 | MAX7219 LED 드라이버 | 1 | UHF 디스플레이 커스텀 PCB 에 실장 (주파수 6 + 채널 2자리) |
 
