@@ -443,11 +443,11 @@ REDKITE-F16-Panels/
 │   ├── REF_PARTS.md               #   부품 목록
 │   ├── REF_PROTOCOL.md            #   DCS/BMS 프로토콜·LED 주소 맵
 │   ├── REF_LEFT_AUX_WIRING.md     #   AUX 보드 배선·핀 배열·DX맵·LAN
-│   └── REF_LEFT_CONSOLE_WIRING.md #   콘솔 보드 배선·핀 배열·DX맵·전원
+│   ├── REF_LEFT_CONSOLE_WIRING.md #   콘솔 보드 배선·핀 배열·DX맵·전원
+│   └── REF_TWA_MOD.md             #   TWA 기판 LED 추가 개조 가이드
 ├── 3d stl/                        # 3D 프린트용 STL + 썸네일
 ├── pcb/                           # 커스텀 기판
-│   ├── uhf_display/               #   UHF 디스플레이 자작 PCB (거버·BOM·설계)
-│   └── twa_led_mod.md             #   TWA 기판 LED 추가 개조 가이드
+│   └── uhf_display/               #   UHF 디스플레이 자작 PCB (거버·BOM·설계)
 ├── CLAUDE.md                      # Claude Code 가이드
 └── README.md
 ```
@@ -461,6 +461,7 @@ REDKITE-F16-Panels/
 | [docs/REF_PROTOCOL.md](docs/REF_PROTOCOL.md) | DCS-BIOS / BMS-BIOS 프로토콜, LED 주소 맵, LightBits 매핑 |
 | [docs/REF_LEFT_AUX_WIRING.md](docs/REF_LEFT_AUX_WIRING.md) | AUX 보드 케이블 배선, Teensy 핀 배열, MCP GPIO, AUX↔MISC LAN 배선, DX 맵, 시공 체크리스트 |
 | [docs/REF_LEFT_CONSOLE_WIRING.md](docs/REF_LEFT_CONSOLE_WIRING.md) | 콘솔 보드 케이블 배선, Teensy 핀 배열, MCP GPIO, DX 맵, 전원 구성, 시공 체크리스트 |
+| [docs/REF_TWA_MOD.md](docs/REF_TWA_MOD.md) | TWA 기판에 Power LED 를 추가한 개조 내용 — 추가 부품, 회로, 적용 방법 |
 
 ---
 
