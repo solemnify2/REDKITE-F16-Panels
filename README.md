@@ -195,16 +195,9 @@ AUX 51버튼, 콘솔 66버튼이므로 **두 스케치 모두** 128버튼 Extrem
 | Left Console | [docs/REF_LEFT_CONSOLE_WIRING.md](docs/REF_LEFT_CONSOLE_WIRING.md) |
 
 스위치 배선은 전부 **액티브 로우 + INPUT_PULLUP** (공통 단자 = GND, 눌림 = LOW = ON).
+저항 래더(CMDS MODE·PRGM, TWA, ECM) 제작법과 값도 위 문서에 있습니다.
 
-### 3-2. 저항 래더
-
-로터리 스위치와 버튼 묶음을 **아날로그 핀 1개**로 받아 디지털 핀을 아낍니다.
-CMDS MODE·PRGM(각 7포지션), TWA(4버튼), ECM(8버튼) — 디지털로 받으면 26핀이 필요한 신호가 **4핀**에 들어갑니다.
-
-래더 4개가 저항값도 실장 위치도 제각각입니다. 제작법·값·기대 ADC·캘리브레이션은 배선도에 있습니다 —
-[AUX](docs/REF_LEFT_AUX_WIRING.md) 의 「저항 래더」 절, [콘솔](docs/REF_LEFT_CONSOLE_WIRING.md) 의 「ECM 저항 래더」 절.
-
-### 3-3. MCP23017 I2C 확장
+### 3-2. MCP23017 I2C 확장
 
 Teensy의 직결 핀은 모두 사용 중이므로, 추가 스위치/LED는 MCP23017 I2C 확장으로 추가합니다.
 
@@ -221,7 +214,7 @@ Teensy의 직결 핀은 모두 사용 중이므로, 추가 스위치/LED는 MCP2
 
 AUX↔MISC 패널 LAN 배선 상세: [docs/REF_LEFT_AUX_WIRING.md](docs/REF_LEFT_AUX_WIRING.md) 의 「I1 — LAN 배선」 절
 
-### 3-4. 백라이트
+### 3-3. 백라이트
 
 양쪽 보드 모두 **MOSFET PWM 디밍**을 지원합니다. Teensy pin 13으로 MOSFET을 PWM 제어하며, 인게임 조명 노브에 연동됩니다.
 
