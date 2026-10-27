@@ -226,7 +226,15 @@ Teensy는 수신된 sync 바이트로 BMS/DCS 프로토콜을 자동 판별합�
 
 ### 5-1. 조이스틱 확인
 
-Windows `joy.cpl`은 32버튼까지만 표시합니다. 128버튼을 확인하려면 [VKB DevCfg](https://vkbcontrollers.com/?page_id=4609) 또는 [Joystick Gremlin](https://whitemagic.github.io/JoystickGremlin/)을 사용하세요.
+Windows `joy.cpl` 은 **32버튼까지만** 표시합니다. 128버튼을 전부 보려면 별도 도구가 필요합니다.
+
+| 도구 | 비고 |
+|---|---|
+| **AIM Joystick Probe** (Invictus) | 실제로 사용 중. 128버튼·23축을 모두 표시 — `AIM-Joystick-Probe-v1.2.0-Setup.exe` |
+| [VKB DevCfg](https://vkbcontrollers.com/?page_id=4609) | 대안 |
+| [Joystick Gremlin](https://whitemagic.github.io/JoystickGremlin/) | 대안 |
+
+DX 번호가 배선도의 「DX 버튼 맵」과 맞는지 여기서 확인합니다.
 
 ### 5-2. 래더 캘리브레이션
 
