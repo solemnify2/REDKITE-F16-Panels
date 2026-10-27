@@ -289,54 +289,6 @@ UHF 엔코더의 CW/CCW가 반대면 `encoders[]`의 `pinA`/`pinB`를 교체하�
 
 ---
 
-## 커스터마이징
-
-스위치/LED 등 하드웨어 변경 시 각 `.ino`의 **HARDWARE CONFIGURATION** 섹션의 config 배열만 수정합니다. 조이스틱 버튼 번호는 런타임에 자동 재할당됩니다.
-
-| 배열 | 용도 | 보드 |
-|---|---|---|
-| `switches[]` | 디지털 스위치 (직결 / MCP) | 공통 |
-| `analogBtnArrays[]` | 저항 래더 그룹 | 공통 |
-| `mcpDevices[]` | MCP23017 I2C 주소 | 공통 |
-| `leds[]` | LED (직결 / MCP) | 공통 |
-| `pots[]` | 포텐셔미터 → 조이스틱 축 | 공통 |
-| `encoders[]` | 로터리 엔코더 | 콘솔 |
-| `srMap[]` | 74HC595 논리→물리 출력 리맵 | 콘솔 |
-
-```cpp
-// 스위치 추가 예시 (mcpIdx: -1=Teensy직결, 0+=MCP 인덱스)
-{"My Switch",   PNL_GEAR,  SW_ON_OFF,  -1,  5,  0,  NULL},
-{"MCP Switch",  PNL_MISC,  SW_ON_OFF,   0,  5,  0,  NULL},  // mcpIdx=0, GPA5
-```
-
-새 MCP 디바이스를 추가하려면 `mcpDevices[]`에 I2C 주소를 등록하면 됩니다. 패널을 비활성화하려면 해당 항목을 주석 처리하면 됩니다.
-
----
-
-## Left Console 보드 상세
-
-콘솔 보드(`F16_LEFT_CONSOLE/`)는 AUX 보드 대비 몇 가지 고유 사항이 있습니다.
-
-**로터리 엔코더 (UHF 6개)**
-1kHz `IntervalTimer` ISR에서 쿼드러처를 디코딩하고, 메인 루프가 CW/CCW DX 버튼 펄스로 배출합니다. 엔코더는 **MCP23017에 올릴 수 없습니다** — I2C 폴링으로는 펄스를 놓칩니다.
-
-**UHF 7세그 디스플레이 (MAX7219)**
-기성 모듈이 아니라 2층 86×50mm **자작 PCB** 입니다 — 거버·BOM·설계 문서는 저장소 밖의 `f-16-cockpit-uhf-radio-panel/display/pcb/` 에 있고, 부품은 [docs/REF_PARTS.md](docs/REF_PARTS.md) 의 「UHF 7세그 디스플레이 보드」 절에 정리돼 있습니다.
-UHF 주파수 6자리 + 채널 2자리를 표시합니다. DCS에서는 DCS-BIOS가 디스플레이 상태를 직접 제공하므로 UHF OFF 시 자동으로 꺼집니다. BMS 공유 메모리에는 UHF FUNCTION 스위치 상태가 없어서, 펌웨어가 물리 스위치(FUNCTION=OFF) 위치를 직접 읽어 디스플레이를 끕니다. 브릿지 미연결 시에도 번인 방지를 위해 디스플레이가 꺼집니다.
-
-**74HC595 32/32 소진**
-칩을 추가하면 BMS-BIOS 프레임의 `srData` 32비트를 넘으므로 `BB_FRAME_PAYLOAD`, 양쪽 `BmsBiosParser.h`, `bmsbios_bridge.py`를 모두 수정해야 합니다.
-
-**I2C 데이지체인**
-AUX의 Star와 달리 MCP 3장을 한 줄로 체인합니다. 한 링크가 끊기면 하류 전체가 사라지는 대신, 분기 스터브가 없어 반사가 줄고 총 배선이 짧아집니다.
-
-**12V 어댑터 (AUX와 Y 케이블로 공유)**
-인디케이터 LED 40개(ECM 32 + ELEC 8)로 USB 전력 예산을 초과합니다. **어댑터 GND와 Teensy GND를 단일점으로 반드시 연결하세요.**
-
-상세는 [docs/REF_LEFT_CONSOLE_WIRING.md](docs/REF_LEFT_CONSOLE_WIRING.md) 참조.
-
----
-
 ## 프로젝트 구조
 
 ```

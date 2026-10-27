@@ -244,6 +244,25 @@ struct AnalogBtnArrayDef {
 //  >>> HARDWARE CONFIGURATION - Edit this section <<<
 //
 // ================================================================
+//
+//  하드웨어를 바꿀 때는 아래 config 배열만 고칩니다. DX 버튼 번호는 런타임에
+//  자동 배정되므로 직접 매기지 않습니다. 패널을 빼려면 해당 항목을 주석 처리하면 됩니다.
+//
+//    switches[]          디지털 스위치 — mcpIdx -1 = Teensy 직결, 0+ = mcpDevices[] 인덱스
+//    analogBtnArrays[]   저항 래더 그룹 (아날로그 핀 1개에 버튼 여러 개)
+//    pots[]              포텐셔미터 -> 조이스틱 축
+//    leds[]              LED — mcpIdx 규칙은 switches[] 와 동일
+//    mcpDevices[]        MCP23017 I2C 주소. 새 확장 칩은 여기 등록
+//    encoders[]          로터리 엔코더 (콘솔 전용)
+//    srMap[]             74HC595 논리 -> 물리 출력 리맵 (콘솔 전용)
+//
+//  예) {"My Switch",  PNL_GEAR, SW_ON_OFF, -1, 5, 0, NULL}   Teensy 핀 5
+//      {"MCP Switch", PNL_MISC, SW_ON_OFF,  0, 5, 0, NULL}   MCP#0 GPA5
+//
+//  ※ 스위치를 추가할 때 기존 DX 번호를 보존하려면 배열 **맨 뒤**에 붙이십시오.
+//    `SWITCH_LATE_START` 이후 항목은 래더·엔코더·커버 뒤에 번호를 받습니다.
+//
+
 
 // --- MCP23017 I/O Expanders (Wire2: SCL2=24, SDA2=25) ---
 // MCP pin numbering: GPA0-7 = 0-7, GPB0-7 = 8-15
