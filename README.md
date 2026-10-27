@@ -423,6 +423,7 @@ REDKITE-F16-Panels/
 │   │                              #   Gear, CMDS, TWA, Alt Gear, MISC, HMCS, Pedal
 │   ├── F16_LEFT_AUX_MISC.ino
 │   ├── BiosHandler/               # DcsBiosParser.h / BmsBiosParser.h
+│   ├── pcb/                       # TWA 기판 LED 추가 개조 가이드
 │   ├── CLAUDE.md
 │   └── name.c
 ├── F16_LEFT_CONSOLE/              # Teensy 4.1 (PID 0x048E)
@@ -431,6 +432,7 @@ REDKITE-F16-Panels/
 │   ├── F16_LEFT_CONSOLE.ino
 │   ├── BiosHandler/
 │   ├── Display/                   # Max7219Display.h (UHF 7-seg)
+│   ├── pcb/                       # UHF 디스플레이 자작 PCB — 거버·BOM·설계 문서
 │   ├── CLAUDE.md
 │   └── name.c
 ├── tools/                         # Python 브릿지 (BMS/DCS → Teensy)

@@ -81,7 +81,7 @@ LED 4개를 한 신호핀에서 직접 당기면 핀 전류가 그만큼 늘어�
 4. DRC 를 돌리고 거버를 뽑아 발주합니다.
 
 `VCC` 는 **3.3V 입니다.** 기판 실크에 `5V` 라고 찍혀 있어도 Teensy 3.3V 를 넣으십시오 —
-이유는 [REF_LEFT_AUX_WIRING.md](../REF_LEFT_AUX_WIRING.md) 의 「다른 래더와의 차이」 절.
+이유는 [REF_LEFT_AUX_WIRING.md](../../docs/REF_LEFT_AUX_WIRING.md) 의 「다른 래더와의 차이」 절.
 
 ---
 
@@ -89,6 +89,6 @@ LED 4개를 한 신호핀에서 직접 당기면 핀 전류가 그만큼 늘어�
 
 | 문서 | 내용 |
 |------|------|
-| [REF_LEFT_AUX_WIRING.md](../REF_LEFT_AUX_WIRING.md) | `C3` 케이블, TWA 래더, LED 핀 배정 (34~37) |
-| [REF_PARTS.md](../REF_PARTS.md) | 기판 사양, LED·저항 수량 |
-| [REF_BACKLIGHT.md](../REF_BACKLIGHT.md) | 백라이트 — 이 LED 들과는 별개 회로 |
+| [REF_LEFT_AUX_WIRING.md](../../docs/REF_LEFT_AUX_WIRING.md) | `C3` 케이블, TWA 래더, LED 핀 배정 (34~37) |
+| [REF_PARTS.md](../../docs/REF_PARTS.md) | 기판 사양, LED·저항 수량 |
+| [REF_BACKLIGHT.md](../../docs/REF_BACKLIGHT.md) | 백라이트 — 이 LED 들과는 별개 회로 |

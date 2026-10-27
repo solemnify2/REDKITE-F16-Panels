@@ -4,7 +4,7 @@
 > §9 는 보드 설계 당시의 기본 배선(SPI0 — 핀 11 / 13 / 10)이고,
 > 본 프로젝트는 **하단 SD 패드의 SPI2 — DIN 43 · CLK 45 · CS 46** 을 씁니다.
 > **핀 13 은 백라이트 PWM 출력**이라 쓸 수 없습니다.
-> 실제 배선은 [REF_LEFT_CONSOLE_WIRING.md](../../REF_LEFT_CONSOLE_WIRING.md) 의
+> 실제 배선은 [REF_LEFT_CONSOLE_WIRING.md](../../docs/REF_LEFT_CONSOLE_WIRING.md) 의
 > 「하단 SD 카드 인터페이스 — UHF 디스플레이 (C14)」 절을 보십시오.
 > 급전(J1.1 = VIN 5V)과 보드 자체 설계는 §9 설명 그대로 유효합니다.
 

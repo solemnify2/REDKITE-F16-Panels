@@ -204,8 +204,8 @@ Teensy 의 SDA·SCL 한 쌍에서 출발해 MCP 3장을 **한 줄로 꿰는 단�
 UHF 주파수 6자리 + 채널 2자리를 표시합니다. **엣지 핀을 쓰지 않습니다** — Teensy 4.1 뒷면
 SD 카드 소켓의 **SPI2** 를 **SD 확장 케이블**로 빼내 연결하므로 위 배치는 그대로입니다.
 
-기성 모듈이 아니라 2층 86×50mm **자작 PCB** 입니다. 거버·BOM·설계 문서는 저장소 밖
-`f-16-cockpit-uhf-radio-panel/display/pcb/` 에 있고, 부품은
+기성 모듈이 아니라 2층 86×50mm **자작 PCB** 입니다. 거버·BOM·설계 문서는
+[`F16_LEFT_CONSOLE/pcb/`](../F16_LEFT_CONSOLE/pcb/) 에 있고, 부품은
 [REF_PARTS.md](REF_PARTS.md) 의 「커스텀 PCB」 절에 정리돼 있습니다.
 
 **꺼지는 조건** — 번인을 막기 위해 세 경우에 소등합니다.
