@@ -42,7 +42,7 @@ VR 전용 미니멀 데스크핏을 지향합니다. VR 헤드셋을 쓰고 손�
 | HMCS | Analog | Symbology 포텐셔미터 |
 | Pedal | Analog | Rudder + Left/Right Brake (auto calibration) |
 
-#### Left Console (`0x048E`) — DX 58, 축 10
+#### Left Console (`0x048E`) — DX 66, 축 10
 
 | Panel | Type | Description |
 |-------|------|-------------|
@@ -50,12 +50,12 @@ VR 전용 미니멀 데스크핏을 지향합니다. VR 헤드셋을 쓰고 손�
 | ELEC | Switch, LED (MCP23017) | MAIN PWR, CAUTION RST + 경고등 8개 |
 | EPU | Switch (MCP23017) | OFF / NORM / ON |
 | AVTR | Switch (MCP23017) | OFF / AUTO / ON |
-| UHF | Switch, Encoder ×6, Analog | FUNCTION(4), MODE(3), SQUELCH, T-TONE, STATUS + 주파수 엔코더 + VOL |
+| UHF | Switch, Encoder ×6, Analog, 7-seg | FUNCTION(4), MODE(3), SQUELCH, T-TONE, STATUS, TEST + 주파수 엔코더 + VOL + MAX7219 디스플레이 |
 | ENGINE START | Switch | JFS, ENG CONT, MAX PWR, AB RESET, ENG DATA |
 | MPO | Switch | Manual Pitch Override |
 | AUDIO 1/2 | Analog, Switch (MCP23017) | 볼륨 6개 + COMM 1/2 모드 로터리 2개 |
 
-DCS에서는 ENG CONT, EPU 커버 자동화용 DX 3개(59~61)가 추가됩니다.
+DX 59~61은 ENG CONT·EPU 커버 자동화용으로 **DCS에서만** 사용됩니다. 62~65는 COMM1/COMM2 볼륨 pot의 전원 스위치(ADC 임계값 감지), 66은 UHF TEST 입니다.
 
 ---
 
@@ -189,7 +189,7 @@ Stand는 Enclosure 뒷면에 에폭시 접착제로 부착합니다. new 버전 
 
 ### 2-2. usb_desc.h 수정 (Extreme Joystick)
 
-AUX 51버튼, 콘솔 58버튼이므로 **두 스케치 모두** 128버튼 Extreme 모드가 필요합니다.
+AUX 51버튼, 콘솔 66버튼이므로 **두 스케치 모두** 128버튼 Extreme 모드가 필요합니다.
 
 파일 위치: `%LOCALAPPDATA%\Arduino15\packages\teensy\hardware\avr\<version>\cores\teensy4\usb_desc.h`
 
