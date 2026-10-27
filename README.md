@@ -152,6 +152,11 @@ Upper / Lower 를 맞물려 조립하고, Bottom 2 종이 바닥판입니다.
 
 #### MFD 홀더
 
+**Thrustmaster(TM) MFD** 를 인클로저에 고정하는 브래킷입니다.
+MFD 뒤에 **Alibaba 에서 구한 7.6인치 정사각 LCD** 를 붙여 한 덩어리로 만든 뒤 인클로저에 넣습니다.
+`…MFDHolder` 는 **인클로저 아래쪽에 에폭시로 접착**하고,
+`…MFDHolderUpper` 는 **인클로저와 MFD 사이에 남는 빈틈을 메우는** 부품입니다.
+
 | LeftMFDHolder | LeftMFDHolderUpper | RightMFDHolder | RightMFDHolderUpper |
 |:----:|:----:|:----:|:----:|
 | <a href="docs/3d%20stl/LeftMFDHolder.stl"><img src="docs/3d%20stl/LeftMFDHolder.png" width="160"></a><br>146.1 × 10.6 × 35.2 mm | <a href="docs/3d%20stl/LeftMFDHolderUpper.stl"><img src="docs/3d%20stl/LeftMFDHolderUpper.png" width="160"></a><br>145.6 × 7.2 × 5.0 mm | <a href="docs/3d%20stl/RightMFDHolder.stl"><img src="docs/3d%20stl/RightMFDHolder.png" width="160"></a><br>146.1 × 11.0 × 35.2 mm | <a href="docs/3d%20stl/RightMFDHolderUpper.stl"><img src="docs/3d%20stl/RightMFDHolderUpper.png" width="160"></a><br>145.6 × 7.2 × 5.0 mm |
