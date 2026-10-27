@@ -128,11 +128,11 @@ PETG 는 JLC3DP 에서 지원하지 않아 PCBWay 등에 별도 주문해야 합
 
 Stand 는 Enclosure 뒷면에 에폭시 접착제로 부착합니다.
 
-| Left Enclosure | Right Enclosure (new) | Left Stand (new) | Right Stand (new) |
+| Center Left Enclosure | Center Right Enclosure (new) | Left Stand (new) | Right Stand (new) |
 |:----:|:----:|:----:|:----:|
-| <img src="docs/3d%20stl/Left%20Enclosure.png" width="160"><br>278.4 × 142.8 × 193.5 mm | <img src="docs/3d%20stl/Right%20Enclosure%20-%20new.png" width="160"><br>278.4 × 144.0 × 179.9 mm | <a href="docs/3d%20stl/Left%20Stand%20-%20new.stl"><img src="docs/3d%20stl/Left%20Stand%20-%20new.png" width="160"></a><br>137.1 × 132.3 × 161.2 mm | <a href="docs/3d%20stl/Right%20Stand-%20new.stl"><img src="docs/3d%20stl/Right%20Stand-%20new.png" width="160"></a><br>137.1 × 129.2 × 162.0 mm |
+| <img src="docs/3d%20stl/Center%20Left%20Enclosure.png" width="160"><br>278.4 × 142.8 × 193.5 mm | <img src="docs/3d%20stl/Center%20Right%20Enclosure%20-%20new.png" width="160"><br>278.4 × 144.0 × 179.9 mm | <a href="docs/3d%20stl/Left%20Stand%20-%20new.stl"><img src="docs/3d%20stl/Left%20Stand%20-%20new.png" width="160"></a><br>137.1 × 132.3 × 161.2 mm | <a href="docs/3d%20stl/Right%20Stand-%20new.stl"><img src="docs/3d%20stl/Right%20Stand-%20new.png" width="160"></a><br>137.1 × 129.2 × 162.0 mm |
 
-> Left/Right Enclosure STL 은 Cults3D 구매 모델 기반이라 재배포하지 않습니다. 형상 참고용 이미지만 싣습니다.
+> Center Left/Right Enclosure STL 은 Cults3D 구매 모델 기반이라 재배포하지 않습니다. 형상 참고용 이미지만 싣습니다.
 
 #### Left Aux 인클로저
 
@@ -415,5 +415,5 @@ REDKITE-F16-Panels/
 코드·문서·설정은 [MIT License](LICENSE).
 
 `docs/3d stl/` 의 자작 STL 은 **CC BY-NC-SA 4.0** 입니다 (MIT 아님).
-구매 모델 기반(Left/Right Enclosure)과 타 프로젝트 패널 STL·거버는 **재배포하지 않습니다** —
+구매 모델 기반(Center Left/Right Enclosure)과 타 프로젝트 패널 STL·거버는 **재배포하지 않습니다** —
 원 출처에서 받으십시오. 상세는 [LICENSE](LICENSE) 의 NOTICE.
