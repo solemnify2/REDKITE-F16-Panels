@@ -116,7 +116,7 @@ Stand는 Enclosure 뒷면에 에폭시 접착제로 부착합니다. new 버전 
 
 ---
 
-## 2. 개발 환경 설정
+## 2. 개발 환경 & 펌웨어 업로드
 
 ### 2-1. Arduino IDE 설치
 
@@ -141,6 +141,17 @@ AUX 51버튼, 콘솔 66버튼이므로 **두 스케치 모두** 128버튼 Extrem
 > **축은 6개가 아니라 23개입니다.** Extreme 모드는 명명 축 6개(X/Y/Z/Xrotate/Yrotate/Zrotate)에 더해 `Joystick.slider(1..17)`을 제공합니다. 단, Windows DirectInput은 최대 8축만 인식하므로, `usb_desc.c`에서 Report Count를 8로 줄이고 나머지는 constant padding 처리가 필요합니다. 상세는 [docs/REF_LEFT_CONSOLE_WIRING.md](docs/REF_LEFT_CONSOLE_WIRING.md)의 「usb_desc.c 수정 사항」 참조.
 
 > Teensyduino 업데이트 시 `usb_desc.h`와 `usb_desc.c`가 덮어씌워집니다. 업데이트 전에 백업하거나, 업데이트 후 다시 수정하세요. 상세는 [docs/teensyduino_upgrade.md](docs/teensyduino_upgrade.md) 참조.
+
+### 2-3. 업로드
+
+Arduino IDE에서 해당 `.ino`를 열고 Upload합니다. `usb_desc.h`의 `PRODUCT_ID`가 보드와 일치하는지 먼저 확인하세요.
+
+| 보드 | 파일 | PRODUCT_ID |
+|---|---|---|
+| Left Aux + MISC | `F16_LEFT_AUX_MISC/F16_LEFT_AUX_MISC.ino` | `0x0489` |
+| Left Console | `F16_LEFT_CONSOLE/F16_LEFT_CONSOLE.ino` | `0x048E` |
+
+라이브러리는 `Wire`, `Keyboard` (모두 built-in)만 필요합니다.
 
 ---
 
@@ -167,20 +178,7 @@ AUX 51버튼, 콘솔 66버튼이므로 **두 스케치 모두** 128버튼 Extrem
 
 ---
 
-## 4. 펌웨어 업로드
-
-Arduino IDE에서 해당 `.ino`를 열고 Upload합니다. `usb_desc.h`의 `PRODUCT_ID`가 보드와 일치하는지 먼저 확인하세요.
-
-| 보드 | 파일 | PRODUCT_ID |
-|---|---|---|
-| Left Aux + MISC | `F16_LEFT_AUX_MISC/F16_LEFT_AUX_MISC.ino` | `0x0489` |
-| Left Console | `F16_LEFT_CONSOLE/F16_LEFT_CONSOLE.ino` | `0x048E` |
-
-라이브러리는 `Wire`, `Keyboard` (모두 built-in)만 필요합니다.
-
----
-
-## 5. 소프트웨어 설정 (Python 브릿지)
+## 4. 소프트웨어 설정 (Python 브릿지)
 
 스위치 입력은 USB Joystick으로 직접 전달되지만, **LED 상태는 시뮬레이터에서 받아와야 합니다.** Python 브릿지가 시뮬레이터 데이터를 읽어 시리얼로 Teensy에 전송합니다.
 
@@ -224,26 +222,26 @@ Teensy는 수신된 sync 바이트로 BMS/DCS 프로토콜을 자동 판별합�
 
 ---
 
-## 6. 테스트 & 캘리브레이션
+## 5. 테스트 & 캘리브레이션
 
-### 6-1. 조이스틱 확인
+### 5-1. 조이스틱 확인
 
 Windows `joy.cpl`은 32버튼까지만 표시합니다. 128버튼을 확인하려면 [VKB DevCfg](https://vkbcontrollers.com/?page_id=4609) 또는 [Joystick Gremlin](https://whitemagic.github.io/JoystickGremlin/)을 사용하세요.
 
-### 6-2. 래더 캘리브레이션
+### 5-2. 래더 캘리브레이션
 
 1. `F16_LEFT_AUX_MISC.ino` 또는 `F16_LEFT_CONSOLE.ino`에서 `ALLOW_DEBUG = true` 설정
 2. 업로드 후 시리얼 모니터(1000000 baud)에서 각 포지션의 ADC 값 확인
 3. `values[]` 배열을 실측값으로 업데이트
 4. `ALLOW_DEBUG = false`로 복원 후 재업로드
 
-### 6-3. 페달 캘리브레이션
+### 5-3. 페달 캘리브레이션
 
 페달은 자동 캘리브레이션을 지원합니다.
 - **리셋**: 양 페달 최대 압력 + DN LOCK REL 2초간 홀드
 - **브레이크 모드 전환**: Landing Light UP 또는 양 페달 동시 압력
 
-### 6-4. 엔코더 방향 확인
+### 5-4. 엔코더 방향 확인
 
 UHF 엔코더의 CW/CCW가 반대면 `encoders[]`의 `pinA`/`pinB`를 교체하세요.
 
@@ -283,7 +281,7 @@ REDKITE-F16-Panels/
 └── README.md
 ```
 
-## 7. 참조 문서
+## 6. 참조 문서
 
 | 문서 | 내용 |
 |---|---|
