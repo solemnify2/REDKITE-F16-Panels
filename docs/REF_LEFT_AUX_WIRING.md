@@ -147,7 +147,7 @@ LAN pin 8 ── GND ───┴──┴── MCP23017 GND
 | AUX | 풀업 저항 | 4.7kΩ x2 | I2C 풀업 (SDA, SCL -> 3.3V) |
 | AUX | Gate 직렬 저항 | 1kΩ | MOSFET 스위칭 링잉 방지 |
 | AUX | Gate 풀다운 저항 | 10kΩ | 핫플러그 시 MOSFET OFF 유지 |
-| AUX | MOSFET | IRLML6344 (SOT-23) | N-ch logic-level, Vgs(th) ~1V |
+| AUX | MOSFET | IRLML6244 (SOT-23) | N-ch logic-level, Vgs(th) ~1V |
 | MISC | 직렬 저항 | 100Ω x2 | SDA/SCL 돌입전류 제한 (래치업 방지) |
 | MISC | 전해캡 | 10uF (10V+) | MCP VDD 핫플러그 스파이크 흡수 |
 | MISC | 세라믹캡 | 100nF | MCP VDD 고주파 노이즈 필터 (핀 근접 배치) |

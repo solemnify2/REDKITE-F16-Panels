@@ -622,7 +622,7 @@ I2C 핫플러그 보호: SDA/SCL 직렬 100Ω, 각 보드 3.3V에 10µF + 100nF.
       │         │       │
       │         │     Drain
       │         │       │
-      │         │    MOSFET (IRLML6344, N-ch)
+      │         │    MOSFET (IRLML6244, N-ch)
       │         │       │
       │         │    Source
       │         │       │
@@ -662,7 +662,7 @@ USB 5V (900mA)
                    GND ─────────────┐
                                     │  ! common ground required (single point)
 12V adapter ─┬─ 12V+ ─> backlight strips (all panels, daisy-chain)
-            └─ GND ──┴─ LED-RTN ─> MOSFET(IRLML6344) ─> GND
+            └─ GND ──┴─ LED-RTN ─> MOSFET(IRLML6244) ─> GND
                                       Gate <- 1kΩ <- pin 13
                                              10kΩ pull-down -> GND
 ```
