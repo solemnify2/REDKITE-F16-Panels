@@ -102,7 +102,7 @@ Top · Diffuser 는 동봉된 **아크릴 재단용 DXF** 로 바로 발주할 �
 백라이트 플레이트는 자작 모델이라 처음부터 3D 프린트 전용입니다.
 
 도색면을 각인으로 걷어낸 부분만 빛이 통과해 글자가 백라이트로 떠오릅니다.
-국내는 아크릴마켓 등 레이저 가공 업체에 DXF 를 보내 주문하며, **DXF R2000 형식**을 요구하는 곳이 많습니다.
+국내는 [아크릴마켓](https://smartstore.naver.com/acrylicmarket) 등 레이저 가공 업체에 DXF 를 보내 주문하며, **DXF R2000 형식**을 요구하는 곳이 많습니다.
 
 > **백라이트 플레이트가 따로 있는 이유** — 원래 설계는 백라이트 LED 도 `LED layer` 에 함께
 > 장착하도록 되어 있습니다. 그런데 LED layer 는 Top 과 너무 가까워, 고르게 밝히려면 LED 가
@@ -192,7 +192,7 @@ PLA 나 레진 출력으로 충분합니다 — MJF 등 고급 공정은 필요 
 | 유형 | 업체 | 내용 | 제품 (USD) | 배송 (USD) |
 |------|------|------|----:|----:|
 | 패널 | [PC Flights](https://pcflights.com) | MISC / Gear / CMDS 패널 3종 | $133 | $31 |
-| 아크릴 재단 · 도색 | 아크릴마켓 등 국내 레이저 가공 업체 | Greenisland DXF 패널 11종, 패널당 약 ₩10,000 | ~$80 | - |
+| 아크릴 재단 · 도색 | [아크릴마켓](https://smartstore.naver.com/acrylicmarket) 등 | Greenisland DXF 패널 11종, 패널당 약 ₩10,000 | ~$80 | - |
 | 3D 프린트 | [JLC3DP](https://jlc3dp.com) / [PCBWay](https://www.pcbway.com) 등 | 구조물 · 플레이트 34종 (아래 수량표) | **견적 참조** | - |
 | MCU | [PJRC](https://www.pjrc.com) | Teensy 4.1 ×2 | ~$70 | - |
 | 전자부품 | [AliExpress](https://www.aliexpress.com) | MCP23017, 스위치, LED, 저항 등 | ~$200 | - |
