@@ -108,7 +108,7 @@ SOF-based via `USB1_FRINDEX`. No frame change for 50ms → suspended. All LEDs a
 
 ### UHF 7-Segment Display (MAX7219)
 
-8 × 0.36" common-cathode digits on the UHF panel — 6 for frequency (decimal point on DIG2) and 2 for the preset channel. Board: `f-16-cockpit-uhf-radio-panel/display/pcb`, driven through a 74AHCT125 level shifter from 5 V.
+8 × 0.36" common-cathode digits on the UHF panel — 6 for frequency (decimal point on DIG2) and 2 for the preset channel. Board: `pcb/uhf_display` (rev B, gerbers and design doc in the repo), driven through a 74AHCT125 level shifter from 5 V.
 
 **It uses no edge pins.** The Teensy 4.1 SD-card interface on the underside carries SPI2, broken out with an SD extension cable:
 
@@ -116,7 +116,7 @@ SOF-based via `USB1_FRINDEX`. No frame change for 50ms → suspended. All LEDs a
 |---|---|---|
 | 43 | MOSI2 | DIN |
 | 45 | SCK2 | CLK |
-| 44 | CS2 | CS (toggled in software) |
+| 46 | — | CS (SD DAT3, toggled in software) |
 
 The display is always built in — there is no compile-time switch. `displayFrequency()` falls back to dashes outside 100000–999999 kHz, and the panel shows dashes whenever the bridge is offline (`resetProtocol()`), blanking only on USB suspend. Writes are cached per digit, so a steady display costs no SPI traffic.
 
