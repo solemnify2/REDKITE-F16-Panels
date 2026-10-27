@@ -1,3 +1,4 @@
 .claude/
 *.bak
 *.stl
+!docs/3d stl/*.stl

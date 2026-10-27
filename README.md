@@ -63,10 +63,10 @@ DX 59~61은 ENG CONT·EPU 커버 자동화용으로 **DCS에서만** 사용됩�
 
 ### 1-1. 패널
 
-콕핏 빌더 전문 업체에서 구매하거나 3D 프린터로 직접 출력할 수 있습니다.
+콕핏 빌더 전문 업체에서 구매하거나, 3D 프린터로 출력하거나, 아크릴 레이저 커팅으로 제작할 수 있습니다.
 
 **구매처:**
-- [PC Flights](https://pcflights.com/flight-simulator-cockpit-panels/f-16c-viper-home-cockpit-panels/) — F-16C 패널 전문 **(본 프로젝트에서 사용)**
+- [PC Flights](https://pcflights.com/flight-simulator-cockpit-panels/f-16c-viper-home-cockpit-panels/) — F-16C 패널 전문 **(본 프로젝트: MISC · Gear · CMDS)**
 - [HispaPanel](https://hispapanels.com/tienda/en/20-f-16-fighting-falcon) — 레이저 커팅/각인 패널 키트
 - [TEK Creations](https://tekcreations.space/shop/) — LED 백라이트 패널, DCS-BIOS 레디
 
@@ -75,24 +75,106 @@ DX 59~61은 ENG CONT·EPU 커버 자동화용으로 **DCS에서만** 사용됩�
 | [![MISC](https://pcflights.com/image/cache/catalog/panels/f-16c_viper_misc_panel-600x400.jpg)](https://pcflights.com/f-16c-viper-miscellaneous-misc-panel-flight-sim-part/) | [![Gear](https://pcflights.com/image/cache/catalog/panels/f-16c_viper_landing_gear_panel-600x400.jpg)](https://pcflights.com/f-16c-viper-landing-gear-panel-flight-simulator-module/) | [![CMDS](https://pcflights.com/image/cache/catalog/panels/f-16c_viper_cmds_control_panel-600x400.jpg)](https://pcflights.com/f-16c-viper-cmds-control-panel-module/) |
 
 **3D 프린트 모델:**
-- [Greenisland](https://cults3d.com/en/users/Greenisland/3d-models) — F-16 콕핏 거의 전체 파트
+- [Greenisland](https://cults3d.com/en/users/Greenisland/3d-models) — F-16 콕핏 거의 전체 파트.
+  STL 과 함께 **아크릴 재단용 DXF (`Lasercutting template`)** 를 동봉해서 배포합니다
+  **(본 프로젝트: 위 3종을 뺀 나머지 전 패널)**
 - [Legarsdusofa](https://cults3d.com/en/design-collections/Legarsdusofa/f-16-cockpit-simulator) — F-16 콕핏 거의 전체 파트
 - [The_Viper_Project](https://cults3d.com/en/users/The_Viper_Project/3d-models) — 버튼 노브, 스위치 캡 등 무료
 
-### 1-2. 인클로저 & 스탠드
+**패널 제작 (아크릴 재단 + 3D 프린트):**
 
-`docs/3d stl/` 폴더에 STL 파일이 있습니다. PETG 권장 (JLC3DP는 PETG 미지원, PCBWay 별도 주문).
-Stand는 Enclosure 뒷면에 에폭시 접착제로 부착합니다. new 버전 권장.
+본 프로젝트에서는 **MISC · Gear · CMDS 를 뺀 나머지 패널 전부**를 Greenisland 모델로 직접 만들었습니다.
+세 패널만 PC Flights 구매품입니다.
 
-| Left Stand | Left Stand (new) | Right Stand | Right Stand (new) |
+Greenisland 패널은 **3 레이어** 구조이고, 여기에 백라이트 플레이트가 더해집니다.
+제작에는 **아크릴 재단 2종 + 3D 프린트 2종**이 필요합니다.
+
+| 레이어 | 재료 | 제작 방법 | 역할 |
+|--------|------|-----------|------|
+| Top | 아크릴 2~3 mm | **아크릴 재단** → 도색 → 문자 · 눈금 각인 | 전면 |
+| Diffuser | 투명 아크릴 2~3 mm | **아크릴 재단** | 빛 확산 |
+| LED layer | 투명 PLA | **3D 프린트** | 스위치가 체결되는 층 |
+| 백라이트 플레이트 | PLA · 레진 | **3D 프린트** | 패널 뒤 몇 cm — 본 프로젝트에서 추가 ([1-2](#1-2-3d-프린트-구조물)) |
+
+Top · Diffuser 는 동봉된 **아크릴 재단용 DXF** 로 바로 발주할 수 있습니다
+(패널에 따라 컷 도면과 각인 도면이 따로 들어 있습니다).
+**LED layer 는 DXF 가 없어** 아크릴 재단이 불가능하므로 투명 PLA 로 출력했습니다.
+백라이트 플레이트는 자작 모델이라 처음부터 3D 프린트 전용입니다.
+
+도색면을 각인으로 걷어낸 부분만 빛이 통과해 글자가 백라이트로 떠오릅니다.
+국내는 아크릴마켓 등 레이저 가공 업체에 DXF 를 보내 주문하며, **DXF R2000 형식**을 요구하는 곳이 많습니다.
+
+> **백라이트 플레이트가 따로 있는 이유** — 원래 설계는 백라이트 LED 도 `LED layer` 에 함께
+> 장착하도록 되어 있습니다. 그런데 LED layer 는 Top 과 너무 가까워, 고르게 밝히려면 LED 가
+> 아주 많이 필요합니다. 그래서 패널 **뒤쪽 몇 cm 뒤에 별도 플레이트**를 두어 LED 수량을 줄였습니다.
+> 자세한 내용은 [docs/REF_BACKLIGHT.md](docs/REF_BACKLIGHT.md) 참조.
+
+### 1-2. 3D 프린트 구조물
+
+`docs/3d stl/` 폴더에 STL 파일이 있습니다. 썸네일을 클릭하면 STL 을 내려받습니다.
+치수는 바운딩 박스 기준입니다.
+
+**출력 재료**
+
+| 대상 | 재료 |
+|------|------|
+| 인클로저 · 스탠드 · 콘솔 · MFD 홀더 | **PLA** 또는 **PETG** |
+| 패널 `LED layer` (스위치 체결층) | **투명 PLA** |
+| 백라이트 플레이트 | **PLA** 또는 **레진(SLA)** |
+
+PETG 는 JLC3DP 에서 지원하지 않아 PCBWay 등에 별도 주문해야 합니다.
+
+#### 인클로저 & 스탠드
+
+Stand 는 Enclosure 뒷면에 에폭시 접착제로 부착합니다.
+
+| Left Enclosure | Right Enclosure (new) | Left Stand (new) | Right Stand (new) |
 |:----:|:----:|:----:|:----:|
-| <a href="docs/3d%20stl/Left%20Stand.stl"><img src="docs/3d%20stl/Left%20Stand.png" width="150"></a> | <a href="docs/3d%20stl/Left%20Stand%20-%20new.stl"><img src="docs/3d%20stl/Left%20Stand%20-%20new.png" width="150"></a> | <a href="docs/3d%20stl/Right%20Stand.stl"><img src="docs/3d%20stl/Right%20Stand.png" width="150"></a> | <a href="docs/3d%20stl/Right%20Stand-%20new.stl"><img src="docs/3d%20stl/Right%20Stand-%20new.png" width="150"></a> |
+| <img src="docs/3d%20stl/Left%20Enclosure.png" width="160"><br>278.4 × 142.8 × 193.5 mm | <img src="docs/3d%20stl/Right%20Enclosure%20-%20new.png" width="160"><br>278.4 × 144.0 × 179.9 mm | <a href="docs/3d%20stl/Left%20Stand%20-%20new.stl"><img src="docs/3d%20stl/Left%20Stand%20-%20new.png" width="160"></a><br>137.1 × 132.3 × 161.2 mm | <a href="docs/3d%20stl/Right%20Stand-%20new.stl"><img src="docs/3d%20stl/Right%20Stand-%20new.png" width="160"></a><br>137.1 × 129.2 × 162.0 mm |
 
-| Left Enclosure | Right Enclosure (new) | Enclosure OnePiece |
+> Left/Right Enclosure STL 은 Cults3D 구매 모델 기반이라 재배포하지 않습니다. 형상 참고용 이미지만 싣습니다.
+
+#### Left Aux 인클로저
+
+| LeftAuxEnclosure | LeftAuxFrontPanel | LeftAuxBackPanel |
 |:----:|:----:|:----:|
-| <img src="docs/3d%20stl/Left%20Enclosure.png" width="150"> | <img src="docs/3d%20stl/Right%20Enclosure%20-%20new.png" width="150"> | <a href="docs/3d%20stl/Enclosure%20-%20%20OnePiece2.stl"><img src="docs/3d%20stl/Enclosure%20-%20%20OnePiece2.png" width="150"></a> |
+| <a href="docs/3d%20stl/LeftAuxEnclosure.stl"><img src="docs/3d%20stl/LeftAuxEnclosure.png" width="160"></a><br>265.8 × 245.0 × 242.0 mm | <a href="docs/3d%20stl/LeftAuxFrontPanel.stl"><img src="docs/3d%20stl/LeftAuxFrontPanel.png" width="160"></a><br>266.2 × 244.8 × 242.0 mm | <a href="docs/3d%20stl/LeftAuxBackPanel.stl"><img src="docs/3d%20stl/LeftAuxBackPanel.png" width="160"></a><br>265.8 × 12.0 × 242.0 mm |
 
-> Left/Right Enclosure STL은 Cults3D 구매 모델 기반이라 저작권 보호를 위해 재배포하지 않습니다.
+#### Left Console
+
+Upper / Lower 를 맞물려 조립하고, Bottom 2 종이 바닥판입니다.
+
+| LeftConsoleUpper | LeftConsoleLower | LeftConsoleBottomUpper | LeftConsoleBottomLower |
+|:----:|:----:|:----:|:----:|
+| <a href="docs/3d%20stl/LeftConsoleUpper.stl"><img src="docs/3d%20stl/LeftConsoleUpper.png" width="160"></a><br>220.2 × 270.5 × 51.4 mm | <a href="docs/3d%20stl/LeftConsoleLower.stl"><img src="docs/3d%20stl/LeftConsoleLower.png" width="160"></a><br>273.6 × 125.2 × 56.1 mm | <a href="docs/3d%20stl/LeftConsoleBottomUpper.stl"><img src="docs/3d%20stl/LeftConsoleBottomUpper.png" width="160"></a><br>124.2 × 239.0 × 19.0 mm | <a href="docs/3d%20stl/LeftConsoleBottomLower.stl"><img src="docs/3d%20stl/LeftConsoleBottomLower.png" width="160"></a><br>273.6 × 125.2 × 13.0 mm |
+
+#### MFD 홀더
+
+| LeftMFDHolder | LeftMFDHolderUpper | RightMFDHolder | RightMFDHolderUpper |
+|:----:|:----:|:----:|:----:|
+| <a href="docs/3d%20stl/LeftMFDHolder.stl"><img src="docs/3d%20stl/LeftMFDHolder.png" width="160"></a><br>146.1 × 10.6 × 35.2 mm | <a href="docs/3d%20stl/LeftMFDHolderUpper.stl"><img src="docs/3d%20stl/LeftMFDHolderUpper.png" width="160"></a><br>145.6 × 7.2 × 5.0 mm | <a href="docs/3d%20stl/RightMFDHolder.stl"><img src="docs/3d%20stl/RightMFDHolder.png" width="160"></a><br>146.1 × 11.0 × 35.2 mm | <a href="docs/3d%20stl/RightMFDHolderUpper.stl"><img src="docs/3d%20stl/RightMFDHolderUpper.png" width="160"></a><br>145.6 × 7.2 × 5.0 mm |
+
+#### 백라이트 플레이트
+
+패널 **뒤쪽 몇 cm 뒤**에 띄워 배치하는 백라이트 LED 거치판입니다.
+Greenisland 패널의 `LED layer`(스위치가 체결되는 층, 1-1 참조)**와는 다른 부품**으로,
+LED 수량을 줄이려고 본 프로젝트에서 추가한 것입니다. 거리를 띄운 만큼 빛이 퍼져 적은 LED 로도 고르게 밝습니다.
+
+PLA 나 레진 출력으로 충분합니다 — MJF 등 고급 공정은 필요 없고 비용만 올라갑니다.
+
+> 파일명이 `LED Plate …` 이지만 1-1 의 `LED layer` 가 아니라 **백라이트 플레이트**입니다. 자작 모델입니다.
+
+**Left Aux** — 패널별로 한 장씩
+
+| LED Plate - Gear | LED Plate - CMDS | LED Plate - TWA | LED Plate - HMCS |
+|:----:|:----:|:----:|:----:|
+| <a href="docs/3d%20stl/LED%20Plate%20-%20Gear.stl"><img src="docs/3d%20stl/LED%20Plate%20-%20Gear.png" width="160"></a><br>190.1 × 140.4 × 112.1 mm | <a href="docs/3d%20stl/LED%20Plate%20-%20CMDS.stl"><img src="docs/3d%20stl/LED%20Plate%20-%20CMDS.png" width="160"></a><br>144.2 × 81.8 × 81.8 mm | <a href="docs/3d%20stl/LED%20Plate%20-%20TWA.stl"><img src="docs/3d%20stl/LED%20Plate%20-%20TWA.png" width="160"></a><br>47.9 × 68.5 × 68.5 mm | <a href="docs/3d%20stl/LED%20Plate%20-%20HMCS.stl"><img src="docs/3d%20stl/LED%20Plate%20-%20HMCS.png" width="160"></a><br>144.2 × 40.8 × 40.8 mm |
+
+**Left Console** — `LED Plate1` ~ `4`
+
+| LED Plate1 | LED Plate2 | LED Plate3 | LED Plate4 |
+|:----:|:----:|:----:|:----:|
+| <a href="docs/3d%20stl/LED%20Plate1.stl"><img src="docs/3d%20stl/LED%20Plate1.png" width="160"></a><br>92.8 × 265.2 × 10.7 mm | <a href="docs/3d%20stl/LED%20Plate2.stl"><img src="docs/3d%20stl/LED%20Plate2.png" width="160"></a><br>117.6 × 230.1 × 13.1 mm | <a href="docs/3d%20stl/LED%20Plate3.stl"><img src="docs/3d%20stl/LED%20Plate3.png" width="160"></a><br>124.0 × 86.5 × 13.8 mm | <a href="docs/3d%20stl/LED%20Plate4.stl"><img src="docs/3d%20stl/LED%20Plate4.png" width="160"></a><br>136.5 × 119.0 × 14.6 mm |
 
 ### 1-3. 부품 목록
 
@@ -104,13 +186,33 @@ Stand는 Enclosure 뒷면에 에폭시 접착제로 부착합니다. new 버전 
 | 유형 | 업체 | 내용 | 제품 (USD) | 배송 (USD) |
 |------|------|------|----:|----:|
 | 패널 | [PC Flights](https://pcflights.com) | MISC / Gear / CMDS 패널 3종 | $133 | $31 |
-| 3D 프린트 (SLA/MJF) | [JLC3DP](https://jlc3dp.com) | 스위치 캡, 노브, LED 레이어 등 | $64 | $20 |
-| 3D 프린트 (PETG) | [PCBWay](https://www.pcbway.com) | Enclosure, Stand 등 구조물 | $119 | ~$50 |
+| 아크릴 재단 · 도색 | [아크릴마켓](https://www.acrylicmarket.com) 등 | Greenisland DXF 패널 11종, 패널당 약 ₩10,000 | ~$80 | - |
+| 3D 프린트 | [JLC3DP](https://jlc3dp.com) / [PCBWay](https://www.pcbway.com) 등 | 구조물 · 플레이트 34종 (아래 수량표) | **견적 참조** | - |
 | MCU | [PJRC](https://www.pjrc.com) | Teensy 4.1 ×2 | ~$70 | - |
 | 전자부품 | [AliExpress](https://www.aliexpress.com) | MCP23017, 스위치, LED, 저항 등 | ~$200 | - |
 | 커스텀 PCB | JLCPCB / PCBWay 등 | TWA · ECM · UHF 디스플레이 3종, 장당 약 $5 | ~$15 | - |
 | 노동력 | - | 약 1년간의 설계, 조립, 프로그래밍 | priceless | - |
-| | | **합계** | **~$601** | **~$101** |
+| | | **합계** | **~$498** | **~$31** |
+
+**3D 프린트 수량**
+
+| 구분 | 수량 | 재료 | STL 위치 |
+|------|----:|------|----------|
+| 패널 `LED layer` | 11 | 투명 PLA | Greenisland 모델 동봉 |
+| 백라이트 플레이트 | 8 | PLA · 레진 | `docs/3d stl/` |
+| Left Aux 인클로저 | 3 | PLA · PETG | `docs/3d stl/` |
+| Left Console | 4 | PLA · PETG | `docs/3d stl/` |
+| MFD 홀더 | 4 | PLA · PETG | `docs/3d stl/` |
+| 스탠드 | 2 | PLA · PETG | `docs/3d stl/` |
+| 인클로저 | 2 | PLA · PETG | Cults3D 구매 모델 |
+| **합계** | **34** | | |
+
+스위치 캡 · 노브는 별도이며, 수량은 스위치 구성에 따라 달라집니다 (본 프로젝트 기준 64개).
+
+> **3D 프린트 비용은 금액으로 적지 않았습니다.** 업체 발주분과 직접 출력분이 섞여 있고,
+> 업체 · 재료 · 시기에 따라 편차가 큽니다. **STL 을 [JLC3DP](https://jlc3dp.com) ·
+> [PCBWay](https://www.pcbway.com) 등에 업로드하면 재료별 실시간 견적**이 바로 나오니
+> 그쪽을 참고하십시오. 그만큼 실제 지출은 위 합계보다 큽니다.
 
 > 결론: 시간과 노동력을 고려하면 TEK Creations 등 완제품을 사는 게 현명합니다. 직접 만드는 건 취미입니다.
 
