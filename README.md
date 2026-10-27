@@ -192,7 +192,7 @@ PLA 나 레진 출력으로 충분합니다 — MJF 등 고급 공정은 필요 
 | 유형 | 업체 | 내용 | 제품 (USD) | 배송 (USD) |
 |------|------|------|----:|----:|
 | 패널 | [PC Flights](https://pcflights.com) | MISC / Gear / CMDS 패널 3종 | $133 | $31 |
-| 아크릴 재단 · 도색 | [아크릴마켓](https://www.acrylicmarket.com) 등 | Greenisland DXF 패널 11종, 패널당 약 ₩10,000 | ~$80 | - |
+| 아크릴 재단 · 도색 | 아크릴마켓 등 국내 레이저 가공 업체 | Greenisland DXF 패널 11종, 패널당 약 ₩10,000 | ~$80 | - |
 | 3D 프린트 | [JLC3DP](https://jlc3dp.com) / [PCBWay](https://www.pcbway.com) 등 | 구조물 · 플레이트 34종 (아래 수량표) | **견적 참조** | - |
 | MCU | [PJRC](https://www.pjrc.com) | Teensy 4.1 ×2 | ~$70 | - |
 | 전자부품 | [AliExpress](https://www.aliexpress.com) | MCP23017, 스위치, LED, 저항 등 | ~$200 | - |
