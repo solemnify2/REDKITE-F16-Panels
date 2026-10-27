@@ -178,7 +178,7 @@ Arduino IDE에서 해당 `.ino`를 열고 Upload합니다. `usb_desc.h`의 `PROD
 
 ---
 
-## 4. 소프트웨어 설정 (Python 브릿지)
+## 4. BMS · DCS 연동
 
 스위치 입력은 USB Joystick으로 직접 전달되지만, **LED 상태는 시뮬레이터에서 받아와야 합니다.** Python 브릿지가 시뮬레이터 데이터를 읽어 시리얼로 Teensy에 전송합니다.
 
