@@ -15,7 +15,8 @@
 |---|---:|---:|---:|
 | 스위치 신호 (`switches[]` 항목) | 26 | 33 | 59 |
 | 저항 래더 | 3 (TWA, CMDS MODE·PRGM) | 1 (ECM) | 4 |
-| 포텐셔미터 | 1 (HMCS) + 페달 2 | 10 (AUDIO 1×6, AUDIO 2×3, UHF VOL) | 13 |
+| 포텐셔미터 | 1 (HMCS) | 10 (AUDIO 1×6, AUDIO 2×3, UHF VOL) | 11 |
+| 홀 센서 (페달 내장) | 2 (러더 페달) | — | 2 |
 | 로터리 엔코더 EC11 | — | 6 (UHF) | 6 |
 | MCP23017 | 1 (`0x20`) | 3 (`0x20`·`0x21`·`0x22`) | 4 |
 | 74HC595 | — | 4 (ECM 32 LED) | 4 |
@@ -64,7 +65,7 @@
 | 리밋 스위치 (12x6mm) | 10 | 실사용 3 — ALT GEAR Handle, Landing Gear UP·DN |
 | 로터리 스위치 SR26 1P12T | 4 | 로터리 실사용 6 — CMDS MODE·PRGM 7P, UHF FUNC 4P, UHF MODE 3P, COMM1·2 3P |
 | 로터리 스위치 RS16 1P6T / 1P5T | 2 / 2 | 위와 합산 |
-| 포텐셔미터 10kΩ | 15 | 실사용 11 (콘솔 10 + HMCS 1). 페달 2개는 페달 유닛 내장 |
+| 포텐셔미터 10kΩ | 15 | 실사용 11 (콘솔 10 + HMCS 1). **페달은 포텐셔미터가 아니라 홀 센서** |
 | 코리 스위치 | 1 | 실사용 1 (MISC ADV MODE). [HispaPanel](https://hispapanels.com/tienda/en/buttons-encoders/71-korry-type-tactile-switch-momentary.html) |
 | 키보드 스위치 (Brown) | 2 | |
 
@@ -171,6 +172,9 @@ AUX 12스트링(163mA) / MISC 3스트링(41mA) 으로 나뉩니다.
 | RJ45 패널 마운트 커넥터 / 키스톤 잭 | 1 | **AUX 통에 장착** — MISC 패널 연결(`I1`, I2C)용. 다른 LAN 구간은 패널 커넥터를 쓰지 않습니다 |
 | Cat5e LAN 케이블 | 1 | **AUX ↔ MISC 패널(`I1`) 전용.** 그 외 구간은 전부 듀폰 케이블 |
 | microSD 확장 케이블 (15핀 FPC) | 2 | 하단 SD 패드 인출 — AUX CMDS 램프, 콘솔 UHF 디스플레이 |
+| 전동 킥보드용 스로틀 페달 | 2 | AliExpress. **홀 센서 내장** (3.3V · GND · Signal). 러더 페달 자작용 — [REF_PEDAL.md](REF_PEDAL.md) |
+| PVC 전선 몰딩 | 2 | 페달 프레임 겸 배선 통로. 검정 권장 |
+| 알루미늄 페달 커버 | 2 | AliExpress. 외관용 |
 | Thrustmaster MFD | 2 | 좌·우 1대씩. LCD 와 겹쳐 MFD 홀더가 잡아 줌 (홀더만 인클로저 아래쪽에 에폭시 접착) |
 | 7.6인치 정사각 LCD (BOE, 800×800 IPS, `GX076-30MB-A1`) | 2 | Alibaba. MFD 뒤에 **겹쳐** 놓고 홀더로 함께 고정 — 접착하지 않아 분리 가능. 상세는 [REF_MFD_LCD.md](REF_MFD_LCD.md) |
 
