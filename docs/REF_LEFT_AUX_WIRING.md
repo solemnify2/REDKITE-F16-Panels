@@ -111,9 +111,9 @@ GND ─────────────────────────�
 
 MOSFET₁ — AUX 로컬 백라이트 (console channel, pin 13)
                         ┌────────┐
-           GND ───┬─────┤ S 1    │
+Teensy 13 ── 1kΩ ─┬─────┤ G 1    │
                10kΩ     │    D 3 ├──── LED-RTN
-Teensy 13 ── 1kΩ ─┴─────┤ G 2    │
+           GND ───┴─────┤ S 2    │
                         └────────┘
 
   12V ── AUX LED strips (Gear·CMDS·TWA·HMCS) ── LED-RTN ── D(3)
@@ -121,9 +121,9 @@ Teensy 13 ── 1kΩ ─┴─────┤ G 2    │
 
 MOSFET₂ — MISC 백라이트 via LAN (instr panel channel, pin 12)
                         ┌────────┐
-           GND ───┬─────┤ S 1    │
+Teensy 12 ── 1kΩ ─┬─────┤ G 1    │
                10kΩ     │    D 3 ├──── LED-RTN (LAN 5)
-Teensy 12 ── 1kΩ ─┴─────┤ G 2    │
+           GND ───┴─────┤ S 2    │
                         └────────┘
 
   12V ── LAN 4 ── MISC LED strips ── LAN 5 (LED-RTN) ── D(3)

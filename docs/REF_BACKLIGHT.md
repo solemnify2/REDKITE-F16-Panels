@@ -13,9 +13,9 @@
 ```
 IRLML6244 SOT-23, N-ch low-side switching
                         ┌────────┐
-           GND ───┬─────┤ S 1    │
+   Teensy ── 1kΩ ─┬─────┤ G 1    │
                10kΩ     │    D 3 ├──── LED-RTN
-   Teensy ── 1kΩ ─┴─────┤ G 2    │
+           GND ───┴─────┤ S 2    │
                         └────────┘
   12V ── LED strips (3 LED + 220Ω 직렬) ── LED-RTN ── D(3)
   12V adapter GND ═══ Teensy GND (단일점!)

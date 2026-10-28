@@ -614,9 +614,9 @@ I2C 핫플러그 보호: SDA/SCL 직렬 100Ω, 각 보드 3.3V에 10µF + 100nF.
       │
       │   MOSFET (IRLML6244 SOT-23, N-ch low-side switching)
       │                           ┌────────┐
-      │              GND ───┬─────┤ S 1    │
+      │   Teensy 13 ── 1kΩ ─┬─────┤ G 1    │
       │                  10kΩ     │    D 3 ├──── LED-RTN (cathode common)
-      │   Teensy 13 ── 1kΩ ─┴─────┤ G 2    │
+      │              GND ───┴─────┤ S 2    │
       │                           └────────┘
       │
       └─ GND ═══ ! single-point (star) tie to Teensy GND — REQUIRED
