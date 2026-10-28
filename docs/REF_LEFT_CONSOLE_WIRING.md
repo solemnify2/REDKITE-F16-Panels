@@ -428,8 +428,9 @@ C14 는 SD 확장 케이블 4선(DIN · CLK · CS · GND) + VIN 1선 = **5선**�
 | 47–58 | UHF | 엔코더 6개 × (CW / CCW) |
 | 59 | ENGINE | ENG CONT COVER (DCS 커버 자동화) |
 | 60–61 | EPU | EPU OFF COVER / EPU ON COVER (DCS 커버 자동화) |
-| 62–63 | AUDIO 1 | COMM1 PWR OFF / ON (pot threshold) |
-| 64–65 | AUDIO 1 | COMM2 PWR OFF / ON (pot threshold) |
+| 62 | AUDIO 1 | COMM1 PWR (pot threshold, 지속형) |
+| 63 | AUDIO 1 | COMM2 PWR (pot threshold, 지속형) |
+| 64–65 | — | 예비 (DX 66 을 밀지 않기 위해 비워 둠) |
 | 66 | UHF | TEST |
 
 > **`SWITCH_LATE_START` (현재 32)** — 이 인덱스부터의 `switches[]` 항목은 DX 번호를
@@ -438,8 +439,10 @@ C14 는 SD 확장 케이블 4선(DIN · CLK · CS · GND) + VIN 1선 = **5선**�
 > 배열 끝에만 붙이십시오.
 >
 > DX 59~61 은 DCS 커버 자동화용으로, DCS에서만 사용됩니다.
-> DX 62~65 는 COMM1/COMM2 볼륨 pot의 전원 스위치입니다.
-> pot ADC < 5 → OFF, ≥ 5 → ON 전환 시 모멘터리 DX 펄스를 발생시킵니다.
+> DX 62~63 은 COMM1/COMM2 볼륨 노브의 전원입니다. 노브를 끝까지 내리면 OFF,
+> 올리면 ON 이며 **눌린 상태가 유지되는 지속형 DX** 입니다(토글 스위치와 동일).
+> pot ADC ≥ 8 → ON, ≤ 3 → OFF, 사이 구간은 직전 상태를 유지합니다(채터링 방지).
+> DX 64~65 는 예비로 비워 두어 UHF TEST 가 DX 66 에 그대로 남습니다.
 
 ---
 

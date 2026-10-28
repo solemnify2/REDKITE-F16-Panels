@@ -739,7 +739,7 @@ static uint32_t  protoDetectStart = 0;
 // ================================================================
 
 #define NUM_COVERS 3                      // ENG CONT, EPU OFF, EPU ON
-#define NUM_COMM_PWR 4                    // COMM1 ON/OFF, COMM2 ON/OFF
+#define NUM_COMM_PWR 4                    // COMM1 PWR, COMM2 PWR + 예비 2 (DX 번호 고정용)
 
 static uint8_t switchBtnStart[NUM_SWITCHES];
 static uint8_t analogBtnStart[NUM_ANALOG_ARRAYS];
@@ -787,7 +787,7 @@ void assignButtons() {
   coverBtnBase = btn;
   btn += NUM_COVERS;
 
-  // COMM1/COMM2 Power ON/OFF (pot threshold)
+  // COMM1/COMM2 Power (pot threshold) — 2개 사용, 2개는 예비
   commPwrBtnBase = btn;
   btn += NUM_COMM_PWR;
 
@@ -867,25 +867,27 @@ void processCovers() {
 
 
 // ================================================================
-//  COMM1/COMM2 Power ON/OFF (pot threshold → DX pulse)
+//  COMM1/COMM2 Power (pot threshold → 지속형 DX)
 // ================================================================
 //
-//  COMM1, COMM2 볼륨 노브에 전원 스위치가 있어,
-//  pot ADC 값이 threshold 미만이면 OFF, 이상이면 ON.
-//  상태 전환 시 모멘터리 DX 펄스를 발생시킵니다.
+//  COMM1, COMM2 볼륨 노브는 끝까지 내린 위치(full CCW)가 전원 OFF 입니다.
+//  pot ADC 값으로 그 위치를 읽어, 다른 2단 스위치들과 똑같이
+//  **눌린 상태가 유지되는 DX 하나**로 내보냅니다 (눌림 = 전원 ON).
+//  DCS 커버 자동화가 커버 DX 하나를 미러링하는 것과 같은 방식입니다.
 //
-//  COMM1 PWR OFF = DX 62
-//  COMM1 PWR ON  = DX 63
-//  COMM2 PWR OFF = DX 64
-//  COMM2 PWR ON  = DX 65
+//  지속형이라 시뮬을 다시 켜거나 기체를 재로드해도 노브 위치가
+//  그대로 다시 전달됩니다. 전환 순간에만 펄스를 보내던 이전 방식은
+//  이미 노브를 올려둔 채 시작하면 신호가 아예 나가지 않았습니다.
+//
+//  DX 62: COMM1 PWR
+//  DX 63: COMM2 PWR
+//  DX 64~65: 예비 — 뒤따라오는 UHF TEST 의 DX 66 을 밀지 않기 위해 비워 둡니다.
 
-#define COMM_PWR_THRESHOLD  5     // ADC threshold (10-bit, 0~1023)
-#define COMM_PWR_PULSE_TICKS 4    // ~40ms pulse @ 100Hz
+#define COMM_PWR_ON_LEVEL   8     // ADC(10-bit) 이 값 이상 → ON
+#define COMM_PWR_OFF_LEVEL  3     // 이 값 이하 → OFF (사이 구간은 직전 상태 유지 — 채터링 방지)
 
 struct CommPwrRuntime {
-  bool    prevOn;
-  uint8_t pulseTicks;   // >0: DX pulse active
-  uint8_t btnOffset;    // 0=ON, 1=OFF within this COMM channel
+  bool on;
 };
 static CommPwrRuntime commPwrRt[2];  // [0]=COMM1, [1]=COMM2
 
@@ -897,28 +899,13 @@ void processCommPower() {
     for (int s = 0; s < 4; s++) raw += analogRead(pots[commPotIdx[ch]].pin);
     raw /= 4;
 
-    bool isOn = (raw >= COMM_PWR_THRESHOLD);
     CommPwrRuntime& rt = commPwrRt[ch];
+    bool prev = rt.on;
+    if      (raw >= COMM_PWR_ON_LEVEL)  rt.on = true;
+    else if (raw <= COMM_PWR_OFF_LEVEL) rt.on = false;
+    if (rt.on != prev) lastInputTime = millis();
 
-    // State transition → start pulse
-    if (isOn != rt.prevOn) {
-      rt.prevOn = isOn;
-      rt.btnOffset = isOn ? 1 : 0;  // 0=OFF, 1=ON
-      rt.pulseTicks = COMM_PWR_PULSE_TICKS;
-      lastInputTime = millis();
-    }
-
-    // Emit DX pulse
-    uint8_t offBtn = commPwrBtnBase + ch * 2;       // COMM{ch} PWR OFF
-    uint8_t onBtn  = commPwrBtnBase + ch * 2 + 1;   // COMM{ch} PWR ON
-    if (rt.pulseTicks > 0) {
-      Joystick.button(offBtn, rt.btnOffset == 0 ? 1 : 0);
-      Joystick.button(onBtn,  rt.btnOffset == 1 ? 1 : 0);
-      rt.pulseTicks--;
-    } else {
-      Joystick.button(offBtn, 0);
-      Joystick.button(onBtn, 0);
-    }
+    Joystick.button(commPwrBtnBase + ch, rt.on);
   }
 }
 
@@ -1336,12 +1323,11 @@ void setup() {
   assignButtons();
   memset(prevBtnState, 0, sizeof(prevBtnState));
 
-  // COMM power: read initial pot state to avoid false trigger at startup
+  // COMM power: 노브 초기 위치를 읽어 첫 틱부터 올바른 상태로 시작합니다
   for (int ch = 0; ch < 2; ch++) {
     int raw = 0;
     for (int s = 0; s < 4; s++) raw += analogRead(pots[commPotIdx[ch]].pin);
-    commPwrRt[ch].prevOn = (raw / 4 >= COMM_PWR_THRESHOLD);
-    commPwrRt[ch].pulseTicks = 0;
+    commPwrRt[ch].on = (raw / 4 >= COMM_PWR_ON_LEVEL);
   }
 
   // --- Startup summary ---
