@@ -71,6 +71,10 @@ Teensy 를 거치지 않고 PC 에서 HID feature report 로 직접 보냅니다
 
 `pip install hidapi` 가 안 돼 있으면 이 부분만 건너뛰고 나머지는 그대로 동작합니다.
 
+> **SimGears ICP 는 연동하지 못했습니다.** 함께 쓰고 있지만 Cougar MFD 와 달리
+> HID feature report 로 밝기를 받지 않습니다. 브릿지에서 건드릴 방법이 없어 포기했고,
+> ICP 백라이트는 장치 자체 조절에 맡깁니다.
+
 ## LED 배치
 
 ### 패널 구조

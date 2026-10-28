@@ -8,6 +8,7 @@ Teensy 4.1 기반 USB 디바이스 **2대**가 핵심이고, 각각 별도의 �
 | **Left Aux + MISC** | `F16_LEFT_AUX_MISC/` | `0x0489` | DX 51 · 축 4 | Gear, CMDS, TWA, Alt Gear, MISC, HMCS, Pedal |
 | **Left Console** | `F16_LEFT_CONSOLE/` | `0x048E` | DX 66 · 축 10 | ECM, ELEC, EPU, AVTR, UHF, ENGINE START, MPO, AUDIO 1/2 |
 | **MFD + LCD** | — | — | — | Thrustmaster MFD ×2 (USB) · 7.6인치 정사각 LCD ×2 (HDMI). **Teensy 와 연결되지 않습니다** — 다만 MFD 백라이트는 이 프로젝트의 브릿지가 인게임 조명에 맞춰 줍니다 |
+| **ICP** | — | — | — | SimGears ICP (USB). 역시 Teensy 와 무관하며, **백라이트 연동은 포기**했습니다 |
 
 MFD 와 LCD 는 Teensy 에 물리지 않습니다. MFD 는 Thrustmaster 자체 USB 장치이고,
 LCD 는 HDMI 로 PC 에 붙는 모니터입니다.
@@ -16,6 +17,9 @@ LCD 는 HDMI 로 PC 에 붙는 모니터입니다.
 (VID `0x044F`, PID `0xB351` · `0xB352`)를 HID 로 열어, 인게임 조명값에 맞춘 밝기를
 feature report 로 보냅니다. 패널 백라이트와 같이 어두워지므로 쓰는 사람 입장에서는
 한 콕핏으로 묶입니다. `hidapi` 가 없으면 이 부분만 건너뜁니다.
+
+**SimGears ICP 는 포기했습니다.** 같이 쓰고 있지만 MFD 와 달리 HID feature report 로
+밝기를 받지 않아, 브릿지에서 손댈 방법이 없었습니다. 백라이트는 자체 조절만 가능합니다.
 
 장착은 [REF_MFD_LCD.md](REF_MFD_LCD.md) 참조.
 
