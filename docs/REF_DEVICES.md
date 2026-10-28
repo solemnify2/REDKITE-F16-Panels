@@ -53,4 +53,6 @@ DX 번호와 BMS/DCS 주소 매핑은 [REF_PROTOCOL.md](REF_PROTOCOL.md) 를 보
 | MPO | Switch | Manual Pitch Override |
 | AUDIO 1/2 | Analog, Switch (MCP23017) | 볼륨 6개 + COMM 1/2 모드 로터리 2개 |
 
-DX 59~61은 ENG CONT·EPU 커버 자동화용으로 **DCS에서만** 사용됩니다. DX 62~63은 **BMS 의 COMM1/COMM2 전원 자동화**로, 볼륨 노브를 끝까지 내리면 OFF, 올리면 ON 인 지속형 DX 입니다(pot ADC 임계값 감지). 64는 UHF TEST 입니다.
+DX 59~61은 ENG CONT·EPU 커버 자동화, DX 62~63은 COMM1/COMM2 전원 자동화(볼륨 노브를 끝까지 내리면 OFF, 올리면 ON 인 지속형 DX, pot ADC 임계값 감지), 64는 UHF TEST 입니다.
+
+> **펌웨어는 심을 구분하지 않습니다.** 프로토콜 판별은 LED·백라이트 동기화에만 쓰이고, 모든 DX 는 심과 무관하게 똑같이 나갑니다. 위 두 자동화는 각 심의 특이한 점을 고려한 것일 뿐입니다 — 커버를 따로 여닫는 개념은 DCS 에, 볼륨 노브 끝에 전원을 둔 것은 BMS 에 있습니다. 바인딩할 대상이 없는 심에서는 해당 DX 를 비워 두면 그만입니다.

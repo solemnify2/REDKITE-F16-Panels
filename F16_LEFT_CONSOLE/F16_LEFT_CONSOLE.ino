@@ -744,7 +744,7 @@ static uint32_t  protoDetectStart = 0;
 static uint8_t switchBtnStart[NUM_SWITCHES];
 static uint8_t analogBtnStart[NUM_ANALOG_ARRAYS];
 static uint8_t encoderBtnStart[NUM_ENCODERS];
-static uint8_t coverBtnBase;             // DCS 커버 자동화 DX 시작 번호
+static uint8_t coverBtnBase;             // 커버 자동화 DX 시작 번호
 static uint8_t commPwrBtnBase;           // COMM 전원 DX 시작 번호
 static int     totalButtons = 0;
 
@@ -783,7 +783,7 @@ void assignButtons() {
     btn += 2;                       // CW, CCW
   }
 
-  // DCS 커버 자동화 (ENG CONT cover, EPU OFF cover, EPU ON cover)
+  // 커버 자동화 (ENG CONT cover, EPU OFF cover, EPU ON cover)
   coverBtnBase = btn;
   btn += NUM_COVERS;
 
@@ -804,13 +804,16 @@ void assignButtons() {
 
 
 // ================================================================
-//  DCS Cover Automation
+//  Cover Automation
 // ================================================================
 //
 //  ENG CONT, EPU 스위치 커버를 자동 제어합니다.
 //  ON 시: 커버 먼저 열림 → COVER_DELAY_TICKS 후 스위치 ON
 //  OFF 시: 스위치 먼저 OFF → COVER_DELAY_TICKS 후 커버 닫힘
-//  DCS에서 해당 DX를 커버 열기/닫기에 바인딩하세요.
+//
+//  이 DX 는 심과 무관하게 항상 나갑니다. 다만 커버를 따로 여닫는
+//  개념이 있는 것은 DCS 쪽이라, 실제로 바인딩할 대상은 DCS 에만
+//  있습니다. BMS 는 스위치를 올리면 커버가 알아서 열려 비워 두면 됩니다.
 //
 //  DX 59: ENG CONT COVER
 //  DX 60: EPU OFF COVER
@@ -873,11 +876,14 @@ void processCovers() {
 //  COMM1, COMM2 볼륨 노브는 끝까지 내린 위치(full CCW)가 전원 OFF 입니다.
 //  pot ADC 값으로 그 위치를 읽어, 다른 2단 스위치들과 똑같이
 //  **눌린 상태가 유지되는 DX 하나**로 내보냅니다 (눌림 = 전원 ON).
-//  DCS 커버 자동화가 커버 DX 하나를 미러링하는 것과 같은 방식입니다.
+//  커버 자동화가 커버 DX 하나를 미러링하는 것과 같은 방식입니다.
 //
 //  지속형이라 시뮬을 다시 켜거나 기체를 재로드해도 노브 위치가
 //  그대로 다시 전달됩니다. 전환 순간에만 펄스를 보내던 이전 방식은
 //  이미 노브를 올려둔 채 시작하면 신호가 아예 나가지 않았습니다.
+//
+//  이 DX 역시 심과 무관하게 항상 나갑니다. 볼륨 노브 끝에 전원을 둔
+//  것은 BMS 의 모델링을 따른 것입니다.
 //
 //  DX 62: COMM1 PWR
 //  DX 63: COMM2 PWR

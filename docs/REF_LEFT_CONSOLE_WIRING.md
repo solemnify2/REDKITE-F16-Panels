@@ -426,8 +426,8 @@ C14 는 SD 확장 케이블 4선(DIN · CLK · CS · GND) + VIN 1선 = **5선**�
 | 37–38 | AUDIO 2 | HOT MIC / CIPHER |
 | 39–46 | ECM | 저항 래더 — ECM 1~6, FRM, SPL |
 | 47–58 | UHF | 엔코더 6개 × (CW / CCW) |
-| 59 | ENGINE | ENG CONT COVER (DCS 커버 자동화) |
-| 60–61 | EPU | EPU OFF COVER / EPU ON COVER (DCS 커버 자동화) |
+| 59 | ENGINE | ENG CONT COVER (커버 자동화) |
+| 60–61 | EPU | EPU OFF COVER / EPU ON COVER (커버 자동화) |
 | 62 | AUDIO 1 | COMM1 PWR (pot threshold, 지속형) |
 | 63 | AUDIO 1 | COMM2 PWR (pot threshold, 지속형) |
 | 64 | UHF | TEST |
@@ -437,10 +437,16 @@ C14 는 SD 확장 케이블 4선(DIN · CLK · CS · GND) + VIN 1선 = **5선**�
 > BMS 재바인딩이 필요 없습니다. 스위치를 추가할 때는 이 값을 건드리지 말고
 > 배열 끝에만 붙이십시오.
 >
-> DX 59~61 은 DCS 커버 자동화용으로, DCS에서만 사용됩니다.
-> DX 62~63 은 COMM1/COMM2 볼륨 노브의 전원입니다. 노브를 끝까지 내리면 OFF,
-> 올리면 ON 이며 **눌린 상태가 유지되는 지속형 DX** 입니다(토글 스위치와 동일).
-> pot ADC ≥ 8 → ON, ≤ 3 → OFF, 사이 구간은 직전 상태를 유지합니다(채터링 방지).
+> DX 59~61 은 ENG CONT·EPU 커버 자동화, DX 62~63 은 COMM1/COMM2 볼륨 노브의
+> 전원입니다. 노브를 끝까지 내리면 OFF, 올리면 ON 이며 **눌린 상태가 유지되는
+> 지속형 DX** 입니다(토글 스위치와 동일). pot ADC ≥ 8 → ON, ≤ 3 → OFF, 사이
+> 구간은 직전 상태를 유지합니다(채터링 방지).
+>
+> **펌웨어는 심을 구분하지 않습니다.** 프로토콜 판별(BMS-BIOS / DCS-BIOS)은
+> LED·백라이트 동기화에만 쓰이고, 위 DX 는 어느 심이든 똑같이 나갑니다.
+> 두 자동화는 각 심의 특이한 점을 고려한 것일 뿐입니다 — 커버를 따로
+> 여닫는 것은 DCS, 볼륨 노브 끝에 전원이 달린 것은 BMS 의 모델링입니다.
+> 바인딩할 대상이 없는 심에서는 해당 DX 를 비워 두면 그만입니다.
 
 ---
 
