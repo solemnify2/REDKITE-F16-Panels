@@ -71,6 +71,10 @@ DX 59~61은 ENG CONT·EPU 커버 자동화용으로 **DCS에서만** 사용됩�
 Greenisland 패널은 **Top(아크릴) · Diffuser(아크릴) · LED layer(투명 PLA)** 3 레이어에
 백라이트 플레이트가 더해지는 구조입니다 — 패널 한 장에 **아크릴 재단 2종 + 3D 프린트 2종**.
 
+| 구매 — MISC | 구매 — Gear | 구매 — CMDS |
+|:----:|:----:|:----:|
+| [![MISC](https://pcflights.com/image/cache/catalog/panels/f-16c_viper_misc_panel-600x400.jpg)](https://pcflights.com/f-16c-viper-miscellaneous-misc-panel-flight-sim-part/) | [![Gear](https://pcflights.com/image/cache/catalog/panels/f-16c_viper_landing_gear_panel-600x400.jpg)](https://pcflights.com/f-16c-viper-landing-gear-panel-flight-simulator-module/) | [![CMDS](https://pcflights.com/image/cache/catalog/panels/f-16c_viper_cmds_control_panel-600x400.jpg)](https://pcflights.com/f-16c-viper-cmds-control-panel-module/) |
+
 구매처 · 3D 모델 출처 · 레이어별 재료와 두께 · 도색과 레이저 각인 방법은
 **[docs/REF_PANEL.md](docs/REF_PANEL.md)** 에 있습니다.
 
@@ -79,15 +83,13 @@ Greenisland 패널은 **Top(아크릴) · Diffuser(아크릴) · LED layer(투�
 `3d stl/` 폴더에 STL 21 개가 있습니다. 인클로저 · 스탠드 · 콘솔 · MFD 홀더는 **PLA 또는 PETG**,
 패널 `LED layer` 는 **투명 PLA**, 백라이트 플레이트는 **PLA 또는 레진** 으로 출력합니다.
 
-| 묶음 | 개수 | 내용 |
-|------|----:|------|
-| 인클로저 & 스탠드 | 2 | 좌우 스탠드. Center Left/Right 인클로저는 구매 모델 가공본이라 STL 을 싣지 않습니다 |
-| Left Aux 인클로저 | 3 | Enclosure · Front · Back |
-| Left Console | 4 | Upper · Lower · Bottom 2 종 |
-| MFD 홀더 | 4 | TM MFD + 7.6" LCD 를 함께 잡는 브래킷 |
-| 백라이트 플레이트 | 8 | Left Aux 4 + Left Console 4 — 자작 모델 |
+| 인클로저 & 스탠드 | Left Aux 인클로저 | Left Console | MFD 홀더 | 백라이트 플레이트 |
+|:----:|:----:|:----:|:----:|:----:|
+| <a href="docs/REF_ENCLOSURE.md"><img src="3d%20stl/Center%20Left%20Enclosure.png" width="150"></a> | <a href="docs/REF_ENCLOSURE.md"><img src="3d%20stl/LeftAuxEnclosure.png" width="150"></a> | <a href="docs/REF_ENCLOSURE.md"><img src="3d%20stl/LeftConsoleUpper.png" width="150"></a> | <a href="docs/REF_ENCLOSURE.md"><img src="3d%20stl/LeftMFDHolder.png" width="150"></a> | <a href="docs/REF_ENCLOSURE.md"><img src="3d%20stl/LED%20Plate%20-%20Gear.png" width="150"></a> |
+| **2** — 좌우 스탠드<br>Center 인클로저는 구매 모델<br>가공본이라 STL 미포함 | **3** — Enclosure<br>Front · Back | **4** — Upper · Lower<br>Bottom 2 종 | **4** — TM MFD + 7.6" LCD<br>를 함께 잡는 브래킷 | **8** — Left Aux 4<br>Left Console 4, 자작 모델 |
 
-썸네일 · 바운딩 박스 치수 · 내려받기 링크는 **[docs/REF_ENCLOSURE.md](docs/REF_ENCLOSURE.md)** 에 있습니다.
+묶음별 전체 썸네일 · 바운딩 박스 치수 · STL 내려받기 링크는
+**[docs/REF_ENCLOSURE.md](docs/REF_ENCLOSURE.md)** 에 있습니다 (위 그림을 눌러도 됩니다).
 
 ### 1-3. 부품 목록
 
