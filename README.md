@@ -444,8 +444,9 @@ REDKITE-F16-Panels/
 ├── tools/                         # Python 브릿지 (BMS/DCS → Teensy)
 │   ├── bmsbios_bridge.py          #   VID/PID로 두 디바이스 동시 인식
 │   ├── dcsbios_bridge.py
-│   ├── reset_joystick_name.bat
-│   └── backup_to_synology.ps1
+│   ├── patch_usb_desc_h.py        #   IDE 업데이트 후 usb_desc.h 자동 패치
+│   ├── patch_usb_desc_c.py        #   usb_desc.c HID 슬라이더 디스크립터 패치
+│   └── reset_joystick_name.bat
 ├── docs/                          # 배선도, 프로토콜 참조
 │   ├── REF_BACKLIGHT.md           #   백라이트 회로·전원·LED 배치
 │   ├── REF_PARTS.md               #   부품 목록
