@@ -53,4 +53,4 @@ DX 번호와 BMS/DCS 주소 매핑은 [REF_PROTOCOL.md](REF_PROTOCOL.md) 를 보
 | MPO | Switch | Manual Pitch Override |
 | AUDIO 1/2 | Analog, Switch (MCP23017) | 볼륨 6개 + COMM 1/2 모드 로터리 2개 |
 
-DX 59~61은 ENG CONT·EPU 커버 자동화용으로 **DCS에서만** 사용됩니다. 62~65는 COMM1/COMM2 볼륨 pot의 전원 스위치(ADC 임계값 감지), 66은 UHF TEST 입니다.
+DX 59~61은 ENG CONT·EPU 커버 자동화용으로 **DCS에서만** 사용됩니다. DX 62~65는 **BMS 의 COMM1/COMM2 전원 자동화**로, 볼륨 노브를 끝까지 내리면 전원 OFF, 다시 올리면 전원 ON 이 DX 펄스로 나갑니다(pot ADC 임계값 감지). 66은 UHF TEST 입니다.
