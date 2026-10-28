@@ -6,7 +6,7 @@
 - **Board**: Teensy 4.1 (헤더 핀 0–41)
 - **USB**: PID `0x048E`, `JOYSTICK_SIZE 64` (128버튼)
 - **I2C**: `Wire2` — SCL2 = pin 24, SDA2 = pin 25 @ 100kHz, MCP23017 3장 (`0x20` `0x21` `0x22`)
-- **DX 버튼 64, 축 10**, 메인 루프 100Hz
+- **DX 버튼 66, 축 10**, 메인 루프 100Hz
 
 케이블 이름(C1~C14, M1~M6, I1~I3)은 이 문서에서 부여한 명명입니다.
 
@@ -395,7 +395,7 @@ C14 는 SD 확장 케이블 4선(DIN · CLK · CS · GND) + VIN 1선 = **5선**�
 
 ---
 
-## DX 버튼 맵 (64 / 128)
+## DX 버튼 맵 (66 / 128)
 
 버튼 번호는 `switches[0 .. SWITCH_LATE_START-1]` → `analogBtnArrays[]` → `encoders[]`
 → covers → COMM power → `switches[SWITCH_LATE_START ..]` 순서로 런타임에 자동 배정됩니다.
@@ -428,19 +428,18 @@ C14 는 SD 확장 케이블 4선(DIN · CLK · CS · GND) + VIN 1선 = **5선**�
 | 47–58 | UHF | 엔코더 6개 × (CW / CCW) |
 | 59 | ENGINE | ENG CONT COVER (커버 자동화) |
 | 60–61 | EPU | EPU OFF COVER / EPU ON COVER (커버 자동화) |
-| 62 | AUDIO 1 | COMM1 PWR (pot threshold, 지속형) |
-| 63 | AUDIO 1 | COMM2 PWR (pot threshold, 지속형) |
-| 64 | UHF | TEST |
+| 62–63 | AUDIO 1 | COMM1 PWR OFF / ON (pot threshold) |
+| 64–65 | AUDIO 1 | COMM2 PWR OFF / ON (pot threshold) |
+| 66 | UHF | TEST |
 
 > **`SWITCH_LATE_START` (현재 32)** — 이 인덱스부터의 `switches[]` 항목은 DX 번호를
 > **맨 마지막**에 받습니다. 새 스위치를 배열 뒤에 추가해도 기존 번호가 밀리지 않아
 > BMS 재바인딩이 필요 없습니다. 스위치를 추가할 때는 이 값을 건드리지 말고
 > 배열 끝에만 붙이십시오.
 >
-> DX 59~61 은 ENG CONT·EPU 커버 자동화, DX 62~63 은 COMM1/COMM2 볼륨 노브의
-> 전원입니다. 노브를 끝까지 내리면 OFF, 올리면 ON 이며 **눌린 상태가 유지되는
-> 지속형 DX** 입니다(토글 스위치와 동일). pot ADC ≥ 8 → ON, ≤ 3 → OFF, 사이
-> 구간은 직전 상태를 유지합니다(채터링 방지).
+> DX 59~61 은 ENG CONT·EPU 커버 자동화, DX 62~65 는 COMM1/COMM2 볼륨 노브의
+> 전원입니다. pot ADC < 5 → OFF, ≥ 5 → ON 으로 전환될 때 모멘터리 DX 펄스를
+> 발생시킵니다.
 >
 > **펌웨어는 심을 구분하지 않습니다.** 프로토콜 판별(BMS-BIOS / DCS-BIOS)은
 > LED·백라이트 동기화에만 쓰이고, 위 DX 는 어느 심이든 똑같이 나갑니다.
@@ -684,7 +683,7 @@ USB 5V (900mA)
 | **하단 SD 패드** | **3 / 6** (UHF 디스플레이 43·45·46) |
 | **MCP23017 GPIO** | 39 / 48 (`0x20` 15 + `0x21` 16 + `0x22` 8) |
 | 74HC595 출력 | 32 / 32 |
-| **DX 버튼** | **64 / 128** |
+| **DX 버튼** | **66 / 128** |
 | 조이스틱 축 | 10 / 23 |
 | I2C 주소 | `0x20` `0x21` `0x22` (데이지체인) |
 
