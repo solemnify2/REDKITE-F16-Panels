@@ -1,0 +1,40 @@
+# 디바이스 구성
+
+독립된 USB 디바이스 2대. 각각 별도의 Teensy 4.1과 스케치를 사용합니다.
+
+| 디바이스 | 폴더 | PID | 규모 | 담당 |
+|---|---|---|---|---|
+| **Left Aux + MISC** | `F16_LEFT_AUX_MISC/` | `0x0489` | DX 51 · 축 4 | Gear, CMDS, TWA, Alt Gear, MISC, HMCS, Pedal |
+| **Left Console** | `F16_LEFT_CONSOLE/` | `0x048E` | DX 66 · 축 10 | ECM, ELEC, EPU, AVTR, UHF, ENGINE START, MPO, AUDIO 1/2 |
+
+배선도는 [REF_LEFT_AUX_WIRING.md](REF_LEFT_AUX_WIRING.md) · [REF_LEFT_CONSOLE_WIRING.md](REF_LEFT_CONSOLE_WIRING.md),
+DX 번호와 BMS/DCS 주소 매핑은 [REF_PROTOCOL.md](REF_PROTOCOL.md) 를 보십시오.
+
+---
+
+## Left Aux + MISC (`0x0489`) — DX 51, 축 4
+
+| Panel | Type | Description |
+|-------|------|-------------|
+| Gear | Switch, LED | Landing Gear, Hook, Anti-skid, Landing Light, Gear Warning 등 |
+| Alt Gear | Switch | ALT Gear Handle |
+| MISC | Switch, LED (MCP23017) | Master ARM, Laser ARM, RF, Autopilot Pitch/Roll, ECM LED 등 |
+| CMDS | Switch, Analog Ladder, LED | RWR, JMR, MWS, JETT, MODE (7-pos), PRGM (7-pos), GO/NO GO/RDY EWS 램프 |
+| TWA | Analog Ladder, LED | Threat Warning Aux — Search, Act/Pwr, Low, Power |
+| HMCS | Analog | Symbology 포텐셔미터 |
+| Pedal | Analog | Rudder + Left/Right Brake (auto calibration) |
+
+## Left Console (`0x048E`) — DX 66, 축 10
+
+| Panel | Type | Description |
+|-------|------|-------------|
+| ECM | Switch (MCP23017), Analog Ladder, LED (74HC595) | OPR/STBY, XMIT, BIT, RESET + 8버튼 래더 + S/A/F/T 32 LED |
+| ELEC | Switch, LED (MCP23017) | MAIN PWR, CAUTION RST + 경고등 8개 |
+| EPU | Switch (MCP23017) | OFF / NORM / ON |
+| AVTR | Switch (MCP23017) | OFF / AUTO / ON |
+| UHF | Switch, Encoder ×6, Analog, 7-seg | FUNCTION(4), MODE(3), SQUELCH, T-TONE, STATUS, TEST + 주파수 엔코더 + VOL + MAX7219 디스플레이 |
+| ENGINE START | Switch | JFS, ENG CONT, MAX PWR, AB RESET, ENG DATA |
+| MPO | Switch | Manual Pitch Override |
+| AUDIO 1/2 | Analog, Switch (MCP23017) | 볼륨 6개 + COMM 1/2 모드 로터리 2개 |
+
+DX 59~61은 ENG CONT·EPU 커버 자동화용으로 **DCS에서만** 사용됩니다. 62~65는 COMM1/COMM2 볼륨 pot의 전원 스위치(ADC 임계값 감지), 66은 UHF TEST 입니다.
