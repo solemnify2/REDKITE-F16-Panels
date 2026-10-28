@@ -77,28 +77,13 @@ Greenisland 패널은 **Top(아크릴) · Diffuser(아크릴) · LED layer(투�
 |------|------|------|----:|----:|
 | 패널 | [PC Flights](https://pcflights.com) | MISC / Gear / CMDS 패널 3종 | $133 | $31 |
 | 아크릴 재단 · 도색 | [아크릴마켓](https://smartstore.naver.com/acrylicmarket) 등 | Greenisland DXF 패널 11종, 패널당 약 ₩10,000 | ~$80 | - |
-| 3D 프린트 | [JLC3DP](https://jlc3dp.com) / [PCBWay](https://www.pcbway.com) 등 | 구조물 · 플레이트 34종 (아래 수량표) | **견적 참조** | - |
+| 3D 프린트 | [JLC3DP](https://jlc3dp.com) / [PCBWay](https://www.pcbway.com) 등 | 구조물 · 플레이트 [34종](docs/REF_ENCLOSURE.md#출력-수량) | **견적 참조** | - |
 | MFD LCD | [Alibaba](https://www.alibaba.com/product-detail/In-Stock-IPS-7-6-Inch_1601257654342.html) | 7.6" 정사각 800×800 IPS ×2, 장당 $58 (드라이버 보드 포함) | $116 | 무료 |
 | MCU | [PJRC](https://www.pjrc.com) | Teensy 4.1 ×2 | ~$70 | - |
 | 전자부품 | [AliExpress](https://www.aliexpress.com) | MCP23017, 스위치, LED, 저항 등 | ~$200 | - |
 | 커스텀 PCB | JLCPCB / PCBWay 등 | TWA · ECM · UHF 디스플레이 3종, 장당 약 $5 | ~$15 | - |
 | 노동력 | - | 약 1년간의 설계, 조립, 프로그래밍 | priceless | - |
 | | | **합계** | **~$614** | **~$31** |
-
-**3D 프린트 수량**
-
-| 구분 | 수량 | 재료 | STL 위치 |
-|------|----:|------|----------|
-| 패널 `LED layer` | 11 | 투명 PLA | Greenisland 모델 동봉 |
-| 백라이트 플레이트 | 8 | PLA · 레진 | `3d stl/` |
-| Left Aux 인클로저 | 3 | PLA · PETG | `3d stl/` |
-| Left Console | 4 | PLA · PETG | `3d stl/` |
-| MFD 홀더 | 4 | PLA · PETG | `3d stl/` |
-| 스탠드 | 2 | PLA · PETG | `3d stl/` |
-| 인클로저 | 2 | PLA · PETG | Cults3D 구매 모델 |
-| **합계** | **34** | | |
-
-스위치 캡 · 노브는 별도이며, 수량은 스위치 구성에 따라 달라집니다 (본 프로젝트 기준 64개).
 
 > **3D 프린트 비용은 금액으로 적지 않았습니다.** 업체 발주분과 직접 출력분이 섞여 있고,
 > 업체 · 재료 · 시기에 따라 편차가 큽니다. **STL 을 [JLC3DP](https://jlc3dp.com) ·

@@ -13,6 +13,23 @@
 
 PETG 는 JLC3DP 에서 지원하지 않아 PCBWay 등에 별도 주문해야 합니다.
 
+## 출력 수량
+
+패널 `LED layer` 까지 포함한, 이 프로젝트를 한 벌 만드는 데 필요한 출력물 전체입니다.
+
+| 구분 | 수량 | 재료 | STL 위치 |
+|------|----:|------|----------|
+| 패널 `LED layer` | 11 | 투명 PLA | Greenisland 모델 동봉 |
+| 백라이트 플레이트 | 8 | PLA · 레진 | `3d stl/` |
+| Left Aux 인클로저 | 3 | PLA · PETG | `3d stl/` |
+| Left Console | 4 | PLA · PETG | `3d stl/` |
+| MFD 홀더 | 4 | PLA · PETG | `3d stl/` |
+| 스탠드 | 2 | PLA · PETG | `3d stl/` |
+| 인클로저 | 2 | PLA · PETG | Cults3D 구매 모델 |
+| **합계** | **34** | | |
+
+스위치 캡 · 노브는 별도이며, 수량은 스위치 구성에 따라 달라집니다 (본 프로젝트 기준 64개).
+
 ## 인클로저 & 스탠드
 
 Stand 는 Center 인클로저 뒷면에 에폭시로 부착합니다 (조립은 [README 2-1](../README.md#2-1-조립-순서)).
