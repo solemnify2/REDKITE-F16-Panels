@@ -63,70 +63,16 @@ DX 59~61은 ENG CONT·EPU 커버 자동화용으로 **DCS에서만** 사용됩�
 
 ### 1-1. 패널
 
-콕핏 빌더 전문 업체에서 구매하거나, 3D 프린터로 출력하거나, 아크릴 레이저 커팅으로 제작할 수 있습니다.
+콕핏 빌더 전문 업체에서 **구매**하거나, 3D 프린터와 아크릴 레이저 커팅으로 **직접 제작**할 수 있습니다.
+본 프로젝트는 [PC Flights](https://pcflights.com/flight-simulator-cockpit-panels/f-16c-viper-home-cockpit-panels/)
+구매품인 **MISC · Gear · CMDS 세 장**을 빼고, 나머지 패널 전부를
+[Greenisland](https://cults3d.com/en/users/Greenisland/3d-models) 모델로 직접 만들었습니다.
 
-**구매처:**
-- [PC Flights](https://pcflights.com/flight-simulator-cockpit-panels/f-16c-viper-home-cockpit-panels/) — F-16C 패널 전문 **(본 프로젝트: MISC · Gear · CMDS)**
-- [HispaPanel](https://hispapanels.com/tienda/en/20-f-16-fighting-falcon) — 레이저 커팅/각인 패널 키트
-- [TEK Creations](https://tekcreations.space/shop/) — LED 백라이트 패널, DCS-BIOS 레디
+Greenisland 패널은 **Top(아크릴) · Diffuser(아크릴) · LED layer(투명 PLA)** 3 레이어에
+백라이트 플레이트가 더해지는 구조입니다 — 패널 한 장에 **아크릴 재단 2종 + 3D 프린트 2종**.
 
-| MISC | Gear | CMDS |
-|:----:|:----:|:----:|
-| [![MISC](https://pcflights.com/image/cache/catalog/panels/f-16c_viper_misc_panel-600x400.jpg)](https://pcflights.com/f-16c-viper-miscellaneous-misc-panel-flight-sim-part/) | [![Gear](https://pcflights.com/image/cache/catalog/panels/f-16c_viper_landing_gear_panel-600x400.jpg)](https://pcflights.com/f-16c-viper-landing-gear-panel-flight-simulator-module/) | [![CMDS](https://pcflights.com/image/cache/catalog/panels/f-16c_viper_cmds_control_panel-600x400.jpg)](https://pcflights.com/f-16c-viper-cmds-control-panel-module/) |
-
-**3D 프린트 모델:**
-- [Greenisland](https://cults3d.com/en/users/Greenisland/3d-models) — F-16 콕핏 거의 전체 파트.
-  STL 과 함께 **아크릴 재단용 DXF (`Lasercutting template`)** 를 동봉해서 배포합니다
-  **(본 프로젝트: 위 3종을 뺀 나머지 전 패널)**
-- [Legarsdusofa](https://cults3d.com/en/design-collections/Legarsdusofa/f-16-cockpit-simulator) — F-16 콕핏 거의 전체 파트
-- [The_Viper_Project](https://cults3d.com/en/users/The_Viper_Project/3d-models) — 버튼 노브, 스위치 캡 등 무료
-
-**패널 제작 (아크릴 재단 + 3D 프린트):**
-
-본 프로젝트에서는 **MISC · Gear · CMDS 를 뺀 나머지 패널 전부**를 Greenisland 모델로 직접 만들었습니다.
-세 패널만 PC Flights 구매품입니다.
-
-Greenisland 패널은 **3 레이어** 구조이고, 여기에 백라이트 플레이트가 더해집니다.
-제작에는 **아크릴 재단 2종 + 3D 프린트 2종**이 필요합니다.
-
-| 레이어 | 재료 | 제작 방법 | 역할 |
-|--------|------|-----------|------|
-| Top | 아크릴 **2 mm** — 흰색 또는 투명 (아래 도색 방법에 따라) | **아크릴 재단** → 도색 → 문자 · 눈금 각인 | 전면 |
-| Diffuser | **투명** 아크릴 **2~3 mm** | **아크릴 재단** | 빛 확산 |
-| LED layer | 투명 PLA | **3D 프린트** | 스위치가 체결되는 층 |
-| 백라이트 플레이트 | PLA · 레진 | **3D 프린트** | 패널 뒤 몇 cm — 본 프로젝트에서 추가 ([1-2](#1-2-3d-프린트-구조물)) |
-
-두께는 Top **2 mm**, Diffuser **투명 2~3 mm** 로 주문했습니다. Top 의 색은 도색 방법에 따라 갈립니다(바로 아래).
-Diffuser 는 2 mm 와 3 mm 중 고르면 되는데, **토글 스위치 나사가 두꺼우면 3 mm** 를 권합니다.
-
-Top · Diffuser 는 동봉된 **아크릴 재단용 DXF** 로 바로 발주할 수 있습니다
-(패널에 따라 컷 도면과 각인 도면이 따로 들어 있습니다).
-**LED layer 는 DXF 가 없어** 아크릴 재단이 불가능하므로 투명 PLA 로 출력했습니다.
-백라이트 플레이트는 자작 모델이라 처음부터 3D 프린트 전용입니다.
-
-> ⚠ **LED layer 는 투명 아크릴이 낫습니다** — 투명 PLA 는 이름만큼 투명하지 않아,
-> 백라이트가 이 층을 지나면서 눈에 띄게 어두워집니다. 다시 만든다면 투명 아크릴로
-> 재단하겠습니다. 다만 DXF 가 없으므로 STL 에서 도면을 직접 떠야 합니다.
-
-#### Top 도색 · 각인 — 두 가지 방법
-
-글자는 인쇄하는 게 아닙니다. 아크릴을 통째로 도색한 뒤 **글자 모양만 레이저로 걷어내고**,
-그 자리로 뒤에서 온 빛이 새어 나오게 만듭니다. 걷어낸 바닥이 무엇이냐에 따라 두 갈래입니다.
-
-| | 아크릴 | 도색 | 레이저가 걷어내는 것 | 글자 바닥 |
-|---|--------|------|---------------------|-----------|
-| **A** | **흰색** 2 mm | 검정 락카 **1 회** | 검정 락카 | 흰색 아크릴 |
-| **B** | **투명** 2 mm | 흰색 락카 → 검정 락카 **2 중** | 검정 락카 층만 | 흰색 락카 |
-
-A 는 도색이 한 번이라 간단합니다. B 는 두 번 칠해야 하고, 레이저가 **검정 층만 벗기고
-흰색 층은 남겨야** 하므로 출력 · 속도를 더 정확히 맞춰야 합니다.
-
-국내는 [아크릴마켓](https://smartstore.naver.com/acrylicmarket) 등 레이저 가공 업체에 DXF 를 보내 주문하며, **DXF R2000 형식**을 요구하는 곳이 많습니다.
-
-> **백라이트 플레이트가 따로 있는 이유** — 원래 설계는 백라이트 LED 도 `LED layer` 에 함께
-> 장착하도록 되어 있습니다. 그런데 LED layer 는 Top 과 너무 가까워, 고르게 밝히려면 LED 가
-> 아주 많이 필요합니다. 그래서 패널 **뒤쪽 몇 cm 뒤에 별도 플레이트**를 두어 LED 수량을 줄였습니다.
-> 자세한 내용은 [docs/REF_BACKLIGHT.md](docs/REF_BACKLIGHT.md) 참조.
+구매처 · 3D 모델 출처 · 레이어별 재료와 두께 · 도색과 레이저 각인 방법은
+**[docs/REF_PANEL.md](docs/REF_PANEL.md)** 에 있습니다.
 
 ### 1-2. 3D 프린트 구조물
 
@@ -182,12 +128,12 @@ MFD 와 **Alibaba 에서 구한 7.6인치 정사각 LCD** 를 겹쳐 놓고 홀�
 #### 백라이트 플레이트
 
 패널 **뒤쪽 몇 cm 뒤**에 띄워 배치하는 백라이트 LED 거치판입니다.
-Greenisland 패널의 `LED layer`(스위치가 체결되는 층, 1-1 참조)**와는 다른 부품**으로,
+Greenisland 패널의 `LED layer`(스위치가 체결되는 층, [docs/REF_PANEL.md](docs/REF_PANEL.md) 참조)**와는 다른 부품**으로,
 LED 수량을 줄이려고 본 프로젝트에서 추가한 것입니다. 거리를 띄운 만큼 빛이 퍼져 적은 LED 로도 고르게 밝습니다.
 
 PLA 나 레진 출력으로 충분합니다 — MJF 등 고급 공정은 필요 없고 비용만 올라갑니다.
 
-> 파일명이 `LED Plate …` 이지만 1-1 의 `LED layer` 가 아니라 **백라이트 플레이트**입니다. 자작 모델입니다.
+> 파일명이 `LED Plate …` 이지만 `LED layer` 가 아니라 **백라이트 플레이트**입니다. 자작 모델입니다.
 
 **Left Aux** — 패널별로 한 장씩
 
@@ -248,7 +194,8 @@ PLA 나 레진 출력으로 충분합니다 — MJF 등 고급 공정은 필요 
 
 ### 2-1. 조립 순서
 
-부품 제작은 1-1 · 1-2, 배선은 2-2, 백라이트 회로는 2-3 을 보십시오. 여기서는 조립 순서만 정리합니다.
+패널 제작은 [docs/REF_PANEL.md](docs/REF_PANEL.md), 구조물은 1-2, 배선은 2-2, 백라이트 회로는 2-3 을
+보십시오. 여기서는 조립 순서만 정리합니다.
 
 **1. 패널 적층** — Greenisland 패널은 3 층을 겹칩니다. 스위치 · 로터리 · 푸시버튼은 전부
 맨 뒤 `LED layer` 에 체결되고, 앞의 두 장은 그 위에 얹힙니다.
@@ -496,6 +443,7 @@ REDKITE-F16-Panels/
 
 | 문서 | 내용 |
 |---|---|
+| [docs/REF_PANEL.md](docs/REF_PANEL.md) | 패널 구매처 · 3D 모델 출처, 레이어 구조와 두께, 도색 · 레이저 각인 방법 |
 | [docs/REF_BACKLIGHT.md](docs/REF_BACKLIGHT.md) | 백라이트 MOSFET 회로, 12V 전원, 밝기 제어, LED 스트링 배치 |
 | [docs/REF_PARTS.md](docs/REF_PARTS.md) | 스위치·IC·LED·수동 소자·커넥터·모듈 부품 목록, UHF 디스플레이 보드 BOM |
 | [docs/REF_PROTOCOL.md](docs/REF_PROTOCOL.md) | DCS-BIOS / BMS-BIOS 프로토콜, LED 주소 맵, LightBits 매핑 |
