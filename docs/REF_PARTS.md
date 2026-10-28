@@ -66,7 +66,7 @@
 | 로터리 스위치 SR26 1P12T | 4 | 로터리 실사용 6 — CMDS MODE·PRGM 7P, UHF FUNC 4P, UHF MODE 3P, COMM1·2 3P |
 | 로터리 스위치 RS16 1P6T / 1P5T | 2 / 2 | 위와 합산 |
 | 포텐셔미터 10kΩ | 15 | 실사용 11 (콘솔 10 + HMCS 1). **페달은 포텐셔미터가 아니라 홀 센서** |
-| 코리 스위치 | 1 | 실사용 1 (MISC ADV MODE). [HispaPanel](https://hispapanels.com/tienda/en/buttons-encoders/71-korry-type-tactile-switch-momentary.html) |
+| 코리 스위치 | 1 | 실사용 1 (MISC ADV MODE). [HispaPanel](https://hispapanels.com/tienda/en/71-634-korry-type-tactile-switch-momentary.html#/1-add_components-no) — €13.31, **add components: no** 옵션 |
 | 키보드 스위치 (Brown) | 2 | |
 
 ## IC / 반도체
