@@ -33,12 +33,14 @@ VR 전용 F-16 미니멀 데스크핏
 
 ### 디바이스 구성
 
-독립된 USB 디바이스 2대. 각각 별도의 Teensy 4.1과 스케치를 사용합니다.
+Teensy 4.1 기반 USB 디바이스 **2대**가 핵심이고, 각각 별도의 스케치를 씁니다.
+여기에 PC 에 직접 붙는 **MFD · LCD** 가 더해집니다.
 
 | 디바이스 | 폴더 | PID | 규모 | 담당 |
 |---|---|---|---|---|
 | **Left Aux + MISC** | `F16_LEFT_AUX_MISC/` | `0x0489` | DX 51 · 축 4 | Gear, CMDS, TWA, Alt Gear, MISC, HMCS, Pedal |
 | **Left Console** | `F16_LEFT_CONSOLE/` | `0x048E` | DX 66 · 축 10 | ECM, ELEC, EPU, AVTR, UHF, ENGINE START, MPO, AUDIO 1/2 |
+| **MFD + LCD** | — | — | — | Thrustmaster MFD ×2 (USB) · 7.6인치 정사각 LCD ×2 (HDMI). **Teensy 와 연결되지 않습니다** — 다만 MFD 백라이트는 인게임 조명에 연동됩니다 |
 
 패널별 입력 종류 · LED 구성 · DX 번호 주석은 **[docs/REF_DEVICES.md](docs/REF_DEVICES.md)** 에 있습니다.
 

@@ -1,11 +1,18 @@
 # 디바이스 구성
 
-독립된 USB 디바이스 2대. 각각 별도의 Teensy 4.1과 스케치를 사용합니다.
+Teensy 4.1 기반 USB 디바이스 **2대**가 핵심이고, 각각 별도의 스케치를 씁니다.
+여기에 PC 에 직접 붙는 **MFD · LCD** 가 더해집니다.
 
 | 디바이스 | 폴더 | PID | 규모 | 담당 |
 |---|---|---|---|---|
 | **Left Aux + MISC** | `F16_LEFT_AUX_MISC/` | `0x0489` | DX 51 · 축 4 | Gear, CMDS, TWA, Alt Gear, MISC, HMCS, Pedal |
 | **Left Console** | `F16_LEFT_CONSOLE/` | `0x048E` | DX 66 · 축 10 | ECM, ELEC, EPU, AVTR, UHF, ENGINE START, MPO, AUDIO 1/2 |
+| **MFD + LCD** | — | — | — | Thrustmaster MFD ×2 (USB) · 7.6인치 정사각 LCD ×2 (HDMI). **Teensy 와 연결되지 않습니다** — 다만 MFD 백라이트는 인게임 조명에 연동됩니다 |
+
+MFD 와 LCD 는 이 프로젝트의 펌웨어가 다루지 않습니다. MFD 는 Thrustmaster 자체 USB 장치이고,
+LCD 는 HDMI 로 PC 에 붙는 모니터입니다. 그래도 MFD 백라이트가 인게임 조명을 따라가므로,
+패널 백라이트와 같이 어두워집니다 — 사용자 입장에서는 한 콕핏으로 묶입니다.
+장착은 [REF_MFD_LCD.md](REF_MFD_LCD.md) 참조.
 
 배선도는 [REF_LEFT_AUX_WIRING.md](REF_LEFT_AUX_WIRING.md) · [REF_LEFT_CONSOLE_WIRING.md](REF_LEFT_CONSOLE_WIRING.md),
 DX 번호와 BMS/DCS 주소 매핑은 [REF_PROTOCOL.md](REF_PROTOCOL.md) 를 보십시오.
