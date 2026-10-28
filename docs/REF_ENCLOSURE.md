@@ -52,6 +52,9 @@ Stand 는 Center 인클로저 뒷면에 에폭시로 부착합니다 (조립은 
 
 Upper / Lower 를 맞물려 조립하고, Bottom 2 종이 바닥판입니다.
 
+이 인클로저는 **Thrustmaster Viper TQS** 와 맞물리도록 설계되어 있습니다.
+TQS 를 그대로는 붙일 수 없고, **Mission Pack 또는 더미 뚜껑을 먼저 떼어내야** 합니다.
+
 | LeftConsoleUpper | LeftConsoleLower | LeftConsoleBottomUpper | LeftConsoleBottomLower |
 |:----:|:----:|:----:|:----:|
 | <a href="../3d%20stl/LeftConsoleUpper.stl"><img src="../3d%20stl/LeftConsoleUpper.png" width="160"></a><br>220.2 × 270.5 × 51.4 mm | <a href="../3d%20stl/LeftConsoleLower.stl"><img src="../3d%20stl/LeftConsoleLower.png" width="160"></a><br>273.6 × 125.2 × 56.1 mm | <a href="../3d%20stl/LeftConsoleBottomUpper.stl"><img src="../3d%20stl/LeftConsoleBottomUpper.png" width="160"></a><br>124.2 × 239.0 × 19.0 mm | <a href="../3d%20stl/LeftConsoleBottomLower.stl"><img src="../3d%20stl/LeftConsoleBottomLower.png" width="160"></a><br>273.6 × 125.2 × 13.0 mm |

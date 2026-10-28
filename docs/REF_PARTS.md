@@ -175,6 +175,7 @@ AUX 12스트링(163mA) / MISC 3스트링(41mA) 으로 나뉩니다.
 | 전동 킥보드용 스로틀 페달 | 2 | AliExpress. **홀 센서 내장** (3.3V · GND · Signal). 러더 페달 자작용 — [REF_PEDAL.md](REF_PEDAL.md) |
 | PVC 전선 몰딩 | 2 | 페달 프레임 겸 배선 통로. 검정 권장 |
 | 알루미늄 페달 커버 | 2 | AliExpress. 외관용 |
+| Thrustmaster Viper TQS | 1 | Left Console 인클로저가 여기에 맞물립니다. **Mission Pack / 더미 뚜껑을 떼어내야** 결합 — [REF_ENCLOSURE.md](REF_ENCLOSURE.md#left-console) |
 | Thrustmaster MFD | 2 | 좌·우 1대씩. LCD 와 겹쳐 MFD 홀더가 잡아 줌 (홀더만 인클로저 아래쪽에 에폭시 접착) |
 | 7.6인치 정사각 LCD (BOE, 800×800 IPS, `GX076-30MB-A1`) | 2 | Alibaba. MFD 뒤에 **겹쳐** 놓고 홀더로 함께 고정 — 접착하지 않아 분리 가능. 상세는 [REF_MFD_LCD.md](REF_MFD_LCD.md) |
 

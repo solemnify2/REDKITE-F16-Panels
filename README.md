@@ -135,6 +135,9 @@ PC Flights 패널(MISC · Gear · CMDS)은 2 층(전면 도색 + 후면 투명)�
 `…MFDHolderUpper` 는 접착 부품이 아니라, 인클로저와 MFD 사이에 남는 **빈틈을 메우는** 조각입니다.
 에폭시는 위 표의 두 곳에만 씁니다. MFD 와 LCD 는 어디에도 접착하지 않습니다.
 
+Left Console 인클로저는 **Thrustmaster Viper TQS** 와 맞물리도록 설계되어 있습니다.
+**TQS 의 Mission Pack 또는 더미 뚜껑을 먼저 떼어내야** 결합됩니다.
+
 **4. MFD** — Thrustmaster MFD 뒤에 7.6인치 정사각 LCD 를 **겹쳐 놓기만** 하고,
 MFD 홀더가 둘을 함께 눌러 고정합니다. **서로 붙이지 않습니다** —
 수리할 때 홀더에서 두 장을 그대로 빼낼 수 있어야 하기 때문입니다.
