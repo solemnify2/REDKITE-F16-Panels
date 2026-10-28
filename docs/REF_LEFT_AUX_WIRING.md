@@ -68,7 +68,7 @@
 | **C3** | Teensy → TWA 패널 | 래더 1 + LED 4채널(LED 7개). **급전은 3.3V** — 기판 `5V` 실크 주의 | 5 |
 | **C4** | Teensy → ALT GEAR | Handle (Reset 미연결) | 1 |
 | **C5** | Teensy → HMCS | Symbology 1개 (Brightness / Contrast 미연결) | 1 |
-| **C6** | Teensy → 페달 | 포트 2 (Left / Right) | 2 |
+| **C6** | Teensy → 페달 | 포트 2 (Left / Right). 홀 센서 — 자작 내역은 [REF_PEDAL.md](REF_PEDAL.md) | 2 |
 | **C7** | Teensy 하단 SD 패드 → CMDS 램프 | LED 8 (DISPENSE RDY 5 / NO GO 2 / GO 1) on 5 pins | 5 (+GND, LAN 6심, pin 42 미사용) |
 | 12V | 12V 어댑터 → 백라이트 | MOSFET 2개: pin 13 (AUX 로컬), pin 12 (MISC via LAN). 어댑터는 콘솔과 **Y 케이블로 공유** | 2 |
 
