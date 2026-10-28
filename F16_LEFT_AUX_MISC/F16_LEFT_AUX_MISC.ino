@@ -721,7 +721,7 @@ void processPedal() {
   // if (ALLOW_DEBUG) {
   //   Serial.printf("[Pedal] raw L=%d R=%d  cal L=%d R=%d  range L=[%d,%d] R=[%d,%d]  brake=%d  rudder=%d\n",
   //     rawLb, rawRb, lb, rb, lbMin, lbMax, rbMin, rbMax, brakeMode,
-  //     brakeMode ? (1024 / 2) : ((1023 - lb + rb) / 2));
+  //     (1023 - lb + rb) / 2);
   // }
 
   setJoystickAxis(PEDAL_AXIS_LBRAKE, brakeMode ? lb : 0);
