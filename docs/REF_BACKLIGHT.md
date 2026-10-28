@@ -87,6 +87,15 @@ Greenisland 설계는 백라이트 LED 를 `LED layer` 에 함께 장착하도�
 플레이트 STL 은 `3d stl/LED Plate*.stl` 입니다 — Left Aux 4장(Gear · CMDS · TWA · HMCS),
 Left Console 4장(`LED Plate1`~`4`). 자작 모델이며 PLA 또는 레진 출력으로 충분합니다.
 
+### LED layer 재질 — 투명 PLA 의 한계
+
+`LED layer` 는 DXF 가 없어 **투명 PLA 로 3D 프린트**했습니다. 쓸 수는 있지만,
+**투명 PLA 는 이름만큼 투명하지 않습니다.** 백라이트 플레이트에서 나온 빛이 이 층을
+지나면서 눈에 띄게 어두워집니다.
+
+**투명 아크릴 재단이 더 낫습니다.** 다시 만든다면 그쪽을 택하겠습니다.
+단, 제공되는 DXF 가 없으므로 STL 에서 도면을 직접 떠야 합니다.
+
 ### 스트링
 
 - LED 3개 + 220Ω 저항 1개 = 직렬 스트링. 고휘도 녹색(Vf ≈ 3.0V) 기준 스트링당 약 13.6mA
