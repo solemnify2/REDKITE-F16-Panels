@@ -6,7 +6,7 @@ Teensy 4.1 기반 USB 디바이스 **2대**가 핵심이고, 각각 별도의 �
 | 디바이스 | 폴더 | PID | 규모 | 담당 |
 |---|---|---|---|---|
 | **Left Aux + MISC** | `F16_LEFT_AUX_MISC/` | `0x0489` | DX 51 · 축 4 | Gear, CMDS, TWA, Alt Gear, MISC, HMCS, Pedal |
-| **Left Console** | `F16_LEFT_CONSOLE/` | `0x048E` | DX 66 · 축 10 | ECM, ELEC, EPU, AVTR, UHF, ENGINE START, MPO, AUDIO 1/2 |
+| **Left Console** | `F16_LEFT_CONSOLE/` | `0x048E` | DX 64 · 축 10 | ECM, ELEC, EPU, AVTR, UHF, ENGINE START, MPO, AUDIO 1/2 |
 | **MFD + LCD** | — | — | — | Thrustmaster MFD ×2 (USB) · 7.6인치 정사각 LCD ×2 (HDMI). **Teensy 와 연결되지 않습니다** — 다만 MFD 백라이트는 이 프로젝트의 브릿지가 인게임 조명에 맞춰 줍니다 |
 | **ICP** | — | — | — | SimGears ICP (USB). 역시 Teensy 와 무관하며, **백라이트 연동은 포기**했습니다 |
 
@@ -40,7 +40,7 @@ DX 번호와 BMS/DCS 주소 매핑은 [REF_PROTOCOL.md](REF_PROTOCOL.md) 를 보
 | HMCS | Analog | Symbology 포텐셔미터 |
 | Pedal | Analog | Rudder + Left/Right Brake (auto calibration) |
 
-## Left Console (`0x048E`) — DX 66, 축 10
+## Left Console (`0x048E`) — DX 64, 축 10
 
 | Panel | Type | Description |
 |-------|------|-------------|
@@ -53,4 +53,4 @@ DX 번호와 BMS/DCS 주소 매핑은 [REF_PROTOCOL.md](REF_PROTOCOL.md) 를 보
 | MPO | Switch | Manual Pitch Override |
 | AUDIO 1/2 | Analog, Switch (MCP23017) | 볼륨 6개 + COMM 1/2 모드 로터리 2개 |
 
-DX 59~61은 ENG CONT·EPU 커버 자동화용으로 **DCS에서만** 사용됩니다. DX 62~63은 **BMS 의 COMM1/COMM2 전원 자동화**로, 볼륨 노브를 끝까지 내리면 OFF, 올리면 ON 인 지속형 DX 입니다(pot ADC 임계값 감지). 64~65는 예비, 66은 UHF TEST 입니다.
+DX 59~61은 ENG CONT·EPU 커버 자동화용으로 **DCS에서만** 사용됩니다. DX 62~63은 **BMS 의 COMM1/COMM2 전원 자동화**로, 볼륨 노브를 끝까지 내리면 OFF, 올리면 ON 인 지속형 DX 입니다(pot ADC 임계값 감지). 64는 UHF TEST 입니다.

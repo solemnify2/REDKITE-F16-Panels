@@ -739,7 +739,7 @@ static uint32_t  protoDetectStart = 0;
 // ================================================================
 
 #define NUM_COVERS 3                      // ENG CONT, EPU OFF, EPU ON
-#define NUM_COMM_PWR 4                    // COMM1 PWR, COMM2 PWR + 예비 2 (DX 번호 고정용)
+#define NUM_COMM_PWR 2                    // COMM1 PWR, COMM2 PWR
 
 static uint8_t switchBtnStart[NUM_SWITCHES];
 static uint8_t analogBtnStart[NUM_ANALOG_ARRAYS];
@@ -787,7 +787,7 @@ void assignButtons() {
   coverBtnBase = btn;
   btn += NUM_COVERS;
 
-  // COMM1/COMM2 Power (pot threshold) — 2개 사용, 2개는 예비
+  // COMM1/COMM2 Power (pot threshold)
   commPwrBtnBase = btn;
   btn += NUM_COMM_PWR;
 
@@ -881,7 +881,6 @@ void processCovers() {
 //
 //  DX 62: COMM1 PWR
 //  DX 63: COMM2 PWR
-//  DX 64~65: 예비 — 뒤따라오는 UHF TEST 의 DX 66 을 밀지 않기 위해 비워 둡니다.
 
 #define COMM_PWR_ON_LEVEL   8     // ADC(10-bit) 이 값 이상 → ON
 #define COMM_PWR_OFF_LEVEL  3     // 이 값 이하 → OFF (사이 구간은 직전 상태 유지 — 채터링 방지)
