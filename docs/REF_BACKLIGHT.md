@@ -57,6 +57,20 @@ Online 일 때 각 채널이 독립 제어됩니다. Offline 수동 조절은 �
 | Idle 30분 | 자동 꺼짐. 아무 입력으로 복귀 |
 | USB Suspend | LED + 백라이트 소등, MCU 절전 |
 
+### Cougar MFD 백라이트
+
+패널 백라이트와 별개로, 브릿지가 **Thrustmaster Cougar MFD** 의 백라이트도 같이 맞춥니다.
+Teensy 를 거치지 않고 PC 에서 HID feature report 로 직접 보냅니다.
+
+| 항목 | 값 |
+|------|-----|
+| 장치 | VID `0x044F`, PID `0xB351` · `0xB352` (F16 MFD 1 · 2) |
+| 전송 | `send_feature_report([0x00, 0x01, brightness])`, 밝기 0~255 |
+| 소스 | BMS 공유 메모리 `instrLight` |
+| 소등 | 심 오프라인, 브릿지 종료, 콘솔 창 닫기 |
+
+`pip install hidapi` 가 안 돼 있으면 이 부분만 건너뛰고 나머지는 그대로 동작합니다.
+
 ## LED 배치
 
 ### 패널 구조

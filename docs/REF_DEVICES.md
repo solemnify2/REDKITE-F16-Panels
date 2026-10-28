@@ -7,11 +7,16 @@ Teensy 4.1 기반 USB 디바이스 **2대**가 핵심이고, 각각 별도의 �
 |---|---|---|---|---|
 | **Left Aux + MISC** | `F16_LEFT_AUX_MISC/` | `0x0489` | DX 51 · 축 4 | Gear, CMDS, TWA, Alt Gear, MISC, HMCS, Pedal |
 | **Left Console** | `F16_LEFT_CONSOLE/` | `0x048E` | DX 66 · 축 10 | ECM, ELEC, EPU, AVTR, UHF, ENGINE START, MPO, AUDIO 1/2 |
-| **MFD + LCD** | — | — | — | Thrustmaster MFD ×2 (USB) · 7.6인치 정사각 LCD ×2 (HDMI). **Teensy 와 연결되지 않습니다** — 다만 MFD 백라이트는 인게임 조명에 연동됩니다 |
+| **MFD + LCD** | — | — | — | Thrustmaster MFD ×2 (USB) · 7.6인치 정사각 LCD ×2 (HDMI). **Teensy 와 연결되지 않습니다** — 다만 MFD 백라이트는 이 프로젝트의 브릿지가 인게임 조명에 맞춰 줍니다 |
 
-MFD 와 LCD 는 이 프로젝트의 펌웨어가 다루지 않습니다. MFD 는 Thrustmaster 자체 USB 장치이고,
-LCD 는 HDMI 로 PC 에 붙는 모니터입니다. 그래도 MFD 백라이트가 인게임 조명을 따라가므로,
-패널 백라이트와 같이 어두워집니다 — 사용자 입장에서는 한 콕핏으로 묶입니다.
+MFD 와 LCD 는 Teensy 에 물리지 않습니다. MFD 는 Thrustmaster 자체 USB 장치이고,
+LCD 는 HDMI 로 PC 에 붙는 모니터입니다.
+
+**MFD 백라이트만은 이 프로젝트가 건드립니다.** `tools/` 의 브릿지가 Cougar MFD
+(VID `0x044F`, PID `0xB351` · `0xB352`)를 HID 로 열어, 인게임 조명값에 맞춘 밝기를
+feature report 로 보냅니다. 패널 백라이트와 같이 어두워지므로 쓰는 사람 입장에서는
+한 콕핏으로 묶입니다. `hidapi` 가 없으면 이 부분만 건너뜁니다.
+
 장착은 [REF_MFD_LCD.md](REF_MFD_LCD.md) 참조.
 
 배선도는 [REF_LEFT_AUX_WIRING.md](REF_LEFT_AUX_WIRING.md) · [REF_LEFT_CONSOLE_WIRING.md](REF_LEFT_CONSOLE_WIRING.md),
