@@ -66,7 +66,7 @@ Online 일 때 각 채널이 독립 제어됩니다. Offline 수동 조절은 �
 | 패널 | 구조 | LED 위치 |
 |------|------|----------|
 | PC Flights — MISC · Gear · CMDS | 2중: 전면(검정 도색 + 흰색 각인) / 후면(투명) | 후면 투명판 뒤 **1~2 cm** |
-| Greenisland — 그 외 전 패널 | 3중: Top(아크릴) / Diffuser(아크릴) / LED layer(투명 PLA) | 패널 뒤 **몇 cm** 뒤 백라이트 플레이트 |
+| Greenisland — 그 외 전 패널 | 3중: Top(흰색 아크릴 2 mm) / Diffuser(투명 아크릴 2~3 mm) / LED layer(투명 PLA) | 패널 뒤 **몇 cm** 뒤 백라이트 플레이트 |
 
 어느 쪽이든 **패널에서 띄워서 쏘는 것**이 핵심입니다. 각인된 글자만 빛나는 건 같은 원리입니다.
 
