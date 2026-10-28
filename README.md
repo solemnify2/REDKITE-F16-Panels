@@ -20,6 +20,7 @@ VR 전용 미니멀 데스크핏을 지향합니다. VR 헤드셋을 쓰고 손�
 - **74HC595 시프트 레지스터** — ECM 32 LED를 3핀으로 구동
 - **로터리 엔코더** — UHF 주파수 5자리 + PRESET을 6개 엔코더로 구현 (1kHz ISR)
 - **DCS 커버 자동화** — ENG CONT, EPU 스위치 조작 시 커버를 자동으로 열고 닫음
+- **Thrustmaster Viper TQS 결합** — Left Console 인클로저가 TQS 에 맞물리는 형상. 결합하려면 TQS 의 Mission Pack 또는 더미 뚜껑을 분리해야 합니다
 
 ### 디바이스 구성
 
