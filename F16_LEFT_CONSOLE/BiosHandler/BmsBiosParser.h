@@ -70,8 +70,10 @@ static void bmsBiosApply() {
   srFlush();
 
   // UHF 7세그 디스플레이 — 주파수(kHz)와 프리셋 채널
-  // UHF FUNC OFF = MCP#0 PB7 (pin 15), active-low
-  bool uhfOff = !mcpReadPin(0, 15);
+  // UHF FUNC OFF = MCP#0 PB4, active-low
+  // MCP 핀 번호는 GPA0~7 = 0~7, GPB0~7 = 8~15 이므로 PB4 = 12 입니다.
+  // 15 는 PB7 = FUNCTION ADF 라, 예전에는 ADF 에서 꺼지고 OFF 에서 켜져 있었습니다.
+  bool uhfOff = !mcpReadPin(0, 12);
   if (uhfOff) {
     displayOn(false);             // FUNCTION=OFF → 디스플레이 OFF (번인 방지)
   } else {
