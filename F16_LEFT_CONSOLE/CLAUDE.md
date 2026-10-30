@@ -97,7 +97,7 @@ Pin 13 drives a MOSFET gate via 1kΩ resistor (10kΩ pulldown to GND). On-board 
 | Source | How | Detail |
 |--------|-----|--------|
 | BMS | Bridge sends PWM in `ledBits` byte 2 | Adaptive: DIM(instrLight=1)→PWM 255 by default; if BRT(=2) ever received, DIM drops to 50, BRT=255. instrLight=0→OFF |
-| DCS | Teensy direct | `LIGHT_CONSLES` (0x4482) 0–65535 → `>>8` → PWM 0–255 |
+| DCS | Teensy direct | `LIGHT_CONSLES` (0x4482) remap 11200~58510 → PWM 0~255 |
 | Offline manual | UHF TEST + STATUS (held) + UHF VOL | `checkManualBacklight()` — 10-bit ADC → 8-bit PWM |
 | Idle auto-off | 30 min no input while offline | `backlightIdleOff` flag, any input restores |
 | USB suspend | SOF silence >50ms | All LEDs + backlight off, `wfi` sleep |

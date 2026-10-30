@@ -25,7 +25,11 @@
 | LIGHT_RWR_ACT_POWER | 0x447E | 0x1000 | 12 | TWA Act/Power |
 | LIGHT_RWR_ALT_LOW | 0x447E | 0x2000 | 13 | TWA Alt Low |
 | LIGHT_ECM | 0x4544 | 0x4000 | 14 | ECM Indicator |
-| LIGHT_CONSLES | 0x4482 | 0xFFFF | - | Console Lighting (0–65535) |
+| LIGHT_CMDS_NO_GO | 0x4480 | 0x0200 | 9 | CMDS NO GO (green) |
+| LIGHT_CMDS_GO | 0x4480 | 0x0400 | 10 | CMDS GO (green) |
+| LIGHT_CMDS_DISP | 0x4480 | 0x0800 | 11 | CMDS DISP (green) |
+| LIGHT_CMDS_RDY | 0x4480 | 0x1000 | 12 | CMDS RDY (green) |
+| LIGHT_CONSLES | 0x4482 | 0xFFFF | - | Console Lighting (0–65535, remap 11200–58510 → 0–255) |
 | LIGHT_INST_PNL | 0x4484 | 0xFFFF | - | Instrument Panel Lighting (0–65535) |
 
 **ECM LED Address Map** (74HC595, 32 outputs):
@@ -148,7 +152,7 @@ Backlight 2원화:
 - `ledBits` byte 2 (bits 16–23) = console backlight PWM → pin 13 (양쪽 보드)
 - `ledBits` byte 3 (bits 24–31) = instr panel backlight PWM → pin 12 (LEFT_AUX_MISC only, MISC 패널)
 - Bridge: `instrLight` 0→OFF, 1→DIM(255 or 50), 2→BRT(255). BMS는 소스가 하나라 두 채널 동일 값.
-- DCS: `LIGHT_CONSLES`(0x4482) → pin 13, `LIGHT_INST_PNL`(0x4484) → pin 12.
+- DCS: `LIGHT_CONSLES`(0x4482) → pin 13 (remap 11200~58510 → 0~255), `LIGHT_INST_PNL`(0x4484) → pin 12.
 - Offline 수동 조절: AUX = DN LOCK REL + HMCS pot (양쪽 동시), 콘솔 = UHF TEST + STATUS + VOL.
 
 `srData`: uint32, ECM 32 LED (74HC595). FlightData2 `ecmBits[5]`에서 생성.

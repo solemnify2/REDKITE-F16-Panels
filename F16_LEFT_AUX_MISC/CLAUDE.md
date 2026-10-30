@@ -78,7 +78,7 @@ Separate 12V adapter, two MOSFETs for dual-channel backlight:
 | Source | How | Detail |
 |--------|-----|--------|
 | BMS | Bridge sends PWM in `ledBits` | byte 2 (bits 16~23) → pin 13, byte 3 (bits 24~31) → pin 12. BMS는 `instrLight` 하나뿐이라 동일 값 |
-| DCS | Teensy direct | `LIGHT_CONSLES` (0x4482) → pin 13, `LIGHT_INST_PNL` (0x4484) → pin 12 |
+| DCS | Teensy direct | `LIGHT_CONSLES` (0x4482) → pin 13 (remap 11200~58510 → 0~255), `LIGHT_INST_PNL` (0x4484) → pin 12 |
 | Offline manual | DN LOCK REL (held) + HMCS Symbology pot | A15, reversed. **양쪽 핀 동시 조절** |
 | Idle auto-off | 30 min no input while offline | `backlightIdleOff` flag, any input restores |
 | USB suspend | SOF silence >50ms | All LEDs + backlight off, `wfi` sleep |
@@ -136,4 +136,6 @@ Pins are assigned in **FPC conductor order** so the ribbon does not cross: RDY, 
 
 The µSD-to-Teensy mapping comes from `docs/teensy/card11b_rev4_web.pdf`: µSD 1–8 is pins 47, 46, 45, 3.3V, 44, GND, 43, 42. The socket is wired for SDIO, so the SPI2 names on those pins do not line up with the SD signal names.
 
-Keep LED Vf under ~3.0 V — these run straight off 3.3 V logic, same as the GEAR/TWA LEDs. DCS-BIOS does not drive these yet.
+Keep LED Vf under ~3.0 V — these run straight off 3.3 V logic, same as the GEAR/TWA LEDs.
+
+DCS-BIOS uses address **0x4480**: `LIGHT_CMDS_GO` (bit 10), `LIGHT_CMDS_NO_GO` (bit 9), `LIGHT_CMDS_DISP` (bit 11), `LIGHT_CMDS_RDY` (bit 12). DCS separates DISP and RDY as independent indicators, unlike BMS which uses a single `Rdy` bit for the combined lamp.

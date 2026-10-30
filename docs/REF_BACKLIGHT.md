@@ -51,7 +51,7 @@ Online 일 때 각 채널이 독립 제어됩니다. Offline 수동 조절은 �
 | 상태 | 동작 |
 |---|---|
 | BMS online | 브릿지가 `instrLight` → `ledBits` byte 2 (console, bits 16-23) + byte 3 (instr panel, bits 24-31) 전송. BMS는 소스가 `instrLight` 하나뿐이라 두 채널 동일 값 |
-| DCS online | Teensy가 `LIGHT_CONSLES`(0x4482) → pin 13, `LIGHT_INST_PNL`(0x4484) → pin 12 독립 제어 (0~65535 → >>8 → PWM 0~255) |
+| DCS online | Teensy가 `LIGHT_CONSLES`(0x4482) → pin 13 (remap 11200~58510 → 0~255), `LIGHT_INST_PNL`(0x4484) → pin 12 (>>8 → 0~255) 독립 제어 |
 | Offline 수동 (AUX) | DN LOCK REL 누른 채 HMCS Symbology pot(A15)로 **양쪽 핀 동시** 밝기 조절 (방향 반전) |
 | Offline 수동 (콘솔) | UHF TEST + STATUS 동시에 누른 채 UHF VOL pot(A9)로 밝기 조절 |
 | Idle 30분 | 자동 꺼짐. 아무 입력으로 복귀 |

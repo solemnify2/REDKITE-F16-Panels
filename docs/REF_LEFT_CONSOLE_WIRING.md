@@ -630,7 +630,7 @@ I2C 핫플러그 보호: SDA/SCL 직렬 100Ω, 각 보드 3.3V에 10µF + 100nF.
 | 상태 | 제어 방식 |
 |------|-----------|
 | **BMS online** | bridge가 `instrLight` → PWM 변환 (adaptive: BRT 미수신 시 DIM=255, 수신 후 DIM=50/BRT=255) |
-| **DCS online** | Teensy가 `LIGHT_CONSLES` (0~65535) → PWM 0~255 직접 변환 |
+| **DCS online** | Teensy가 `LIGHT_CONSLES` remap 11200~58510 → PWM 0~255 |
 | **Offline 수동** | UHF TEST + STATUS 동시에 누른 채 UHF VOL pot → PWM 0~255 |
 | **Idle 30분** | 자동 꺼짐. 입력 시 복귀 |
 
