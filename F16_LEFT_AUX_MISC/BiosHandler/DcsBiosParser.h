@@ -40,12 +40,21 @@
 #define DCSBIOS_TWA_POWER_MASK    0x1000  // bit 12 — LIGHT_RWR_ACT_POWER
 #define DCSBIOS_TWA_LOW_MASK      0x2000  // bit 13 — LIGHT_RWR_ALT_LOW
 
+// Address 0x4480: CMDS EWS indicator lights
+#define DCSBIOS_CMDS_ADDR           0x4480
+#define DCSBIOS_CMDS_NOGO_MASK      0x0200  // bit 9  — LIGHT_CMDS_NO_GO (green)
+#define DCSBIOS_CMDS_GO_MASK        0x0400  // bit 10 — LIGHT_CMDS_GO (green)
+#define DCSBIOS_CMDS_DISP_MASK      0x0800  // bit 11 — LIGHT_CMDS_DISP (green)
+#define DCSBIOS_CMDS_RDY_MASK       0x1000  // bit 12 — LIGHT_CMDS_RDY (green)
+
 // Address 0x4544: ECM indicator (bit14) — main ECM LED (separate from 32 SR LEDs)
 #define DCSBIOS_ECM_ADDR        0x4544
 #define DCSBIOS_ECM_MASK        0x4000  // bit 14
 
 // Address 0x4482: LIGHT_CONSLES — console backlight (0–65535) → pin 13
 #define DCSBIOS_CONSOLE_LIGHT_ADDR  0x4482
+#define DCSBIOS_CONSLES_MIN  11200  // DCS knob minimum (~PWM 43 raw), remap to 0
+#define DCSBIOS_CONSLES_MAX  58510  // DCS knob maximum (~PWM 228 raw), remap to 255
 
 // Address 0x4484: LIGHT_INST_PNL — instrument panel backlight (0–65535) → pin 12 (MISC)
 #define DCSBIOS_INST_PNL_ADDR   0x4484
@@ -82,7 +91,8 @@ static uint32_t     dcsBiosLastByte = 0;     // millis() of last byte received (
 // Returns true if we need to process data for this 2-byte aligned address
 static bool dcsBiosIsInteresting(uint16_t addr) {
   return (addr == DCSBIOS_GEAR_NL_ADDR || addr == DCSBIOS_GEAR_R_ADDR ||
-          addr == DCSBIOS_TWA_ADDR || addr == DCSBIOS_ECM_ADDR ||
+          addr == DCSBIOS_TWA_ADDR || addr == DCSBIOS_CMDS_ADDR ||
+          addr == DCSBIOS_ECM_ADDR ||
           addr == DCSBIOS_CONSOLE_LIGHT_ADDR || addr == DCSBIOS_INST_PNL_ADDR);
 }
 
@@ -92,6 +102,7 @@ static bool dcsBiosChunkIsInteresting(uint16_t addr, uint16_t count) {
   return (DCSBIOS_GEAR_NL_ADDR    >= addr && DCSBIOS_GEAR_NL_ADDR    < end) ||
          (DCSBIOS_GEAR_R_ADDR     >= addr && DCSBIOS_GEAR_R_ADDR     < end) ||
          (DCSBIOS_TWA_ADDR        >= addr && DCSBIOS_TWA_ADDR        < end) ||
+         (DCSBIOS_CMDS_ADDR       >= addr && DCSBIOS_CMDS_ADDR       < end) ||
          (DCSBIOS_ECM_ADDR        >= addr && DCSBIOS_ECM_ADDR        < end) ||
          (DCSBIOS_CONSOLE_LIGHT_ADDR >= addr && DCSBIOS_CONSOLE_LIGHT_ADDR < end) ||
          (DCSBIOS_INST_PNL_ADDR   >= addr && DCSBIOS_INST_PNL_ADDR   < end);
@@ -121,12 +132,24 @@ static void dcsBiosOnUpdate(uint16_t addr, uint16_t value) {
     writeLed(LI_TWA_SEARCH, (value & DCSBIOS_TWA_SEARCH_MASK));
     writeLed(LI_TWA_ACT, (value & DCSBIOS_TWA_ACT_MASK));
   }
+  else if (addr == DCSBIOS_CMDS_ADDR) {
+    writeLed(LI_CMDS_GO, (value & DCSBIOS_CMDS_GO_MASK));
+    writeLed(LI_CMDS_NOGO, (value & DCSBIOS_CMDS_NOGO_MASK));
+    writeLed(LI_CMDS_DISP_12, (value & DCSBIOS_CMDS_DISP_MASK));
+    writeLed(LI_CMDS_DISP_3, (value & DCSBIOS_CMDS_DISP_MASK));
+    writeLed(LI_CMDS_RDY, (value & DCSBIOS_CMDS_RDY_MASK));
+  }
   else if (addr == DCSBIOS_ECM_ADDR) {
     writeLed(LI_ECM, (value & DCSBIOS_ECM_MASK));
   }
   else if (addr == DCSBIOS_CONSOLE_LIGHT_ADDR) {
-    // Console backlight → pin 13 (0~65535 → 0~255)
-    setBacklightBrightness(value >> 8);
+    // Console backlight → pin 13: remap [11200, 58510] → [0, 255]
+    uint8_t pwm = 0;
+    if (value > DCSBIOS_CONSLES_MIN) {
+      uint32_t scaled = (uint32_t)(value - DCSBIOS_CONSLES_MIN) * 255 / (DCSBIOS_CONSLES_MAX - DCSBIOS_CONSLES_MIN);
+      pwm = (scaled > 255) ? 255 : scaled;
+    }
+    setBacklightBrightness(pwm);
   }
   else if (addr == DCSBIOS_INST_PNL_ADDR) {
     // Instrument panel backlight → pin 12 MISC (0~65535 → 0~255)

@@ -82,6 +82,8 @@
 
 // Address 0x4482: LIGHT_CONSLES — console backlight (0-65535) → pin 13
 #define DCSBIOS_CONSOLE_LIGHT_ADDR 0x4482
+#define DCSBIOS_CONSLES_MIN  11200  // DCS knob minimum (~PWM 43 raw), remap to 0
+#define DCSBIOS_CONSLES_MAX  58510  // DCS knob maximum (~PWM 228 raw), remap to 255
 
 // --- UHF Display (string outputs) ---
 // Address 0x45B0: UHF_CHAN_DISP — 2-char string (" 1"~"20")
@@ -216,7 +218,13 @@ static void dcsBiosOnUpdate(uint16_t addr, uint16_t value) {
   }
   // --- Console backlight (PWM dimming) ---
   else if (addr == DCSBIOS_CONSOLE_LIGHT_ADDR) {
-    setBacklightBrightness(value >> 8);   // 0~65535 → 0~255
+    // Console backlight: remap [11200, 58510] → [0, 255]
+    uint8_t pwm = 0;
+    if (value > DCSBIOS_CONSLES_MIN) {
+      uint32_t scaled = (uint32_t)(value - DCSBIOS_CONSLES_MIN) * 255 / (DCSBIOS_CONSLES_MAX - DCSBIOS_CONSLES_MIN);
+      pwm = (scaled > 255) ? 255 : scaled;
+    }
+    setBacklightBrightness(pwm);
   }
   // --- UHF Display (string outputs → 7-seg) ---
   else if (addr == DCSBIOS_UHF_CHAN_ADDR) {
