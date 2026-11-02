@@ -231,8 +231,8 @@ const LedDef leds[] = {
   {"Left Gear",    PNL_GEAR,  31,  -1},
   {"Right Gear",   PNL_GEAR,  32,  -1},
   {"Gear Warn",    PNL_GEAR,  27,  -1},
-  {"TWA Power",    PNL_TWA,   28,  -1},  // swapped from 34 for PWM
-  {"TWA Low",      PNL_TWA,   29,  -1},  // swapped from 35 for PWM
+  {"TWA Power",    PNL_TWA,   29,  -1},  // swapped with Low
+  {"TWA Low",      PNL_TWA,   28,  -1},  // swapped with Power
   {"TWA Search",   PNL_TWA,   36,  -1},
   {"TWA Act",      PNL_TWA,   37,  -1},
   {"ECM",          PNL_MISC,  7,   0},    // MCP device 0, GPA7
@@ -418,10 +418,12 @@ void mcpWritePin(uint8_t deviceIdx, uint8_t pin, bool state) {
 // Unified LED write — handles both direct and MCP LEDs
 #define TWA_BRIGHT_PIN A14  // pin 38 — pot for TWA LED dimming
 uint8_t twaBrightness = 128;
+bool twaLedState[4] = {false};  // LI_TWA_POWER ~ LI_TWA_ACT
 void writeLed(uint8_t idx, bool state) {
   if (leds[idx].mcpIdx >= 0) {
     mcpWritePin(leds[idx].mcpIdx, leds[idx].pin, state);
   } else if (idx >= LI_TWA_POWER && idx <= LI_TWA_ACT) {
+    twaLedState[idx - LI_TWA_POWER] = state;
     analogWrite(leds[idx].pin, state ? twaBrightness : 0);
   } else {
     digitalWrite(leds[idx].pin, state ? HIGH : LOW);
@@ -1083,7 +1085,16 @@ void loop() {
   }
 
   // --- TWA LED dimming from pot ---
-  twaBrightness = analogRead(TWA_BRIGHT_PIN) >> 2;  // 10-bit → 8-bit
+  {
+    uint8_t newBright = 255 - (analogRead(TWA_BRIGHT_PIN) >> 2);
+    if (newBright != twaBrightness) {
+      twaBrightness = newBright;
+      for (uint8_t i = 0; i < 4; i++) {
+        if (twaLedState[i])
+          analogWrite(leds[LI_TWA_POWER + i].pin, twaBrightness);
+      }
+    }
+  }
 
   // --- Read all inputs ---
   processSwitches();

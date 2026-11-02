@@ -118,7 +118,7 @@ LED sweep animation runs on: startup, USB resume from suspend, bridge online (of
 
 See `docs/REF_LEFT_AUX_WIRING.md` for the cable tree, full Teensy pin map, MCP GPIO map, DX button map, joystick axes, the CMDS lamp wiring, the AUX↔MISC LAN wiring, and the build checklist. Pin 27 = Gear Warn LED, pin 12 = MISC backlight MOSFET.
 
-40/42 header pins are used (spare: pin 0, A14). The CMDS lamps hang off the **bottom microSD pads**, broken out with a 15-pin FPC extension cable — no soldering onto the board, no header pins consumed.
+41/42 header pins are used (spare: pin 0). A14 = TWA dimm pot. TWA LED pins 28/29 are swapped with Gear 34/35 for PWM dimming. The CMDS lamps hang off the **bottom microSD pads**, broken out with a 15-pin FPC extension cable — no soldering onto the board, no header pins consumed.
 
 ### CMDS EWS Lamps
 
