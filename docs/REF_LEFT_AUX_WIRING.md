@@ -212,11 +212,11 @@ LAN pin 8 ── GND ───┴──┴── MCP23017 GND
   C6    PEDAL RIGHT       (A17)  41 ──┤ ○         ○ ├── 24  TWA LADDER        (A10)  C3
   C6    PEDAL LEFT        (A16)  40 ──┤ ○         ○ ├── 25  CMDS MODE LDR     (A11)  C2
   C5    HMCS SYMBOL       (A15)  39 ──┤ ○         ○ ├── 26  CMDS PRGM LDR     (A12)  C2
-  --    -- spare --       (A14)  38 ──┤ ○         ○ ├── 27  GEAR WARN LED    (A13)  C1
-  C3    TWA ACT LED              37 ──┤ ○         ○ ├── 28  LANDING GEAR UP          C1
-  C3    TWA SEARCH LED           36 ──┤ ○         ○ ├── 29  LANDING GEAR DN          C1
-  C3    TWA LOW LED              35 ──┤ ○         ○ ├── 30  NOSE GEAR LED            C1
-  C3    TWA POWER LED            34 ──┤ ○         ○ ├── 31  LEFT GEAR LED            C1
+  C3    TWA DIMM POT     (A14)  38 ──┤ ○         ○ ├── 27  GEAR WARN LED    (A13)  C1
+  C3    TWA ACT LED (PWM)         37 ──┤ ○         ○ ├── 28  TWA POWER LED (PWM)      C3
+  C3    TWA SEARCH LED (PWM)     36 ──┤ ○         ○ ├── 29  TWA LOW LED (PWM)        C3
+  C1    LANDING GEAR DN          35 ──┤ ○         ○ ├── 30  NOSE GEAR LED            C1
+  C1    LANDING GEAR UP          34 ──┤ ○         ○ ├── 31  LEFT GEAR LED            C1
   C4    ALTGEAR HANDLE           33 ──┤ ○         ○ ├── 32  RIGHT GEAR LED           C1
                                       └─────────────┘
 

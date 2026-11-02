@@ -158,7 +158,7 @@ const SwitchDef switches[] = {
   {"Horn Silencer",         PNL_GEAR,       SW_ON_OFF,      -1,   2,   0,  NULL},
   {"Landing Light",         PNL_GEAR,       SW_ON_OFF_ON,   -1,   3,   4,  &swLandingLight},
   {"Hook",                  PNL_GEAR,       SW_ON_OFF,      -1,   11,   0,  NULL},   // Up / Down
-  {"Landing Gear",          PNL_GEAR,       SW_ON_OFF_ON,   -1,   28,   29,  &swGear},  // UP / DN
+  {"Landing Gear",          PNL_GEAR,       SW_ON_OFF_ON,   -1,   34,   35,  &swGear},  // UP / DN (swapped with TWA Power/Low for PWM)
   {"DN LOCK REL",           PNL_GEAR,       SW_ON_OFF,      -1,   1,   0,  NULL},   // SW_IDX_DN_LOCK_REL
   {"GND JETT ENABLE",       PNL_GEAR,       SW_ON_OFF,      -1,   9,   0,  NULL},   // ENABLE / OFF
   {"ANTI SKID",             PNL_GEAR,       SW_ON_OFF_ON,   -1,   6,  7,  NULL},   // PARKING BRAKE / ANTI SKID / OFF
@@ -231,8 +231,8 @@ const LedDef leds[] = {
   {"Left Gear",    PNL_GEAR,  31,  -1},
   {"Right Gear",   PNL_GEAR,  32,  -1},
   {"Gear Warn",    PNL_GEAR,  27,  -1},
-  {"TWA Power",    PNL_TWA,   34,  -1},
-  {"TWA Low",      PNL_TWA,   35,  -1},
+  {"TWA Power",    PNL_TWA,   28,  -1},  // swapped from 34 for PWM
+  {"TWA Low",      PNL_TWA,   29,  -1},  // swapped from 35 for PWM
   {"TWA Search",   PNL_TWA,   36,  -1},
   {"TWA Act",      PNL_TWA,   37,  -1},
   {"ECM",          PNL_MISC,  7,   0},    // MCP device 0, GPA7
@@ -416,9 +416,13 @@ void mcpWritePin(uint8_t deviceIdx, uint8_t pin, bool state) {
 }
 
 // Unified LED write — handles both direct and MCP LEDs
+#define TWA_BRIGHT_PIN A14  // pin 38 — pot for TWA LED dimming
+uint8_t twaBrightness = 128;
 void writeLed(uint8_t idx, bool state) {
   if (leds[idx].mcpIdx >= 0) {
     mcpWritePin(leds[idx].mcpIdx, leds[idx].pin, state);
+  } else if (idx >= LI_TWA_POWER && idx <= LI_TWA_ACT) {
+    analogWrite(leds[idx].pin, state ? twaBrightness : 0);
   } else {
     digitalWrite(leds[idx].pin, state ? HIGH : LOW);
   }
@@ -1077,6 +1081,9 @@ void loop() {
       }
     }
   }
+
+  // --- TWA LED dimming from pot ---
+  twaBrightness = analogRead(TWA_BRIGHT_PIN) >> 2;  // 10-bit → 8-bit
 
   // --- Read all inputs ---
   processSwitches();
