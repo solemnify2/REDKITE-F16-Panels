@@ -49,8 +49,7 @@ python tools/gen_bms_setup_xml.py -o out
 | `--bms-root` | BMS 설치 경로 (기본 `C:\Falcon BMS 4.38`) |
 | `--guid DEVICE GUID` | 장치 GUID 지정 (기본은 `sim_axes.py` 의 값) |
 
-**파일을 처음부터 전부 만듭니다** — 기존 XML 이 없어도 되고 참고하지도 않습니다.
-`-o` 로 받아 확인한 뒤 `User\Config` 로 복사하십시오.
+확인한 뒤 `User\Config` 로 복사하십시오.
 
 ### 1-2. DCS — 입력 프로파일
 
@@ -62,8 +61,8 @@ python tools/gen_dcs_profile.py -o out
 |---|---|
 | `--name CONSOLE "이름"` | 파일명 지정 (기본은 `sim_axes.py` 의 값) |
 
-장치마다 `.diff.lua` 하나를 만들고, `Saved Games\DCS\Config\Input\...\InputUserProfiles\`
-에 넣은 뒤 DCS 입력 설정에서 장치에 지정합니다. GUID 가 없어 파일명은 자유입니다.
+확인한 뒤 `Saved Games\DCS\Config\Input\...\InputUserProfiles\` 로 복사하고,
+DCS 입력 설정에서 장치에 지정하십시오.
 
 ## 2. 보드가 DX 맵을 알려주는 방법
 
@@ -275,8 +274,9 @@ EPU 커버는 모듈의 `Input/F-16C_50/joystick/default.lua` 를 봐야 확실�
 
 ## 7. 축 설정 — 두 심 공통
 
-버튼은 `dxOrder[]` 와 매핑 표에서 전부 유도되지만, **축에는 유도할 수 없는 값이
-붙습니다** — `invert`, `deadzone`, `saturation` 같은 것들입니다. 이 패널의 포트는
+두 생성기는 **파일을 처음부터 전부 만듭니다** — 기존 파일이 없어도 되고 참고하지도
+않습니다. 버튼은 `dxOrder[]` 와 매핑 표에서 전부 유도되지만, **축에는 유도할 수 없는
+값이 붙습니다** — `invert`, `deadzone`, `saturation` 같은 것들입니다. 이 패널의 포트는
 전부 반전이고요. 그래서 기존 설정에서 한 번 뽑아 `tools/sim_axes.py` 에 적어 두고,
 두 생성기가 그 파일만 보고 축 블록을 만듭니다. 바꾸려면 그 파일을 고치십시오.
 
