@@ -423,8 +423,8 @@ C14 는 SD 확장 케이블 4선(DIN · CLK · CS · GND) + VIN 1선 = **5선**�
 | 23 | UHF | T-TONE |
 | 24 | UHF | SQUELCH |
 | 25–26 | ENGINE | JFS START 1 / START 2 |
-| 27 | ENGINE | ENG CONT PRI / SEC |
-| 28 | ENGINE | ENG CONT COVER (커버 자동화) |
+| 27 | ENGINE | ENG CONT COVER (커버 자동화) |
+| 28 | ENGINE | ENG CONT PRI / SEC |
 | 29–30 | ENGINE | AB RESET / NORM / ENG DATA (3단 토글) |
 | 31 | ENGINE | MAX POWER |
 | 32 | AUDIO 1 | COMM 1 전원 — 노브가 켜져 있는 동안 **유지** (pot ADC ≥ 5) |
@@ -441,9 +441,9 @@ C14 는 SD 확장 케이블 4선(DIN · CLK · CS · GND) + VIN 1선 = **5선**�
 | 46–53 | ECM | 저항 래더 — ECM 1~6, FRM, SPL |
 | 54 | ECM | RESET |
 | 55 | ECM | BIT |
-| 56–57 | EPU | NORM / ON |
-| 58 | EPU | EPU OFF COVER (커버 자동화) |
-| 59 | EPU | EPU ON COVER (커버 자동화) |
+| 56 | EPU | EPU OFF COVER (커버 자동화) |
+| 57 | EPU | EPU ON COVER (커버 자동화) |
+| 58–59 | EPU | NORM / ON |
 | 60–61 | ELEC | MAIN PWR — BATT / MAIN |
 | 62 | ELEC | CAUTION RST |
 | 63–64 | AVTR | AUTO / ON |
@@ -451,9 +451,12 @@ C14 는 SD 확장 케이블 4선(DIN · CLK · CS · GND) + VIN 1선 = **5선**�
 > 줄을 옮기면 그 뒤 DX 가 전부 밀립니다. 바인딩 파일은 손으로 유지하지 말고 다시 생성하십시오.
 > 기동 시 시리얼 요약이 현재 DX 를 이 순서 그대로 찍어 줍니다.
 >
-> ENG CONT·EPU 커버는 커버 자동화 DX 이고, COMM1/COMM2 전원은 볼륨 노브 끝의 전원
-> 스위치입니다. pot ADC < 5 → OFF, ≥ 5 → ON 이며, **켜져 있는 동안 DX 를 계속 누른
-> 상태로 둡니다**(펄스가 아님) — 심을 나중에 띄워도 현재 상태가 그대로 전달됩니다.
+> ENG CONT·EPU 커버는 커버 자동화 DX 로, 자기가 덮는 토글 **바로 앞** 번호를 받습니다
+> — 커버가 먼저 열리고 스위치가 움직이는 실제 순서와 같습니다.
+>
+> COMM1/COMM2 전원은 볼륨 노브 끝의 전원 스위치입니다. pot ADC < 5 → OFF, ≥ 5 → ON
+> 이며, **켜져 있는 동안 DX 를 계속 누른 상태로 둡니다**(펄스가 아님) — 심을 나중에
+> 띄워도 현재 상태가 그대로 전달됩니다.
 >
 > **펌웨어는 심을 구분하지 않습니다.** 프로토콜 판별(BMS-BIOS / DCS-BIOS)은
 > LED·백라이트 동기화에만 쓰이고, 위 DX 는 어느 심이든 똑같이 나갑니다.

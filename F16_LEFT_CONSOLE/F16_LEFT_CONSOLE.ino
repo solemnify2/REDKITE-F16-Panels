@@ -794,6 +794,9 @@ static const char* const commPwrNames[NUM_COMM_PWR] = {
 //  analogBtnArrays[] 의 순서는 배선 정보라 건드리지 않고, DX 순서만
 //  여기서 따로 정합니다 — 핀 배치는 그대로 둔 채 번호만 바뀝니다.
 //
+//  커버 자동화 DX 는 자기가 덮는 토글 **바로 앞**에 둡니다 — 커버가 먼저
+//  열리고 스위치가 움직이는 실제 순서와 같습니다.
+//
 //  ※ 줄을 옮기면 그 뒤 DX 가 전부 밀립니다. 바인딩 파일을 손으로
 //    유지하지 말고 다시 생성하십시오. 현재 번호는 기동 시 시리얼
 //    요약이 이 순서 그대로 찍어 줍니다.
@@ -830,8 +833,8 @@ const DxEntry dxOrder[] = {
 
   // ---- ENG & JET START ----
   {DX_SW,      12},   // JFS                  x2
-  {DX_SW,      13},   // ENG CONT             x1
   {DX_COVER,    0},   // ENG CONT COVER       x1
+  {DX_SW,      13},   // ENG CONT             x1
   {DX_SW,      14},   // AB RESET/ENG DATA    x2
   {DX_SW,      15},   // MAX POWER            x1
 
@@ -856,9 +859,9 @@ const DxEntry dxOrder[] = {
   {DX_SW,      26},   // ECM BIT              x1
 
   // ---- EPU ----
-  {DX_SW,      27},   // EPU                  x2
   {DX_COVER,    1},   // EPU OFF COVER        x1
   {DX_COVER,    2},   // EPU ON COVER         x1
+  {DX_SW,      27},   // EPU                  x2
 
   // ---- ELEC ----
   {DX_SW,      28},   // ELEC MAIN PWR        x2
