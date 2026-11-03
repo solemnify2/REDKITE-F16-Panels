@@ -51,6 +51,18 @@ python tools/gen_bms_setup_xml.py
 BMS 의 `User\Config` 에 **바로 씁니다.** 전 파일은 같은 이름 뒤에 `.bak` 을
 붙여 남기므로 되돌릴 수 있습니다. 먼저 눈으로 보고 싶으면 `-o out`.
 
+폴더가 이렇게 되어 있어야 합니다:
+
+```
+C:\Falcon BMS 4.38\User\Config\
+  BMS - Full.key                                               ← 콜백 목록을 여기서 읽습니다
+  Setup.v100.F16 LEFT CONSOLE {6AE05230-…-444553540000}.xml    ← 덮어씁니다
+  Setup.v100.F16 LEFT AUX MISC {024F5980-…-444553540000}.xml   ← 덮어씁니다
+  Setup.v100.Throttle - HOTAS Warthog {…}.xml                  ← 다른 장치. 안 건드립니다
+```
+
+중괄호 안 GUID 는 **PC 마다 다릅니다** — 위 값은 심 PC 의 예일 뿐입니다.
+
 그 장치의 XML 이 아직 없으면 아무것도 쓰지 않고 멈춥니다. BMS 의
 **SETUP – CONTROLLERS** 에서 그 장치를 고르고 아무 버튼이나 한 번 바인드한 뒤
 저장하십시오. 빈 파일이 생기고, 그 뒤로는 생성기가 그걸 계속 덮어씁니다.
@@ -68,8 +80,19 @@ python tools/gen_dcs_profile.py
 |---|---|
 | `--profiles DIR` | InputUserProfiles 경로 (못 찾을 때) |
 
-그 이름(`sim_axes.py` 의 `DCS_PROFILE`)의 프로파일이 아직 없으면 아무것도
-쓰지 않고 멈춥니다. DCS 의 **Options – Controls** 에서 F-16C 의 그 장치 열을
+폴더가 이렇게 되어 있어야 합니다:
+
+```
+C:\Users\<계정>\Saved Games\DCS\InputUserProfiles\
+  F16 Left Console panel.diff.lua      ← 덮어씁니다
+  F16 Left AUX MISCpanel.diff.lua      ← 덮어씁니다
+  Warthog Throttle.diff.lua            ← 다른 장치. 안 건드립니다
+```
+
+`sim_axes.py` 의 `DCS_PROFILE` 과 **띄어쓰기까지 같아야** 합니다 — `MISCpanel` 에
+띄어쓰기가 없는 것도 그대로입니다.
+
+그 프로파일이 아직 없으면 아무것도 쓰지 않고 멈춥니다. DCS 의 **Options – Controls** 에서 F-16C 의 그 장치 열을
 고르고 **Save Profile As...** 로 그 이름 그대로 한 번 저장하십시오. 빈 프로파일이
 생기고, 그 뒤로는 생성기가 그걸 계속 덮어씁니다.
 
