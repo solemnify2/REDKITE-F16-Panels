@@ -277,50 +277,39 @@ const McpDeviceDef mcpDevices[] = {
 //
 const SwitchDef switches[] = {
   // name                 panel        type           mcpIdx pin1 pin2 numPos
+  //
+  // ※ 이 배열의 순서는 **읽기 좋으라고** 실기 배치를 따릅니다. DX 번호와는
+  //   무관합니다 — 번호는 `dxOrder[]` 가 정합니다. 새 하드웨어를 넣을 때는
+  //   배선상 맞는 자리에 넣고, `dxOrder[]` 에도 한 줄 추가하십시오.
 
-  // ---- ECM Panel (MCP 0x22, GPB) ----
-  {"ECM OPR/STBY",        PNL_ECM,     SW_ON_OFF_ON,     2,  11,  10,  0},  // GPB3/GPB2  (OPR/OFF)
-  {"ECM XMIT",            PNL_ECM,     SW_ON_OFF_ON,     2,  13,  12,  0},  // GPB5/GPB4  (XMIT1/XMIT3)
-  {"ECM BIT",             PNL_ECM,     SW_ON_OFF,        2,  14,   0,  0},  // GPB6  momentary
-  {"ECM RESET",           PNL_ECM,     SW_ON_OFF,        2,  15,   0,  0},  // GPB7  momentary
-
-  // ---- EPU Panel (MCP 0x21) ----
-  {"EPU",                 PNL_EPU,     SW_ON_OFF_ON,     1,   8,   9,  0},  // GPB0/GPB1  OFF/NORM/ON (배선 교차)
-
-  // ---- ELEC Panel (MCP 0x21) ----
-  {"ELEC CAUTION RST",    PNL_ELEC,    SW_ON_OFF,        1,  10,   0,  0},  // GPB2  momentary (CAUTION RST)
-
-  // ---- AVTR Panel (MCP 0x22) ----
-  {"AVTR",                PNL_AVTR,    SW_ON_OFF_ON,     2,   8,   9,  0},  // GPB0/GPB1  UNTHRD/RECORD/EVENT MRK
-
-  // ---- ENGINE START Panel (Teensy direct) ----
-  {"JFS",       PNL_ENGINE, SW_ON_OFF_ON, -1, PIN_JFS1, PIN_JFS2, 0},  // OFF/START1/START2
-  {"ENG CONT",  PNL_ENGINE, SW_ON_OFF,    -1, PIN_ENG_CONT,   0,  0},  // PRI/SEC
-
-  // ---- MPO (Teensy direct) ----
+  // ---- MANUAL PITCH — 최전방 인보드 (Teensy direct) ----
   {"MPO",       PNL_MPO,    SW_ON_OFF,    -1, PIN_MPO,        0,  0},  // NORM/OVRD
 
-  // ---- ELEC MAIN PWR (MCP 0x21) ----
-  {"ELEC MAIN PWR",       PNL_ELEC,    SW_ON_OFF_ON,     1,  14,  15,  0},  // GPB6/GPB7  MAIN/OFF (배선 교차)
-
-  // ---- UHF Panel (MCP 0x20, 패널 실장) ----
-  // SW_ROTARY 는 pin1 부터 numPos 개 연속 GPIO 를 읽습니다.
+  // ---- UHF Panel — 최전방 아웃보드 (MCP 0x20 PB + Teensy direct, 패널 실장) ----
   // 실제 배선: FUNCTION(PB4~7) → MODE(PB1~3) → STATUS(PB0)
-  // SW_ROTARY 는 오름차순 고정이라 DX 를 뒤집으려면 개별 SW_ON_OFF 로 분리
-  {"UHF FUNC ADF",   PNL_UHF, SW_ON_OFF, 0, 15, 0, 0},  // PB7
-  {"UHF FUNC BOTH",  PNL_UHF, SW_ON_OFF, 0, 14, 0, 0},  // PB6
-  {"UHF FUNC MAIN",  PNL_UHF, SW_ON_OFF, 0, 13, 0, 0},  // PB5
-  {"UHF FUNC OFF",   PNL_UHF, SW_ON_OFF, 0, 12, 0, 0},  // PB4
-  {"UHF MODE GRD",   PNL_UHF, SW_ON_OFF, 0, 11, 0, 0},  // PB3
-  {"UHF MODE PRE",   PNL_UHF, SW_ON_OFF, 0, 10, 0, 0},  // PB2
-  {"UHF MODE MNL",   PNL_UHF, SW_ON_OFF, 0,  9, 0, 0},  // PB1
-  {"UHF SQUELCH",  PNL_UHF, SW_ON_OFF, -1, PIN_UHF_SQUELCH, 0, 0},  // Teensy 33
-  {"UHF T-TONE",   PNL_UHF, SW_ON_OFF, -1, PIN_UHF_TTONE,   0, 0},  // Teensy 34  momentary
+  // SW_ROTARY 는 pin1 부터 numPos 개를 오름차순으로만 읽어 패널 순서대로
+  // 늘어놓을 수 없습니다. 그래서 개별 SW_ON_OFF 로 분리했습니다.
+  {"UHF TEST",  PNL_UHF,    SW_ON_OFF,    -1, PIN_UHF_TEST,   0,  0},  // Teensy 39 (A15) momentary
   {"UHF STATUS",  PNL_UHF, SW_ON_OFF, -1, PIN_UHF_STATUS,  0, 0},  // Teensy 41  momentary
+  {"UHF FUNC OFF",   PNL_UHF, SW_ON_OFF, 0, 12, 0, 0},  // PB4
+  {"UHF FUNC MAIN",  PNL_UHF, SW_ON_OFF, 0, 13, 0, 0},  // PB5
+  {"UHF FUNC BOTH",  PNL_UHF, SW_ON_OFF, 0, 14, 0, 0},  // PB6
+  {"UHF FUNC ADF",   PNL_UHF, SW_ON_OFF, 0, 15, 0, 0},  // PB7
+  {"UHF MODE MNL",   PNL_UHF, SW_ON_OFF, 0,  9, 0, 0},  // PB1
+  {"UHF MODE PRE",   PNL_UHF, SW_ON_OFF, 0, 10, 0, 0},  // PB2
+  {"UHF MODE GRD",   PNL_UHF, SW_ON_OFF, 0, 11, 0, 0},  // PB3
+  {"UHF T-TONE",   PNL_UHF, SW_ON_OFF, -1, PIN_UHF_TTONE,   0, 0},  // Teensy 34  momentary
+  {"UHF SQUELCH",  PNL_UHF, SW_ON_OFF, -1, PIN_UHF_SQUELCH, 0, 0},  // Teensy 33
 
-  // ---- AUDIO 1 모드 로터리 (MCP 0x20, 케이블 C8 로 UHF 패널까지 점퍼) ----
+  // ---- ENG & JET START Panel (Teensy direct) ----
+  {"JFS",       PNL_ENGINE, SW_ON_OFF_ON, -1, PIN_JFS1, PIN_JFS2, 0},  // OFF/START1/START2
+  {"ENG CONT",  PNL_ENGINE, SW_ON_OFF,    -1, PIN_ENG_CONT,   0,  0},  // PRI/SEC
+  {"AB RESET",  PNL_ENGINE, SW_ON_OFF,    -1, PIN_ABRESET,    0,  0},
+  {"ENG DATA",  PNL_ENGINE, SW_ON_OFF,    -1, PIN_ENGDATA,    0,  0},
+  {"MAX POWER", PNL_ENGINE, SW_ON_OFF,    -1, PIN_MAXPOWER,   0,  0},
+
+  // ---- AUDIO 1 모드 로터리 (MCP 0x20 PA, 케이블 C8 로 UHF 패널까지 점퍼) ----
   // 실제 배선: COMM1 PA4=OFF PA3=SQL PA2=GD, COMM2 PA7=OFF PA6=SQL PA5=GD
-  // SW_ROTARY 는 오름차순 고정이라 DX 를 뒤집으려면 개별 SW_ON_OFF 로 분리
   {"COMM1 OFF",   PNL_AUDIO1, SW_ON_OFF, 0, 4, 0, 0},  // PA4
   {"COMM1 SQL",   PNL_AUDIO1, SW_ON_OFF, 0, 3, 0, 0},  // PA3
   {"COMM1 GD",    PNL_AUDIO1, SW_ON_OFF, 0, 2, 0, 0},  // PA2
@@ -328,17 +317,25 @@ const SwitchDef switches[] = {
   {"COMM2 SQL",   PNL_AUDIO1, SW_ON_OFF, 0, 6, 0, 0},  // PA6
   {"COMM2 GD",    PNL_AUDIO1, SW_ON_OFF, 0, 5, 0, 0},  // PA5
 
-  // ---- ENGINE START 추가 스위치 (Teensy direct) ----
-  {"AB RESET",  PNL_ENGINE, SW_ON_OFF,    -1, PIN_ABRESET,    0,  0},
-  {"ENG DATA",  PNL_ENGINE, SW_ON_OFF,    -1, PIN_ENGDATA,    0,  0},
-  {"MAX POWER", PNL_ENGINE, SW_ON_OFF,    -1, PIN_MAXPOWER,   0,  0},
-
-  // ---- AUDIO 2 스위치 (Teensy direct) ----
+  // ---- AUDIO 2 Panel (MCP 0x20 PA) ----
   {"HOT MIC",   PNL_AUDIO2, SW_ON_OFF,     0,   0,            0,  0},  // MCP#0 PA0
   {"CIPHER",    PNL_AUDIO2, SW_ON_OFF,     0,   1,            0,  0},  // MCP#0 PA1
 
-  // ---- UHF TEST (Teensy direct) ----
-  {"UHF TEST",  PNL_UHF,    SW_ON_OFF,    -1, PIN_UHF_TEST,   0,  0},  // Teensy 39 (A15) momentary
+  // ---- ECM Panel (MCP 0x22, GPB) ----
+  {"ECM OPR/STBY",        PNL_ECM,     SW_ON_OFF_ON,     2,  11,  10,  0},  // GPB3/GPB2  (OPR/OFF)
+  {"ECM XMIT",            PNL_ECM,     SW_ON_OFF_ON,     2,  13,  12,  0},  // GPB5/GPB4  (XMIT1/XMIT3)
+  {"ECM RESET",           PNL_ECM,     SW_ON_OFF,        2,  15,   0,  0},  // GPB7  momentary
+  {"ECM BIT",             PNL_ECM,     SW_ON_OFF,        2,  14,   0,  0},  // GPB6  momentary
+
+  // ---- EPU Panel (MCP 0x21) ----
+  {"EPU",                 PNL_EPU,     SW_ON_OFF_ON,     1,   8,   9,  0},  // GPB0/GPB1  OFF/NORM/ON (배선 교차)
+
+  // ---- ELEC Panel (MCP 0x21) ----
+  {"ELEC MAIN PWR",       PNL_ELEC,    SW_ON_OFF_ON,     1,  14,  15,  0},  // GPB6/GPB7  MAIN/OFF (배선 교차)
+  {"ELEC CAUTION RST",    PNL_ELEC,    SW_ON_OFF,        1,  10,   0,  0},  // GPB2  momentary (CAUTION RST)
+
+  // ---- AVTR Panel (MCP 0x22) ----
+  {"AVTR",                PNL_AVTR,    SW_ON_OFF_ON,     2,   8,   9,  0},  // GPB0/GPB1  UNTHRD/RECORD/EVENT MRK
 };
 
 // --- Rotary Encoders (Teensy direct, interrupt-polled) ---
@@ -351,6 +348,7 @@ const SwitchDef switches[] = {
 // The encoder cables' only line on the other edge is VOL (pin 23).
 const EncoderDef encoders[] = {
   // name              panel     pinA pinB
+  // 순서는 이미 패널 배치 그대로입니다 — PRESET(우상단) 다음 주파수 노브 좌→우.
   {"UHF PRESET",       PNL_UHF,    1,   0},   // C3  pinA/B swapped
   {"UHF 100MHz",       PNL_UHF,    2,   3},   // C3
   {"UHF 10MHz",        PNL_UHF,    4,   5},   // C2
@@ -362,19 +360,27 @@ const EncoderDef encoders[] = {
 
 // --- Analog Pots ---
 const PotDef pots[] = {
-  // BMS 바인딩 가능 7개 → DirectInput 인식 축 우선 배치 (6 named + slider 1~2)
   // name                 panel        pin              axis
+  //
+  // ※ 순서는 실기 배치(전→후, 좌→우)를 따릅니다. **축 배정과는 무관합니다** —
+  //   축은 각 항목의 `axis` 열이 직접 지정하므로 줄을 옮겨도 그대로입니다.
+  //   AXIS_S3·S4 (TF·TACAN) 는 DirectInput 이 인식하지 못해 BMS 바인딩 불가.
+
+  // ---- UHF Panel — 최전방 아웃보드 ----
+  {"UHF VOL",             PNL_UHF,     PIN_POT_UHFVOL,  AXIS_Zr},
+
+  // ---- AUDIO 1 — 상단 COMM1·COMM2·SECURE·MSL / 하단 TF·THREAT ----
   {"AUDIO COMM CH1",      PNL_AUDIO1,  PIN_POT_COMM1,   AXIS_X},
   {"AUDIO COMM CH2",      PNL_AUDIO1,  PIN_POT_COMM2,   AXIS_Y},
-  {"AUDIO MSL VOL",       PNL_AUDIO1,  PIN_POT_MSL,     AXIS_Z},
-  {"AUDIO THREAT VOL",    PNL_AUDIO1,  PIN_POT_THREAT,  AXIS_Xr},
-  {"AUDIO INTERCOM",      PNL_AUDIO2,  PIN_POT_INTCOM,  AXIS_Yr},
-  {"UHF VOL",             PNL_UHF,     PIN_POT_UHFVOL,  AXIS_Zr},
-  {"AUDIO ILS VOL",       PNL_AUDIO2,  PIN_POT_ILS,     AXIS_S1},
-  // BMS 바인딩 불가 3개 → slider 2 까지만 DirectInput 인식
   {"AUDIO SECURE VOL",    PNL_AUDIO1,  PIN_POT_SECURE,  AXIS_S2},
+  {"AUDIO MSL VOL",       PNL_AUDIO1,  PIN_POT_MSL,     AXIS_Z},
   {"AUDIO TF VOL",        PNL_AUDIO1,  PIN_POT_TF,      AXIS_S3},    // DirectInput 미인식
+  {"AUDIO THREAT VOL",    PNL_AUDIO1,  PIN_POT_THREAT,  AXIS_Xr},
+
+  // ---- AUDIO 2 — INTERCOM·TACAN·ILS ----
+  {"AUDIO INTERCOM",      PNL_AUDIO2,  PIN_POT_INTCOM,  AXIS_Yr},
   {"AUDIO TACAN VOL",     PNL_AUDIO2,  PIN_POT_TACAN,   AXIS_S4},    // DirectInput 미인식
+  {"AUDIO ILS VOL",       PNL_AUDIO2,  PIN_POT_ILS,     AXIS_S1},
 };
 #define NUM_POTS      (sizeof(pots) / sizeof(pots[0]))
 
@@ -401,18 +407,30 @@ const AnalogBtnArrayDef analogBtnArrays[] = {
 //       VDD inflow 125mA — not the VSS 150mA figure. 0x21 carries 11 LEDs
 //       (ELEC 8 + EPU 3), so keep each at or below 10mA (11 x 10 = 110mA).
 enum LedIdx {
-  // ELEC 패널 경고등 8 (MCP 0x21 GPA0~7) — ledBits bit 0~7
-  LI_FLCS_PMG, LI_MAIN_GEN, LI_STBY_GEN,
-  LI_EPU_GEN, LI_EPU_PMG, LI_BATT_TO_FLCS,
-  LI_FLCS_RLY, LI_BATT_FAIL,
-  // EPU 패널 3 (MCP 0x21 GPB3~5) — ledBits bit 8~10
-  LI_EPU_HYDRAZN, LI_EPU_AIR, LI_EPU_RUN,
-  // ENGINE START 패널 1 (Teensy 직결) — ledBits bit 11
+  // leds[] 와 **같은 순서**여야 합니다 — 이 값이 그대로 BMS-BIOS ledBits 의
+  // 비트 번호이고, tools/bmsbios_bridge.py 의 CONSOLE_LED_MAP 과 짝입니다.
+  // ---- ENGINE START (bit 0) ----
   LI_JFS_RUN,
+  // ---- EPU 패널 (bit 1~3) ----
+  LI_EPU_HYDRAZN, LI_EPU_AIR, LI_EPU_RUN,
+  // ---- ELEC 패널 경고등 (bit 4~11) ----
+  LI_FLCS_PMG, LI_MAIN_GEN, LI_STBY_GEN, LI_EPU_GEN,
+  LI_EPU_PMG, LI_BATT_TO_FLCS, LI_FLCS_RLY, LI_BATT_FAIL,
 };
 
 const LedDef leds[] = {
   // name               panel      pin  mcpIdx
+
+  // ---- ENGINE START 패널 (Teensy 직결, 케이블 1에 탑승) ----
+  {"JFS RUN",           PNL_ENGINE, PIN_LED_JFS_RUN, -1},
+
+  // ---- EPU 패널 (MCP 0x21 GPB3~4 + 0x22 GPA7) ----
+  {"EPU HYDRAZN",       PNL_EPU,   11,   1},   // GPB3
+  {"EPU AIR",           PNL_EPU,   12,   1},   // GPB4
+  {"EPU RUN",           PNL_EPU,    7,   2},   // MCP 0x22 GPA7 (0x21 GPB5 핀 불량으로 이설)
+
+  // ---- ELEC 패널 경고등 8 (MCP 0x21 GPA0~7) ----
+  // GPA 한 포트에 몰아 두어 I2C 한 번에 전체가 갱신됩니다.
   {"FLCS PMG",          PNL_ELEC,   0,   1},   // GPA0
   {"MAIN GEN",          PNL_ELEC,   1,   1},   // GPA1
   {"STBY GEN",          PNL_ELEC,   2,   1},   // GPA2
@@ -421,12 +439,6 @@ const LedDef leds[] = {
   {"BATT TO FLCS",      PNL_ELEC,   5,   1},   // GPA5
   {"FLCS RLY",          PNL_ELEC,   6,   1},   // GPA6
   {"BATT FAIL",         PNL_ELEC,   7,   1},   // GPA7
-  // ---- EPU 패널 (MCP 0x21 GPB3~5) ----
-  {"EPU HYDRAZN",       PNL_EPU,   11,   1},   // GPB3
-  {"EPU AIR",           PNL_EPU,   12,   1},   // GPB4
-  {"EPU RUN",           PNL_EPU,    7,   2},   // MCP 0x22 GPA7 (0x21 GPB5 핀 불량으로 이설)
-  // ---- ENGINE START 패널 (Teensy 직결, 케이블 1에 탑음) ----
-  {"JFS RUN",           PNL_ENGINE, PIN_LED_JFS_RUN, -1},
 };
 
 // --- ECM Panel LEDs (74HC595 x4, daisy-chained, 32 outputs) ---
@@ -794,67 +806,67 @@ struct DxEntry {
 
 const DxEntry dxOrder[] = {
   // ---- MANUAL PITCH (MPO) — 최전방 인보드 ----
-  {DX_SW,        9},   // MPO                  x1
+  {DX_SW,       0},   // MPO                  x1
 
   // ---- UHF — 최전방 아웃보드 ----
-  {DX_ENC,       0},   // UHF PRESET           x2
-  {DX_SW,       32},   // UHF TEST             x1
-  {DX_SW,       20},   // UHF STATUS           x1
-  {DX_ENC,       1},   // UHF 100MHz           x2
-  {DX_ENC,       2},   // UHF 10MHz            x2
-  {DX_ENC,       3},   // UHF 1MHz             x2
-  {DX_ENC,       4},   // UHF 0.1MHz           x2
-  {DX_ENC,       5},   // UHF 0.025MHz         x2
-  {DX_SW,       14},   // UHF FUNC OFF         x1
-  {DX_SW,       13},   // UHF FUNC MAIN        x1
-  {DX_SW,       12},   // UHF FUNC BOTH        x1
-  {DX_SW,       11},   // UHF FUNC ADF         x1
-  {DX_SW,       17},   // UHF MODE MNL         x1
-  {DX_SW,       16},   // UHF MODE PRE         x1
-  {DX_SW,       15},   // UHF MODE GRD         x1
-  {DX_SW,       19},   // UHF T-TONE           x1
-  {DX_SW,       18},   // UHF SQUELCH          x1
+  {DX_ENC,      0},   // UHF PRESET           x2
+  {DX_SW,       1},   // UHF TEST             x1
+  {DX_SW,       2},   // UHF STATUS           x1
+  {DX_ENC,      1},   // UHF 100MHz           x2
+  {DX_ENC,      2},   // UHF 10MHz            x2
+  {DX_ENC,      3},   // UHF 1MHz             x2
+  {DX_ENC,      4},   // UHF 0.1MHz           x2
+  {DX_ENC,      5},   // UHF 0.025MHz         x2
+  {DX_SW,       3},   // UHF FUNC OFF         x1
+  {DX_SW,       4},   // UHF FUNC MAIN        x1
+  {DX_SW,       5},   // UHF FUNC BOTH        x1
+  {DX_SW,       6},   // UHF FUNC ADF         x1
+  {DX_SW,       7},   // UHF MODE MNL         x1
+  {DX_SW,       8},   // UHF MODE PRE         x1
+  {DX_SW,       9},   // UHF MODE GRD         x1
+  {DX_SW,      10},   // UHF T-TONE           x1
+  {DX_SW,      11},   // UHF SQUELCH          x1
 
   // ---- ENG & JET START ----
-  {DX_SW,        7},   // JFS                  x2
-  {DX_SW,        8},   // ENG CONT             x1
-  {DX_COVER,     0},   // ENG CONT COVER       x1
-  {DX_SW,       27},   // AB RESET             x1
-  {DX_SW,       28},   // ENG DATA             x1
-  {DX_SW,       29},   // MAX POWER            x1
+  {DX_SW,      12},   // JFS                  x2
+  {DX_SW,      13},   // ENG CONT             x1
+  {DX_COVER,    0},   // ENG CONT COVER       x1
+  {DX_SW,      14},   // AB RESET             x1
+  {DX_SW,      15},   // ENG DATA             x1
+  {DX_SW,      16},   // MAX POWER            x1
 
   // ---- AUDIO 1 ----
-  {DX_COMMPWR,   0},   // COMM1 PWR            x1
-  {DX_COMMPWR,   1},   // COMM2 PWR            x1
-  {DX_SW,       21},   // COMM1 OFF            x1
-  {DX_SW,       22},   // COMM1 SQL            x1
-  {DX_SW,       23},   // COMM1 GD             x1
-  {DX_SW,       24},   // COMM2 OFF            x1
-  {DX_SW,       25},   // COMM2 SQL            x1
-  {DX_SW,       26},   // COMM2 GD             x1
+  {DX_COMMPWR,  0},   // COMM1 PWR            x1
+  {DX_COMMPWR,  1},   // COMM2 PWR            x1
+  {DX_SW,      17},   // COMM1 OFF            x1
+  {DX_SW,      18},   // COMM1 SQL            x1
+  {DX_SW,      19},   // COMM1 GD             x1
+  {DX_SW,      20},   // COMM2 OFF            x1
+  {DX_SW,      21},   // COMM2 SQL            x1
+  {DX_SW,      22},   // COMM2 GD             x1
 
   // ---- AUDIO 2 ----
-  {DX_SW,       30},   // HOT MIC              x1
-  {DX_SW,       31},   // CIPHER               x1
+  {DX_SW,      23},   // HOT MIC              x1
+  {DX_SW,      24},   // CIPHER               x1
 
   // ---- ECM ----
-  {DX_SW,        0},   // ECM OPR/STBY         x2
-  {DX_SW,        1},   // ECM XMIT             x2
-  {DX_LADDER,    0},   // ECM Buttons          x8
-  {DX_SW,        3},   // ECM RESET            x1
-  {DX_SW,        2},   // ECM BIT              x1
+  {DX_SW,      25},   // ECM OPR/STBY         x2
+  {DX_SW,      26},   // ECM XMIT             x2
+  {DX_LADDER,   0},   // ECM Buttons          x8
+  {DX_SW,      27},   // ECM RESET            x1
+  {DX_SW,      28},   // ECM BIT              x1
 
   // ---- EPU ----
-  {DX_SW,        4},   // EPU                  x2
-  {DX_COVER,     1},   // EPU OFF COVER        x1
-  {DX_COVER,     2},   // EPU ON COVER         x1
+  {DX_SW,      29},   // EPU                  x2
+  {DX_COVER,    1},   // EPU OFF COVER        x1
+  {DX_COVER,    2},   // EPU ON COVER         x1
 
   // ---- ELEC ----
-  {DX_SW,       10},   // ELEC MAIN PWR        x2
-  {DX_SW,        5},   // ELEC CAUTION RST     x1
+  {DX_SW,      30},   // ELEC MAIN PWR        x2
+  {DX_SW,      31},   // ELEC CAUTION RST     x1
 
   // ---- AVTR ----
-  {DX_SW,        6},   // AVTR                 x2
+  {DX_SW,      32},   // AVTR                 x2
 };
 #define NUM_DX_ORDER (sizeof(dxOrder) / sizeof(dxOrder[0]))
 
@@ -941,8 +953,8 @@ void assignButtons() {
 //
 //  DX 번호는 dxOrder[] 가 정합니다. 세 커버가 연속일 필요는 없습니다.
 
-#define SW_IDX_ENG_CONT  8    // switches[] 인덱스 — 배열 순서 변경 시 함께 수정
-#define SW_IDX_EPU       4
+#define SW_IDX_ENG_CONT  13    // switches[] 인덱스 — 배열 순서 변경 시 함께 수정
+#define SW_IDX_EPU       29
 
 #define COVER_DELAY_TICKS 10  // 100ms @ 100Hz — 커버/스위치 간 시차
 
@@ -1013,7 +1025,7 @@ void processCovers() {
 #define COMM_PWR_THRESHOLD  5     // ADC threshold (10-bit, 0~1023)
 
 static bool commPwrOn[2];                    // [0]=COMM1, [1]=COMM2
-static const uint8_t commPotIdx[] = {0, 1};  // pots[] index: COMM1=0, COMM2=1
+static const uint8_t commPotIdx[] = {1, 2};  // pots[] index: COMM1, COMM2
 
 void processCommPower() {
   for (int ch = 0; ch < 2; ch++) {

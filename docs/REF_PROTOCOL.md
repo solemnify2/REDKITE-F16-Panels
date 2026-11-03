@@ -117,36 +117,51 @@ LightBits3 (offset 128):
 
 ## 3. LED Index Mapping — Left Aux + MISC (0x0489)
 
-| Index | Name | Pin | Location | DCS-BIOS | BMS LightBit |
-|---|---|---|---|---|---|
-| 0 | Nose Gear | 30 | direct | 0x447A bit14 | LB3 NoseGearDown |
-| 1 | Left Gear | 31 | direct | 0x447A bit15 | LB3 LeftGearDown |
-| 2 | Right Gear | 32 | direct | 0x447C bit0 | LB3 RightGearDown |
-| 3 | Gear Warn | 27 | direct | 0x447C bit1 | LB2 GEARHANDLE |
-| 4 | TWA Power | 34 | direct | 0x447E bit12 | LB2 AuxPwr |
-| 5 | TWA Low | 35 | direct | 0x447E bit13 | LB2 AuxLow |
-| 6 | TWA Search | 36 | direct | 0x447E bit10 | LB2 AuxSrch |
-| 7 | TWA Act | 37 | direct | 0x447E bit11 | LB2 AuxAct |
-| 8 | ECM | MCP0:7 | MCP 0x20 | 0x4544 bit14 | LB2 EcmPwr |
-| 9 | ADV Active | MCP0:8 | MCP 0x20 | 0x447E bit2 | LB2 AdvActive |
-| 10 | ADV Standby | MCP0:9 | MCP 0x20 | 0x447E bit3 | LB AdvStandby |
+| ledBits | Name | Location | BMS LightBit | DCS-BIOS |
+|---|---|---|---|---|
+| 0 | ECM | MCP 0x20 GPA7 | `LB2_ECM_PWR` (LightBits2) | 0x4544 bit14 |
+| 1 | ADV Active | MCP 0x20 GPB1 | `LB2_ADV_ACTIVE` (LightBits2) | 0x447E bit2 |
+| 2 | ADV Standby | MCP 0x20 GPB0 | `LB_ADV_STANDBY` (LightBits) | 0x447E bit3 |
+| 3 | Nose Gear | Teensy pin 30 | `LB3_NOSE_GEAR_DN` (LightBits3) | 0x447A bit14 |
+| 4 | Left Gear | Teensy pin 31 | `LB3_LEFT_GEAR_DN` (LightBits3) | 0x447A bit15 |
+| 5 | Right Gear | Teensy pin 32 | `LB3_RIGHT_GEAR_DN` (LightBits3) | 0x447C bit0 |
+| 6 | Gear Warn | Teensy pin 27 | `LB_GEARHANDLE` (LightBits2) | 0x447C bit1 |
+| 7 | TWA Search | Teensy pin 36 | `LB2_AUX_SRCH` (LightBits2) | 0x447E bit10 |
+| 8 | TWA Act | Teensy pin 37 | `LB2_AUX_ACT` (LightBits2) | 0x447E bit11 |
+| 9 | TWA Low | Teensy pin 28 | `LB2_AUX_LOW` (LightBits2) | 0x447E bit13 |
+| 10 | TWA Power | Teensy pin 29 | `LB2_AUX_PWR` (LightBits2) | 0x447E bit12 |
+| 11 | CMDS DISP 12 | Teensy pin 45 | `LB2_EWS_RDY` (LightBits2) | 0x4480 bit11 |
+| 12 | CMDS DISP 3 | Teensy pin 46 | `LB2_EWS_RDY` (LightBits2) | 0x4480 bit11 |
+| 13 | CMDS RDY | Teensy pin 47 | `LB2_EWS_RDY` (LightBits2) | 0x4480 bit12 |
+| 14 | CMDS NO GO | Teensy pin 43 | `LB2_EWS_NOGO` (LightBits2) | 0x4480 bit9 |
+| 15 | CMDS GO | Teensy pin 44 | `LB2_EWS_GO` (LightBits2) | 0x4480 bit10 |
+
+> 이 표는 펌웨어 `leds[]` / `LedIdx` 와 `tools/bmsbios_bridge.py` 의 맵에서 생성했습니다.
+> **ledBits 비트 번호 = `leds[]` 인덱스**이므로 (`BmsBiosParser.h` 의 `writeElecLed(i, ledBits >> i)`),
+> 배열 순서를 바꾸면 브리지 맵도 같이 바꿔야 합니다. 배열 순서는 실기 패널 배치를 따릅니다.
+
 
 ## 4. LED Index Mapping — Left Console (0x048E)
 
 | ledBits | Name | Location | BMS LightBit | DCS-BIOS |
 |---|---|---|---|---|
-| 0 | FLCS PMG | MCP 0x21 PA0 | LB3 FlcsPmg 0x00000001 | 0x447C bit9 |
-| 1 | MAIN GEN | MCP 0x21 PA1 | LB3 MainGen 0x00000002 | 0x447C bit10 |
-| 2 | STBY GEN | MCP 0x21 PA2 | LB3 StbyGen 0x00000004 | 0x447C bit11 |
-| 3 | EPU GEN | MCP 0x21 PA3 | LB3 EpuGen 0x00000008 | 0x447C bit13 |
-| 4 | EPU PMG | MCP 0x21 PA4 | LB3 EpuPmg 0x00000010 | 0x447C bit14 |
-| 5 | FLCS RLY | MCP 0x21 PA5 | LB3 FlcsRly 0x00000040 | 0x447E bit0 |
-| 6 | BATT FAIL | MCP 0x21 PA6 | LB3 BatFail 0x00000080 | 0x447E bit1 |
-| 7 | BATT TO FLCS | MCP 0x21 PA7 | LB3 ToFlcs 0x00000020 | 0x447C bit15 |
-| 8 | EPU HYDRAZN | MCP 0x22 GPA7 | LB3 Hydrazine 0x00000100 | 0x447C bit6 |
-| 9 | EPU AIR | MCP 0x21 PB4 | LB3 Air 0x00000200 | 0x447C bit7 |
-| 10 | EPU RUN | MCP 0x22 GPA7 | LB2 EPUOn 0x00100000 | 0x447C bit8 |
-| 11 | JFS RUN | Teensy pin 26 | LB2 JFSOn 0x00200000 | 0x447C bit5 |
+| 0 | JFS RUN | Teensy pin 26 | `LB2_JFS_ON` (LightBits2) | 0x447C bit5 |
+| 1 | EPU HYDRAZN | MCP 0x21 GPB3 | `LB3_HYDRAZINE` (LightBits3) | 0x447C bit6 |
+| 2 | EPU AIR | MCP 0x21 GPB4 | `LB3_AIR` (LightBits3) | 0x447C bit7 |
+| 3 | EPU RUN | MCP 0x22 GPA7 | `LB2_EPU_ON` (LightBits2) | 0x447C bit8 |
+| 4 | FLCS PMG | MCP 0x21 GPA0 | `LB3_FLCS_PMG` (LightBits3) | 0x447C bit9 |
+| 5 | MAIN GEN | MCP 0x21 GPA1 | `LB3_MAIN_GEN` (LightBits3) | 0x447C bit10 |
+| 6 | STBY GEN | MCP 0x21 GPA2 | `LB3_STBY_GEN` (LightBits3) | 0x447C bit11 |
+| 7 | EPU GEN | MCP 0x21 GPA3 | `LB3_EPU_GEN` (LightBits3) | 0x447C bit13 |
+| 8 | EPU PMG | MCP 0x21 GPA4 | `LB3_EPU_PMG` (LightBits3) | 0x447C bit14 |
+| 9 | BATT TO FLCS | MCP 0x21 GPA5 | `LB3_TO_FLCS` (LightBits3) | 0x447C bit15 |
+| 10 | FLCS RLY | MCP 0x21 GPA6 | `LB3_FLCS_RLY` (LightBits3) | 0x447E bit0 |
+| 11 | BATT FAIL | MCP 0x21 GPA7 | `LB3_BAT_FAIL` (LightBits3) | 0x447E bit1 |
+
+> 이 표는 펌웨어 `leds[]` / `LedIdx` 와 `tools/bmsbios_bridge.py` 의 맵에서 생성했습니다.
+> **ledBits 비트 번호 = `leds[]` 인덱스**이므로 (`BmsBiosParser.h` 의 `writeElecLed(i, ledBits >> i)`),
+> 배열 순서를 바꾸면 브리지 맵도 같이 바꿔야 합니다. 배열 순서는 실기 패널 배치를 따릅니다.
+
 
 Backlight 2원화:
 - `ledBits` byte 2 (bits 16–23) = console backlight PWM → pin 13 (양쪽 보드)

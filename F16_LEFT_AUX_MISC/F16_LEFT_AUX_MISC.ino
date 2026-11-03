@@ -142,8 +142,11 @@ int swGear = 0;           // used by offline LED simulation
 const SwitchDef switches[] = {
   // name                   panel           type         mcpIdx pin1 pin2  stateRef
   //                                                     (-1 = Teensy direct, >= 0 = MCP device index)
+  //
+  // ※ 이 배열의 순서는 **읽기 좋으라고** 실기 배치를 따릅니다. DX 번호와는
+  //   무관합니다 — 번호는 `dxOrder[]` 가 정합니다.
 
-  // ---- MISC Panel (MCP23017 device 0, addr 0x20) ----
+  // ---- MISC Panel — 전방 계기판, 좌측 MFD 왼쪽 (MCP23017 device 0, addr 0x20) ----
   // MCP pin mapping: GPA0–7 = 0–7, GPB0–7 = 8–15
   {"RF",                    PNL_MISC,       SW_ON_OFF_ON,    0,   4,   5,  NULL},   // GPA4, GPA5
   {"Laser ARM",             PNL_MISC,       SW_ON_OFF,       0,   3,   0,  NULL},   // GPA3
@@ -153,19 +156,21 @@ const SwitchDef switches[] = {
   {"Roll AP",               PNL_MISC,       SW_ON_OFF_ON,    0,   11,  12,  NULL},  // GPB3, GPB4
   {"Pitch AP",              PNL_MISC,       SW_ON_OFF_ON,    0,   13,  14,  NULL},  // GPB5, GPB6
 
-  // ---- Gear Panel (left aux console) ----
+  // ---- Gear Panel — 좌측 보조 콘솔 전방 (Teensy direct) ----
+  // 패널 3행: EMER JETT·HOOK / GND JETT·BRAKES·ANTI-SKID·DN LOCK·기어핸들
+  //           / STORES CONFIG·HORN SILENCER·LIGHTS LANDING
   {"EMER Jettison",         PNL_GEAR,       SW_ON_OFF,      -1,   10,   0,  NULL},
+  {"Hook",                  PNL_GEAR,       SW_ON_OFF,      -1,   11,   0,  NULL},   // Up / Down
+  {"GND JETT ENABLE",       PNL_GEAR,       SW_ON_OFF,      -1,   9,   0,  NULL},   // ENABLE / OFF
+  {"BRAKES Channel",        PNL_GEAR,       SW_ON_OFF,      -1,   8,   0,  NULL},   // CHAN 1 / CHAN 2
+  {"ANTI SKID",             PNL_GEAR,       SW_ON_OFF_ON,   -1,   6,  7,  NULL},   // PARKING BRAKE / ANTI SKID / OFF
+  {"DN LOCK REL",           PNL_GEAR,       SW_ON_OFF,      -1,   1,   0,  NULL},   // SW_IDX_DN_LOCK_REL
+  {"Landing Gear",          PNL_GEAR,       SW_ON_OFF_ON,   -1,   34,   35,  &swGear},  // UP / DN (swapped with TWA Power/Low for PWM)
   {"Store CAT",             PNL_GEAR,       SW_ON_OFF,      -1,   5,   0,  NULL},   // CAT I / CAT III
   {"Horn Silencer",         PNL_GEAR,       SW_ON_OFF,      -1,   2,   0,  NULL},
   {"Landing Light",         PNL_GEAR,       SW_ON_OFF_ON,   -1,   3,   4,  &swLandingLight},
-  {"Hook",                  PNL_GEAR,       SW_ON_OFF,      -1,   11,   0,  NULL},   // Up / Down
-  {"Landing Gear",          PNL_GEAR,       SW_ON_OFF_ON,   -1,   34,   35,  &swGear},  // UP / DN (swapped with TWA Power/Low for PWM)
-  {"DN LOCK REL",           PNL_GEAR,       SW_ON_OFF,      -1,   1,   0,  NULL},   // SW_IDX_DN_LOCK_REL
-  {"GND JETT ENABLE",       PNL_GEAR,       SW_ON_OFF,      -1,   9,   0,  NULL},   // ENABLE / OFF
-  {"ANTI SKID",             PNL_GEAR,       SW_ON_OFF_ON,   -1,   6,  7,  NULL},   // PARKING BRAKE / ANTI SKID / OFF
-  {"BRAKES Channel",        PNL_GEAR,       SW_ON_OFF,      -1,   8,   0,  NULL},   // CHAN 1 / CHAN 2
 
-  // ---- CMDS Panel (left aux console) ----
+  // ---- CMDS Panel (Teensy direct) ----
   {"CMDS RWR",              PNL_CMDS,       SW_ON_OFF,      -1,  17,   0,  NULL},
   {"CMDS JMR",              PNL_CMDS,       SW_ON_OFF,      -1,  16,   0,  NULL},
   {"CMDS MWS",              PNL_CMDS,       SW_ON_OFF,      -1,  15,   0,  NULL},
@@ -175,9 +180,8 @@ const SwitchDef switches[] = {
   {"CMDS FL",               PNL_CMDS,       SW_ON_OFF,      -1,  23,   0,  NULL},
   {"CMDS JETT",             PNL_CMDS,       SW_ON_OFF,      -1,  14,   0,  NULL},
 
-  // ---- Alt Gear Panel (left aux console) ----
+  // ---- Alt Gear Panel (Teensy direct) ----
   {"ALT GEAR Handle",       PNL_ALT_GEAR,   SW_ON_OFF,      -1,  33,   0,  NULL},     // wire too short for other than pin 33
-
 };
 
 // --- Analog Button Arrays (resistor ladder, multiple buttons on 1 analog pin) ---
@@ -215,35 +219,38 @@ const PotDef pots[] = {
 
 // --- LEDs ---
 enum LedIdx {
-  LI_NOSE_GEAR, LI_LEFT_GEAR, LI_RIGHT_GEAR, LI_GEAR_WARN,
-  LI_TWA_POWER, LI_TWA_LOW, LI_TWA_SEARCH, LI_TWA_ACT,
-  LI_ECM, LI_ADV_ACTIVE, LI_ADV_STANDBY,
-  LI_CMDS_DISP_12,  LI_CMDS_DISP_3,
-  LI_CMDS_RDY,
-  LI_CMDS_NOGO,
-  LI_CMDS_GO,
+  // leds[] 와 **같은 순서**여야 합니다 — 이 값이 그대로 BMS-BIOS ledBits 의
+  // 비트 번호이고, tools/bmsbios_bridge.py 의 AUX_LED_MAP 과 짝입니다.
+  LI_ECM, LI_ADV_ACTIVE, LI_ADV_STANDBY,                      // MISC   bit 0~2
+  LI_NOSE_GEAR, LI_LEFT_GEAR, LI_RIGHT_GEAR, LI_GEAR_WARN,    // Gear   bit 3~6
+  LI_TWA_SEARCH, LI_TWA_ACT, LI_TWA_LOW, LI_TWA_POWER,        // TWA    bit 7~10
+  LI_CMDS_DISP_12, LI_CMDS_DISP_3, LI_CMDS_RDY,               // CMDS   bit 11~15
+  LI_CMDS_NOGO, LI_CMDS_GO,
 };
 
 // pin 번호가 direct LED와 MCP LED에서 중복될 경우, MCP 쪽이 우선 적용됩니다.
 // (mcpIdx >= 0 이면 MCP LED로 처리, -1 이면 direct LED로 처리)
 const LedDef leds[] = {
   // name          panel      pin  mcpIdx
+
+  // ---- MISC 패널 (MCP 0x20) — 전방 계기판 ----
+  {"ECM",          PNL_MISC,  7,   0},    // MCP device 0, GPA7
+  {"ADV Active",   PNL_MISC,  9,   0},   // MCP device 0, GPB0
+  {"ADV Standby",  PNL_MISC,  8,   0},   // MCP device 0, GPB1
+
+  // ---- Gear 패널 (Teensy 직결) ----
   {"Nose Gear",    PNL_GEAR,  30,  -1},
   {"Left Gear",    PNL_GEAR,  31,  -1},
   {"Right Gear",   PNL_GEAR,  32,  -1},
   {"Gear Warn",    PNL_GEAR,  27,  -1},
-  {"TWA Power",    PNL_TWA,   29,  -1},  // swapped with Low
-  {"TWA Low",      PNL_TWA,   28,  -1},  // swapped with Power
+
+  // ---- TWA 패널 (Teensy 직결) — 패널 배치 SEARCH·ACT / LOW·SYS PWR ----
   {"TWA Search",   PNL_TWA,   36,  -1},
   {"TWA Act",      PNL_TWA,   37,  -1},
-  {"ECM",          PNL_MISC,  7,   0},    // MCP device 0, GPA7
-  {"ADV Active",   PNL_MISC,  9,   0},   // MCP device 0, GPB0
-  {"ADV Standby",  PNL_MISC,  8,   0},   // MCP device 0, GPB1
-  // CMDS EWS 램프 — 하단 SD 패드에서 15핀 FPC 확장 케이블로 인출. 개별 320Ω(220+100).
-  //   핀↔µSD 접점 대응은 핀아웃 카드 card11b_rev4 기준 (SD 소켓은 SDIO 배선이라
-  //   SPI2 이름과 SD 신호명이 어긋납니다). FPC 도선 번호가 낮은 쪽부터
-  //   RDY → DISP 3 → DISP 1·2 → GO → NO GO 순으로 늘어서 리본이 꼬이지 않습니다.
-  //   pin 42 (DAT1/MISO2, µSD 8, FPC 14) = spare, 공통 캐소드는 FPC 15.
+  {"TWA Low",      PNL_TWA,   28,  -1},  // swapped with Power
+  {"TWA Power",    PNL_TWA,   29,  -1},  // swapped with Low
+
+  // ---- CMDS 패널 (하단 SD 패드 → 15핀 FPC) ----
   {"CMDS DISP 12", PNL_CMDS,  45,  -1},   // CMD /SCK2  µSD 3, FPC  6 — 2 LEDs parallel
   {"CMDS DISP 3",  PNL_CMDS,  46,  -1},   // DAT3       µSD 2, FPC  4 — 1 LED
   {"CMDS RDY",     PNL_CMDS,  47,  -1},   // DAT2       µSD 1, FPC  2 — 2 LEDs parallel
@@ -282,7 +289,7 @@ const McpDeviceDef mcpDevices[] = {
 #define PEDAL_BRAKE_SW_VALUE  (1)    // landing light UP position
 
 // DN LOCK REL switch index (used as modifier key for combos)
-#define SW_IDX_DN_LOCK_REL    13
+#define SW_IDX_DN_LOCK_REL    12
 
 
 // ================================================================
@@ -527,15 +534,15 @@ const DxEntry dxOrder[] = {
 
   // ---- LANDING GEAR — 좌측 보조 콘솔 전방 ----
   {DX_SW,      7},   // EMER Jettison        x1
-  {DX_SW,     11},   // Hook                 x1
-  {DX_SW,     14},   // GND JETT ENABLE      x1
-  {DX_SW,     16},   // BRAKES Channel       x1
-  {DX_SW,     15},   // ANTI SKID            x2
-  {DX_SW,     13},   // DN LOCK REL          x1
-  {DX_SW,     12},   // Landing Gear         x2
-  {DX_SW,      8},   // Store CAT            x1
-  {DX_SW,      9},   // Horn Silencer        x1
-  {DX_SW,     10},   // Landing Light        x2
+  {DX_SW,      8},   // Hook                 x1
+  {DX_SW,      9},   // GND JETT ENABLE      x1
+  {DX_SW,     10},   // BRAKES Channel       x1
+  {DX_SW,     11},   // ANTI SKID            x2
+  {DX_SW,     12},   // DN LOCK REL          x1
+  {DX_SW,     13},   // Landing Gear         x2
+  {DX_SW,     14},   // Store CAT            x1
+  {DX_SW,     15},   // Horn Silencer        x1
+  {DX_SW,     16},   // Landing Light        x2
 
   // ---- THREAT WARNING AUX ----
   {DX_LADDER,  0},   // TWA Buttons          x4

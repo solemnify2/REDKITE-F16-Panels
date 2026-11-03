@@ -75,46 +75,48 @@ LB3_RIGHT_GEAR_DN   = 0x00040000  # bit 18
 # ================================================================
 
 # LEFT_AUX: 16 LEDs (11 direct GPIO + 5 CMDS SD pads) + backlight (byte 2)
+# 비트 순서 = 펌웨어 leds[] / LedIdx 순서. 둘은 항상 같이 고쳐야 합니다.
 AUX_LED_MAP = [
-    (0,  OFF_LIGHTBITS3, LB3_NOSE_GEAR_DN),  # NOSE GEAR
-    (1,  OFF_LIGHTBITS3, LB3_LEFT_GEAR_DN),  # LEFT GEAR
-    (2,  OFF_LIGHTBITS3, LB3_RIGHT_GEAR_DN), # RIGHT GEAR
-    (3,  OFF_LIGHTBITS2, LB_GEARHANDLE),     # GEAR WARN
-    (4,  OFF_LIGHTBITS2, LB2_AUX_PWR),       # TWA POWER
-    (5,  OFF_LIGHTBITS2, LB2_AUX_LOW),       # TWA LOW
-    (6,  OFF_LIGHTBITS2, LB2_AUX_SRCH),      # TWA SEARCH
-    (7,  OFF_LIGHTBITS2, LB2_AUX_ACT),       # TWA ACT
-    (8,  OFF_LIGHTBITS2, LB2_ECM_PWR),       # ECM
-    (9,  OFF_LIGHTBITS2, LB2_ADV_ACTIVE),    # ADV ACTIVE
-    (10, OFF_LIGHTBITS,  LB_ADV_STANDBY),    # ADV STANDBY
+    (0, OFF_LIGHTBITS2, LB2_ECM_PWR),       # ECM
+    (1, OFF_LIGHTBITS2, LB2_ADV_ACTIVE),    # ADV ACTIVE
+    (2, OFF_LIGHTBITS,  LB_ADV_STANDBY),    # ADV STANDBY
+    (3, OFF_LIGHTBITS3, LB3_NOSE_GEAR_DN),  # NOSE GEAR
+    (4, OFF_LIGHTBITS3, LB3_LEFT_GEAR_DN),  # LEFT GEAR
+    (5, OFF_LIGHTBITS3, LB3_RIGHT_GEAR_DN), # RIGHT GEAR
+    (6, OFF_LIGHTBITS2, LB_GEARHANDLE),     # GEAR WARN
+    (7, OFF_LIGHTBITS2, LB2_AUX_SRCH),      # TWA SEARCH
+    (8, OFF_LIGHTBITS2, LB2_AUX_ACT),       # TWA ACT
+    (9, OFF_LIGHTBITS2, LB2_AUX_LOW),       # TWA LOW
+    (10,OFF_LIGHTBITS2, LB2_AUX_PWR),       # TWA POWER
     # CMDS EWS 램프 — FPC 도선 오름차순 배치. 개별 320Ω(220+100). pin 42(µSD 8, FPC 14) = spare.
     #   DISPENSE 와 RDY 는 한 램프입니다 — BMS 가 주는 신호는 Rdy 하나뿐이라
     #   LED 5개(DISP 3 + RDY 2)가 항상 함께 켜집니다. CMDS 상단 지시등은
     #   GO / NO GO / DISPENSE RDY 셋 (TO-BMS1F-16CM-1.pdf p.34).
-    (11, OFF_LIGHTBITS2, LB2_EWS_RDY),       # CMDS DISP 12  pin 45  µSD 3  FPC  6  (2 LEDs parallel)
-    (12, OFF_LIGHTBITS2, LB2_EWS_RDY),       # CMDS DISP 3   pin 46  µSD 2  FPC  4  (1 LED)
-    (13, OFF_LIGHTBITS2, LB2_EWS_RDY),       # CMDS RDY      pin 47  µSD 1  FPC  2  (2 LEDs parallel)
-    (14, OFF_LIGHTBITS2, LB2_EWS_NOGO),      # CMDS NO GO    pin 43  µSD 7  FPC 12  (2 LEDs parallel)
-    (15, OFF_LIGHTBITS2, LB2_EWS_GO),        # CMDS GO       pin 44  µSD 5  FPC 10  (1 LED)
+    (11,OFF_LIGHTBITS2, LB2_EWS_RDY),       # CMDS DISP 12  pin 45  µSD 3  FPC  6  (2 LEDs parallel)
+    (12,OFF_LIGHTBITS2, LB2_EWS_RDY),       # CMDS DISP 3   pin 46  µSD 2  FPC  4  (1 LED)
+    (13,OFF_LIGHTBITS2, LB2_EWS_RDY),       # CMDS RDY      pin 47  µSD 1  FPC  2  (2 LEDs parallel)
+    (14,OFF_LIGHTBITS2, LB2_EWS_NOGO),      # CMDS NO GO    pin 43  µSD 7  FPC 12  (2 LEDs parallel)
+    (15,OFF_LIGHTBITS2, LB2_EWS_GO),        # CMDS GO       pin 44  µSD 5  FPC 10  (1 LED)
 ]
 
-# LEFT_CONSOLE: 12 LEDs - ELEC 8 (bit 0-7) + EPU 3 (bit 8-10) + ENGINE RUN (bit 11)
+# LEFT_CONSOLE: 12 LEDs - JFS RUN (bit 0) + EPU 3 (bit 1-3) + ELEC 8 (bit 4-11)
+# 비트 순서 = 펌웨어 leds[] / LedIdx 순서. 둘은 항상 같이 고쳐야 합니다.
 # 마스크 출처: Falcon BMS 4.38 Tools/SharedMem/FlightData.h
 CONSOLE_LED_MAP = [
-    (0,  OFF_LIGHTBITS3, LB3_FLCS_PMG),     # FLCS PMG
-    (1,  OFF_LIGHTBITS3, LB3_MAIN_GEN),     # MAIN GEN
-    (2,  OFF_LIGHTBITS3, LB3_STBY_GEN),     # STBY GEN
-    (3,  OFF_LIGHTBITS3, LB3_EPU_GEN),      # EPU GEN
-    (4,  OFF_LIGHTBITS3, LB3_EPU_PMG),      # EPU PMG
-    (5,  OFF_LIGHTBITS3, LB3_TO_FLCS),      # BATT TO FLCS
-    (6,  OFF_LIGHTBITS3, LB3_FLCS_RLY),     # FLCS RLY
-    (7,  OFF_LIGHTBITS3, LB3_BAT_FAIL),     # BATT FAIL
-    # --- EPU 패널 3 ---
-    (8,  OFF_LIGHTBITS3, LB3_HYDRAZINE),    # EPU HYDRAZN
-    (9,  OFF_LIGHTBITS3, LB3_AIR),          # EPU AIR
-    (10, OFF_LIGHTBITS2, LB2_EPU_ON),       # EPU RUN
     # --- ENGINE START 패널 1 ---
-    (11, OFF_LIGHTBITS2, LB2_JFS_ON),       # JFS RUN
+    (0, OFF_LIGHTBITS2, LB2_JFS_ON),       # JFS RUN
+    # --- EPU 패널 3 ---
+    (1, OFF_LIGHTBITS3, LB3_HYDRAZINE),    # EPU HYDRAZN
+    (2, OFF_LIGHTBITS3, LB3_AIR),          # EPU AIR
+    (3, OFF_LIGHTBITS2, LB2_EPU_ON),       # EPU RUN
+    (4, OFF_LIGHTBITS3, LB3_FLCS_PMG),     # FLCS PMG
+    (5, OFF_LIGHTBITS3, LB3_MAIN_GEN),     # MAIN GEN
+    (6, OFF_LIGHTBITS3, LB3_STBY_GEN),     # STBY GEN
+    (7, OFF_LIGHTBITS3, LB3_EPU_GEN),      # EPU GEN
+    (8, OFF_LIGHTBITS3, LB3_EPU_PMG),      # EPU PMG
+    (9, OFF_LIGHTBITS3, LB3_TO_FLCS),      # BATT TO FLCS
+    (10,OFF_LIGHTBITS3, LB3_FLCS_RLY),     # FLCS RLY
+    (11,OFF_LIGHTBITS3, LB3_BAT_FAIL),     # BATT FAIL
 ]
 
 # --- EcmBits enum (mutually exclusive states per program) ---
