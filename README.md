@@ -348,8 +348,7 @@ REDKITE-F16-Panels/
 │   │   ├── sim_axes.py            #     축 설정·제품명·파일명
 │   │   ├── bms_callbacks.py       #     컨트롤 이름 → BMS 콜백 표
 │   │   ├── dcs_commands.py        #     컨트롤 이름 → DCS 명령 ID 표
-│   │   ├── bms_catalog.txt        #     BMS 콜백 목록 기준선 (버전업 감지용)
-│   │   └── dcs_catalog.txt        #     DCS 명령 목록 기준선
+│   │   └── dcs_catalog.txt        #     DCS 명령 ID ↔ 이름
 │   ├── patch_usb_desc_c.py        #   usb_desc.c HID 슬라이더 디스크립터 패치
 │   └── reset_joystick_name.bat
 ├── docs/                          # 배선도, 프로토콜 참조

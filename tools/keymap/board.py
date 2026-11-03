@@ -7,7 +7,6 @@
     find_boards()      VID/PID 로 Teensy 찾기
     query_board(port)  "?DX" 를 보내 현재 DX 맵을 받기
     load_catalog()     BMS - Full.key 에서 콜백 목록 읽기
-    check_unmodeled()  UNMODELED 검색어를 현재 목록에 다시 걸어 보기
     next_out(base,ext) 비어 있는 번호를 붙인 출력 파일명
 
 업로드된 펌웨어가 곧 심이 보는 장치이므로, 소스가 아니라 보드가 기준입니다.
@@ -132,53 +131,7 @@ def load_catalog(bms_root):
 
 
 # ----------------------------------------------------------------- 줄 생성
-CATALOG_BASELINE = os.path.join(HERE, 'bms_catalog.txt')
 
 # DX 바인딩 줄: <Callback> <DX#> <-1|-2> -2 ...
 #  4번째 필드가 리터럴 -2 인 것이 DX 바인딩의 표식입니다. 키보드 줄은
 #  그 자리에 스캔코드(0x3B 등)가 오므로 섞일 일이 없습니다.
-def check_unmodeled(unmodeled_all, catalog):
-    """UNMODELED 자리의 검색어를 현재 콜백 목록에 다시 걸어 본다.
-
-    BMS 버전업으로 지원이 생기면 여기서 걸립니다. 사람이 기억할 필요 없이
-    키 파일을 다시 뽑을 때마다 자동으로 확인됩니다.
-    """
-    hits = []
-    for dev, dx, label, bind in unmodeled_all:
-        found = []
-        for pat in bind.patterns:
-            try:
-                rx = re.compile(pat, re.I)
-            except re.error:
-                continue
-            for cb, (snd, desc) in catalog.items():
-                if rx.search(cb) or rx.search(desc):
-                    found.append((cb, desc))
-        if found:
-            hits.append((dev, dx, label, sorted(set(found))))
-    return hits
-
-
-def catalog_diff(catalog):
-    """콜백 목록을 커밋된 기준선과 비교. (추가, 삭제) 반환."""
-    if not os.path.isfile(CATALOG_BASELINE):
-        return None, None
-    old = set()
-    for line in open(CATALOG_BASELINE, encoding='utf-8'):
-        line = line.strip()
-        if line and not line.startswith('#'):
-            old.add(line.split(None, 1)[0])
-    new = set(catalog)
-    return sorted(new - old), sorted(old - new)
-
-
-def write_catalog_baseline(catalog):
-    with open(CATALOG_BASELINE, 'w', encoding='utf-8', newline='\n') as f:
-        f.write('# Falcon BMS 콜백 목록 기준선 — BMS - Full.key 에서 생성.\n'
-                '# 생성기가 매번 이 파일과 현재 BMS 를 비교해,\n'
-                '# 버전업으로 추가/삭제된 콜백을 알려줍니다.\n'
-                '# BMS 를 올린 뒤 내용을 확인했으면 --update-catalog 로 갱신하십시오.\n'
-                '# git diff 가 그대로 "이번 BMS 가 뭘 추가했나" 목록이 됩니다.\n')
-        for cb in sorted(catalog):
-            f.write('%s\t%s\n' % (cb, catalog[cb][1]))
-    return len(catalog)

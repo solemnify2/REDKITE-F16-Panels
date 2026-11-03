@@ -59,8 +59,8 @@ def slots_for(bind, catalog):
 
 
 def build_map(entries, mapping, catalog, device):
-    """[(dx, 이름, 폭)] -> ({dx: 슬롯 4개}, 미매핑, 미모델링)"""
-    out, missing, unmodeled = {}, [], []
+    """[(dx, 이름, 폭)] -> ({dx: 슬롯 4개}, 미매핑 목록)"""
+    out, missing = {}, []
     for dx, name, w in entries:
         binds = mapping.get(name)
         if binds is None:
@@ -70,16 +70,13 @@ def build_map(entries, mapping, catalog, device):
             raise SystemExit('%s: %r 는 DX %d 개인데 매핑은 %d 개입니다'
                              % (device, name, w, len(binds)))
         for k, b in enumerate(binds):
-            if isinstance(b, bms_callbacks.Unmodeled):
-                label = name if w == 1 else '%s [%d]' % (name, k + 1)
-                unmodeled.append((device, dx + k, label, b))
             for cb in ([b] if isinstance(b, str)
                        else list(b) if isinstance(b, tuple) else []):
                 if cb and cb not in catalog:
                     raise SystemExit('%s: 콜백 %r 가 BMS - Full.key 에 없습니다 (%s)'
                                      % (device, cb, name))
             out[dx + k] = slots_for(b, catalog)
-    return out, missing, unmodeled
+    return out, missing
 
 
 def render(device, dxmap):
@@ -148,20 +145,7 @@ def main():
     ap.add_argument('--bms-root', default=K.DEFAULT_BMS,
                     help='BMS 설치 경로 — 콜백 목록을 읽습니다')
     ap.add_argument('--port', action='append', metavar='COMx', help='포트 직접 지정')
-    ap.add_argument('--update-catalog', action='store_true',
-                    help='현재 BMS 의 콜백 목록을 기준선에 기록하고 끝냅니다')
     args = ap.parse_args()
-
-    if args.update_catalog:
-        catalog = K.load_catalog(args.bms_root)
-        added, removed = K.catalog_diff(catalog)
-        n = K.write_catalog_baseline(catalog)
-        sys.stderr.write('%s 에 콜백 %d 개 기록\n' % (K.CATALOG_BASELINE, n))
-        if added:
-            sys.stderr.write('추가 %d: %s\n' % (len(added), ', '.join(added[:20])))
-        if removed:
-            sys.stderr.write('삭제 %d: %s\n' % (len(removed), ', '.join(removed[:20])))
-        return 0
 
     maps = {}
     boards = [(p, None) for p in args.port] if args.port else K.find_boards()
@@ -176,13 +160,12 @@ def main():
         maps[dev] = entries
 
     catalog = K.load_catalog(args.bms_root)
-    made, unmodeled_all = [], []
+    made = []
     for dev in sorted(maps):
-        dxmap, missing, unmod = build_map(maps[dev], bms_callbacks.MAPS[dev], catalog, dev)
+        dxmap, missing = build_map(maps[dev], bms_callbacks.MAPS[dev], catalog, dev)
         dest = K.next_out(AX.OUT_BASE[dev], '.xml')
         open(dest, 'w', encoding='utf-8', newline='\n').write(render(dev, dxmap))
         made.append((dev, dest))
-        unmodeled_all += unmod
         bound = sum(1 for v in dxmap.values() if v[0] is not EMPTY)
         total = maps[dev][-1][0] + maps[dev][-1][2] - 1
         sys.stderr.write('%-8s %s\n' % (dev, dest))
@@ -190,15 +173,6 @@ def main():
                          % (bound, total, len(AX.BMS_AXES[dev])))
         for dx, name, w in missing:
             sys.stderr.write('         매핑 없음: DX %d %s (x%d)\n' % (dx, name, w))
-
-    hits = K.check_unmodeled(unmodeled_all, catalog)
-    if hits:
-        sys.stderr.write('\nBMS 가 그사이 지원하게 된 것 같습니다 (%d) — '
-                         'bms_callbacks.py 를 고쳐 보십시오:\n' % len(hits))
-        for dev, dx, label, found in hits:
-            sys.stderr.write('  %-8s DX %-3d %s\n' % (dev, dx, label))
-            for cb, desc in found[:4]:
-                sys.stderr.write('      %-28s %s\n' % (cb, desc))
 
     cfg = os.path.join(args.bms_root, 'User', 'Config')
     sys.stderr.write('\n덮어쓰려면 (PowerShell):\n')
