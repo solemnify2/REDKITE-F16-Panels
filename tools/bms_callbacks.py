@@ -70,8 +70,11 @@ CONSOLE = {
     'UHF T-TONE':        [UNMODELED('T-TONE', 'Tone')],
     'UHF SQUELCH':       [UNMODELED('SQUELCH')],
     # ---- ENG & JET START ----
-    'JFS':               [('SimJfsStartUp', 'SimJfsStartMid'),
-                          ('SimJfsStartDown', 'SimJfsStartMid')],
+    # 뗄 때는 아무것도 보내지 않습니다. 실기 JFS 는 OFF 로 돌아오는 스프링
+    # 스위치라 BMS 도 시동 명령만 받으면 되고, 놓는 순간 SimJfsStartMid 를
+    # 보내면 막 시작한 시동에 OFF 를 던지는 꼴이 됩니다.
+    'JFS':               [('SimJfsStartUp', None),
+                          ('SimJfsStartDown', None)],
     # 커버 DX 는 DCS 전용 개념입니다. BMS 는 스위치를 올리면 커버가 알아서
     # 열리므로 버전업으로 생길 대상이 아닙니다 — UNMODELED 가 아니라 None.
     'ENG CONT COVER':    [None],
@@ -108,8 +111,10 @@ CONSOLE = {
                           ('SimMainPowerOff', 'SimMainPowerBatt')],
     'ELEC CAUTION RST':  ['SimElecReset'],
     # ---- AVTR ----
-    'AVTR':              [('SimAVTRSwitchOff', 'SimAVTRSwitchAuto'),
-                          ('SimAVTRSwitchOn', 'SimAVTRSwitchAuto')],
+    # 이 패널의 AVTR 토글은 OFF - ON - AUTO 순서입니다. 가운데가 ON 이라
+    # 양쪽 위치를 놓으면 ON 으로 돌아옵니다 (AUTO 가 아님).
+    'AVTR':              [('SimAVTRSwitchOff', 'SimAVTRSwitchOn'),
+                          ('SimAVTRSwitchAuto', 'SimAVTRSwitchOn')],
 }
 
 AUX = {
@@ -132,7 +137,8 @@ AUX = {
     'ANTI SKID':         [('SimParkingBrakeUp', 'SimParkingBrakeMid'),
                           ('SimParkingBrakeDown', 'SimParkingBrakeMid')],
     'DN LOCK REL':       ['AFEmergencyGearHandleUnlock'],
-    'Landing Gear':      [('AFGearUp', None), ('AFGearDown', None)],
+    # 핸들에 중립이 없어 두 위치가 각각 그대로 명령입니다 — 모멘터리로 겁니다
+    'Landing Gear':      ['AFGearUp', 'AFGearDown'],
     'Store CAT':         [('SimCATI', 'SimCATIII')],
     'Horn Silencer':     ['SimSilenceHorn'],
     'Landing Light':     [('SimLandingLightUp', 'SimLandingLightMid'),
