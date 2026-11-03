@@ -34,10 +34,9 @@ pyserial, 그리고 해당 심 설치본이면 됩니다. 심 PC 에 그대로 �
 | `--port COMx` | 자동 탐지 대신 포트 지정 |
 | `-o` | 출력 폴더. **원본을 덮어쓰지 않습니다** |
 
-> 보드와 소스가 어긋나지 않았는지(업로드를 깜빡했는지) 보려면
-> `python tools/gen_bms_keyfile.py --verify` 를 쓰십시오 — 아무 파일도 쓰지 않고
-> 대조만 합니다. `gen_bms_keyfile.py` 는 보드 질의·DX 맵 파싱 코드를 담고 있어
-> 다른 두 생성기가 이 파일을 import 합니다. 지우지 마십시오.
+> 생성하기 전에 **업로드를 깜빡했는지** 보려면
+> `python tools/gen_bms_keyfile.py --verify` — 보드와 소스를 대조만 하고
+> 아무 파일도 쓰지 않습니다.
 
 ### 1-1. BMS — 장치별 Setup XML
 
@@ -51,21 +50,7 @@ python tools/gen_bms_setup_xml.py -o out
 | `--guid DEVICE GUID` | 장치 GUID 지정 (기본은 `sim_axes.py` 의 값) |
 
 **파일을 처음부터 전부 만듭니다** — 기존 XML 이 없어도 되고 참고하지도 않습니다.
-축 보정(Invert/Saturation/Deadzone), `<detentPosition>`, GUID 처럼 유도할 수 없는
-값은 `tools/sim_axes.py` 에 데이터로 들어 있습니다. `-o` 로 받아 확인한 뒤
-`User\Config` 로 복사하십시오.
-
-버튼 하나가 `<Assgn>` 4칸입니다:
-
-| 슬롯 | `<Invoke>` | 뜻 |
-|---|---|---|
-| 0 | `Default` | 누를 때 |
-| 1 | — | 미사용 (`SimDoNothing`) |
-| 2 | `Down` | 뗄 때 |
-| 3 | — | 미사용 |
-
-`DxAssgn[i]` 가 그 장치의 **DX 버튼 i+1** 입니다 — 오프셋 없음. `<dx>` 섹션이 셋인데
-앞 둘은 내용이 같고 셋째는 비어 있어, 관측된 그대로 재현합니다.
+`-o` 로 받아 확인한 뒤 `User\Config` 로 복사하십시오.
 
 ### 1-2. DCS — 입력 프로파일
 
@@ -79,29 +64,6 @@ python tools/gen_dcs_profile.py -o out
 
 장치마다 `.diff.lua` 하나를 만들고, `Saved Games\DCS\Config\Input\...\InputUserProfiles\`
 에 넣은 뒤 DCS 입력 설정에서 장치에 지정합니다. GUID 가 없어 파일명은 자유입니다.
-
-### 1-3. 축 설정 — 두 심 공통
-
-버튼은 `dxOrder[]` 와 매핑 표에서 전부 유도되지만, **축에는 유도할 수 없는 값이
-붙습니다** — `invert`, `deadzone`, `saturation` 같은 것들입니다. 이 패널의 포트는
-전부 반전이고요. 그래서 기존 설정에서 한 번 뽑아 `tools/sim_axes.py` 에 적어 두고,
-두 생성기가 그 파일만 보고 축 블록을 만듭니다. 바꾸려면 그 파일을 고치십시오.
-
-| | BMS | DCS |
-|---|---|---|
-| 데이터 | `BMS_AXES` — `<AxAssgn>` 8칸 | `DCS_AXES` — 명령별 필터 |
-| 담는 값 | AxisName · Invert · Saturation · Deadzone | invert · deadzone · curvature · saturation |
-| 그 외 | `BMS_DETENT`, `BMS_GUID` | `DCS_PROFILE` (파일명) |
-
-DCS 쪽에는 **`removed` 항목**도 들어 있습니다. 이게 특히 중요합니다 — DCS 가 새 조이스틱에 자동으로 거는
-`Pitch←JOY_Y` · `Roll←JOY_X` · `Thrust←JOY_Z` (콘솔은 `Rudder←JOY_RZ` 까지) 를
-떼어내는 줄입니다. 없으면 **HMCS 노브가 스로틀을 움직이고** 빈 축이 기수를 밉니다.
-
-> **슬라이더 번호 주의** — 펌웨어의 `slider(1)`(ILS)이 두 심 모두에서 **두 번째**
-> 슬라이더로 보입니다. BMS 는 `<AxAssgn>` 슬롯 7, DCS 는 `JOY_SLIDER2`.
-> 양쪽이 일치하므로 HID 디스크립터 쪽 특성으로 보고 그대로 둡니다.
-
----
 
 ## 2. 보드가 DX 맵을 알려주는 방법
 
@@ -157,6 +119,20 @@ DCS 쪽에는 **`removed` 항목**도 들어 있습니다. 이게 특히 중요�
 > **모든 콜백은 생성 시점에 `BMS - Full.key` 에 실재하는지 검증합니다.**
 > 없는 이름은 죽은 바인딩을 뱉는 대신 에러로 중단합니다. 사운드 ID 도 같은 파일에서
 > 읽어 오므로 하드코딩이 없습니다.
+
+### Setup XML 에서의 모양
+
+버튼 하나가 `<Assgn>` 4칸입니다:
+
+| 슬롯 | `<Invoke>` | 뜻 |
+|---|---|---|
+| 0 | `Default` | 누를 때 |
+| 1 | — | 미사용 (`SimDoNothing`) |
+| 2 | `Down` | 뗄 때 |
+| 3 | — | 미사용 |
+
+`DxAssgn[i]` 가 그 장치의 **DX 버튼 i+1** 입니다 — 오프셋 없음. `<dx>` 섹션이 셋인데
+앞 둘은 내용이 같고 셋째는 비어 있어, 관측된 그대로 재현합니다.
 
 ### 누름 / 뗌 쌍이라는 모양
 
@@ -297,7 +273,32 @@ EPU 커버는 모듈의 `Input/F-16C_50/joystick/default.lua` 를 봐야 확실�
 
 ---
 
-## 7. 파일
+## 7. 축 설정 — 두 심 공통
+
+버튼은 `dxOrder[]` 와 매핑 표에서 전부 유도되지만, **축에는 유도할 수 없는 값이
+붙습니다** — `invert`, `deadzone`, `saturation` 같은 것들입니다. 이 패널의 포트는
+전부 반전이고요. 그래서 기존 설정에서 한 번 뽑아 `tools/sim_axes.py` 에 적어 두고,
+두 생성기가 그 파일만 보고 축 블록을 만듭니다. 바꾸려면 그 파일을 고치십시오.
+
+| | BMS | DCS |
+|---|---|---|
+| 데이터 | `BMS_AXES` — `<AxAssgn>` 8칸 | `DCS_AXES` — 명령별 필터 |
+| 담는 값 | AxisName · Invert · Saturation · Deadzone | invert · deadzone · curvature · saturation |
+| 그 외 | `BMS_DETENT`, `BMS_GUID` | `DCS_PROFILE` (파일명) |
+
+DCS 쪽에는 **`removed` 항목**도 들어 있습니다. 이게 특히 중요합니다 — DCS 가 새 조이스틱에 자동으로 거는
+`Pitch←JOY_Y` · `Roll←JOY_X` · `Thrust←JOY_Z` (콘솔은 `Rudder←JOY_RZ` 까지) 를
+떼어내는 줄입니다. 없으면 **HMCS 노브가 스로틀을 움직이고** 빈 축이 기수를 밉니다.
+
+> **슬라이더 번호 주의** — 펌웨어의 `slider(1)`(ILS)이 두 심 모두에서 **두 번째**
+> 슬라이더로 보입니다. BMS 는 `<AxAssgn>` 슬롯 7, DCS 는 `JOY_SLIDER2`.
+> 양쪽이 일치하므로 HID 디스크립터 쪽 특성으로 보고 그대로 둡니다.
+
+---
+
+---
+
+## 8. 파일
 
 | 파일 | 역할 |
 |---|---|
@@ -313,7 +314,7 @@ EPU 커버는 모듈의 `Input/F-16C_50/joystick/default.lua` 를 봐야 확실�
 컨트롤 이름이 모든 표의 키입니다. `dxOrder[]` 를 재배열해도 표는 그대로고,
 하드웨어를 추가할 때만 늘어납니다.
 
-## 8. 장치 구분 — 두 시뮬 모두 장치별 파일입니다
+## 9. 장치 구분 — 두 시뮬 모두 장치별 파일입니다
 
 보드가 둘이지만 섞일 일이 없습니다. **BMS 도 DCS 도 장치마다 파일이 따로** 있고,
 버튼 번호에 오프셋이 없습니다 — `JOY_BTN1` / `DxAssgn[0]` 이 그 보드의 DX 1 입니다.
@@ -329,7 +330,7 @@ EPU 커버는 모듈의 `Input/F-16C_50/joystick/default.lua` 를 봐야 확실�
 심 PC 의 실제 설정을 보면 BMS 바인딩은 **이 XML 쪽에** 들어 있습니다. 그래서
 `gen_bms_setup_xml.py` 를 권합니다.
 
-## 9. 관련 문서
+## 10. 관련 문서
 
 | | |
 |---|---|
