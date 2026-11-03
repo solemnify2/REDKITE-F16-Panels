@@ -6,10 +6,17 @@ DX 번호가 아니라 **컨트롤 이름**을 키로 씁니다. dxOrder[] 를 �
 
 값은 그 컨트롤이 차지하는 DX 하나당 한 항목인 리스트입니다:
 
-    None                  바인딩 없음 (BMS 가 모델링하지 않는 스위치)
+    None                  일부러 비워 둠 (BMS 쪽에 바인딩할 대상 자체가 없음)
+    UNMODELED('검색어',…)  BMS 가 아직 모델링하지 않아 비어 있음
     'SimFoo'              모멘터리  — 누를 때 1회
     ('SimOn', 'SimOff')   유지형    — 누를 때 SimOn, 뗄 때 SimOff
     ('SimOn', None)       유지형이지만 되돌릴 콜백이 없음 (누를 때만)
+
+`None` 과 `UNMODELED` 의 차이가 중요합니다. `None` 은 영구적입니다 — 예를 들어
+커버 DX 는 DCS 개념이라 BMS 가 버전업해도 생길 리가 없습니다. `UNMODELED` 은
+"지금은 없다"는 뜻이고, 괄호 안은 **그때 찾아본 검색어**입니다. 생성기가 실행할
+때마다 현재 BMS 의 콜백 목록을 이 검색어로 다시 뒤져, 버전업으로 생긴 게 있으면
+알려줍니다. 그러니 새 BMS 를 깔고 한 번 돌려보기만 하면 됩니다.
 
 3단 토글은 DX 2개로 들어오고 중립이 '뗀 상태'이므로, 각 DX 를
 (해당 위치, 중립 위치) 로 두면 세 위치가 모두 표현됩니다.
@@ -20,6 +27,27 @@ TODO 로 표시한 항목은 아직 확정하지 못한 것입니다 — 생성�
 
 TODO = '!TODO'
 
+
+class Unmodeled(object):
+    """BMS 가 아직 모델링하지 않아 비워 둔 자리.
+
+    patterns 는 이 자리를 비우기로 할 때 콜백 이름과 설명에서 찾아봤던
+    정규식입니다. 생성기가 매번 현재 BMS 의 콜백 목록을 같은 검색어로
+    다시 뒤져, 하나라도 걸리면 보고합니다 — BMS 버전업으로 지원이
+    생겼는지 사람이 기억하고 있을 필요가 없습니다.
+    """
+
+    __slots__ = ('patterns',)
+
+    def __init__(self, *patterns):
+        self.patterns = patterns
+
+    def __repr__(self):
+        return 'UNMODELED(%s)' % ', '.join(repr(p) for p in self.patterns)
+
+
+UNMODELED = Unmodeled
+
 CONSOLE = {
     # ---- MPO ----
     # 실기 MPO 는 OVRD 로 눌러 쥐고 있는 스위치입니다. DX 를 -1 로 걸면
@@ -28,8 +56,8 @@ CONSOLE = {
     'MPO':               ['SimMPO'],
     # ---- UHF ----
     'UHF PRESET':        ['SimCycleRadioChannel', 'SimDecRadioChannel'],
-    'UHF TEST':          [None],          # BMS 미모델링
-    'UHF STATUS':        [None],          # BMS 미모델링
+    'UHF TEST':          [UNMODELED('UHF.*TEST', 'TEST DISPLAY')],
+    'UHF STATUS':        [UNMODELED('UHF.*STATUS')],
     'UHF 100MHz':        ['SimBupUhfFreq1Inc', 'SimBupUhfFreq1Dec'],
     'UHF 10MHz':         ['SimBupUhfFreq2Inc', 'SimBupUhfFreq2Dec'],
     'UHF 1MHz':          ['SimBupUhfFreq3Inc', 'SimBupUhfFreq3Dec'],
@@ -38,39 +66,43 @@ CONSOLE = {
     'UHF FUNC OFF':      ['SimBupUhfOff'],
     'UHF FUNC MAIN':     ['SimBupUhfMain'],
     'UHF FUNC BOTH':     ['SimBupUhfBoth'],
-    'UHF FUNC ADF':      [None],          # BMS 에 ADF 위치 없음
+    'UHF FUNC ADF':      [UNMODELED('ADF')],
     'UHF MODE MNL':      ['SimBupUhfManual'],
     'UHF MODE PRE':      ['SimBupUhfPreset'],
     'UHF MODE GRD':      ['SimBupUhfGuard'],
-    'UHF T-TONE':        [None],          # BMS 미모델링
-    'UHF SQUELCH':       [None],          # BMS 미모델링
+    'UHF T-TONE':        [UNMODELED('T-TONE', 'Tone')],
+    'UHF SQUELCH':       [UNMODELED('SQUELCH')],
     # ---- ENG & JET START ----
     'JFS':               [('SimJfsStartUp', 'SimJfsStartMid'),
                           ('SimJfsStartDown', 'SimJfsStartMid')],
-    'ENG CONT COVER':    [None],          # 커버는 DCS 전용 개념
+    # 커버 DX 는 DCS 전용 개념입니다. BMS 는 스위치를 올리면 커버가 알아서
+    # 열리므로 버전업으로 생길 대상이 아닙니다 — UNMODELED 가 아니라 None.
+    'ENG CONT COVER':    [None],
     'ENG CONT':          [('SimEngContSec', 'SimEngContPri')],  # 접점 방향 확인 필요
-    'AB RESET/ENG DATA': [None, None],    # BMS 미모델링
-    'MAX POWER':         [None],          # BMS 미모델링
+    'AB RESET/ENG DATA': [UNMODELED('AB RESET', 'Afterburner Reset'),
+                          UNMODELED('ENG DATA', 'Engine Data')],
+    'MAX POWER':         [UNMODELED('MAX POWER', 'Max Pwr')],
     # ---- AUDIO 1 ----
     'COMM1 PWR':         [('SimComm1PowerOn', 'SimComm1PowerOff')],
     'COMM2 PWR':         [('SimComm2PowerOn', 'SimComm2PowerOff')],
-    'COMM1 OFF':         [None],          # BMS 에 COMM MODE OFF 콜백 없음
+    'COMM1 OFF':         [UNMODELED('COMM 1 Mode.*OFF', 'Aud1Com1Off')],
     'COMM1 SQL':         ['SimAud1Com1Sql'],
     'COMM1 GD':          ['SimAud1Com1Gd'],
-    'COMM2 OFF':         [None],
+    'COMM2 OFF':         [UNMODELED('COMM 2 Mode.*OFF', 'Aud1Com2Off')],
     'COMM2 SQL':         ['SimAud1Com2Sql'],
     'COMM2 GD':          ['SimAud1Com2Gd'],
     # ---- AUDIO 2 ----
     # HOT MIC 도 CIPHER 도 BMS 에 콜백이 없습니다 (Mic/Cipher/Secure 전부 0건).
     # BMS 가 모델링하지 않는 스위치입니다.
-    'HOT MIC/CIPHER':    [None, None],
+    'HOT MIC/CIPHER':    [UNMODELED('HOT ?MIC'), UNMODELED('CIPHER', 'Secure Voice')],
     # ---- ECM ----
     'ECM OPR/STBY':      [('SimEcmPowerOn', None), ('SimEcmPowerOff', None)],
     'ECM XMIT':          [('SimXMit1', 'SimXMit2'), ('SimXMit3', 'SimXMit2')],
     'ECM Buttons':       ['SimEcmMode1Toggle', 'SimEcmMode2Toggle', 'SimEcmMode3Toggle',
                           'SimEcmMode4Toggle', 'SimEcmMode5Toggle',
-                          None, None, None],   # ECM 6 / FRM / SPL — 콜백 없음
-    'ECM RESET':         [None],          # BMS 미모델링
+                          UNMODELED('Ecm.*Mode ?6'), UNMODELED('ECM.*FRM'),
+                          UNMODELED('ECM.*SPL')],
+    'ECM RESET':         [UNMODELED('ECM.*RESET')],
     'ECM BIT':           ['SimECMBit'],
     # ---- EPU ----
     'EPU OFF COVER':     [None],
@@ -89,7 +121,7 @@ AUX = {
     # ---- MISC ----
     'RF':                [('SimRFNorm', 'SimRFQuiet'), ('SimRFSilent', 'SimRFQuiet')],
     'Laser ARM':         [('SimLaserArmOn', 'SimLaserArmOff')],
-    'ALT REL':           [None],          # BMS 미모델링 (NC — DX 반전)
+    'ALT REL':           [UNMODELED('ALT REL', 'Alternate Release')],
     'Master ARM':        [('SimArmMasterArm', 'SimSafeMasterArm'),
                           ('SimSimMasterArm', 'SimSafeMasterArm')],
     'ADV MODE':          ['SimToggleTFR'],
@@ -115,7 +147,7 @@ AUX = {
     # ACT/PWR 은 활성·전원 표시등 쪽이라 대응 콜백이 없습니다.
     # POWER 는 실제로 계통을 켜는 SYSTEM POWER 에 걸었습니다 — 패널에서
     # 반대로 동작하면 아래 두 항목을 맞바꾸십시오.
-    'TWA Buttons':       [None,                      # ACT/PWR — 콜백 없음
+    'TWA Buttons':       [UNMODELED('ACT/PWR', 'ACTIVITY'),   # ACT/PWR
                           'SimRWRSetSearch',         # SEARCH
                           'SimRWRSetGroundPriority',  # LOW ALTITUDE
                           'SimRwrPower'],            # SYSTEM POWER
@@ -129,8 +161,10 @@ AUX = {
     'CMDS FL':           [('SimEWSFlareOn', 'SimEWSFlareOff')],
     'CMDS JETT':         [('SimEwsJettOn', 'SimEwsJettOff')],
     # PRGM 래더 7 = BIT, 1~6 — BMS 는 1~4 만 있음
-    'CMDS PRGM':         [None, 'SimEWSProgOne', 'SimEWSProgTwo', 'SimEWSProgThree',
-                          'SimEWSProgFour', None, None],
+    'CMDS PRGM':         [UNMODELED('PRGM.*BIT'), 'SimEWSProgOne', 'SimEWSProgTwo',
+                          'SimEWSProgThree', 'SimEWSProgFour',
+                          UNMODELED('ProgFive', 'PRGM Knob - 5'),
+                          UNMODELED('ProgSix', 'PRGM Knob - 6')],
     # MODE 래더 7 — 실기 MODE 노브는 6 위치(OFF·STBY·MAN·SEMI·AUTO·BYP)이고
     # 여기 쓴 로터리는 7 단이라 한 자리가 남습니다. 아래는 래더 위치 1 이
     # 노브의 반시계 끝(OFF)이라고 본 배치입니다.

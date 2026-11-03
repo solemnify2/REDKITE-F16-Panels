@@ -211,8 +211,8 @@ def load_catalog(bms_root):
 
 # ----------------------------------------------------------------- 줄 생성
 def emit(entries, mapping, catalog, base, device_label):
-    """[(dx, 이름, 폭)] + 매핑 → (줄 리스트, 미매핑 리스트, TODO 리스트)"""
-    lines, unmapped, todo, missing = [], [], [], []
+    """[(dx, 이름, 폭)] + 매핑 → (줄, 미매핑, TODO, 미모델링)"""
+    lines, unmapped, todo, unmodeled, missing = [], [], [], [], []
     for dx, name, w in entries:
         binds = mapping.get(name)
         if binds is None:
@@ -225,6 +225,9 @@ def emit(entries, mapping, catalog, base, device_label):
             bms_dx = base + (dx - 1) + k          # Windows DX n → BMS n-1
             label = name if w == 1 else '%s [%d]' % (name, k + 1)
             if bind is None:
+                continue
+            if isinstance(bind, bms_callbacks.Unmodeled):
+                unmodeled.append((dx + k, label, bind))
                 continue
             if bind == bms_callbacks.TODO:
                 todo.append((dx + k, label))
@@ -247,7 +250,57 @@ def emit(entries, mapping, catalog, base, device_label):
     if missing:
         msg = '\n'.join('  %-26s 콜백 %r 가 BMS - Full.key 에 없습니다' % m for m in missing)
         raise SystemExit('%s: 존재하지 않는 콜백\n%s' % (device_label, msg))
-    return lines, unmapped, todo
+    return lines, unmapped, todo, unmodeled
+
+
+CATALOG_BASELINE = os.path.join(HERE, 'bms_catalog.txt')
+
+
+def check_unmodeled(unmodeled_all, catalog):
+    """UNMODELED 자리의 검색어를 현재 콜백 목록에 다시 걸어 본다.
+
+    BMS 버전업으로 지원이 생기면 여기서 걸립니다. 사람이 기억할 필요 없이
+    키 파일을 다시 뽑을 때마다 자동으로 확인됩니다.
+    """
+    hits = []
+    for dev, dx, label, bind in unmodeled_all:
+        found = []
+        for pat in bind.patterns:
+            try:
+                rx = re.compile(pat, re.I)
+            except re.error:
+                continue
+            for cb, (snd, desc) in catalog.items():
+                if rx.search(cb) or rx.search(desc):
+                    found.append((cb, desc))
+        if found:
+            hits.append((dev, dx, label, sorted(set(found))))
+    return hits
+
+
+def catalog_diff(catalog):
+    """콜백 목록을 커밋된 기준선과 비교. (추가, 삭제) 반환."""
+    if not os.path.isfile(CATALOG_BASELINE):
+        return None, None
+    old = set()
+    for line in open(CATALOG_BASELINE, encoding='utf-8'):
+        line = line.strip()
+        if line and not line.startswith('#'):
+            old.add(line.split(None, 1)[0])
+    new = set(catalog)
+    return sorted(new - old), sorted(old - new)
+
+
+def write_catalog_baseline(catalog):
+    with open(CATALOG_BASELINE, 'w', encoding='utf-8', newline='\n') as f:
+        f.write('# Falcon BMS 콜백 목록 기준선 — BMS - Full.key 에서 생성.\n'
+                '# gen_bms_keyfile.py 가 매번 이 파일과 현재 BMS 를 비교해,\n'
+                '# 버전업으로 추가/삭제된 콜백을 알려줍니다.\n'
+                '# BMS 를 올린 뒤 내용을 확인했으면 --update-catalog 로 갱신하십시오.\n'
+                '# git diff 가 그대로 "이번 BMS 가 뭘 추가했나" 목록이 됩니다.\n')
+        for cb in sorted(catalog):
+            f.write('%s\t%s\n' % (cb, catalog[cb][1]))
+    return len(catalog)
 
 
 def main():
@@ -270,7 +323,21 @@ def main():
     ap.add_argument('--comments', action='store_true',
                     help='각 줄 뒤에 컨트롤 이름을 주석으로 (BMS 는 무시하지만 '
                          'BMS UI 에서 저장하면 사라집니다)')
+    ap.add_argument('--update-catalog', action='store_true',
+                    help='현재 BMS 의 콜백 목록을 tools/bms_catalog.txt 에 기준선으로 '
+                         '기록하고 끝냅니다. BMS 를 올린 뒤 변경을 확인하고 쓰십시오')
     args = ap.parse_args()
+
+    if args.update_catalog:
+        catalog = load_catalog(args.bms_root)
+        added, removed = catalog_diff(catalog)
+        n = write_catalog_baseline(catalog)
+        sys.stderr.write('%s 에 콜백 %d 개 기록\n' % (CATALOG_BASELINE, n))
+        if added:
+            sys.stderr.write('추가 %d: %s\n' % (len(added), ', '.join(added[:20])))
+        if removed:
+            sys.stderr.write('삭제 %d: %s\n' % (len(removed), ', '.join(removed[:20])))
+        return 0
 
     # --- DX 맵 확보: 보드 질의가 기본, --from-source 는 보조 ---
     maps = {}            # device -> [(dx, name, width)]
@@ -328,12 +395,13 @@ def main():
                              '(DeviceSorting.txt 에서 몇 번째인지, 1-base).' % (dev, dev))
 
     catalog = load_catalog(args.bms_root)
-    out, todos, unmapped_all = [], [], []
+    out, todos, unmapped_all, unmodeled_all = [], [], [], []
     for dev in sorted(maps):
         n = idx[dev]
         base = (n - 1) * args.buttons_per_device
         entries = maps[dev]
-        lines, unmapped, todo = emit(entries, bms_callbacks.MAPS[dev], catalog, base, dev)
+        lines, unmapped, todo, unmod = emit(entries, bms_callbacks.MAPS[dev],
+                                           catalog, base, dev)
         out.append('')
         out.append('# ---- %s : 장치 %s, BMS DX %d~%d (Windows DX %d~%d) ----'
                    % (dev, n, base, base + entries[-1][0] + entries[-1][2] - 2,
@@ -344,6 +412,7 @@ def main():
                        if args.comments else text)
         todos += [(dev,) + t for t in todo]
         unmapped_all += [(dev,) + u for u in unmapped]
+        unmodeled_all += [(dev,) + u for u in unmod]
 
     body = '\n'.join(out).lstrip('\n') + '\n'
     if args.out:
@@ -363,6 +432,34 @@ def main():
                          % len(unmapped_all))
         for dev, dx, name, w in unmapped_all:
             sys.stderr.write('  %-8s DX %-3d %s (x%d)\n' % (dev, dx, name, w))
+
+    # --- BMS 가 새로 모델링한 게 있는지 ---
+    hits = check_unmodeled(unmodeled_all, catalog)
+    if hits:
+        sys.stderr.write('\n*** BMS 에 콜백이 새로 생겼습니다 (%d) ***\n'
+                         '비워 둔 자리의 검색어가 이제 걸립니다. 확인 후 '
+                         'bms_callbacks.py 에서 UNMODELED 를 콜백 이름으로 바꾸십시오:\n'
+                         % len(hits))
+        for dev, dx, label, found in hits:
+            sys.stderr.write('  %-8s DX %-3d %s\n' % (dev, dx, label))
+            for cb, desc in found:
+                sys.stderr.write('      %-26s %s\n' % (cb, desc))
+    else:
+        sys.stderr.write('\n비워 둔 자리 %d 개 — 현재 BMS 에도 대응 콜백 없음\n'
+                         % len(unmodeled_all))
+
+    added, removed = catalog_diff(catalog)
+    if added is None:
+        sys.stderr.write('콜백 기준선이 없습니다 — --update-catalog 로 만들어 두면 '
+                         '다음 BMS 버전에서 바뀐 것을 알 수 있습니다.\n')
+    elif added or removed:
+        sys.stderr.write('\nBMS 콜백 목록이 기준선과 다릅니다 '
+                         '(추가 %d, 삭제 %d):\n' % (len(added), len(removed)))
+        for cb in added:
+            sys.stderr.write('  + %-26s %s\n' % (cb, catalog[cb][1]))
+        for cb in removed:
+            sys.stderr.write('  - %s\n' % cb)
+        sys.stderr.write('확인했으면 --update-catalog 로 기준선을 갱신하십시오.\n')
     return 0
 
 

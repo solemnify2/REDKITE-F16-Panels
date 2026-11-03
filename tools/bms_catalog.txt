@@ -1,0 +1,1212 @@
+# Falcon BMS 콜백 목록 기준선 — BMS - Full.key 에서 생성.
+# gen_bms_keyfile.py 가 매번 이 파일과 현재 BMS 를 비교해,
+# 버전업으로 추가/삭제된 콜백을 알려줍니다.
+# BMS 를 올린 뒤 내용을 확인했으면 --update-catalog 로 갱신하십시오.
+# git diff 가 그대로 "이번 BMS 가 뭘 추가했나" 목록이 됩니다.
+AFABFull	FCTRL: Throttle Full Afterburner
+AFABOn	FCTRL: Throttle Min. Afterburner
+AFAileronLeft	FCTRL: Roll Left
+AFAileronRight	FCTRL: Roll Right
+AFAileronTrimLeft	STICK: TRIM Left - Roll Left
+AFAileronTrimRight	STICK: TRIM Right - Roll Right
+AFAlternateGear	ALT GEAR: Extend Gear Handle - Push
+AFAlternateGearReset	ALT GEAR: Reset Button - Push
+AFBrakesIn	TQS: SPD BRAKE Switch - Close
+AFBrakesOut	TQS: SPD BRAKE Switch - Open
+AFBrakesToggle	TQS: SPD BRAKE Switch - Toggle
+AFCanopyClose	LEFT WALL: CANOPY - Close (Shortcut)
+AFCanopyDec	LEFT WALL: CANOPY - Close
+AFCanopyInc	LEFT WALL: CANOPY - Open
+AFCanopyLock	LEFT WALL: SPIDER - Lock
+AFCanopyLockToggle	LEFT WALL: SPIDER - Toggle Open/Close
+AFCanopyOpen	LEFT WALL: CANOPY - Open (Shortcut)
+AFCanopyStop	LEFT WALL: CANOPY - Stop
+AFCanopyToggle	LEFT WALL: CANOPY - Toggle (Shortcut)
+AFCanopyUnlock	LEFT WALL: SPIDER - Unlock
+AFCoarseThrottleDown	FCTRL: Throttle Step Down
+AFCoarseThrottleUp	FCTRL: Throttle Step Up
+AFDecExhaust	FCTRL: VTOL-EXHAUST - Decrease Angle
+AFDecFlap	CKPIT: FLAPS - Decrease
+AFDecLEF	CKPIT: LEFS - Decrease
+AFDragChute	CKPIT: Drag Chute Deploy
+AFElevatorDown	FCTRL: Nose Down
+AFElevatorTrimDown	STICK: TRIM Down - Nose Up
+AFElevatorTrimUp	STICK: TRIM Up - Nose Down
+AFElevatorUp	FCTRL: Nose Up
+AFEmergencyGearHandleUnlock	GEAR: DN LOCK REL - Push
+AFFullFlap	CKPIT: FLAPS - Set To Full
+AFFullLEF	CKPIT: LEFS - Set To Full
+AFGearDown	GEAR: LG Handle - DN
+AFGearToggle	GEAR: LG Handle - Toggle
+AFGearUp	GEAR: LG Handle - UP
+AFIdle	FCTRL: Throttle Idle
+AFIncExhaust	FCTRL: VTOL-EXHAUST - Increase Angle
+AFIncFlap	CKPIT: FLAPS - Increase
+AFIncLEF	CKPIT: LEFS - Increase
+AFNoFlap	CKPIT: FLAPS - Set To Null
+AFNoLEF	CKPIT: LEFS - Set To Null
+AFResetTrim	CKPIT: Trim-Reset (Change here)
+AFRudderLeft	FCTRL: Rudder Left
+AFRudderRight	FCTRL: Rudder Right
+AFThrottleDown	FCTRL: Throttle Back
+AFThrottleUp	FCTRL: Throttle Forward
+AFTriggerCatapult	CKPIT: NAVOPS - Release Catapult Trigger
+AFTriggerReverseThrust	FCTRL: ENGINE - Togg. Thrust Reverser
+AFWingFoldDown	CKPIT: Wing Fold - Down
+AFWingFoldToggle	CKPIT: Wing Fold - Toggle
+AFWingFoldUp	CKPIT: Wing Fold - Up
+ATCAbortApproach	ATC: Abort Approach
+ATCRequestClearance	ATC: Inbound For Landing
+ATCRequestDeparture	ATC: Request Taxi for Departure
+ATCRequestEmergencyClearance	ATC: Declaring An Emergency
+ATCRequestTakeoff	ATC: Request Takeoff
+AWACSDeclare	AWACS: Declare
+AWACSRequestCarrier	AWACS: Vector To Carrier Group
+AWACSRequestHelp	AWACS: Request Help
+AWACSRequestPicture	AWACS: Request Picture
+AWACSRequestRelief	AWACS: Request Relief
+AWACSRequestTanker	AWACS: Vector To Tanker
+AWACSUnable	AWACS: Unable
+AWACSVectorToThreat	AWACS: Vector To Nearest Threat
+AWACSWilco	AWACS: Wilco
+BombBurstDecrement	SHORT: Bomb Burst Altitude Decrease
+BombBurstIncrement	SHORT: Bomb Burst Altitude Increase
+BombIntervalDecrement	SHORT: Bomb Interval Decrement
+BombIntervalIncrement	SHORT: Bomb Interval Increment
+BombPairRelease	SHORT: Bomb Pair Release
+BombRippleDecrement	SHORT: Bomb Ripple Dencrement
+BombRippleIncrement	SHORT: Bomb Ripple Increment
+BombSGLRelease	SHORT: Bomb Single Release
+CampaignQuickSave	SIM: Campaign-QuickSave (Host only)
+CommandsSetKeyCombo	SIM: Key Combination Keys (KeyCombo)
+CycleEngine	FCTRL: ENGINE - Cycle Engines
+DEV_OTWEnterPosition	DEV: Enter Position (EyeFly only)
+DEV_OTWScaleDown	DEV: Scale Down
+DEV_OTWScaleUp	DEV: Scale Up
+DEV_OTWSetScale	DEV: Set Scale
+DEV_OTWToggleLocationDisplay	DEV: Location Display - Toggle
+DEV_SimCycleDebugLabels	DEV: Debug Labels - Cycle
+DEV_SimRegen	DEV: Regenerate Mission (Dogfight only)
+DecreaseAlow	SHORT: Decrease ALOW
+ElementArrow	ELEMENT: Go Arrowhead
+ElementBreakLeft	ELEMENT: Break Left
+ElementBreakRight	ELEMENT: Break Right
+ElementChainsaw	ELEMENT: Chainsaw
+ElementCheckSix	ELEMENT: Check Your Six
+ElementClearSix	ELEMENT: Clear My Six
+ElementCloseup	ELEMENT: Close Up
+ElementDecreaseRelAlt	ELEMENT: Go Lower
+ElementDesignateGroup	ELEMENT: Attack Targets
+ElementDesignateTarget	ELEMENT: Attack My Target
+ElementDiamond	ELEMENT: Go Diamond
+ElementDropStores	ELEMENT: Drop Stores
+ElementEchelonLeft	ELEMENT: Go Echelon Left
+ElementEchelonRight	ELEMENT: Go Echelon Right
+ElementFlex	ELEMENT: Flex
+ElementFluid	ELEMENT: Go Fluid
+ElementGiveBra	ELEMENT: Say Position
+ElementGiveDamageReport	ELEMENT: Say Damage
+ElementGiveFuelState	ELEMENT: Say Fuel
+ElementGiveStatus	ELEMENT: Say Status
+ElementGiveWeaponsCheck	ELEMENT: Say Weapons
+ElementGoCoverMode	ELEMENT: Go Cover
+ElementGoOnDeck	ELEMENT: Go On Deck
+ElementGoShooterMode	ELEMENT: Go Shooter
+ElementIncreaseRelAlt	ELEMENT: Go Higher
+ElementKickout	ELEMENT: Kickout
+ElementLadder	ELEMENT: Go Ladder
+ElementLine	ELEMENT: Go Line
+ElementPince	ELEMENT: Pince
+ElementPosthole	ELEMENT: Posthole
+ElementRTB	ELEMENT: Return to Base
+ElementRejoin	ELEMENT: Rejoin
+ElementResumeNormal	ELEMENT: Resume Mission
+ElementSearchAir	ELEMENT: Search Air
+ElementSearchGround	ELEMENT: Search Ground
+ElementSendGrnDL	ELEMENT: Datalink Ground Target
+ElementSpread	ELEMENT: Go Spread
+ElementStack	ELEMENT: Go Stack
+ElementStackDown	ELEMENT: Stack Down
+ElementStackLevel	ELEMENT: Stack Level
+ElementStackUp	ELEMENT: Stack Up
+ElementToggleSide	ELEMENT: Switch Side
+ElementTrail	ELEMENT: Go Trail
+ElementWeaponsFree_AA	ELEMENT: Weapons Free AA
+ElementWeaponsFree_AG	ELEMENT: Weapons Free AG
+ElementWeaponsHold	ELEMENT: Weapons Hold
+ElementWedge	ELEMENT: Go Wedge
+ExtinguishMasterCaution	EYE: MASTER CAUTION Button - Push
+FOVDecrease	VIEWGEN: Decrease FOV - or Mousewheel
+FOVDefault	VIEWGEN: Default FOV
+FOVIncrease	VIEWGEN: Increase FOV - or Mousewheel
+FOVToggle	VIEWGEN: Look Closer - Toggle
+FlightArrow	FLIGHT: Go Arrowhead
+FlightBox	FLIGHT: Go Box
+FlightBreakLeft	FLIGHT: Break Left
+FlightBreakRight	FLIGHT: Break Right
+FlightChainsaw	FLIGHT: Chainsaw
+FlightCheckSix	FLIGHT: Check Your Six
+FlightClearSix	FLIGHT: Clear My Six
+FlightCloseup	FLIGHT: Close Up
+FlightDecreaseRelAlt	FLIGHT: Go Lower
+FlightDesignateGroup	FLIGHT: Attack Target
+FlightDesignateTarget	FLIGHT: Attack My Target
+FlightDiamond	FLIGHT: Go Diamond
+FlightDropStores	FLIGHT: Drop Store
+FlightEchelonLeft	FLIGHT: Go Echolon Right
+FlightEchelonRight	FLIGHT: Go Echolon Left
+FlightFinger4	FLIGHT: Go Finger Four
+FlightFlex	FLIGHT: Flex
+FlightFluid	FLIGHT: Go Fluid
+FlightGiveBra	FLIGHT: Say Position
+FlightGiveDamageReport	FLIGHT: Say Damage
+FlightGiveFuelState	FLIGHT: Say Fuel
+FlightGiveStatus	FLIGHT: Say Status
+FlightGiveWeaponsCheck	FLIGHT: Say Weapon
+FlightGoCoverMode	FLIGHT: Go Cover
+FlightGoOnDeck	FLIGHT: Go On Deck
+FlightGoShooterMode	FLIGHT: Go Shooter
+FlightIncreaseRelAlt	FLIGHT: Go Higher
+FlightKickout	FLIGHT: Kickout
+FlightLadder	FLIGHT: Go Ladder
+FlightLine	FLIGHT: Go Line
+FlightPince	FLIGHT: Pince
+FlightPosthole	FLIGHT: Posthole
+FlightRTB	FLIGHT: Return to Base
+FlightRejoin	FLIGHT: Rejoin
+FlightResCell	FLIGHT: Go Res Cell
+FlightResumeNormal	FLIGHT: Resume Mission
+FlightSearchAir	FLIGHT: Search Air
+FlightSearchGround	FLIGHT: Search Ground
+FlightSendGrnDL	FLIGHT: Datalink Ground Target
+FlightSpread	FLIGHT: Go Spread
+FlightStack	FLIGHT: Go Stack
+FlightStackDown	FLIGHT: Stack Down
+FlightStackLevel	FLIGHT: Stack Level
+FlightStackUp	FLIGHT: Stack Up
+FlightToggleSide	FLIGHT: Switch Side
+FlightTrail	FLIGHT: Go Trail
+FlightVic	FLIGHT: Go VIC
+FlightWeaponsFree_AA	FLIGHT: Weapons Free AA
+FlightWeaponsFree_AG	FLIGHT: Weapons Free AG
+FlightWeaponsHold	FLIGHT: Weapons Hold
+FlightWedge	FLIGHT: Go Wedge
+IncreaseAlow	SHORT: Increase ALOW
+LoadCockpitDefaults	CKPIT: Cockpit Defaults - Load
+OTWBalanceIVCvsAIDown	UHF: VOL Knob - AI vs IVC Volume Decr
+OTWBalanceIVCvsAIUp	UHF: VOL Knob - AI vs IVC Volume Incr
+OTWCheckSix	VIEWINT: Glance Backward
+OTWGlanceForward	VIEWINT: Glance Forward
+OTWMouseButtonsIn3dDisable	CKPIT: Disable Mouse Btns in 3D
+OTWMouseButtonsIn3dEnable	CKPIT: Enable Mouse Btns in 3D
+OTWMouseButtonsIn3dToggle	CKPIT: Toggle Mouse Btns in 3D
+OTWNextCustom3dPitView	VIEWINT:  Next Custom 3dPit View
+OTWPrevCustom3dPitView	VIEWINT:  Previous Custom 3dPit View
+OTWRadioMenuClear	RADIO: Menu Clear
+OTWRadioMenuStep	Radio-next menu AWACS
+OTWRadioMenuStepBack	Radio-previous menu AWACS
+OTWSelect2DCockpitMode	VIEWINT: Snap (3D) Cockpit
+OTWSelect3DCockpitMode	VIEWINT: Pan (3D) Cockpit
+OTWSelectAirEnemyMode	VIEWEXT: Enemy Aircraft Camera
+OTWSelectAirFriendlyMode	VIEWEXT: Friendly Aircraft Camera
+OTWSelectChaseMode	VIEWEXT: Chase Camera
+OTWSelectEFOVPadlockMode	VIEWINT: Extended FOV
+OTWSelectEFOVPadlockModeAA	VIEWINT: Padlock EFOV Mode=AA
+OTWSelectEFOVPadlockModeAG	VIEWINT: Padlock EFOV Mode=AG
+OTWSelectF3PadlockMode	VIEWINT: Padlock
+OTWSelectF3PadlockModeAA	VIEWINT: Padlock Mode=AA
+OTWSelectF3PadlockModeAG	VIEWINT: Padlock Mode=AG
+OTWSelectFlybyMode	VIEWEXT: Flyby Camera
+OTWSelectGroundEnemyMode	VIEWEXT: Enemy Ground Unit Camera
+OTWSelectGroundFriendlyMode	VIEWEXT: Friendly Ground Unit Camera
+OTWSelectHUDMode	VIEWINT: HUD Only
+OTWSelectIncomingMode	VIEWEXT: Incoming Camera
+OTWSelectNextTopGunView	VIEWEXT: Next TopGun View
+OTWSelectOrbitMode	VIEWEXT: Orbit Camera
+OTWSelectPrevTopGunView	VIEWEXT: Prev TopGun View
+OTWSelectSatelliteMode	VIEWEXT: Satellite Camera
+OTWSelectTargetMode	VIEWEXT: Target Camera
+OTWSelectTopGunView	VIEWEXT: TopGun Camera
+OTWSelectWeaponMode	VIEWEXT: Weapon Camera
+OTWShowVersion	DEV: Show Falcon BMS Version
+OTWStepHudColor	CKPIT: HUD Color - Cycle
+OTWStepMFD3	SHORT: Step 3rd MFD (like DMS l/r)
+OTWStepMFD4	SHORT: Step 4th MFD (like DMS l/r)
+OTWStepNextAC	VIEWEXT: Next Aircraft
+OTWStepNextPadlock	VIEWINT: Padlock next
+OTWStepNextPadlockAA	VIEWINT: Padlock next AA
+OTWStepNextPadlockAG	VIEWINT: Padlock next AG
+OTWStepPrevAC	VIEWEXT: Previous Aircraft
+OTWStepPrevPadlock	VIEWINT: Padlock previous
+OTWStepPrevPadlockAA	VIEWINT: Padlock prev AA
+OTWStepPrevPadlockAG	VIEWINT: Padlock prev AG
+OTWSwapMFDS	SHORT: Swap MFDs
+OTWToggle3DEmptyShell	VIEWINT: Toggle Empty Cockpit Shell
+OTWToggleActionCamera	VIEWEXT: Action Camera
+OTWToggleCampNames	SIM: Labels Far - Toggle
+OTWToggleCustom3dPitView	VIEWINT: Toggle Custom 3dPit View
+OTWToggleDebugWindow	DEV: Toggle Debug Window
+OTWToggleEngineDisplay	SIM: Engine Display Toggle
+OTWToggleEyeFly	VIEWEXT: Toggle EyeFly (Free Cam)
+OTWToggleFlapDisplay	SIM: Flap Display Toggle
+OTWToggleFrameRate	SIM: Display Frame Rate - Toggle
+OTWToggleFullFrameRate	SIM: F ull Frame Rate - Toggle
+OTWToggleHUDRendering	SIM: Toggle HUD Rendering
+OTWToggleNames	SIM: Labels Near - Toggle
+OTWToggleOnlinePlayersDisplay	SIM: Show Online Status - Toggle
+OTWToggleScoreDisplay	SIM: Show Score Display - Toggle
+OTWToggleSidebar	VIEWINT: Toggle SA bar
+OTWToggleSubtitleWindow	SIM: Toggle Subtitle Window
+OTWTrackExternal	VIEWEXT: Target-To-Self Camera
+OTWTrackTargetToWeapon	VIEWEXT: Target-to-Weapon Camera
+OTWVRZoom	VIEWGEN: VR Zoom - Momentary
+OTWVRZoomToggle	VIEWGEN: VR Zoom - Toggle
+OTWViewDown	VIEWGEN: Rotate View Down
+OTWViewDownLeft	VIEWGEN: Rotate View Down-Left
+OTWViewDownRight	VIEWGEN: Rotate View Down-Right
+OTWViewLeft	VIEWGEN: Rotate View Left
+OTWViewReset	VIEWEXT: Reset View
+OTWViewRight	VIEWGEN: Rotate View Right
+OTWViewUp	VIEWGEN: Rotate View Up
+OTWViewUpLeft	VIEWGEN: Rotate View Up-Left
+OTWViewUpRight	VIEWGEN: Rotate View Up-Right
+OTWViewZoomIn	VIEWEXT: Zoom In
+OTWViewZoomOut	VIEWEXT: Zoom Out
+PauseTrackIR	SIM: Toggle TrackIR Pause (additional)
+PrettyFilm	SIM: Pretty Filming (Hide Overlays)
+PrettyScreenShot	SIM: Pretty Screenshot (additional)
+RadioAWACSCommand	RADIO: AWACS Menu
+RadioElementCommand	RADIO: Element Menu
+RadioFlightCommand	RADIO: Flight Menu
+RadioMenuEight	RADIO: Menu Eight
+RadioMenuFive	RADIO: Menu Five
+RadioMenuFour	RADIO: Menu Four
+RadioMenuNine	RADIO: Menu Nine
+RadioMenuOne	RADIO: Menu One
+RadioMenuSeven	RADIO: Menu Seven
+RadioMenuSix	RADIO: Menu Six
+RadioMenuThree	RADIO: Menu Three
+RadioMenuTwo	RADIO: Menu Two
+RadioMessageSend	Radio-send message AWACS
+RadioTankerCommand	RADIO: Other Agencies Menu
+RadioTowerCommand	RADIO: ATC Menu
+RadioWingCommand	RADIO: Wingman Menu
+RecenterJoystick	SIM: Joystick Recenter
+RecenterTrackIR	SIM: TrackIR Recenter (additional)
+ReloadTrackIR	SIM: TrackIR Reload
+SaveCockpitDefaults	CKPIT: Cockpit Defaults - Save
+ScreenShot	SIM: Screenshot (additional)
+SetLeftThrottleAbDetent	TQS: SET AB DETENT - Left Engine
+SetLeftThrottleIdleCutOffDetent	TQS: SET IDLE DETENT - Left Engine
+SetRightThrottleAbDetent	TQS: SET AB DETENT - Right Engine
+SetRightThrottleIdleCutOffDetent	TQS: SET IDLE DETENT - Right Engine
+SimAPOverride	STICK: PADDLE SWITCH
+SimAVTRSwitch	AVTR: AVTR Switch - Cycle
+SimAVTRSwitchAuto	AVTR: AVTR Switch - AUTO
+SimAVTRSwitchDown	AVTR: AVTR Switch - Step Down
+SimAVTRSwitchOff	AVTR: AVTR Switch - OFF
+SimAVTRSwitchOn	AVTR: AVTR Switch - ON
+SimAVTRSwitchUp	AVTR: AVTR Switch - Step Up
+SimAVTRToggle	AVTR: AVTR Switch - Toggle ON / OFF
+SimAirSourceDump	AIR: AIR SOURCE Knob - DUMP
+SimAirSourceNorm	AIR: AIR SOURCE Knob - NORM
+SimAirSourceOff	AIR: AIR SOURCE Knob - OFF
+SimAirSourceRam	AIR: AIR SOURCE Knob - RAM
+SimAltFlaps	FLT: ALT FLAPS Switch - Toggle
+SimAltFlapsExtend	FLT: ALT FLAPS Switch - EXTEND
+SimAltFlapsNorm	FLT: ALT FLAPS Switch - NORM
+SimAltHotasAlpha	GAMEPAD: A Button
+SimAltHotasBravo	GAMEPAD: B Button
+SimAltHotasDMSShift	GAMEPAD: RB Button - DMS Shift
+SimAltHotasDown	GAMEPAD: D-Pad Down
+SimAltHotasDownLeft	GAMEPAD: D-Pad Down Left
+SimAltHotasDownRight	GAMEPAD: D-Pad Down Right
+SimAltHotasLeft	GAMEPAD: D-Pad Left
+SimAltHotasRight	GAMEPAD: D-Pad Right
+SimAltHotasTMSShift	GAMEPAD: LB Button - TMS Shift
+SimAltHotasUp	GAMEPAD: D-Pad Up
+SimAltHotasUpLeft	GAMEPAD: D-Pad Up Left
+SimAltHotasUpRight	GAMEPAD: D-Pad Up Right 
+SimAltHotasXray	GAMEPAD: X Button
+SimAltHotasYankey	GAMEPAD: Y Button
+SimAltPressDec	MAIN: Altimeter Pressure Knob - Decr. 1-5 degrees
+SimAltPressDecBy1	MAIN: Altimeter Pressure Knob - Decr. 1 degree
+SimAltPressInc	MAIN: Altimeter Pressure Knob - Incr. 1-5 degrees
+SimAltPressIncBy1	MAIN: Altimeter Pressure Knob - Incr. 1 degree
+SimAntennaSelectCycle	ANT: IFF UHF Switch - Cycle
+SimAntennaSelectDec	ANT: IFF UHF Switch - Step Down
+SimAntennaSelectDown	ANT: IFF UHF Switch - LOWER
+SimAntennaSelectInc	ANT: IFF UHF Switch - Step Up
+SimAntennaSelectMid	ANT: IFF UHF Switch - NORM
+SimAntennaSelectUp	ANT: IFF UHF Switch - UPPER
+SimAntiColCycleUp	EXT: ANTI COLLISION Knob - Cycle
+SimAntiColMode1	EXT: ANTI COLLISION Knob - 1
+SimAntiColMode2	EXT: ANTI COLLISION Knob - 2
+SimAntiColMode3	EXT: ANTI COLLISION Knob - 3
+SimAntiColMode4	EXT: ANTI COLLISION Knob - 4
+SimAntiColModeA	EXT: ANTI COLLISION Knob - A
+SimAntiColModeB	EXT: ANTI COLLISION Knob - B
+SimAntiColModeC	EXT: ANTI COLLISION Knob - C
+SimAntiColModeOff	EXT: ANTI COLLISION Knob - OFF
+SimAntiCollOff	EXT: ANTI COLLISION Switch - OFF
+SimAntiCollOn	EXT: ANTI COLLISION Switch - ON
+SimAntiIceCycle	ICE: ENGINE Switch - Cycle
+SimAntiIceDec	ICE: ENGINE Switch - Step Down
+SimAntiIceDown	ICE: ENGINE Switch - OFF
+SimAntiIceInc	ICE: ENGINE Switch - Step up
+SimAntiIceMid	ICE: ENGINE Switch - AUTO
+SimAntiIceUp	ICE: ENGINE Switch - ON
+SimArmMasterArm	MISC: MASTER ARM Switch - ON
+SimAud1Com1	AUDIO1: COMM 1 Mode Knob - Toggle
+SimAud1Com1Gd	AUDIO1: COMM 1 Mode Knob - GD
+SimAud1Com1Sql	AUDIO1: COMM 1 Mode Knob - SQL
+SimAud1Com2	AUDIO1: COMM 2 Mode Knob - Toggle
+SimAud1Com2Gd	AUDIO1: COMM 2 Mode Knob - GD
+SimAud1Com2Sql	AUDIO1: COMM 2 Mode Knob - SQL
+SimAuxComBackup	AUX: CNI Knob Switch - BACKUP
+SimAuxComUFC	AUX: CNI Knob Switch - UFC
+SimBrakeChannelDown	GEAR: BRAKES - Channel 2
+SimBrakeChannelToggle	GEAR: BRAKES - Toggle
+SimBrakeChannelUp	GEAR: BRAKES - Channel 1
+SimBrtWheelDn	ICP: BRT Wheel - Decrease FLIR Intensity
+SimBrtWheelUp	ICP: BRT Wheel - Increase FLIR Intensity
+SimBupUhfBoth	UHF: FUNCTION Knob - BOTH
+SimBupUhfFreq1Dec	UHF: A-3-2-T Rotary X**.*** - Step Down
+SimBupUhfFreq1Inc	UHF: A-3-2-T Rotary X**.*** - Step Up
+SimBupUhfFreq1_2	UHF: A-3-2-T Rotary 2**.***
+SimBupUhfFreq1_3	UHF: A-3-2-T Rotary 3**.***
+SimBupUhfFreq2Dec	UHF: Manual Frequency *X*.*** - Cycle Down
+SimBupUhfFreq2Inc	UHF: Manual Frequency *X*.*** - Cycle Up
+SimBupUhfFreq2_0	UHF: Manual Frequency *0*.***
+SimBupUhfFreq2_1	UHF: Manual Frequency *1*.***
+SimBupUhfFreq2_2	UHF: Manual Frequency *2*.***
+SimBupUhfFreq2_3	UHF: Manual Frequency *3*.***
+SimBupUhfFreq2_4	UHF: Manual Frequency *4*.***
+SimBupUhfFreq2_5	UHF: Manual Frequency *5*.***
+SimBupUhfFreq2_6	UHF: Manual Frequency *6*.***
+SimBupUhfFreq2_7	UHF: Manual Frequency *7*.***
+SimBupUhfFreq2_8	UHF: Manual Frequency *8*.***
+SimBupUhfFreq2_9	UHF: Manual Frequency *9*.***
+SimBupUhfFreq3Dec	UHF: Manual Frequency **X.*** - Cycle Down
+SimBupUhfFreq3Inc	UHF: Manual Frequency **X.*** - Cycle Up
+SimBupUhfFreq3_0	UHF: Manual Frequency **0.***
+SimBupUhfFreq3_1	UHF: Manual Frequency **1.***
+SimBupUhfFreq3_2	UHF: Manual Frequency **2.***
+SimBupUhfFreq3_3	UHF: Manual Frequency **3.***
+SimBupUhfFreq3_4	UHF: Manual Frequency **4.***
+SimBupUhfFreq3_5	UHF: Manual Frequency **5.***
+SimBupUhfFreq3_6	UHF: Manual Frequency **6.***
+SimBupUhfFreq3_7	UHF: Manual Frequency **7.***
+SimBupUhfFreq3_8	UHF: Manual Frequency **8.***
+SimBupUhfFreq3_9	UHF: Manual Frequency **9.***
+SimBupUhfFreq4Dec	UHF: Manual Frequency ***.X** - Cycle Down
+SimBupUhfFreq4Inc	UHF: Manual Frequency ***.X** - Cycle Up
+SimBupUhfFreq4_0	UHF: Manual Frequency ***.0**
+SimBupUhfFreq4_1	UHF: Manual Frequency ***.1**
+SimBupUhfFreq4_2	UHF: Manual Frequency ***.2**
+SimBupUhfFreq4_3	UHF: Manual Frequency ***.3**
+SimBupUhfFreq4_4	UHF: Manual Frequency ***.4**
+SimBupUhfFreq4_5	UHF: Manual Frequency ***.5**
+SimBupUhfFreq4_6	UHF: Manual Frequency ***.6**
+SimBupUhfFreq4_7	UHF: Manual Frequency ***.7**
+SimBupUhfFreq4_8	UHF: Manual Frequency ***.8**
+SimBupUhfFreq4_9	UHF: Manual Frequency ***.9**
+SimBupUhfFreq5Dec	UHF: Manual Frequency ***.*XX - Cycle Down
+SimBupUhfFreq5Inc	UHF: Manual Frequency ***.*XX - Cycle Up
+SimBupUhfFreq5_00	UHF: Manual Frequency ***.*00
+SimBupUhfFreq5_25	UHF: Manual Frequency ***.*25
+SimBupUhfFreq5_50	UHF: Manual Frequency ***.*50
+SimBupUhfFreq5_75	UHF: Manual Frequency ***.*75
+SimBupUhfFuncDec	UHF: FUNCTION Knob - Step Down
+SimBupUhfFuncInc	UHF: FUNCTION Knob - Step Up
+SimBupUhfGuard	UHF: MODE Knob - GRD
+SimBupUhfMain	UHF: FUNCTION Knob - MAIN
+SimBupUhfManual	UHF: MODE Knob - MNL
+SimBupUhfModeDec	UHF: MODE Knob - Step Down
+SimBupUhfModeInc	UHF: MODE Knob - Step Up
+SimBupUhfOff	UHF: FUNCTION Knob - OFF
+SimBupUhfPreset	UHF: MODE Knob - PRESET
+SimCATI	GEAR: STORES CONFIG Switch - CAT I
+SimCATIII	GEAR: STORES CONFIG Switch - CAT III
+SimCATSwitch	GEAR: STORES CONFIG Switch - Toggle
+SimCBEOSB_10F	FMFD: OSB-10 Button - Push
+SimCBEOSB_10L	LMFD: OSB-10 Button - Push
+SimCBEOSB_10R	RMFD: OSB-10 Button - Push
+SimCBEOSB_10T	TMFD: OSB-10 Button - Push
+SimCBEOSB_11F	FMFD: OSB-11 Button - Push
+SimCBEOSB_11L	LMFD: OSB-11 Button - Push
+SimCBEOSB_11R	RMFD: OSB-11 Button - Push
+SimCBEOSB_11T	TMFD: OSB-11 Button - Push
+SimCBEOSB_12F	FMFD: OSB-12 Button - Push
+SimCBEOSB_12L	LMFD: OSB-12 Button - Push
+SimCBEOSB_12R	RMFD: OSB-12 Button - Push
+SimCBEOSB_12T	TMFD: OSB-12 Button - Push
+SimCBEOSB_13F	FMFD: OSB-13 Button - Push
+SimCBEOSB_13L	LMFD: OSB-13 Button - Push
+SimCBEOSB_13R	RMFD: OSB-13 Button - Push
+SimCBEOSB_13T	TMFD: OSB-13 Button - Push
+SimCBEOSB_14F	FMFD: OSB-14 Button - Push
+SimCBEOSB_14L	LMFD: OSB-14 Button - Push
+SimCBEOSB_14R	RMFD: OSB-14 Button - Push
+SimCBEOSB_14T	TMFD: OSB-14 Button - Push
+SimCBEOSB_15F	FMFD: OSB-15 Button - Push
+SimCBEOSB_15L	LMFD: OSB-15 Button - Push
+SimCBEOSB_15R	RMFD: OSB-15 Button - Push
+SimCBEOSB_15T	TMFD: OSB-15 Button - Push
+SimCBEOSB_16F	FMFD: OSB-16 Button - Push
+SimCBEOSB_16L	LMFD: OSB-16 Button - Push
+SimCBEOSB_16R	RMFD: OSB-16 Button - Push
+SimCBEOSB_16T	TMFD: OSB-16 Button - Push
+SimCBEOSB_17F	FMFD: OSB-17 Button - Push
+SimCBEOSB_17L	LMFD: OSB-17 Button - Push
+SimCBEOSB_17R	RMFD: OSB-17 Button - Push
+SimCBEOSB_17T	TMFD: OSB-17 Button - Push
+SimCBEOSB_18F	FMFD: OSB-18 Button - Push
+SimCBEOSB_18L	LMFD: OSB-18 Button - Push
+SimCBEOSB_18R	RMFD: OSB-18 Button - Push
+SimCBEOSB_18T	TMFD: OSB-18 Button - Push
+SimCBEOSB_19F	FMFD: OSB-19 Button - Push
+SimCBEOSB_19L	LMFD: OSB-19 Button - Push
+SimCBEOSB_19R	RMFD: OSB-19 Button - Push
+SimCBEOSB_19T	TMFD: OSB-19 Button - Push
+SimCBEOSB_1F	FMFD: OSB-1 Button - Push
+SimCBEOSB_1L	LMFD: OSB-1 Button - Push
+SimCBEOSB_1R	RMFD: OSB-1 Button - Push
+SimCBEOSB_1T	TMFD: OSB-1 Button - Push
+SimCBEOSB_20F	FMFD: OSB-20 Button - Push
+SimCBEOSB_20L	LMFD: OSB-20 Button - Push
+SimCBEOSB_20R	RMFD: OSB-20 Button - Push
+SimCBEOSB_20T	TMFD: OSB-20 Button - Push
+SimCBEOSB_2F	FMFD: OSB-2 Button - Push
+SimCBEOSB_2L	LMFD: OSB-2 Button - Push
+SimCBEOSB_2R	RMFD: OSB-2 Button - Push
+SimCBEOSB_2T	TMFD: OSB-2 Button - Push
+SimCBEOSB_3F	FMFD: OSB-3 Button - Push
+SimCBEOSB_3L	LMFD: OSB-3 Button - Push
+SimCBEOSB_3R	RMFD: OSB-3 Button - Push
+SimCBEOSB_3T	TMFD: OSB-3 Button - Push
+SimCBEOSB_4F	FMFD: OSB-4 Button - Push
+SimCBEOSB_4L	LMFD: OSB-4 Button - Push
+SimCBEOSB_4R	RMFD: OSB-4 Button - Push
+SimCBEOSB_4T	TMFD: OSB-4 Button - Push
+SimCBEOSB_5F	FMFD: OSB-5 Button - Push
+SimCBEOSB_5L	LMFD: OSB-5 Button - Push
+SimCBEOSB_5R	RMFD: OSB-5 Button - Push
+SimCBEOSB_5T	TMFD: OSB-5 Button - Push
+SimCBEOSB_6F	FMFD: OSB-6 Button - Push
+SimCBEOSB_6L	LMFD: OSB-6 Button - Push
+SimCBEOSB_6R	RMFD: OSB-6 Button - Push
+SimCBEOSB_6T	TMFD: OSB-6 Button - Push
+SimCBEOSB_7F	FMFD: OSB-7 Button - Push
+SimCBEOSB_7L	LMFD: OSB-7 Button - Push
+SimCBEOSB_7R	RMFD: OSB-7 Button - Push
+SimCBEOSB_7T	TMFD: OSB-7 Button - Push
+SimCBEOSB_8F	FMFD: OSB-8 Button - Push
+SimCBEOSB_8L	LMFD: OSB-8 Button - Push
+SimCBEOSB_8R	RMFD: OSB-8 Button - Push
+SimCBEOSB_8T	TMFD: OSB-8 Button - Push
+SimCBEOSB_9F	FMFD: OSB-9 Button - Push
+SimCBEOSB_9L	LMFD: OSB-9 Button - Push
+SimCBEOSB_9R	RMFD: OSB-9 Button - Push
+SimCBEOSB_9T	TMFD: OSB-9 Button - Push
+SimCBEOSB_BRTDOWN_F	FMFD: BRT Button - Decrease Brightness
+SimCBEOSB_BRTDOWN_L	LMFD: BRT Button - Decrease Brightness
+SimCBEOSB_BRTDOWN_R	RMFD: BRT Button - Decrease Brightness
+SimCBEOSB_BRTDOWN_T	TMFD: BRT Button - Decrease Brightness
+SimCBEOSB_BRTUP_F	FMFD: BRT Button - Increase Brightness
+SimCBEOSB_BRTUP_L	LMFD: BRT Button - Increase Brightness
+SimCBEOSB_BRTUP_R	RMFD: BRT Button - Increase Brightness
+SimCBEOSB_BRTUP_T	TMFD: BRT Button - Increase Brightness
+SimCMSDown	STICK: CMS Down
+SimCMSLeft	STICK: CMS Left
+SimCMSRight	STICK: CMS Right
+SimCMSUp	STICK: CMS Up
+SimClickButtonLeft	CKPIT: Left Click Buttons - Up/Cw
+SimClickButtonRight	CKPIT: Right Click Buttons - Down/Ccw
+SimComm1PowerOff	AUDIO1: COMM 1 Knob - Power Off
+SimComm1PowerOn	AUDIO1: COMM 1 Knob - Power On
+SimComm2PowerOff	AUDIO1: COMM 2 Knob - Power Off
+SimComm2PowerOn	AUDIO1: COMM 2 Knob - Power On
+SimCommsSwitchLeft	TQS: COMMS Switch Left - IFF OUT
+SimCommsSwitchRight	TQS: COMMS Switch Right - IFF IN
+SimCursorDown	TQS: RDR CURSOR - Down
+SimCursorDownLeft	TQS: RDR CURSOR - Down Left
+SimCursorDownRight	TQS: RDR CURSOR - Down Right
+SimCursorEnable	TQS: RDR CURSOR - Cursor Enable
+SimCursorLeft	TQS: RDR CURSOR - Left
+SimCursorRight	TQS: RDR CURSOR - Right
+SimCursorStopMovement	TQS: RDR CURSOR - Toggle Stop Movement
+SimCursorUp	TQS: RDR CURSOR - Up
+SimCursorUpLeft	TQS: RDR CURSOR - Up Left
+SimCursorUpRight	TQS: RDR CURSOR - Up Right
+SimCycleBandAuxComDigit	AUX: CHANNEL - Toggle Band X/Y
+SimCycleCenterAuxComDigit	AUX: CHANNEL - Cycle Up Center Digit
+SimCycleLeftAuxComDigit	AUX: CHANNEL - Cycle Up Left Digit
+SimCycleRadioChannel	UHF: PRESET CHANNEL Knob - Cycle Up
+SimCycleRightAuxComDigit	AUX: CHANNEL - Cycle Up Right Digit
+SimDLOff	AVIONICS: DL Switch - OFF
+SimDLOn	AVIONICS: DL Switch - ON
+SimDLPower	AVIONICS: DL Switch - Toggle
+SimDMSDown	STICK: DMS Down
+SimDMSLeft	STICK: DMS Left
+SimDMSRight	STICK: DMS Right
+SimDMSUp	STICK: DMS Up
+SimDecAirSource	AIR: AIR SOURCE Knob - Step Down
+SimDecCenterAuxComDigit	AUX: CHANNEL - Cycle Down Center Dig.
+SimDecFuelPump	FUEL: ENG FEED Knob - Step Down
+SimDecFuelSwitch	QTY: FUEL QTY SEL Knob - Step Down
+SimDecLeftAuxComDigit	AUX: CHANNEL - Cycle Down Left Digit
+SimDecRadioChannel	UHF: PRESET CHANNEL Knob - Cycle Down
+SimDecRightAuxComDigit	AUX: CHANNEL - Cycle Down Right Digit
+SimDedBrightness	LIGHT: DED Knob (Primary) - Cycle
+SimDedBrightnessCCW	LIGHT: DED Knob (Primary) - Step Down
+SimDedBrightnessCW	LIGHT: DED Knob (Primary) - Step Up
+SimDeselectOverride	TQS: DOGFIGHT Switch - MRM/DF Cancel
+SimDigitalBUP	FLT: DIGITAL Switch - Toggle
+SimDigitalBUPBackup	FLT: DIGITAL Switch - BACKUP
+SimDigitalBUPOff	FLT: DIGITAL Switch - OFF
+SimDriftCO	ICP: DRIFT C/O Switch - Tog. ON/NORM!
+SimDriftCOOff	ICP: DRIFT C/O Switch - NORM
+SimDriftCOOn	ICP: DRIFT C/O Switch - ON
+SimDropChaff	CKPIT: Drop Chaff (non EWS AC)
+SimDropFlare	CKPIT: Drop Flare (non EWS AC)
+SimECMBit	ECM: BIT Button - Hold
+SimECMOn	SHORT: Toggle Jammer
+SimEWSChaffOff	CMDS: CH Switch - Power OFF
+SimEWSChaffOn	CMDS: CH Switch - Power ON
+SimEWSChaffPower	CMDS: CH Switch - Toggle Power
+SimEWSDispOff	CMDS: DISP Switch - Power Off (MLU EW Panel)
+SimEWSDispOn	CMDS: DISP Switch - Power On (MLU EW Panel)
+SimEWSDispPower	CMDS: DISP Switch - Toggle (MLU EW Panel)
+SimEWSFlareOff	CMDS: FL Switch - Power OFF
+SimEWSFlareOn	CMDS: FL Switch - Power ON
+SimEWSFlarePower	CMDS: FL Switch - Toggle Power
+SimEWSJammerOff	CMDS: JMR Switch - Power OFF
+SimEWSJammerOn	CMDS: JMR Switch - Power ON
+SimEWSJammerPower	CMDS: JMR Switch - Toggle Power
+SimEWSModeAuto	CMDS: MODE Knob - AUTO
+SimEWSModeByp	CMDS: MODE Knob - BYP
+SimEWSModeMan	CMDS: MODE Knob - MAN
+SimEWSModeOff	CMDS: MODE Knob - OFF
+SimEWSModeSemi	CMDS: MODE Knob - SEMI
+SimEWSModeStby	CMDS: MODE Knob - STBY
+SimEWSMwsOff	CMDS: MWS Switch - Power OFF
+SimEWSMwsOn	CMDS: MWS Switch - Power ON
+SimEWSMwsPower	CMDS: MWS Switch - Toggle Power
+SimEWSO1Off	CMDS: O1 Switch - Power OFF
+SimEWSO1On	CMDS: O1 Switch - Power ON
+SimEWSO1Power	CMDS: O1 Switch - Toggle Power
+SimEWSO2Off	CMDS: O2 Switch - Power OFF
+SimEWSO2On	CMDS: O2 Switch - Power ON
+SimEWSO2Power	CMDS: O2 Switch - Toggle Power
+SimEWSPGMDec	CMDS: MODE Knob - Step Down
+SimEWSPGMInc	CMDS: MODE Knob - Step Up
+SimEWSProgDec	CMDS: PRGM Knob - Step Down
+SimEWSProgFour	CMDS: PRGM Knob - 4
+SimEWSProgInc	CMDS: PRGM Knob - Step Up
+SimEWSProgOne	CMDS: PRGM Knob - 1
+SimEWSProgThree	CMDS: PRGM Knob - 3
+SimEWSProgTwo	CMDS: PRGM Knob - 2
+SimEWSRWROff	CMDS: RWR Switch - Power OFF
+SimEWSRWROn	CMDS: RWR Switch - Power ON
+SimEWSRWRPower	CMDS: RWR Switch - Toggle Power
+SimEcmMode1Off	ECM: Mode 1 - Off
+SimEcmMode1On	ECM: Mode 1 - On
+SimEcmMode1Toggle	ECM: Mode 1 - Toggle
+SimEcmMode2Off	ECM: Mode 2 - Off
+SimEcmMode2On	ECM: Mode 2 - On
+SimEcmMode2Toggle	ECM: Mode 2 - Toggle
+SimEcmMode3Off	ECM: Mode 3 - Off
+SimEcmMode3On	ECM: Mode 3 - On
+SimEcmMode3Toggle	ECM: Mode 3 - Toggle
+SimEcmMode4Off	ECM: Mode 4 - Off
+SimEcmMode4On	ECM: Mode 4 - On
+SimEcmMode4Toggle	ECM: Mode 4 - Toggle
+SimEcmMode5Off	ECM: Mode 5 - Off
+SimEcmMode5On	ECM: Mode 5 - On
+SimEcmMode5Toggle	ECM: Mode 5 - Toggle
+SimEcmPower	ECM: OPR Switch - Toggle
+SimEcmPowerOff	ECM: OPR Switch - OFF
+SimEcmPowerOn	ECM: OPR Switch - OPR
+SimEject	SEAT: EJECT Handle - Hold For Eject
+SimElecReset	ELEC: CAUTION RESET Button - Push
+SimEmergencyJettison	GEAR: EMER STORES JETTISON Button - Hold
+SimEndFlight	SIM: Toggle Exit Sim Menu
+SimEngCont	ENG: ENG CONT Switch - Toggle
+SimEngContPri	ENG: ENG CONT Switch - PRI
+SimEngContSec	ENG: ENG CONT Switch - SEC
+SimEpuAuto	EPU: EPU Switch - NORM
+SimEpuDown	EPU: EPU Switch - Step Down
+SimEpuGenTest	TEST: EPU/GEN Switch - Hold
+SimEpuOff	EPU: EPU Switch - OFF
+SimEpuOn	EPU: EPU Switch - ON
+SimEpuToggle	EPU: EPU Switch - Cycle
+SimEpuUp	EPU: EPU Switch - Step Up
+SimEwsJett	CMDS: JETT Switch - Toggle
+SimEwsJettOff	CMDS: JETT Switch - OFF
+SimEwsJettOn	CMDS: JETT Switch - ON
+SimExtFuelTrans	QTY: EXT FUEL TRANS Switch - Toggle
+SimExtlAntiColl	EXT: ANTI COLLISION Switch - Toggle
+SimExtlMasterCovertAC	EXT: MASTER Knob - A-C
+SimExtlMasterCovertAll	EXT: MASTER Knob - ALL
+SimExtlMasterCovertForm	EXT: MASTER Knob - FORM
+SimExtlMasterCycleUp	EXT: MASTER Knob - Cycle
+SimExtlMasterDec	EXT: MASTER Knob - Step Down
+SimExtlMasterInc	EXT: MASTER Knob - Step Up
+SimExtlMasterNorm	EXT: MASTER Switch/Knob - NORM
+SimExtlMasterOff	EXT: MASTER Switch/Knob - OFF
+SimExtlPower	EXT: MASTER Switch - Toggle
+SimExtlSteady	EXT: POSITION Switch - Toggle
+SimExtlWing	CKPIT: WING/TAIL/FUS Lights - Toggle
+SimF18FCSTOTrim	CKPIT: F-18 FCS T/O TRIM Button
+SimF18ThrottleATC	CKPIT: F-18 Throttle - ATC Button
+SimFCCOff	AVIONICS: FCC Switch - OFF
+SimFCCOn	AVIONICS: FCC Switch - ON
+SimFCCPower	AVIONICS: FCC Switch - Toggle
+SimFCROff	SNSR: FCR Switch - OFF
+SimFCROn	SNSR: FCR Switch - ON
+SimFCRPower	SNSR: FCR Switch - Toggle
+SimFLCSReset	FLT: FLCS RESET Switch - Hold
+SimFLTBIT	FLT: BIT Switch - Push
+SimFlcsPowerTest	TEST: FLCS PWR TEST Switch - Hold
+SimFlirLevelDown	ICP: FLIR Rocker - Level Down
+SimFlirLevelUp	ICP: FLIR Rocker - Level Up
+SimFuelDoorClose	FUEL: AIR REFUEL Switch - CLOSE
+SimFuelDoorOpen	FUEL: AIR REFUEL Switch - OPEN
+SimFuelDoorToggle	FUEL: AIR REFUEL Switch - Toggle
+SimFuelDump	CKPIT: Dump Fuel
+SimFuelPumpAft	FUEL: ENG FEED Knob - AFT
+SimFuelPumpFwd	FUEL: ENG FEED Knob - FWD
+SimFuelPumpNorm	FUEL: ENG FEED Knob - NORM
+SimFuelPumpOff	FUEL: ENG FEED Knob - OFF
+SimFuelSwitchCenterExt	QTY: FUEL QTY SEL Knob - EXT CTR
+SimFuelSwitchNorm	QTY: FUEL QTY SEL Knob - NORM
+SimFuelSwitchResv	QTY: FUEL QTY SEL Knob - RSVR
+SimFuelSwitchTest	QTY: FUEL QTY SEL Knob - TEST
+SimFuelSwitchWingExt	QTY: FUEL QTY SEL Knob - EXT WING
+SimFuelSwitchWingInt	QTY: FUEL QTY SEL Knob - INT WING
+SimFuelTransNorm	QTY: EXT FUEL TRANS Switch - NORM
+SimFuelTransWing	QTY: EXT FUEL TRANS Switch - WING FIRST
+SimFuselageLightCycle	EXT: FUSELAGE Switch - Cycle
+SimFuselageLightDec	EXT: FUSELAGE Switch - Step Down
+SimFuselageLightDown	EXT: FUSELAGE Switch - DIM
+SimFuselageLightInc	EXT: FUSELAGE Switch - Step Up
+SimFuselageLightMid	EXT: FUSELAGE Switch - OFF
+SimFuselageLightUp	EXT: FUSELAGE Switch - BRT
+SimGPSOff	AVIONICS: GPS Switch - OFF
+SimGPSOn	AVIONICS: GPS Switch - ON
+SimGPSPower	AVIONICS: GPS Switch - Toggle
+SimGndJettEnable	GEAR: GND JETT Switch - Toggle
+SimGndJettOff	GEAR: GND JETT Switch - OFF
+SimGndJettOn	GEAR: GND JETT Switch - ENABLE
+SimHSDRangeStepDown	SHORT: HSD Range Decrease
+SimHSDRangeStepUp	SHORT: HSD Range Increase
+SimHSIIlsNav	INSTR: MODE Knob - ILS/NAV
+SimHSIIlsTcn	INSTR: MODE Knob - ILS/TCN
+SimHSIModeDec	INSTR: MODE Knob - Step Down
+SimHSIModeInc	INSTR: MODE Knob - Step Up
+SimHSINav	INSTR: MODE Knob - NAV
+SimHSITcn	INSTR: MODE Knob - TCN
+SimHUDAltAuto	HUD: Altitude Switch - AUTO
+SimHUDAltBaro	HUD: Altitude Switch - BARO
+SimHUDAltDown	HUD: Altitude Switch - Step Dn
+SimHUDAltRadar	HUD: Altitude Switch - RADAR
+SimHUDAltUp	HUD: Altitude Switch - Step Up
+SimHUDBrightness	HUD: Brightness Switch - Cycle
+SimHUDBrightnessDown	HUD: Brightness Switch - Step Dn
+SimHUDBrightnessUp	HUD: Brightness Switch - Step Up
+SimHUDBrtAuto	HUD: Brightness Switch - AUTO BRT
+SimHUDBrtDay	HUD: Brightness Switch - DAY
+SimHUDBrtNight	HUD: Brightness Switch - NIG
+SimHUDDED	HUD: DED Data Switch - Cycle
+SimHUDDEDDED	HUD: DED Data Switch - DED
+SimHUDDEDDown	HUD: DED Data Switch - Step Dn
+SimHUDDEDOff	HUD: DED Data Switch - OFF
+SimHUDDEDPFL	HUD: DED Data Switch - PFL
+SimHUDDEDUp	HUD: DED Data Switch - Step Up
+SimHUDFPM	HUD: FPM Switch - Cycle
+SimHUDOff	ICP: SYM Wheel - HUD Power - OFF
+SimHUDOn	ICP: SYM Wheel - HUD Power - On
+SimHUDPower	ICP: SYM Wheel - HUD Power - Toggle
+SimHUDRadar	HUD: Altitude Switch - Cycle
+SimHUDScales	HUD: Scales Switch - Cycle
+SimHUDScalesDown	HUD: Scales Switch - Step Down
+SimHUDScalesUp	HUD: Scales Switch - Step Up
+SimHUDVelocity	HUD: Velocity Switch - Cycle
+SimHUDVelocityCAS	HUD: Velocity Switch - CAS
+SimHUDVelocityDown	HUD: Velocity Switch - Step Dn
+SimHUDVelocityGND	HUD: Velocity Switch - GND SPD
+SimHUDVelocityTAS	HUD: Velocity Switch - TAS
+SimHUDVelocityUp	HUD: Velocity Switch - Step Up
+SimHmsOff	HMCS: HMSC Knob - OFF
+SimHmsOn	HMCS: HMSC Knob - ON
+SimHmsSymWheelDn	HMCS: HMSC Knob - Brightness Decr.
+SimHmsSymWheelUp	HMCS: HMSC Knob - Brightness Incr.
+SimHookDown	GEAR: HOOK Switch - DN
+SimHookToggle	GEAR: HOOK Switch - Toggle
+SimHookUp	GEAR: HOOK Switch - UP
+SimHotasPinkyShift	STICK: PINKY SWITCH (DX SHIFT)
+SimHotasShift	SIM: DX Shift
+SimHotasShiftLock	SIM: DX Shift Lock
+SimHsiCourseDec	MAIN: HSI CRS Knob - Decrease 1-5 degrees
+SimHsiCourseInc	MAIN: HSI CRS Knob - Increase 1-5 degrees
+SimHsiCrsDecBy1	MAIN: HSI CRS Knob - Decrease 1 degree
+SimHsiCrsIncBy1	MAIN: HSI CRS Knob - Increase 1 degree
+SimHsiHdgDecBy1	MAIN: HSI HDG Knob - Decrease 1 degree
+SimHsiHdgIncBy1	MAIN: HSI HDG Knob - Increase 1 degree
+SimHsiHeadingDec	MAIN: HSI HDG Knob - Decrease 1-5 degrees
+SimHsiHeadingInc	MAIN: HSI HDG Knob - Increase 1-5 degrees
+SimICPAA	ICP: A-A Button - Push
+SimICPAG	ICP: A-G Button - Push
+SimICPALOW	ICP: 2-ALOW Button - Push
+SimICPCLEAR	ICP: RCL Button - Push
+SimICPCom1	ICP: COM1 Button - Push
+SimICPCom2	ICP: COM2 Button - Push
+SimICPCrus	ICP: 5-CRUS Button - Push
+SimICPDEDDOWN	ICP: DCS DOWN - Push
+SimICPDEDSEQ	ICP: DCS SEQ (Right) - Push
+SimICPDEDUP	ICP: DCS UP - Push
+SimICPEIGHT	ICP: 8-FIX Button - Push
+SimICPEnter	ICP: ENTER Button - Push
+SimICPFAck	EYE: F ACK Button - Push
+SimICPIFF	ICP: IFF Button - Push
+SimICPLIST	ICP: LIST Button - Push
+SimICPMark	ICP: 7-MARK Button - Push
+SimICPNINE	ICP: 9-A-CAL Button - Push
+SimICPNav	ICP: NAV Mode (no such button In Pit)
+SimICPNext	ICP: NEXT Button - Push
+SimICPPrevious	ICP: PREVIOUS Button - Push
+SimICPResetDED	ICP: DCS RTN (Left) - Push
+SimICPSIX	ICP: 6-TIME Button - Push
+SimICPStpt	ICP: 4-STPT Button - Push
+SimICPTHREE	ICP: 3 Button - Push
+SimICPTILS	ICP: 1-ILS Button - Push
+SimICPZERO	ICP: 0-M-SEL Button - Push
+SimIFFBackupM1Digit1Dec	AUX: IFF MODE I - X* ** - Cycle Down
+SimIFFBackupM1Digit1Inc	AUX: IFF MODE I - X* ** - Cycle Up
+SimIFFBackupM1Digit1_0	AUX: IFF MODE I - 0* **
+SimIFFBackupM1Digit1_1	AUX: IFF MODE I - 1* **
+SimIFFBackupM1Digit1_2	AUX: IFF MODE I - 2* **
+SimIFFBackupM1Digit1_3	AUX: IFF MODE I - 3* **
+SimIFFBackupM1Digit1_4	AUX: IFF MODE I - 4* **
+SimIFFBackupM1Digit1_5	AUX: IFF MODE I - 5* **
+SimIFFBackupM1Digit1_6	AUX: IFF MODE I - 6* **
+SimIFFBackupM1Digit1_7	AUX: IFF MODE I - 7* **
+SimIFFBackupM1Digit2Dec	AUX: IFF MODE I - *X ** - Cycle Down
+SimIFFBackupM1Digit2Inc	AUX: IFF MODE I - *X ** - Cycle Up
+SimIFFBackupM1Digit2_0	AUX: IFF MODE I - *0 **
+SimIFFBackupM1Digit2_1	AUX: IFF MODE I - *1 **
+SimIFFBackupM1Digit2_2	AUX: IFF MODE I - *2 **
+SimIFFBackupM1Digit2_3	AUX: IFF MODE I - *3 **
+SimIFFBackupM3Digit1Dec	AUX: IFF MODE 3 - ** X* - Cycle Down
+SimIFFBackupM3Digit1Inc	AUX: IFF MODE 3 - ** X* - Cycle Up
+SimIFFBackupM3Digit1_0	AUX: IFF MODE 3 - ** 0*
+SimIFFBackupM3Digit1_1	AUX: IFF MODE 3 - ** 1*
+SimIFFBackupM3Digit1_2	AUX: IFF MODE 3 - ** 2*
+SimIFFBackupM3Digit1_3	AUX: IFF MODE 3 - ** 3*
+SimIFFBackupM3Digit1_4	AUX: IFF MODE 3 - ** 4*
+SimIFFBackupM3Digit1_5	AUX: IFF MODE 3 - ** 5*
+SimIFFBackupM3Digit1_6	AUX: IFF MODE 3 - ** 6*
+SimIFFBackupM3Digit1_7	AUX: IFF MODE 3 - ** 7*
+SimIFFBackupM3Digit2Dec	AUX: IFF MODE 3 - ** *X - Cycle Down
+SimIFFBackupM3Digit2Inc	AUX: IFF MODE 3 - ** *X - Cycle Up
+SimIFFBackupM3Digit2_0	AUX: IFF MODE 3 - ** *0
+SimIFFBackupM3Digit2_1	AUX: IFF MODE 3 - ** *1
+SimIFFBackupM3Digit2_2	AUX: IFF MODE 3 - ** *2
+SimIFFBackupM3Digit2_3	AUX: IFF MODE 3 - ** *3
+SimIFFBackupM3Digit2_4	AUX: IFF MODE 3 - ** *4
+SimIFFBackupM3Digit2_5	AUX: IFF MODE 3 - ** *5
+SimIFFBackupM3Digit2_6	AUX: IFF MODE 3 - ** *6
+SimIFFBackupM3Digit2_7	AUX: IFF MODE 3 - ** *7
+SimIFFCodeSwitchHold	AUX: M-4 CODE Switch - HOLD
+SimIFFCodeSwitchZero	AUX: M-4 CODE Switch - ZERO
+SimIFFEnableCycle	AUX: IFF ENABLE Switch - Cycle
+SimIFFEnableDec	AUX: IFF ENABLE Switch - Step down
+SimIFFEnableInc	AUX: IFF ENABLE Switch - Step Up
+SimIFFEnableM1M3	AUX: IFF ENABLE Switch - M1/M3
+SimIFFEnableM3MS	AUX: IFF ENABLE Switch - M3/MS
+SimIFFEnableOff	AUX: IFF ENABLE Switch - OFF
+SimIFFMasterCycleUp	AUX: MASTER Knob - Cycle
+SimIFFMasterDec	AUX: MASTER Knob - Step Down
+SimIFFMasterEmerg	AUX: MASTER Knob - EMER
+SimIFFMasterInc	AUX: MASTER Knob - Step Up
+SimIFFMasterLow	AUX: MASTER Knob - LOW
+SimIFFMasterNorm	AUX: MASTER Knob - NORM
+SimIFFMasterOff	AUX: MASTER Knob - OFF
+SimIFFMasterStby	AUX: MASTER Knob - STBY
+SimIFFMode4MonitorAud	AUX: MONITOR Switch - AUDIO
+SimIFFMode4MonitorOff	AUX: MONITOR Switch - OUT
+SimIFFMode4MonitorToggle	AUX: MONITOR Switch - Toggle
+SimIFFMode4ReplyAlpha	AUX: REPLY Switch - A
+SimIFFMode4ReplyBravo	AUX: REPLY Switch - B
+SimIFFMode4ReplyCycle	AUX: REPLY Switch - Cycle
+SimIFFMode4ReplyDec	AUX: REPLY Switch - Step Down
+SimIFFMode4ReplyInc	AUX: REPLY Switch - Step Up
+SimIFFMode4ReplyOff	AUX: REPLY Switch - OUT
+SimILSDown	AUDIO2: ILS Knob - Volume Decr.
+SimILSUp	AUDIO2: ILS Knob - Volume Incr.
+SimINSDec	AVIONICS: INS Knob - Step Down
+SimINSInFlt	AVIONICS: INS Knob - IN FLT ALIGN
+SimINSInc	AVIONICS: INS Knob - Step Up
+SimINSNav	AVIONICS: INS Knob - NAV
+SimINSNorm	AVIONICS: INS Knob - NORM
+SimINSOff	AVIONICS: INS Knob - OFF
+SimIncAirSource	AIR: AIR SOURCE Knob - Step Up
+SimIncFuelPump	FUEL: ENG FEED Knob - Step Up
+SimIncFuelSwitch	QTY: FUEL QTY SEL Knob - Step Up
+SimInhibitVMS	ZERO: VMS Switch - Toggle
+SimInsertEpuPin	CHIEF: Insert EPU Safety Pin
+SimInstrumentLight	LIGHT: INST PNL Knob (Primary) - Cycle
+SimInstrumentLightCCW	LIGHT: INST PNL Knob (Primary) - Step Down
+SimInstrumentLightCW	LIGHT: INST PNL Knob (Primary) - Step Up
+SimInteriorLight	LIGHT: CONSOLES Knob (Flood) - Cycle
+SimInteriorLightCCW	LIGHT: CONSOLES Knob (Flood) - Step Down
+SimInteriorLightCW	LIGHT: CONSOLES Knob (Flood) - Step Up
+SimJfsStartCycle	ENG: JFS Switch - Cycle  1 / OFF / 2
+SimJfsStartDec	ENG: JFS Switch - Step Down
+SimJfsStartDown	ENG: JFS Switch - START 2
+SimJfsStartInc	ENG: JFS Switch - Step Up
+SimJfsStartMid	ENG: JFS Switch - OFF
+SimJfsStartUp	ENG: JFS Switch - START 1
+SimLEFAuto	FLT: LE FLAPS Switch - AUTO
+SimLEFLock	FLT: LE FLAPS Switch - LOCK
+SimLEFLockSwitch	FLT: LE FLAPS Switch - Toggle
+SimLandingLightCycle	GEAR: LIGHTS Switch - Cycle
+SimLandingLightDec	GEAR: LIGHTS Switch - Step Down
+SimLandingLightDown	GEAR: LIGHTS Switch - TAXI
+SimLandingLightInc	GEAR: LIGHTS Switch - Step Up
+SimLandingLightMid	GEAR: LIGHTS Switch - OFF
+SimLandingLightUp	GEAR: LIGHTS Switch - LANDING
+SimLaserArmOff	MISC: LASER Switch - OFF
+SimLaserArmOn	MISC: LASER Switch - ARM
+SimLaserArmToggle	MISC: LASER Switch - Toggle
+SimLaunchBarEXTEND	CKPIT: F-18 LAUNCH BAR Switch - EXTEND
+SimLaunchBarRETRACT	CKPIT: F-18 LAUNCH BAR Switch - RETRACT
+SimLaunchBarToggle	CKPIT: F-18 LAUNCH BAR Switch - Toggle
+SimLeftAPDec	MISC: ROLL Switch - Step Down
+SimLeftAPDown	MISC: ROLL Switch -  STRG SEL
+SimLeftAPInc	MISC: ROLL Switch - Step Up
+SimLeftAPMid	MISC: ROLL Switch - ATT HOLD
+SimLeftAPSwitch	MISC: ROLL Switch - Cycle
+SimLeftAPUp	MISC: ROLL Switch - HDG SEL
+SimLeftHptOff	SNSR: LEFT HDPT Switch - OFF
+SimLeftHptOn	SNSR: LEFT HDPT Switch - ON
+SimLeftHptPower	SNSR: LEFT HDPT Switch - Toggle
+SimLeftKneePadDec	CKPIT: Left Kneeboard - Dec
+SimLeftKneePadInc	CKPIT: Left Kneeboard - Inc
+SimLightsFlash	EXT: POSITION Switch - FLASH
+SimLightsSteady	EXT: POSITION Switch - STEADY
+SimMAPOff	AVIONICS: MAP Switch - OFF
+SimMAPOn	AVIONICS: MAP Switch - ON
+SimMAPPower	AVIONICS: MAP Switch - Toggle
+SimMFDOff	AVIONICS: MFD Switch - OFF
+SimMFDOn	AVIONICS: MFD Switch - ON
+SimMFDPower	AVIONICS: MFD Switch - Toggle
+SimMIDSLVTDec	AVIONICS: MIDS Knob - Step Down
+SimMIDSLVTInc	AVIONICS: MIDS Knob - Step Up
+SimMIDSLVTOff	AVIONICS: MIDS Knob - OFF
+SimMIDSLVTOn	AVIONICS: MIDS Knob - ON
+SimMIDSLVTZero	AVIONICS: MIDS Knob - ZERO
+SimMPO	MPO: MANUAL PITCH Switch - Hold
+SimMPOToggle	MPO: MANUAL PITCH Switch - Toggle
+SimMainPowerBatt	ELEC: MAIN PWR Switch - BATT
+SimMainPowerDec	ELEC: MAIN PWR Switch - Step Down
+SimMainPowerInc	ELEC: MAIN PWR Switch - Step Up
+SimMainPowerMain	ELEC: MAIN PWR Switch - MAIN
+SimMainPowerOff	ELEC: MAIN PWR Switch - OFF
+SimMalIndLights	TEST: MAL & IND LTS Button - Hold
+SimMalIndLightsOFF	TEST: MAL & IND LTS Button - Release
+SimManualFlyup	FLT: MANUAL TF FLYUP Switch - Toggle
+SimManualFlyupDisable	FLT: MANUAL TF FLYUP Switch - DISABLE
+SimManualFlyupEnable	FLT: MANUAL TF FLYUP Switch - ENABLE
+SimMasterArmDown	MISC: MASTER ARM Switch - Step Down
+SimMasterArmUp	MISC: MASTER ARM Switch - Step Up
+SimMasterFuelOff	FUEL: MASTER Switch - OFF
+SimMasterFuelOn	FUEL: MASTER Switch - ON
+SimMirrorClose	CKPIT: Mirror Close
+SimMirrorOpen	CKPIT: Mirror Open
+SimMissileStep	STICK: NWS A/R DISC MSL STEP SWITCH
+SimMixedRealityCoverToggle	VIEWINT: Toggle Mixed Reality Cover
+SimMotionFreeze	SIM: Sim-Freeze - Toggle
+SimNVGModeOff	CKPIT: Nightvision - Off
+SimNVGModeOn	CKPIT: Nightvision - On
+SimNextAGWeapon	SHORT: Next AG Weapon
+SimNextWaypoint	SHORT: Next Waypoint
+SimOBOGSBit	TEST: OXY QTY Switch - Hold
+SimOpenChatBox	SIM: Chat
+SimOverHeat	TEST: FIRE & OHEAT DETECT Button - Hold
+SimOxySupplyOff	OXY: Setting 2 - OFF (Pilot breathing)
+SimOxySupplyOn	OXY: Setting 2 - ON (Pilot breathing)
+SimOxySupplyToggle	OXY: Setting 2 - Toggle (Pilot breathing)
+SimParkingBrakeCycle	GEAR: PARKING BRAKE Switch - Cycle
+SimParkingBrakeDec	GEAR: PARKING BRAKE Switch - Step Down
+SimParkingBrakeDown	GEAR: PARKING BRAKE Switch - OFF
+SimParkingBrakeInc	GEAR: PARKING BRAKE Switch - Step Up
+SimParkingBrakeMid	GEAR: PARKING BRAKE Switch - ANTI SKID
+SimParkingBrakeUp	GEAR: PARKING BRAKE Switch - ON
+SimPause	SIM: Sim - Pause
+SimPickle	STICK: WEAPON RELEASE (Pickle)
+SimPilotToggle	SIM: Toggle Pilot Model
+SimPinkySwitch	STICK: PINKY SWITCH
+SimPitchLadderATTFPM	HUD: FPM Switch - ATT/FPM
+SimPitchLadderDown	HUD: FPM Switch - Step Down
+SimPitchLadderFPM	HUD: FPM Switch - FPM
+SimPitchLadderOff	HUD: FPM Switch - OFF
+SimPitchLadderUp	HUD: FPM Switch - Step Up
+SimPrevWaypoint	SHORT: Previous Waypoint
+SimProbeHeatMoveDown	TEST: PROBE HEAT Switch - Step Down
+SimProbeHeatMoveUp	TEST: PROBE HEAT Switch - Step Up
+SimProbeHeatOff	TEST: PROBE HEAT Switch - OFF
+SimProbeHeatOn	TEST: PROBE HEAT Switch - ON
+SimProbeHeatTest	TEST: PROBE HEAT Switch - TEST
+SimPullChocks	CHIEF: Remove main gear chocks
+SimRALTDown	SNSR: RDR ALT Switch - Step Down
+SimRALTOFF	SNSR: RDR ALT Switch - OFF
+SimRALTON	SNSR: RDR ALT Switch - ON
+SimRALTSTDBY	SNSR: RDR ALT Switch - STDBY
+SimRALTUp	SNSR: RDR ALT Switch - Step Up
+SimRFNorm	MISC: RF Switch - NORM
+SimRFQuiet	MISC: RF Switch - QUIET
+SimRFSilent	MISC: RF Switch - SILENT
+SimRFSwitch	MISC: RF Switch - Cycle
+SimRFSwitchDown	MISC: RF Switch - Step Down
+SimRFSwitchUp	MISC: RF Switch - Step Up
+SimRWRBrightnessDown	RWR: Brightness Knob - Decrease
+SimRWRBrightnessUp	RWR: Brightness Knob - Increase
+SimRWRHandoff	TWP: HANDOFF - Push
+SimRWRLaunch	TWP: MISSILE LAUNCH - Push
+SimRWRSetGroundPriority	TWA: LOW Button - Toggle
+SimRWRSetPriority	TWP: PRIORITY MODE - Toggle
+SimRWRSetSearch	TWA: SEARCH Button - Toggle
+SimRWRSetTargetSep	TWP: TGT SEP - Push
+SimRWRSetUnknowns	TWP: UNKNOWN - Toggle
+SimRWRSysTest	TWP: SYS TEST - Push
+SimRadarAAModeStep	SHORT: Radar AA Mode Step
+SimRadarAGModeStep	SHORT: Radar AG Mode Step
+SimRadarAzimuthScanChange	SHORT: Radar Azimuth Scan Change
+SimRadarBarScanChange	SHORT: Radar Bar Scan Change
+SimRadarCursorZero	TQS: RDR CURSOR - Cursor Zero
+SimRadarElevationCenter	TQS: ANT ELEV Knob - Center
+SimRadarElevationDown	TQS: ANT ELEV Knob - Tilt Down
+SimRadarElevationUp	TQS: ANT ELEV Knob - Tilt Up
+SimRadarFreeze	SHORT: Radar Freeze
+SimRadarGainDown	LMFD: GAIN Button - Decrease Sensor Gain
+SimRadarGainUp	LMFD: GAIN Button - Increase Sensor Gain
+SimRadarRangeStepDown	SHORT: Radar Range Down
+SimRadarRangeStepUp	SHORT: Radar Range Up
+SimRadarSnowplow	SHORT: Radar Snowplow
+SimRandomError	SIM: Random Error
+SimRangeKnobDown	TQS: MAN RANGE Knob - Down
+SimRangeKnobUp	TQS: MAN RANGE Knob - Up
+SimRecenterHeadTracking	SIM: Recenter head tracker (VR or TrackIR)
+SimRemoveEpuPin	CHIEF: Remove EPU Safety Pin
+SimResume	SIM: Sim - Resume
+SimRetDn	ICP: DEPR RET Wheel - Step Down
+SimRetUp	ICP: DEPR RET Wheel - Step Up
+SimReticleOff	HUD: DEPR RET Switch - OFF
+SimReticlePri	HUD: DEPR RET Switch - PRI
+SimReticleStby	HUD: DEPR RET Switch - STBY
+SimReticleSwitch	HUD: DEPR RET Switch - Cycle
+SimReticleSwitchDown	HUD: DEPR RET Switch - Step Down
+SimReticleSwitchUp	HUD: DEPR RET Switch - Step Up
+SimRightAPDec	MISC: PITCH Switch - Step Down
+SimRightAPDown	MISC: PITCH Switch - ATT HOLD
+SimRightAPInc	MISC: PITCH Switch - Step Up
+SimRightAPMid	MISC: PITCH Switch - A/P OFF
+SimRightAPSwitch	MISC: PITCH Switch - Cycle (also Combat AP)
+SimRightAPUp	MISC: PITCH Switch - ALT HOLD
+SimRightHptOff	SNSR: RIGHT HDPT Switch - OFF
+SimRightHptOn	SNSR: RIGHT HDPT Switch - ON
+SimRightHptPower	SNSR: RIGHT HDPT Switch - Toggle
+SimRightKneePadDec	CKPIT: Right Kneeboard - Dec
+SimRightKneePadInc	CKPIT: Right Kneeboard - Inc
+SimRingCommMenu	UI: Ring Comm Menu
+SimRwrPower	TWA: POWER Button - Toggle
+SimRwrPowerOff	TWA: POWER Button - Off
+SimRwrPowerOn	TWA: POWER Button - On
+SimSMSOff	AVIONICS: SMS Switch - OFF
+SimSMSOn	AVIONICS: SMS Switch - ON
+SimSMSPower	AVIONICS: SMS Switch - Toggle
+SimSafeMasterArm	MISC: MASTER ARM Switch - OFF
+SimScalesOff	HUD: Scales Switch - OFF
+SimScalesVAH	HUD: Scales Switch - VAH
+SimScalesVVVAH	HUD: Scales Switch - VV/VAH
+SimSeatArm	SEAT: Safety Lever - Toggle
+SimSeatDown	SEAT: Move Down
+SimSeatOff	SEAT: Safety Lever - Locked
+SimSeatOn	SEAT: Safety Lever - Armed
+SimSeatUp	SEAT: Move Up
+SimSelectMRMOverride	TQS: DOGFIGHT Switch - MRM Override
+SimSelectSRMOverride	TQS: DOGFIGHT Switch - DF Override
+SimSetChocks	CHIEF: Set main gear chocks in place
+SimSetWX	ICP: FLIR - WX Mode
+SimSilenceHorn	GEAR: HORN SILENCER Button - Push
+SimSimMasterArm	MISC: MASTER ARM Switch - SIM
+SimSlapSwitch	LEFT WALL: SLAP Switch (ECM-PGRM # 5)
+SimSmokeOff	CKPIT: Smoke - Off
+SimSmokeOn	CKPIT: Smoke - On
+SimSpotLight	CKPIT: Spotlight - Toggle
+SimStepAARLightsDown	EXT: AERIAL REFUELING Knob - Step Down
+SimStepAARLightsUp	EXT: AERIAL REFUELING Knob - Step Up
+SimStepAnticolModeDown	EXT: ANTI COLLISION Knob - Step Down
+SimStepAnticolModeUp	EXT: ANTI COLLISION Knob - Step Up
+SimStepComm1VolumeDown	AUDIO1: COMM 1 Knob - Volume Decr.
+SimStepComm1VolumeUp	AUDIO1: COMM 1 Knob - Volume Incr.
+SimStepComm2VolumeDown	AUDIO1: COMM 2 Knob - Volume Decr.
+SimStepComm2VolumeUp	AUDIO1: COMM 2 Knob - Volume Incr.
+SimStepFormationLightsDown	EXT: FORM Knob - Step Down
+SimStepFormationLightsUp	EXT: FORM Knob - Step Up
+SimStepHSIMode	INSTR: MODE Knob - Cycle
+SimStepIntercomVolumeDown	AUDIO2: INTERCOM Knob - Volume Decr.
+SimStepIntercomVolumeUp	AUDIO2: INTERCOM Knob - Volume Incr.
+SimStepMasterArm	MISC: MASTER ARM Switch - Cycle
+SimStepMissileVolumeDown	AUDIO1: MSL Knob - Volume Decr.
+SimStepMissileVolumeUp	AUDIO1: MSL Knob - Volume Incr.
+SimStepThreatVolumeDown	AUDIO1: THREAT Knob - Volume Decr.
+SimStepThreatVolumeUp	AUDIO1: THREAT Knob - Volume Incr.
+SimSymWheelDn	ICP: SYM Wheel - Decrease HUD Brightness
+SimSymWheelUp	ICP: SYM Wheel - Increase HUD Brightness
+SimTACANAATR	AUX: STATION SELECTOR Switch - A/A TR
+SimTACANTR	AUX: STATION SELECTOR Switch - T/R
+SimTEFCMDAuto	CKPIT: F-18 FLAP Switch - AUTO
+SimTEFCMDDec	CKPIT: F-18 FLAP Switch - Step Down
+SimTEFCMDFull	CKPIT: F-18 FLAP Switch - FULL
+SimTEFCMDHalf	CKPIT: F-18 FLAP Switch - HALF
+SimTEFCMDInc	CKPIT: F-18 FLAP Switch - Step Up
+SimTMSDown	STICK: TMS Down
+SimTMSLeft	STICK: TMS Left
+SimTMSRight	STICK: TMS Right
+SimTMSUp	STICK: TMS Up
+SimThrottleIdleDetentBack	TQS: Throttle - OFF
+SimThrottleIdleDetentForward	TQS: Throttle - IDLE
+SimThrottleIdleDetentLeft	TQS: Left Throttle - CUTOFF (hold)
+SimThrottleIdleDetentLeftBack	TQS: Left Throttle - OFF
+SimThrottleIdleDetentLeftForward	TQS: Left Throttle - IDLE
+SimThrottleIdleDetentLeftToggle	TQS: Left Throttle - Toggle IDLE/OFF
+SimThrottleIdleDetentRight	TQS: Right Throttle - CUTOFF (hold)
+SimThrottleIdleDetentRightBack	TQS: Right Throttle - OFF
+SimThrottleIdleDetentRightForward	TQS: Right Throttle - IDLE
+SimThrottleIdleDetentRightToggle	TQS: Right Throttle - Toggle IDLE/OFF
+SimThrottleIdleDetentToggle	TQS: Throttle - Toggle IDLE/OFF
+SimToggleAuxComAATR	AUX: STATION SELECTOR Switch - Toggle
+SimToggleAuxComMaster	AUX: CNI Knob Switch - Toggle
+SimToggleCursorCenter	CKPIT: Toggle Mouse Cursor Center
+SimToggleMasterFuel	FUEL: MASTER Switch - Toggle
+SimToggleMissileBoreSlave	SHORT: Toggle Missile Bore/Slave
+SimToggleMissileCage	TQS: MAN RANGE Knob - UNCAGE
+SimToggleMissileSpotScan	SHORT: Toggle Missile Spot/Scan
+SimToggleMissileTDBPUncage	SHORT: Toggle Missile TD/BP
+SimTogglePaused	SIM: Sim-Pause - Toggle
+SimToggleTFR	MISC: ADV MODE - Toggle TFR On / Off
+SimTransmitCom1	TQS: COMMS Switch Up - UHF
+SimTransmitCom2	TQS: COMMS Switch Down - VHF
+SimTriggerFirstDetent	STICK: FIRST TRIGGER DETENT
+SimTriggerSecondDetent	STICK: SECOND TRIGGER DETENT
+SimTrimAPDISC	TRIM: TRIM/AP DISC Switch - DISC
+SimTrimAPDisc	TRIM: TRIM/AP DISC Switch - Toggle
+SimTrimAPNORM	TRIM: TRIM/AP DISC Switch - NORM
+SimTrimNoseDown	TRIM: PITCH TRIM Wheel - NOSE DN
+SimTrimNoseUp	TRIM: PITCH TRIM Wheel - NOSE UP
+SimTrimRollLeft	TRIM: ROLL TRIM Wheel - L WING DN
+SimTrimRollRight	TRIM: ROLL TRIM Wheel - R WING DN
+SimTrimYawLeft	TRIM: YAW TRIM Knob - L
+SimTrimYawRight	TRIM: YAW TRIM Knob - R
+SimUFCOff	AVIONICS: UFC Switch - OFF
+SimUFCOn	AVIONICS: UFC Switch - ON
+SimUFCPower	AVIONICS: UFC Switch - Toggle
+SimVMSOff	ZERO: VMS Switch - INHIBIT
+SimVMSOn	ZERO: VMS Switch - ON
+SimVRHMDReset	SIM: VR Camera Rotation Reset
+SimVisorToggle	CKPIT: Visor - Toggle
+SimWarnReset	ICP: DRIFT C/O Switch - WARN RESET
+SimWheelBrakes	CKPIT: Wheel Brakes - Hold
+SimWingLightBrt	CKPIT: WING/TAIL/FUS Lights - On
+SimWingLightCycle	EXT: WING/TAIL Switch - Cycle
+SimWingLightDec	EXT: WING/TAIL Switch - Step Down
+SimWingLightDown	EXT: WING/TAIL Switch - DIM
+SimWingLightInc	EXT: WING/TAIL Switch - Step Up
+SimWingLightMid	EXT: WING/TAIL Switch - OFF
+SimWingLightOff	CKPIT: WING/TAIL/FUS Lights - Off
+SimWingLightUp	EXT: WING/TAIL Switch - BRT
+SimXBandAuxComDigit	AUX: CHANNEL - Toggle Band X
+SimXMTASPISOper	ECM: XMT ASPIS - OPER
+SimXMTASPISStdby	ECM: XMT ASPIS - STDBY
+SimXMTASPISToggle	ECM: XMT ASPIS - Toggle
+SimXMit1	ECM: XMT Switch - 1
+SimXMit2	ECM: XMT Switch - 2
+SimXMit3	ECM: XMT Switch - 3
+SimXMitDec	ECM: XMT Switch - Step Down
+SimXMitInc	ECM: XMT Switch - Step Up
+SimYBandAuxComDigit	AUX: CHANNEL - Toggle Band Y
+TankerBreakaway	TANKER: Breakaway
+TankerDoneRefueling	TANKER: Done Refueling
+TankerReadyForGas	TANKER: Ready For Gas
+TankerRequestFuel	TANKER: Request Fuel
+TimeAccelerate	SIM: Time Acceleration - Toggle 2x
+TimeAccelerateDec	SIM: Time Acceleration - Step Down
+TimeAccelerateInc	SIM: Time Acceleration - Step Up
+TimeAccelerateMaxToggle	SIM: Time Acceleration - Toggle 4x
+ToggleClickablePitMode	CKPIT: Mouselook / Clickable Pit - Toggle 
+ToggleDisplacementCam	VIEWEXT: Toggle Displacement Camera
+ToggleInfoBar	SIM: Toggle Infobar
+ToggleNVGMode	CKPIT: Nightvision - Toggle
+ToggleSmoke	CKPIT: Smoke - Toggle
+ToggleSubTitles	SIM: Toggle Radio Subtitles
+WinAmpNextTrack	WINAMP: Next Track
+WinAmpPreviousTrack	WINAMP: Previous Track
+WinAmpStartPlayback	WINAMP: Start Playback
+WinAmpStopPlayback	WINAMP: Stop Playback
+WinAmpTogglePause	WINAMP: Toggle Pause
+WinAmpTogglePlayback	WINAMP: Toggle Playback
+WinAmpVolumeDown	WINAMP: Volume Down
+WinAmpVolumeUp	WINAMP: Volume Up
+WingmanArrow	WINGMAN: Go Arrowhead
+WingmanBreakLeft	WINGMAN: Break Left
+WingmanBreakRight	WINGMAN: Break Right
+WingmanChainsaw	WINGMAN: Chainsaw
+WingmanCheckSix	WINGMAN: Check Your Six
+WingmanClearSix	WINGMAN: Clear My Six
+WingmanCloseup	WINGMAN: Close Up
+WingmanDecreaseRelAlt	WINGMAN: Go Lower
+WingmanDesignateGroup	WINGMAN: Attack Targets
+WingmanDesignateTarget	WINGMAN: Attack My Target
+WingmanDiamond	WINGMAN: Go Diamond
+WingmanDropStores	WINGMAN: Drop Stores
+WingmanEchelonLeft	WINGMAN: Go Echelon Left
+WingmanEchelonRight	WINGMAN: Go Echelon Right
+WingmanFlex	WINGMAN: Flex
+WingmanFluid	WINGMAN: Go Fluid
+WingmanGiveBra	WINGMAN: Say Position
+WingmanGiveDamageReport	WINGMAN: Say Damage
+WingmanGiveFuelState	WINGMAN: Say Fuel
+WingmanGiveStatus	WINGMAN: Say Status
+WingmanGiveWeaponsCheck	WINGMAN: Say Weapons
+WingmanGoCoverMode	WINGMAN: Go Cover
+WingmanGoOnDeck	WINGMAN: Go On Deck
+WingmanGoShooterMode	WINGMAN: Go Shooter
+WingmanIncreaseRelAlt	WINGMAN: Go Higher
+WingmanKickout	WINGMAN: Kickout
+WingmanLadder	WINGMAN: Go Ladder
+WingmanLine	WINGMAN: Go Line
+WingmanPince	WINGMAN: Pince
+WingmanPosthole	WINGMAN: Posthole
+WingmanRTB	WINGMAN: Return to Base
+WingmanRejoin	WINGMAN: Rejoin
+WingmanResumeNormal	WINGMAN: Resume Mission
+WingmanSearchAir	WINGMAN: Search Air
+WingmanSearchGround	WINGMAN: Search Ground
+WingmanSendGrdDL	WINGMAN: Datalink Ground Target
+WingmanSpread	WINGMAN: Go Spread
+WingmanStack	WINGMAN: Go Stack
+WingmanStackDown	WINGMAN: Stack Down
+WingmanStackLevel	WINGMAN: Stack Level
+WingmanStackUp	WINGMAN: Stack Up
+WingmanToggleSide	WINGMAN: Switch Side
+WingmanTrail	WINGMAN: Go Trail
+WingmanWeaponsFree_AA	WINGMAN: Weapons Free AA
+WingmanWeaponsFree_AG	WINGMAN: Weapons Free AG
+WingmanWeaponsHold	WINGMAN: Weapons Hold
+WingmanWedge	WINGMAN: Go Wedge
+selectBothEngines	FCTRL: ENGINE - Select Both Engines
+selectLeftEngine	FCTRL: ENGINE - Select Left Engine
+selectRightEngine	FCTRL: ENGINE - Select Right Engine
