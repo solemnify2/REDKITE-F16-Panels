@@ -304,8 +304,8 @@ const SwitchDef switches[] = {
   // ---- ENG & JET START Panel (Teensy direct) ----
   {"JFS",       PNL_ENGINE, SW_ON_OFF_ON, -1, PIN_JFS1, PIN_JFS2, 0},  // OFF/START1/START2
   {"ENG CONT",  PNL_ENGINE, SW_ON_OFF,    -1, PIN_ENG_CONT,   0,  0},  // PRI/SEC
-  {"AB RESET",  PNL_ENGINE, SW_ON_OFF,    -1, PIN_ABRESET,    0,  0},
-  {"ENG DATA",  PNL_ENGINE, SW_ON_OFF,    -1, PIN_ENGDATA,    0,  0},
+  // 3단 토글 하나입니다 (AB RESET / NORM / ENG DATA). 중립은 양쪽 다 열림.
+  {"AB RESET/ENG DATA", PNL_ENGINE, SW_ON_OFF_ON, -1, PIN_ABRESET, PIN_ENGDATA, 0},
   {"MAX POWER", PNL_ENGINE, SW_ON_OFF,    -1, PIN_MAXPOWER,   0,  0},
 
   // ---- AUDIO 1 모드 로터리 (MCP 0x20 PA, 케이블 C8 로 UHF 패널까지 점퍼) ----
@@ -318,8 +318,9 @@ const SwitchDef switches[] = {
   {"COMM2 GD",    PNL_AUDIO1, SW_ON_OFF, 0, 5, 0, 0},  // PA5
 
   // ---- AUDIO 2 Panel (MCP 0x20 PA) ----
-  {"HOT MIC",   PNL_AUDIO2, SW_ON_OFF,     0,   0,            0,  0},  // MCP#0 PA0
-  {"CIPHER",    PNL_AUDIO2, SW_ON_OFF,     0,   1,            0,  0},  // MCP#0 PA1
+  // 실제 하드웨어는 3단 토글 하나입니다 (HOT MIC / OFF / CIPHER).
+  // 양쪽 접점이 PA0·PA1 이고 중립은 둘 다 열림 — SW_ON_OFF_ON 과 같은 모양입니다.
+  {"HOT MIC/CIPHER",      PNL_AUDIO2,  SW_ON_OFF_ON,     0,   0,   1,  0},  // PA0/PA1
 
   // ---- ECM Panel (MCP 0x22, GPB) ----
   {"ECM OPR/STBY",        PNL_ECM,     SW_ON_OFF_ON,     2,  11,  10,  0},  // GPB3/GPB2  (OPR/OFF)
@@ -831,42 +832,40 @@ const DxEntry dxOrder[] = {
   {DX_SW,      12},   // JFS                  x2
   {DX_SW,      13},   // ENG CONT             x1
   {DX_COVER,    0},   // ENG CONT COVER       x1
-  {DX_SW,      14},   // AB RESET             x1
-  {DX_SW,      15},   // ENG DATA             x1
-  {DX_SW,      16},   // MAX POWER            x1
+  {DX_SW,      14},   // AB RESET/ENG DATA    x2
+  {DX_SW,      15},   // MAX POWER            x1
 
   // ---- AUDIO 1 ----
   {DX_COMMPWR,  0},   // COMM1 PWR            x1
   {DX_COMMPWR,  1},   // COMM2 PWR            x1
-  {DX_SW,      17},   // COMM1 OFF            x1
-  {DX_SW,      18},   // COMM1 SQL            x1
-  {DX_SW,      19},   // COMM1 GD             x1
-  {DX_SW,      20},   // COMM2 OFF            x1
-  {DX_SW,      21},   // COMM2 SQL            x1
-  {DX_SW,      22},   // COMM2 GD             x1
+  {DX_SW,      16},   // COMM1 OFF            x1
+  {DX_SW,      17},   // COMM1 SQL            x1
+  {DX_SW,      18},   // COMM1 GD             x1
+  {DX_SW,      19},   // COMM2 OFF            x1
+  {DX_SW,      20},   // COMM2 SQL            x1
+  {DX_SW,      21},   // COMM2 GD             x1
 
   // ---- AUDIO 2 ----
-  {DX_SW,      23},   // HOT MIC              x1
-  {DX_SW,      24},   // CIPHER               x1
+  {DX_SW,      22},   // HOT MIC/CIPHER       x2
 
   // ---- ECM ----
-  {DX_SW,      25},   // ECM OPR/STBY         x2
-  {DX_SW,      26},   // ECM XMIT             x2
+  {DX_SW,      23},   // ECM OPR/STBY         x2
+  {DX_SW,      24},   // ECM XMIT             x2
   {DX_LADDER,   0},   // ECM Buttons          x8
-  {DX_SW,      27},   // ECM RESET            x1
-  {DX_SW,      28},   // ECM BIT              x1
+  {DX_SW,      25},   // ECM RESET            x1
+  {DX_SW,      26},   // ECM BIT              x1
 
   // ---- EPU ----
-  {DX_SW,      29},   // EPU                  x2
+  {DX_SW,      27},   // EPU                  x2
   {DX_COVER,    1},   // EPU OFF COVER        x1
   {DX_COVER,    2},   // EPU ON COVER         x1
 
   // ---- ELEC ----
-  {DX_SW,      30},   // ELEC MAIN PWR        x2
-  {DX_SW,      31},   // ELEC CAUTION RST     x1
+  {DX_SW,      28},   // ELEC MAIN PWR        x2
+  {DX_SW,      29},   // ELEC CAUTION RST     x1
 
   // ---- AVTR ----
-  {DX_SW,      32},   // AVTR                 x2
+  {DX_SW,      30},   // AVTR                 x2
 };
 #define NUM_DX_ORDER (sizeof(dxOrder) / sizeof(dxOrder[0]))
 
@@ -954,7 +953,7 @@ void assignButtons() {
 //  DX 번호는 dxOrder[] 가 정합니다. 세 커버가 연속일 필요는 없습니다.
 
 #define SW_IDX_ENG_CONT  13    // switches[] 인덱스 — 배열 순서 변경 시 함께 수정
-#define SW_IDX_EPU       29
+#define SW_IDX_EPU       27
 
 #define COVER_DELAY_TICKS 10  // 100ms @ 100Hz — 커버/스위치 간 시차
 

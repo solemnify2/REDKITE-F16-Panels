@@ -13,7 +13,7 @@
 
 | 항목 | LEFT_AUX | LEFT_CONSOLE | 합 |
 |---|---:|---:|---:|
-| 스위치 신호 (`switches[]` 항목) | 26 | 33 | 59 |
+| 스위치 신호 (`switches[]` 항목) | 26 | 31 | 57 |
 | 저항 래더 | 3 (TWA, CMDS MODE·PRGM) | 1 (ECM) | 4 |
 | 포텐셔미터 | 1 (HMCS) | 10 (AUDIO 1×6, AUDIO 2×3, UHF VOL) | 11 |
 | 홀 센서 (페달 내장) | 2 (러더 페달) | — | 2 |
@@ -29,13 +29,13 @@
 
 ### 스위치 부품 내역
 
-`switches[]` 59개 항목과 저항 래더 4개가 실제 부품 **64개**에 대응합니다.
+`switches[]` 57개 항목과 저항 래더 4개가 실제 부품 **63개**에 대응합니다.
 로터리와 3포지션 토글은 한 부품이 여러 항목을 차지합니다.
 
 | 부품 | 수 | 내역 |
 |---|---:|---|
-| 토글 On-Off-On | 13 | `SW_ON_OFF_ON` 12 + AUDIO 2 (HOT MIC‑OFF‑CIPHER) 1 |
-| 토글 On-On | 20 | AUX 13 (Laser ARM, Store CAT, Hook, GND JETT ENABLE, BRAKES Channel, CMDS 8) + 콘솔 7 (ENG CONT·DATA, MAX POWER, AB RESET, MPO, UHF SQUELCH·T-TONE) |
+| 토글 On-Off-On | 14 | `SW_ON_OFF_ON` 14 — AUDIO 2 HOT MIC‑OFF‑CIPHER, ENGINE AB RESET‑NORM‑ENG DATA 포함 |
+| 토글 On-On | 18 | AUX 13 (Laser ARM, Store CAT, Hook, GND JETT ENABLE, BRAKES Channel, CMDS 8) + 콘솔 5 (ENG CONT, MAX POWER, MPO, UHF SQUELCH·T-TONE) |
 | 푸시 | 9 | AUX 4 (ALT REL, EMER Jettison, Horn Silencer, DN LOCK REL) + 콘솔 5 (ECM BIT·RESET, ELEC CAUTION RST, UHF STATUS·TEST) |
 | 택타일 | 12 | 래더 — TWA 4버튼, ECM 8버튼 |
 | 로터리 | 6 | UHF FUNC 4P, UHF MODE 3P, COMM1 3P, COMM2 3P, CMDS MODE 7P, CMDS PRGM 7P |

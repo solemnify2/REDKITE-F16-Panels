@@ -288,7 +288,8 @@ C14 는 SD 확장 케이블 4선(DIN · CLK · CS · GND) + VIN 1선 = **5선**�
 
 > **주소 점퍼 = 공장 출하 그대로** (A0/A1/A2 전부 GND) → `0x20`.
 > **19/20 사용 — PB0 여유 1핀.** STATUS 가 Teensy pin 41 직결(`C13`)로 이설되어 PB0 이 빈 상태입니다.
-> `PA0`~`PA7` 은 **AUDIO 패널** 신호입니다 — `PA0/PA1` 은 AUDIO 2 의 HOT MIC·CIPHER,
+> `PA0`~`PA7` 은 **AUDIO 패널** 신호입니다 — `PA0/PA1` 은 AUDIO 2 의 3단 토글
+> (HOT MIC / OFF / CIPHER) 양쪽 접점,
 > `PA2`~`PA7` 은 AUDIO 1 의 COMM 1/2 모드 로터리. 모두 **케이블 C8**(패널 간 점퍼)로 들어옵니다.
 > UHF(C7)가 헤더 앞쪽 `PB` 블록에 모여 있어, 모듈이 실장된 UHF 패널 쪽 배선이 짧습니다.
 > **T-TONE·SQUELCH·STATUS 는 Teensy 직결**(`C13`)이라 이 모듈을 거치지 않습니다.
@@ -424,8 +425,7 @@ C14 는 SD 확장 케이블 4선(DIN · CLK · CS · GND) + VIN 1선 = **5선**�
 | 25–26 | ENGINE | JFS START 1 / START 2 |
 | 27 | ENGINE | ENG CONT PRI / SEC |
 | 28 | ENGINE | ENG CONT COVER (커버 자동화) |
-| 29 | ENGINE | AB RESET |
-| 30 | ENGINE | ENG DATA |
+| 29–30 | ENGINE | AB RESET / NORM / ENG DATA (3단 토글) |
 | 31 | ENGINE | MAX POWER |
 | 32 | AUDIO 1 | COMM 1 전원 — 노브가 켜져 있는 동안 **유지** (pot ADC ≥ 5) |
 | 33 | AUDIO 1 | COMM 2 전원 — 노브가 켜져 있는 동안 **유지** (pot ADC ≥ 5) |
@@ -435,8 +435,7 @@ C14 는 SD 확장 케이블 4선(DIN · CLK · CS · GND) + VIN 1선 = **5선**�
 | 37 | AUDIO 1 | COMM 2 MODE OFF |
 | 38 | AUDIO 1 | COMM 2 MODE SQL |
 | 39 | AUDIO 1 | COMM 2 MODE GD XMT |
-| 40 | AUDIO 2 | HOT MIC |
-| 41 | AUDIO 2 | CIPHER |
+| 40–41 | AUDIO 2 | HOT MIC / OFF / CIPHER (3단 토글) |
 | 42–43 | ECM | OPR / STBY |
 | 44–45 | ECM | XMIT 1 / XMIT 3 |
 | 46–53 | ECM | 저항 래더 — ECM 1~6, FRM, SPL |
