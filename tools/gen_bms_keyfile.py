@@ -119,8 +119,7 @@ def _require_serial():
         import serial              # noqa: F401
         import serial.tools.list_ports
     except ImportError:
-        raise SystemExit('pyserial 이 필요합니다:  pip install pyserial\n'
-                         '(보드 없이 소스로 만들려면 --from-source)')
+        raise SystemExit('pyserial 이 필요합니다:  pip install pyserial')
     return serial
 
 

@@ -135,8 +135,6 @@ def main():
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument('-o', '--out-dir', required=True, help='생성한 XML 을 쓸 폴더')
     ap.add_argument('--bms-root', default=K.DEFAULT_BMS, help='BMS 설치 경로')
-    ap.add_argument('--from-source', action='store_true',
-                    help='보드 대신 스케치의 dxOrder[] 를 읽습니다 (오프라인용)')
     ap.add_argument('--port', action='append', metavar='COMx', help='포트 직접 지정')
     ap.add_argument('--guid', action='append', nargs=2, metavar=('DEVICE', 'GUID'),
                     help='장치 GUID 지정 (기본은 sim_axes.py 의 값)')
@@ -146,22 +144,16 @@ def main():
         AX.BMS_GUID[dev.upper()] = g.strip('{}')
 
     maps = {}
-    if args.from_source:
-        for dev, rel in K.SKETCHES.items():
-            p = os.path.join(K.ROOT, rel)
-            if os.path.isfile(p):
-                maps[dev] = K.dx_map(p)
-    else:
-        boards = [(p, None) for p in args.port] if args.port else K.find_boards()
-        if not boards:
-            raise SystemExit('Teensy 보드를 찾지 못했습니다. 브리지를 껐는지 확인하거나 '
-                             '--from-source 를 쓰십시오.')
-        for port, _ in boards:
-            dev, entries = K.query_board(port)
-            if dev not in AX.PRODUCT:
-                raise SystemExit('%s: 알 수 없는 device=%r' % (port, dev))
-            sys.stderr.write('%s 에서 %s DX 맵 %d 항목 수신\n' % (port, dev, len(entries)))
-            maps[dev] = entries
+    boards = [(p, None) for p in args.port] if args.port else K.find_boards()
+    if not boards:
+        raise SystemExit('Teensy 보드를 찾지 못했습니다. USB 와 브리지 종료를 '
+                         '확인하거나 --port COM7 로 지정하십시오.')
+    for port, _ in boards:
+        dev, entries = K.query_board(port)
+        if dev not in AX.PRODUCT:
+            raise SystemExit('%s: 알 수 없는 device=%r' % (port, dev))
+        sys.stderr.write('%s 에서 %s DX 맵 %d 항목 수신\n' % (port, dev, len(entries)))
+        maps[dev] = entries
 
     catalog = K.load_catalog(args.bms_root)
     if not os.path.isdir(args.out_dir):

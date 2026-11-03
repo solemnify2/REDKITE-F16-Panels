@@ -135,8 +135,6 @@ def main():
     ap = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument('-o', '--out-dir', required=True, help='생성한 .diff.lua 를 쓸 폴더')
-    ap.add_argument('--from-source', action='store_true',
-                    help='보드 대신 스케치의 dxOrder[] 를 읽습니다 (오프라인용)')
     ap.add_argument('--port', action='append', metavar='COMx', help='포트 직접 지정')
     ap.add_argument('--name', action='append', nargs=2, metavar=('DEVICE', 'NAME'),
                     help='프로파일 파일명 지정 (기본: %s)' % PROFILE_NAME)
@@ -146,20 +144,14 @@ def main():
         PROFILE_NAME[dev.upper()] = nm
 
     maps = {}
-    if args.from_source:
-        for dev, rel in K.SKETCHES.items():
-            p = os.path.join(K.ROOT, rel)
-            if os.path.isfile(p):
-                maps[dev] = K.dx_map(p)
-    else:
-        boards = [(p, None) for p in args.port] if args.port else K.find_boards()
-        if not boards:
-            raise SystemExit('Teensy 보드를 찾지 못했습니다. 브리지를 껐는지 확인하거나 '
-                             '--from-source 를 쓰십시오.')
-        for port, _ in boards:
-            dev, entries = K.query_board(port)
-            sys.stderr.write('%s 에서 %s DX 맵 %d 항목 수신\n' % (port, dev, len(entries)))
-            maps[dev] = entries
+    boards = [(p, None) for p in args.port] if args.port else K.find_boards()
+    if not boards:
+        raise SystemExit('Teensy 보드를 찾지 못했습니다. USB 와 브리지 종료를 '
+                         '확인하거나 --port COM7 로 지정하십시오.')
+    for port, _ in boards:
+        dev, entries = K.query_board(port)
+        sys.stderr.write('%s 에서 %s DX 맵 %d 항목 수신\n' % (port, dev, len(entries)))
+        maps[dev] = entries
 
     names, axes = load_catalog()
     if not os.path.isdir(args.out_dir):

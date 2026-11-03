@@ -17,38 +17,6 @@
 > **`.key` 를 건드리지 않습니다** — 장치별 파일이면 오프셋도 `DeviceSorting.txt` 도
 > 병합도 필요 없고, 장치 순서가 바뀌어도 파일명의 GUID 로 찾으므로 안 깨집니다.
 
-## 파일
-
-| 파일 | 역할 |
-|---|---|
-| `tools/gen_bms_setup_xml.py` | BMS 생성기 |
-| `tools/gen_dcs_profile.py` | DCS 생성기 |
-| `tools/bms_callbacks.py` | 컨트롤 이름 → BMS 콜백 |
-| `tools/dcs_commands.py` | 컨트롤 이름 → DCS 명령 ID |
-| `tools/bms_catalog.txt` | BMS 콜백 목록 기준선 (버전업 감지) |
-| `tools/dcs_catalog.txt` | DCS 명령 ID ↔ 이름 |
-| `tools/sim_axes.py` | **축 설정 · 장치 GUID · 파일명** — 두 심 공통 |
-| `tools/gen_bms_keyfile.py` | 보드 질의 · `?DX` 파서 · DX 맵 리더. **위 둘이 import 합니다** |
-
-컨트롤 이름이 모든 표의 키입니다. `dxOrder[]` 를 재배열해도 표는 그대로고,
-하드웨어를 추가할 때만 늘어납니다.
-
-## 장치 구분 — 두 시뮬 모두 장치별 파일입니다
-
-보드가 둘이라 먼저 짚고 갑니다. **BMS 도 DCS 도 장치마다 파일이 따로** 있고,
-버튼 번호에 오프셋이 없습니다 — `JOY_BTN1` / `DxAssgn[0]` 이 그 보드의 DX 1 입니다.
-
-| | BMS 장치별 | DCS |
-|---|---|---|
-| 파일 | `Setup.v100.<장치명> {GUID}.xml` | `<프로파일명>.diff.lua` |
-| 어디에 | `User\Config\` | `Saved Games\...\InputUserProfiles\` |
-| 장치 식별 | 파일명의 **GUID** | 파일명 — **GUID 없음**, 이름으로 지정 |
-| 버튼 번호 | `DxAssgn[i]` = DX **i+1** | `JOY_BTN<n>` = DX **n** |
-| 오프셋 | **없음** | **없음** |
-
-심 PC 의 실제 설정을 보면 BMS 바인딩은 **이 XML 쪽에** 들어 있습니다. 그래서
-`gen_bms_setup_xml.py` 를 권합니다.
-
 ## 1. 쓰는 법
 
 브리지를 **끄고** 실행하십시오. Windows 는 COM 포트를 한 프로세스만 열 수 있고,
@@ -63,7 +31,6 @@ pyserial, 그리고 해당 심 설치본이면 됩니다. 심 PC 에 그대로 �
 | 옵션 | |
 |---|---|
 | (없음) | 보드에 질의 — 기본 |
-| `--from-source` | 보드 대신 스케치의 `dxOrder[]` 를 읽음 (오프라인용) |
 | `--port COMx` | 자동 탐지 대신 포트 지정 |
 | `-o` | 출력 폴더. **원본을 덮어쓰지 않습니다** |
 
@@ -330,9 +297,39 @@ EPU 커버는 모듈의 `Input/F-16C_50/joystick/default.lua` 를 봐야 확실�
 
 ---
 
----
+## 7. 파일
 
-## 7. 관련 문서
+| 파일 | 역할 |
+|---|---|
+| `tools/gen_bms_setup_xml.py` | BMS 생성기 |
+| `tools/gen_dcs_profile.py` | DCS 생성기 |
+| `tools/bms_callbacks.py` | 컨트롤 이름 → BMS 콜백 |
+| `tools/dcs_commands.py` | 컨트롤 이름 → DCS 명령 ID |
+| `tools/bms_catalog.txt` | BMS 콜백 목록 기준선 (버전업 감지) |
+| `tools/dcs_catalog.txt` | DCS 명령 ID ↔ 이름 |
+| `tools/sim_axes.py` | **축 설정 · 장치 GUID · 파일명** — 두 심 공통 |
+| `tools/gen_bms_keyfile.py` | 보드 질의 · `?DX` 파서 · DX 맵 리더. **위 둘이 import 합니다** |
+
+컨트롤 이름이 모든 표의 키입니다. `dxOrder[]` 를 재배열해도 표는 그대로고,
+하드웨어를 추가할 때만 늘어납니다.
+
+## 8. 장치 구분 — 두 시뮬 모두 장치별 파일입니다
+
+보드가 둘이지만 섞일 일이 없습니다. **BMS 도 DCS 도 장치마다 파일이 따로** 있고,
+버튼 번호에 오프셋이 없습니다 — `JOY_BTN1` / `DxAssgn[0]` 이 그 보드의 DX 1 입니다.
+
+| | BMS 장치별 | DCS |
+|---|---|---|
+| 파일 | `Setup.v100.<장치명> {GUID}.xml` | `<프로파일명>.diff.lua` |
+| 어디에 | `User\Config\` | `Saved Games\...\InputUserProfiles\` |
+| 장치 식별 | 파일명의 **GUID** | 파일명 — **GUID 없음**, 이름으로 지정 |
+| 버튼 번호 | `DxAssgn[i]` = DX **i+1** | `JOY_BTN<n>` = DX **n** |
+| 오프셋 | **없음** | **없음** |
+
+심 PC 의 실제 설정을 보면 BMS 바인딩은 **이 XML 쪽에** 들어 있습니다. 그래서
+`gen_bms_setup_xml.py` 를 권합니다.
+
+## 9. 관련 문서
 
 | | |
 |---|---|
