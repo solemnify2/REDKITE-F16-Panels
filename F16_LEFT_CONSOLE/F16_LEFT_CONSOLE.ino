@@ -5,11 +5,12 @@
 //  Board  : Teensy 4.1
 //  Panels : ECM / ELEC / EPU / AVTR / UHF(엔코더 6) / ENGINE START / MPO / AUDIO 1-2
 //  I2C    : Wire2 (SDA2=25, SCL2=24)
-//  Buttons: 66,  축 10,  엔코더 6
+//  Buttons: 64,  축 10,  엔코더 6
 //  사용 핀: 41 / 42 (헤더),  여유 1
 //  백라이트: pin 13 — 온보드 LED가 상태 표시등이 됨
 //
-//  DX 버튼 배정 순서: dxOrder[] 표의 줄 순서 그대로 (총 66)
+//  DX 버튼 배정 순서: dxOrder[] 표의 줄 순서 그대로 (총 64)
+//                     실기 콘솔 전→후, 패널 안에서는 좌→우 / 상→하
 //  축 10개: AUDIO 1 x6 + AUDIO 2 x3 + UHF VOL x1
 //
 //  USB Type: Serial + Keyboard + Mouse + Joystick
@@ -736,7 +737,7 @@ static uint32_t  protoDetectStart = 0;
 // ================================================================
 
 #define NUM_COVERS 3                      // ENG CONT, EPU OFF, EPU ON
-#define NUM_COMM_PWR 4                    // COMM1 ON/OFF, COMM2 ON/OFF
+#define NUM_COMM_PWR 2                    // COMM1, COMM2 — 채널당 1 (유지형)
 
 static uint8_t switchBtnStart[NUM_SWITCHES];
 static uint8_t analogBtnStart[NUM_ANALOG_ARRAYS];
@@ -763,7 +764,7 @@ static const char* const coverNames[NUM_COVERS] = {
   "ENG CONT COVER", "EPU OFF COVER", "EPU ON COVER"
 };
 static const char* const commPwrNames[NUM_COMM_PWR] = {
-  "COMM1 PWR OFF", "COMM1 PWR ON", "COMM2 PWR OFF", "COMM2 PWR ON"
+  "COMM1 PWR", "COMM2 PWR"
 };
 
 
@@ -792,53 +793,68 @@ struct DxEntry {
 };
 
 const DxEntry dxOrder[] = {
-  {DX_SW,        0},   // ECM OPR/STBY         x2
-  {DX_SW,        1},   // ECM XMIT             x2
-  {DX_SW,        2},   // ECM BIT              x1
-  {DX_SW,        3},   // ECM RESET            x1
-  {DX_SW,        4},   // EPU                  x2
-  {DX_SW,        5},   // ELEC CAUTION RST     x1
-  {DX_SW,        6},   // AVTR                 x2
+  // ---- MANUAL PITCH (MPO) — 최전방 인보드 ----
+  {DX_SW,        9},   // MPO                  x1
+
+  // ---- UHF — 최전방 아웃보드 ----
+  {DX_ENC,       0},   // UHF PRESET           x2
+  {DX_SW,       32},   // UHF TEST             x1
+  {DX_SW,       20},   // UHF STATUS           x1
+  {DX_ENC,       1},   // UHF 100MHz           x2
+  {DX_ENC,       2},   // UHF 10MHz            x2
+  {DX_ENC,       3},   // UHF 1MHz             x2
+  {DX_ENC,       4},   // UHF 0.1MHz           x2
+  {DX_ENC,       5},   // UHF 0.025MHz         x2
+  {DX_SW,       14},   // UHF FUNC OFF         x1
+  {DX_SW,       13},   // UHF FUNC MAIN        x1
+  {DX_SW,       12},   // UHF FUNC BOTH        x1
+  {DX_SW,       11},   // UHF FUNC ADF         x1
+  {DX_SW,       17},   // UHF MODE MNL         x1
+  {DX_SW,       16},   // UHF MODE PRE         x1
+  {DX_SW,       15},   // UHF MODE GRD         x1
+  {DX_SW,       19},   // UHF T-TONE           x1
+  {DX_SW,       18},   // UHF SQUELCH          x1
+
+  // ---- ENG & JET START ----
   {DX_SW,        7},   // JFS                  x2
   {DX_SW,        8},   // ENG CONT             x1
-  {DX_SW,        9},   // MPO                  x1
-  {DX_SW,       10},   // ELEC MAIN PWR        x2
-  {DX_SW,       11},   // UHF FUNC ADF         x1
-  {DX_SW,       12},   // UHF FUNC BOTH        x1
-  {DX_SW,       13},   // UHF FUNC MAIN        x1
-  {DX_SW,       14},   // UHF FUNC OFF         x1
-  {DX_SW,       15},   // UHF MODE GRD         x1
-  {DX_SW,       16},   // UHF MODE PRE         x1
-  {DX_SW,       17},   // UHF MODE MNL         x1
-  {DX_SW,       18},   // UHF SQUELCH          x1
-  {DX_SW,       19},   // UHF T-TONE           x1
-  {DX_SW,       20},   // UHF STATUS           x1
+  {DX_COVER,     0},   // ENG CONT COVER       x1
+  {DX_SW,       27},   // AB RESET             x1
+  {DX_SW,       28},   // ENG DATA             x1
+  {DX_SW,       29},   // MAX POWER            x1
+
+  // ---- AUDIO 1 ----
+  {DX_COMMPWR,   0},   // COMM1 PWR            x1
+  {DX_COMMPWR,   1},   // COMM2 PWR            x1
   {DX_SW,       21},   // COMM1 OFF            x1
   {DX_SW,       22},   // COMM1 SQL            x1
   {DX_SW,       23},   // COMM1 GD             x1
   {DX_SW,       24},   // COMM2 OFF            x1
   {DX_SW,       25},   // COMM2 SQL            x1
   {DX_SW,       26},   // COMM2 GD             x1
-  {DX_SW,       27},   // AB RESET             x1
-  {DX_SW,       28},   // ENG DATA             x1
-  {DX_SW,       29},   // MAX POWER            x1
+
+  // ---- AUDIO 2 ----
   {DX_SW,       30},   // HOT MIC              x1
   {DX_SW,       31},   // CIPHER               x1
+
+  // ---- ECM ----
+  {DX_SW,        0},   // ECM OPR/STBY         x2
+  {DX_SW,        1},   // ECM XMIT             x2
   {DX_LADDER,    0},   // ECM Buttons          x8
-  {DX_ENC,       0},   // UHF PRESET           x2
-  {DX_ENC,       1},   // UHF 100MHz           x2
-  {DX_ENC,       2},   // UHF 10MHz            x2
-  {DX_ENC,       3},   // UHF 1MHz             x2
-  {DX_ENC,       4},   // UHF 0.1MHz           x2
-  {DX_ENC,       5},   // UHF 0.025MHz         x2
-  {DX_COVER,     0},   // ENG CONT COVER       x1
+  {DX_SW,        3},   // ECM RESET            x1
+  {DX_SW,        2},   // ECM BIT              x1
+
+  // ---- EPU ----
+  {DX_SW,        4},   // EPU                  x2
   {DX_COVER,     1},   // EPU OFF COVER        x1
   {DX_COVER,     2},   // EPU ON COVER         x1
-  {DX_COMMPWR,   0},   // COMM1 PWR OFF        x1
-  {DX_COMMPWR,   1},   // COMM1 PWR ON         x1
-  {DX_COMMPWR,   2},   // COMM2 PWR OFF        x1
-  {DX_COMMPWR,   3},   // COMM2 PWR ON         x1
-  {DX_SW,       32},   // UHF TEST             x1
+
+  // ---- ELEC ----
+  {DX_SW,       10},   // ELEC MAIN PWR        x2
+  {DX_SW,        5},   // ELEC CAUTION RST     x1
+
+  // ---- AVTR ----
+  {DX_SW,        6},   // AVTR                 x2
 };
 #define NUM_DX_ORDER (sizeof(dxOrder) / sizeof(dxOrder[0]))
 
@@ -976,28 +992,27 @@ void processCovers() {
 
 
 // ================================================================
-//  COMM1/COMM2 Power ON/OFF (pot threshold → DX pulse)
+//  COMM1/COMM2 Power (pot threshold → 유지형 DX)
 // ================================================================
 //
-//  COMM1, COMM2 볼륨 노브에 전원 스위치가 있어,
+//  COMM1, COMM2 볼륨 노브 끝에 전원 스위치가 있어,
 //  pot ADC 값이 threshold 미만이면 OFF, 이상이면 ON.
-//  상태 전환 시 모멘터리 DX 펄스를 발생시킵니다.
+//  채널당 DX 하나를, 노브가 켜져 있는 **동안 계속** 누른 상태로 둡니다.
+//
+//  펄스가 아니라 유지형인 이유: 펄스는 전환 순간에만 나가므로, 심을
+//  나중에 띄우거나 재접속하면 이미 올라가 있는 노브를 심이 알 방법이
+//  없어 상태가 어긋납니다. 유지형이면 심이 언제 보든 현재 상태입니다.
+//  BMS 자신의 기본 키 파일도 2단 스위치를 같은 DX 두 줄(press/release)로
+//  바인딩합니다 — 예: SimFuelDoorOpen/Close.
 //
 //  이 DX 는 심과 무관하게 항상 나갑니다. 볼륨 노브 끝에 전원을 둔
 //  것은 BMS 의 모델링을 따른 것입니다.
 //
-//  DX 번호는 dxOrder[] 가 정합니다. 네 개가 연속일 필요는 없습니다.
+//  DX 번호는 dxOrder[] 가 정합니다. 둘이 연속일 필요는 없습니다.
 
 #define COMM_PWR_THRESHOLD  5     // ADC threshold (10-bit, 0~1023)
-#define COMM_PWR_PULSE_TICKS 4    // ~40ms pulse @ 100Hz
 
-struct CommPwrRuntime {
-  bool    prevOn;
-  uint8_t pulseTicks;   // >0: DX pulse active
-  uint8_t btnOffset;    // 0=ON, 1=OFF within this COMM channel
-};
-static CommPwrRuntime commPwrRt[2];  // [0]=COMM1, [1]=COMM2
-
+static bool commPwrOn[2];                    // [0]=COMM1, [1]=COMM2
 static const uint8_t commPotIdx[] = {0, 1};  // pots[] index: COMM1=0, COMM2=1
 
 void processCommPower() {
@@ -1007,27 +1022,11 @@ void processCommPower() {
     raw /= 4;
 
     bool isOn = (raw >= COMM_PWR_THRESHOLD);
-    CommPwrRuntime& rt = commPwrRt[ch];
-
-    // State transition → start pulse
-    if (isOn != rt.prevOn) {
-      rt.prevOn = isOn;
-      rt.btnOffset = isOn ? 1 : 0;  // 0=OFF, 1=ON
-      rt.pulseTicks = COMM_PWR_PULSE_TICKS;
+    if (isOn != commPwrOn[ch]) {
+      commPwrOn[ch] = isOn;
       lastInputTime = millis();
     }
-
-    // Emit DX pulse
-    uint8_t offBtn = commPwrBtnStart[ch * 2];       // COMM{ch} PWR OFF
-    uint8_t onBtn  = commPwrBtnStart[ch * 2 + 1];   // COMM{ch} PWR ON
-    if (rt.pulseTicks > 0) {
-      Joystick.button(offBtn, rt.btnOffset == 0 ? 1 : 0);
-      Joystick.button(onBtn,  rt.btnOffset == 1 ? 1 : 0);
-      rt.pulseTicks--;
-    } else {
-      Joystick.button(offBtn, 0);
-      Joystick.button(onBtn, 0);
-    }
+    Joystick.button(commPwrBtnStart[ch], isOn ? 1 : 0);
   }
 }
 
@@ -1449,8 +1448,7 @@ void setup() {
   for (int ch = 0; ch < 2; ch++) {
     int raw = 0;
     for (int s = 0; s < 4; s++) raw += analogRead(pots[commPotIdx[ch]].pin);
-    commPwrRt[ch].prevOn = (raw / 4 >= COMM_PWR_THRESHOLD);
-    commPwrRt[ch].pulseTicks = 0;
+    commPwrOn[ch] = (raw / 4 >= COMM_PWR_THRESHOLD);
   }
 
   // --- Startup summary ---
@@ -1491,7 +1489,7 @@ void setup() {
       case DX_LADDER:  kindStr = "ladder";     break;
       case DX_ENC:     kindStr = "enc CW/CCW"; break;
       case DX_COVER:   kindStr = "cover auto"; break;
-      default:         kindStr = "pot pulse";  break;
+      default:         kindStr = "pot hold";   break;
     }
     if (cnt == 1) Serial.printf("  btn %-3d     : %-20s [%s]\n", dx, dxEntryName(e), kindStr);
     else          Serial.printf("  btn %-3d~%-3d : %-20s [%s]\n", dx, dx + cnt - 1,

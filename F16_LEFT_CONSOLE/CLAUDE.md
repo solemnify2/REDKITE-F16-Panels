@@ -31,9 +31,11 @@ All hardware is declared in config arrays under the **HARDWARE CONFIGURATION** s
 - `leds[]` — ELEC panel LEDs, indexed by `LedIdx` enum
 - `ecmSrLedNames[]` / `srMap[]` — ECM panel LEDs via 74HC595
 
-Joystick button numbers are auto-assigned at runtime in this order: `switches[]` (39) → `analogBtnArrays[]` (8) → `encoders[]` (12, 2 each: CW then CCW) = **59 buttons**.
+Joystick button numbers come from **`dxOrder[]`**, a table whose line order *is* the DX order: **64 buttons**. Each entry is a `(kind, idx)` pair naming one control in `switches[]` / `analogBtnArrays[]` / `encoders[]`, a cover, or a COMM power channel; its width comes from its own type (`SW_ON_OFF` 1, `SW_ON_OFF_ON` 2, `SW_ROTARY` numPos, encoder 2, ladder numButtons, cover/COMM 1).
 
-⚠ Inserting a switch anywhere but the end of `switches[]` renumbers every button after it, which invalidates existing BMS bindings. Append to the end of the array when adding hardware.
+The order follows the real jet's left console, forward to aft — MPO · UHF → ENG&JET START → AUDIO 1 → AUDIO 2 → ECM → EPU → ELEC → AVTR — and within a panel, left to right then top to bottom. The config arrays keep their wiring order and are never reordered; only `dxOrder[]` decides numbering, so pin assignments are independent of DX.
+
+⚠ Moving a line in `dxOrder[]`, or inserting one, renumbers every DX after it. Regenerate the binding files rather than hand-editing them. A control left out of `dxOrder[]` would silently sit at DX 0, so `assignButtons()` reports it by name and a `static_assert` checks the entry count.
 
 ### What Cannot Go on the MCP23017
 

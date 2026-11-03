@@ -516,6 +516,7 @@ struct DxEntry {
 };
 
 const DxEntry dxOrder[] = {
+  // ---- MISC — 전방 계기판, 좌측 MFD 왼쪽 ----
   {DX_SW,      0},   // RF                   x2
   {DX_SW,      1},   // Laser ARM            x1
   {DX_SW,      2},   // ALT REL              x1
@@ -523,16 +524,23 @@ const DxEntry dxOrder[] = {
   {DX_SW,      4},   // ADV MODE             x1
   {DX_SW,      5},   // Roll AP              x2
   {DX_SW,      6},   // Pitch AP             x2
+
+  // ---- LANDING GEAR — 좌측 보조 콘솔 전방 ----
   {DX_SW,      7},   // EMER Jettison        x1
+  {DX_SW,     11},   // Hook                 x1
+  {DX_SW,     14},   // GND JETT ENABLE      x1
+  {DX_SW,     16},   // BRAKES Channel       x1
+  {DX_SW,     15},   // ANTI SKID            x2
+  {DX_SW,     13},   // DN LOCK REL          x1
+  {DX_SW,     12},   // Landing Gear         x2
   {DX_SW,      8},   // Store CAT            x1
   {DX_SW,      9},   // Horn Silencer        x1
   {DX_SW,     10},   // Landing Light        x2
-  {DX_SW,     11},   // Hook                 x1
-  {DX_SW,     12},   // Landing Gear         x2
-  {DX_SW,     13},   // DN LOCK REL          x1
-  {DX_SW,     14},   // GND JETT ENABLE      x1
-  {DX_SW,     15},   // ANTI SKID            x2
-  {DX_SW,     16},   // BRAKES Channel       x1
+
+  // ---- THREAT WARNING AUX ----
+  {DX_LADDER,  0},   // TWA Buttons          x4
+
+  // ---- CMDS ----
   {DX_SW,     17},   // CMDS RWR             x1
   {DX_SW,     18},   // CMDS JMR             x1
   {DX_SW,     19},   // CMDS MWS             x1
@@ -541,10 +549,11 @@ const DxEntry dxOrder[] = {
   {DX_SW,     22},   // CMDS CH              x1
   {DX_SW,     23},   // CMDS FL              x1
   {DX_SW,     24},   // CMDS JETT            x1
-  {DX_SW,     25},   // ALT GEAR Handle      x1
-  {DX_LADDER,  0},   // TWA Buttons          x4
-  {DX_LADDER,  1},   // CMDS MODE            x7
   {DX_LADDER,  2},   // CMDS PRGM            x7
+  {DX_LADDER,  1},   // CMDS MODE            x7
+
+  // ---- ALT GEAR ----
+  {DX_SW,     25},   // ALT GEAR Handle      x1
 };
 #define NUM_DX_ORDER (sizeof(dxOrder) / sizeof(dxOrder[0]))
 

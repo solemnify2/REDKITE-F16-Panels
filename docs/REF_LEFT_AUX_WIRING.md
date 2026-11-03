@@ -432,10 +432,12 @@ LED 1개만 연결한 상태에서 **320Ω 양단 = 1.2V** → 단독 전류 **3
 
 ## DX 버튼 맵 (51 / 128)
 
-버튼 번호는 `switches[]` → `analogBtnArrays[]` 순서로 런타임에 자동 배정됩니다.
+버튼 번호는 `.ino` 의 **`dxOrder[]`** 표에서 나옵니다. 그 표의 줄 순서가 곧 DX 순서이고,
+순서는 **실기 배치 전→후**(MISC 계기판 → 좌측 보조 콘솔), 패널 안에서는
+**좌→우 / 상→하** 입니다. 아래 표는 소스에서 생성한 것이라 손으로 고치지 마십시오.
 
 | 버튼 | 패널 | 신호 |
-|---|---|---|
+|------|------|------|
 | 1–2 | MISC | RF |
 | 3 | MISC | Laser ARM |
 | 4 | MISC | ALT REL (NC — DX 반전) |
@@ -444,21 +446,33 @@ LED 1개만 연결한 상태에서 **320Ω 양단 = 1.2V** → 단독 전류 **3
 | 8–9 | MISC | Roll AP |
 | 10–11 | MISC | Pitch AP |
 | 12 | GEAR | EMER Jettison |
-| 13 | GEAR | Store CAT |
-| 14 | GEAR | Horn Silencer |
-| 15–16 | GEAR | Landing Light |
-| 17 | GEAR | Hook |
-| 18–19 | GEAR | Landing Gear UP / DN |
-| 20 | GEAR | DN LOCK REL (콤보 모디파이어 겸용) |
-| 21 | GEAR | GND JETT ENABLE |
-| 22–23 | GEAR | ANTI SKID |
-| 24 | GEAR | BRAKES Channel |
-| 25–31 | CMDS | RWR, JMR, MWS, O1, O2, CH, FL |
-| 32 | CMDS | JETT |
-| 33 | ALT GEAR | Handle |
-| 34–37 | TWA | 래더 — ACT/PWR, SEARCH, ALT, SYS PWR |
-| 38–44 | CMDS | MODE 래더 — 1~7 |
-| 45–51 | CMDS | PRGM 래더 — BIT, 1~6 |
+| 13 | GEAR | Hook |
+| 14 | GEAR | GND JETT ENABLE |
+| 15 | GEAR | BRAKES Channel |
+| 16–17 | GEAR | ANTI SKID |
+| 18 | GEAR | DN LOCK REL (콤보 모디파이어 겸용) |
+| 19–20 | GEAR | Landing Gear UP / DN |
+| 21 | GEAR | Store CAT |
+| 22 | GEAR | Horn Silencer |
+| 23–24 | GEAR | Landing Light |
+| 25–28 | TWA | 저항 래더 — ACT/PWR, SEARCH, ALT, SYS PWR |
+| 29 | CMDS | RWR |
+| 30 | CMDS | JMR |
+| 31 | CMDS | MWS |
+| 32 | CMDS | O1 |
+| 33 | CMDS | O2 |
+| 34 | CMDS | CH |
+| 35 | CMDS | FL |
+| 36 | CMDS | JETT |
+| 37–43 | CMDS | PRGM 래더 — BIT, 1~6 |
+| 44–50 | CMDS | MODE 래더 — 1~7 |
+| 51 | ALT GEAR | Handle |
+
+> 줄을 옮기면 그 뒤 DX 가 전부 밀립니다. 기동 시 시리얼 요약이 현재 DX 를 찍어 줍니다.
+>
+> TWA 래더의 내부 순서(ACT/PWR → SEARCH → ALT → SYS PWR)는 저항값으로 고정되어 있어
+> 패널 배치(SEARCH → ACT/PWR → ALT → SYS PWR)와 앞 두 개가 바뀌어 있습니다.
+> 바꾸려면 배선을 손봐야 하므로 그대로 두었습니다.
 
 ---
 

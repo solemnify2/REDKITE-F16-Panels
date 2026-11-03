@@ -6,7 +6,7 @@
 - **Board**: Teensy 4.1 (헤더 핀 0–41)
 - **USB**: PID `0x048E`, `JOYSTICK_SIZE 64` (128버튼)
 - **I2C**: `Wire2` — SCL2 = pin 24, SDA2 = pin 25 @ 100kHz, MCP23017 3장 (`0x20` `0x21` `0x22`)
-- **DX 버튼 66, 축 10**, 메인 루프 100Hz
+- **DX 버튼 64, 축 10**, 메인 루프 100Hz
 
 케이블 이름(C1~C14, M1~M6, I1~I3)은 이 문서에서 부여한 명명입니다.
 
@@ -395,51 +395,66 @@ C14 는 SD 확장 케이블 4선(DIN · CLK · CS · GND) + VIN 1선 = **5선**�
 
 ---
 
-## DX 버튼 맵 (66 / 128)
+## DX 버튼 맵 (64 / 128)
 
-버튼 번호는 `switches[0 .. SWITCH_LATE_START-1]` → `analogBtnArrays[]` → `encoders[]`
-→ covers → COMM power → `switches[SWITCH_LATE_START ..]` 순서로 런타임에 자동 배정됩니다.
+버튼 번호는 `.ino` 의 **`dxOrder[]`** 표에서 나옵니다. 그 표의 줄 순서가 곧 DX 순서이고,
+순서는 **실기 콘솔 전→후**, 패널 안에서는 **좌→우 / 상→하** 입니다.
+아래 표는 소스에서 생성한 것이라 손으로 고치지 마십시오 — `dxOrder[]` 를 고치고 다시 뽑으십시오.
 
 | 버튼 | 패널 | 신호 |
 |------|------|------|
-| 1–2 | ECM | OPR / STBY |
-| 3–4 | ECM | XMIT 1 / XMIT 3 |
-| 5 | ECM | BIT |
-| 6 | ECM | RESET |
-| 7–8 | EPU | NORM / ON |
-| 9 | ELEC | CAUTION RST |
-| 10–11 | AVTR | AUTO / ON |
-| 12–13 | ENGINE | JFS START 1 / START 2 |
-| 14 | ENGINE | ENG CONT |
-| 15 | MPO | MANUAL PITCH OVERRIDE |
-| 16–17 | ELEC | MAIN PWR — BATT / MAIN |
-| 18–21 | UHF | FUNCTION ADF / BOTH / MAIN / OFF |
-| 22–24 | UHF | MODE GRD / PRE / MNL |
-| 25 | UHF | SQUELCH |
-| 26 | UHF | T-TONE |
-| 27 | UHF | STATUS |
-| 28–30 | AUDIO 1 | COMM 1 MODE — OFF / SQL / GD XMT |
-| 31–33 | AUDIO 1 | COMM 2 MODE — OFF / SQL / GD XMT |
-| 34 | ENGINE | AB RESET |
-| 35 | ENGINE | ENG DATA |
-| 36 | ENGINE | MAX POWER |
-| 37–38 | AUDIO 2 | HOT MIC / CIPHER |
-| 39–46 | ECM | 저항 래더 — ECM 1~6, FRM, SPL |
-| 47–58 | UHF | 엔코더 6개 × (CW / CCW) |
-| 59 | ENGINE | ENG CONT COVER (커버 자동화) |
-| 60–61 | EPU | EPU OFF COVER / EPU ON COVER (커버 자동화) |
-| 62–63 | AUDIO 1 | COMM1 PWR OFF / ON (pot threshold) |
-| 64–65 | AUDIO 1 | COMM2 PWR OFF / ON (pot threshold) |
-| 66 | UHF | TEST |
+| 1 | MPO | MANUAL PITCH OVERRIDE |
+| 2–3 | UHF | 엔코더 — PRESET CHAN CW / CCW |
+| 4 | UHF | TEST DISPLAY |
+| 5 | UHF | STATUS |
+| 6–7 | UHF | 엔코더 — 100MHz CW / CCW |
+| 8–9 | UHF | 엔코더 — 10MHz CW / CCW |
+| 10–11 | UHF | 엔코더 — 1MHz CW / CCW |
+| 12–13 | UHF | 엔코더 — 0.1MHz CW / CCW |
+| 14–15 | UHF | 엔코더 — 0.025MHz CW / CCW |
+| 16 | UHF | FUNCTION OFF |
+| 17 | UHF | FUNCTION MAIN |
+| 18 | UHF | FUNCTION BOTH |
+| 19 | UHF | FUNCTION ADF |
+| 20 | UHF | MODE MNL |
+| 21 | UHF | MODE PRESET |
+| 22 | UHF | MODE GRD |
+| 23 | UHF | T-TONE |
+| 24 | UHF | SQUELCH |
+| 25–26 | ENGINE | JFS START 1 / START 2 |
+| 27 | ENGINE | ENG CONT PRI / SEC |
+| 28 | ENGINE | ENG CONT COVER (커버 자동화) |
+| 29 | ENGINE | AB RESET |
+| 30 | ENGINE | ENG DATA |
+| 31 | ENGINE | MAX POWER |
+| 32 | AUDIO 1 | COMM 1 전원 — 노브가 켜져 있는 동안 **유지** (pot ADC ≥ 5) |
+| 33 | AUDIO 1 | COMM 2 전원 — 노브가 켜져 있는 동안 **유지** (pot ADC ≥ 5) |
+| 34 | AUDIO 1 | COMM 1 MODE OFF |
+| 35 | AUDIO 1 | COMM 1 MODE SQL |
+| 36 | AUDIO 1 | COMM 1 MODE GD XMT |
+| 37 | AUDIO 1 | COMM 2 MODE OFF |
+| 38 | AUDIO 1 | COMM 2 MODE SQL |
+| 39 | AUDIO 1 | COMM 2 MODE GD XMT |
+| 40 | AUDIO 2 | HOT MIC |
+| 41 | AUDIO 2 | CIPHER |
+| 42–43 | ECM | OPR / STBY |
+| 44–45 | ECM | XMIT 1 / XMIT 3 |
+| 46–53 | ECM | 저항 래더 — ECM 1~6, FRM, SPL |
+| 54 | ECM | RESET |
+| 55 | ECM | BIT |
+| 56–57 | EPU | NORM / ON |
+| 58 | EPU | EPU OFF COVER (커버 자동화) |
+| 59 | EPU | EPU ON COVER (커버 자동화) |
+| 60–61 | ELEC | MAIN PWR — BATT / MAIN |
+| 62 | ELEC | CAUTION RST |
+| 63–64 | AVTR | AUTO / ON |
 
-> **`SWITCH_LATE_START` (현재 32)** — 이 인덱스부터의 `switches[]` 항목은 DX 번호를
-> **맨 마지막**에 받습니다. 새 스위치를 배열 뒤에 추가해도 기존 번호가 밀리지 않아
-> BMS 재바인딩이 필요 없습니다. 스위치를 추가할 때는 이 값을 건드리지 말고
-> 배열 끝에만 붙이십시오.
+> 줄을 옮기면 그 뒤 DX 가 전부 밀립니다. 바인딩 파일은 손으로 유지하지 말고 다시 생성하십시오.
+> 기동 시 시리얼 요약이 현재 DX 를 이 순서 그대로 찍어 줍니다.
 >
-> DX 59~61 은 ENG CONT·EPU 커버 자동화, DX 62~65 는 COMM1/COMM2 볼륨 노브의
-> 전원입니다. pot ADC < 5 → OFF, ≥ 5 → ON 으로 전환될 때 모멘터리 DX 펄스를
-> 발생시킵니다.
+> ENG CONT·EPU 커버는 커버 자동화 DX 이고, COMM1/COMM2 전원은 볼륨 노브 끝의 전원
+> 스위치입니다. pot ADC < 5 → OFF, ≥ 5 → ON 이며, **켜져 있는 동안 DX 를 계속 누른
+> 상태로 둡니다**(펄스가 아님) — 심을 나중에 띄워도 현재 상태가 그대로 전달됩니다.
 >
 > **펌웨어는 심을 구분하지 않습니다.** 프로토콜 판별(BMS-BIOS / DCS-BIOS)은
 > LED·백라이트 동기화에만 쓰이고, 위 DX 는 어느 심이든 똑같이 나갑니다.
@@ -683,7 +698,7 @@ USB 5V (900mA)
 | **하단 SD 패드** | **3 / 6** (UHF 디스플레이 43·45·46) |
 | **MCP23017 GPIO** | 39 / 48 (`0x20` 15 + `0x21` 16 + `0x22` 8) |
 | 74HC595 출력 | 32 / 32 |
-| **DX 버튼** | **66 / 128** |
+| **DX 버튼** | **64 / 128** |
 | 조이스틱 축 | 10 / 23 |
 | I2C 주소 | `0x20` `0x21` `0x22` (데이지체인) |
 

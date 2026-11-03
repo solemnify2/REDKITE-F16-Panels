@@ -11,7 +11,7 @@ Redkite Project: a collection of Teensy-based USB joystick controllers for an F-
 | Folder | MCU | Description |
 |--------|-----|-------------|
 | `F16_LEFT_AUX_MISC/` | Teensy 4.1 | Left Aux panels (Gear, CMDS, TWA, Alt Gear) + MISC panel via MCP23017 I2C. Pedal axes, backlight, Python bridges. |
-| `F16_LEFT_CONSOLE/` | Teensy 4.1 | Left console: ECM (74HC595 ×4 for 32 LEDs, 8-button resistor ladder) + ELEC + EPU + AVTR + UHF (6 rotary encoders) + ENGINE START + MPO + AUDIO 1/2 (10 pots). MCP23017 ×3 over I2C (`0x20` `0x21` `0x22`). **Primary/most complex sketch.** 66 DX buttons, 10 axes, 41/42 header pins used + 3 bottom SD pads. |
+| `F16_LEFT_CONSOLE/` | Teensy 4.1 | Left console: ECM (74HC595 ×4 for 32 LEDs, 8-button resistor ladder) + ELEC + EPU + AVTR + UHF (6 rotary encoders) + ENGINE START + MPO + AUDIO 1/2 (10 pots). MCP23017 ×3 over I2C (`0x20` `0x21` `0x22`). **Primary/most complex sketch.** 64 DX buttons, 10 axes, 41/42 header pins used + 3 bottom SD pads. |
 
 Each sketch has its own `CLAUDE.md` with detailed architecture — read that first when working in a specific sketch.
 

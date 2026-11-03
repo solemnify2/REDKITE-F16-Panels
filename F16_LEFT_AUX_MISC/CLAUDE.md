@@ -35,7 +35,7 @@ All hardware is declared in config arrays in `F16_LEFT_AUX_MISC.ino` under the *
 - `leds[]` — LEDs (direct or MCP23017), indexed by `LedIdx` enum
 - `mcpDevices[]` — MCP23017 I2C expanders (addr 0x20-0x27)
 
-Joystick button numbers are auto-assigned at runtime. `mcpIdx = -1` means direct Teensy pin; `>= 0` indexes into `mcpDevices[]`.
+Joystick button numbers come from **`dxOrder[]`**, a table whose line order *is* the DX order (51 buttons): MISC → GEAR → TWA → CMDS → ALT GEAR, matching the real jet front to back, left to right within a panel. The config arrays keep their wiring order; only `dxOrder[]` decides numbering. `mcpIdx = -1` means direct Teensy pin; `>= 0` indexes into `mcpDevices[]`.
 
 ### Protocol Auto-Detection
 
