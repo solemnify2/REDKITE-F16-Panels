@@ -17,6 +17,22 @@
 > **`.key` 를 건드리지 않습니다** — 장치별 파일이면 오프셋도 `DeviceSorting.txt` 도
 > 병합도 필요 없고, 장치 순서가 바뀌어도 파일명의 GUID 로 찾으므로 안 깨집니다.
 
+## 파일
+
+| 파일 | 역할 |
+|---|---|
+| `tools/gen_bms_setup_xml.py` | BMS 생성기 |
+| `tools/gen_dcs_profile.py` | DCS 생성기 |
+| `tools/bms_callbacks.py` | 컨트롤 이름 → BMS 콜백 |
+| `tools/dcs_commands.py` | 컨트롤 이름 → DCS 명령 ID |
+| `tools/bms_catalog.txt` | BMS 콜백 목록 기준선 (버전업 감지) |
+| `tools/dcs_catalog.txt` | DCS 명령 ID ↔ 이름 |
+| `tools/sim_axes.py` | **축 설정 · 장치 GUID · 파일명** — 두 심 공통 |
+| `tools/gen_bms_keyfile.py` | 보드 질의 · `?DX` 파서 · DX 맵 리더. **위 둘이 import 합니다** |
+
+컨트롤 이름이 모든 표의 키입니다. `dxOrder[]` 를 재배열해도 표는 그대로고,
+하드웨어를 추가할 때만 늘어납니다.
+
 ## 장치 구분 — 두 시뮬 모두 장치별 파일입니다
 
 보드가 둘이라 먼저 짚고 갑니다. **BMS 도 DCS 도 장치마다 파일이 따로** 있고,
@@ -97,13 +113,20 @@ python tools/gen_dcs_profile.py -o out
 장치마다 `.diff.lua` 하나를 만들고, `Saved Games\DCS\Config\Input\...\InputUserProfiles\`
 에 넣은 뒤 DCS 입력 설정에서 장치에 지정합니다. GUID 가 없어 파일명은 자유입니다.
 
-#### 축 설정은 `sim_axes.py` 에 있습니다
+### 1-3. 축 설정 — 두 심 공통
 
-이 패널의 포트는 전부 `invert = true` 이고 `curvature`·`filter` 도 붙습니다.
-생성기가 유도할 수 없는 값이라, 기존 설정에서 한 번 뽑아 `tools/sim_axes.py` 에
-적어 두었습니다. 바꾸고 싶으면 그 파일을 고치십시오.
+버튼은 `dxOrder[]` 와 매핑 표에서 전부 유도되지만, **축에는 유도할 수 없는 값이
+붙습니다** — `invert`, `deadzone`, `saturation` 같은 것들입니다. 이 패널의 포트는
+전부 반전이고요. 그래서 기존 설정에서 한 번 뽑아 `tools/sim_axes.py` 에 적어 두고,
+두 생성기가 그 파일만 보고 축 블록을 만듭니다. 바꾸려면 그 파일을 고치십시오.
 
-그중 **`removed` 항목**이 특히 중요합니다 — DCS 가 새 조이스틱에 자동으로 거는
+| | BMS | DCS |
+|---|---|---|
+| 데이터 | `BMS_AXES` — `<AxAssgn>` 8칸 | `DCS_AXES` — 명령별 필터 |
+| 담는 값 | AxisName · Invert · Saturation · Deadzone | invert · deadzone · curvature · saturation |
+| 그 외 | `BMS_DETENT`, `BMS_GUID` | `DCS_PROFILE` (파일명) |
+
+DCS 쪽에는 **`removed` 항목**도 들어 있습니다. 이게 특히 중요합니다 — DCS 가 새 조이스틱에 자동으로 거는
 `Pitch←JOY_Y` · `Roll←JOY_X` · `Thrust←JOY_Z` (콘솔은 `Rudder←JOY_RZ` 까지) 를
 떼어내는 줄입니다. 없으면 **HMCS 노브가 스로틀을 움직이고** 빈 축이 기수를 밉니다.
 
@@ -255,12 +278,6 @@ COMM 전원을 모멘터리 펄스가 아니라 **유지형 DX** 로 만든 근�
 ---
 
 ## 6. DCS 쪽 참고
-
-| 파일 | 역할 |
-|---|---|
-| `tools/dcs_catalog.txt` | 명령 ID ↔ 이름. BMS 의 `bms_catalog.txt` 에 해당 |
-| `tools/dcs_commands.py` | 컨트롤 이름 → 명령 ID |
-| `tools/gen_dcs_profile.py` | 생성기 |
 
 ### 명령 ID 는 구조체입니다
 
