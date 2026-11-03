@@ -11,7 +11,7 @@
 |---|---|---|---|
 | **Falcon BMS** — 장치별 | 동작함 **(권장)** | `tools/gen_bms_setup_xml.py` | `Setup.v100.*.xml` **장치당 1개** |
 | **Falcon BMS** — 키 파일 | 동작함 | `tools/gen_bms_keyfile.py` | `.key` 조각 **1개** |
-| **DCS World** | **미착수** — 아래 「DCS 계획」 | — | `.diff.lua` **장치당 1개** |
+| **DCS World** | 동작함 | `tools/gen_dcs_profile.py` | `.diff.lua` **장치당 1개** |
 
 > **BMS 는 바인딩을 두 곳에 둡니다.** 게임 전체가 공유하는 `.key` 와, 장치마다 하나씩인
 > `Setup.v100.<장치명> {GUID}.xml` 입니다. 심 PC 의 실제 설정을 보면 **장치별 XML 쪽에**
@@ -42,28 +42,43 @@ python tools/gen_bms_setup_xml.py --config-dir "<BMS User\Config>" -o out
 `DxAssgn[i]` 가 그 장치의 **DX 버튼 i+1** 입니다 — 오프셋 없음. `<dx>` 섹션이 셋인데
 앞 둘은 내용이 같고 셋째는 비어 있어, 관측된 그대로 재현합니다.
 
-## 장치를 구분하는 방식이 두 시뮬에서 다릅니다
+## 장치 구분 — 두 시뮬 모두 장치별 파일이 있습니다
 
-보드가 둘이라 먼저 짚고 갑니다. **BMS 는 파일 하나, DCS 는 장치마다 하나**입니다.
+보드가 둘이라 먼저 짚고 갑니다. **BMS 도 DCS 도 장치마다 파일이 따로** 있고,
+거기에는 오프셋 개념이 없습니다.
 
-| | BMS | DCS |
+| | BMS 장치별 | DCS |
 |---|---|---|
-| 파일 수 | **1개** — 게임 전체가 키 파일 하나 | **장치당 1개** |
-| 파일 안에 장치 구분이 | **없습니다** | 파일명에 장치명 + GUID |
-| 그럼 어떻게 구분하나 | **DX 번호 대역으로.** N번째 장치는 `(N-1) × g_nButtonsPerDevice` 부터 | 파일이 나뉘어 있으니 구분 불필요 |
-| 버튼 번호 | 대역이 더해진 **전역 번호** | 그 장치 안에서 **1부터** — 오프셋 없음 |
+| 파일 | `Setup.v100.<장치명> {GUID}.xml` | `<프로파일명>.diff.lua` |
+| 어디에 | `User\Config\` | `Saved Games\...\InputUserProfiles\` |
+| 장치 식별 | 파일명의 **GUID** | 파일명 — **GUID 없음**, 이름으로 지정 |
+| 버튼 번호 | `DxAssgn[i]` = DX **i+1** | `JOY_BTN<n>` = DX **n** |
+| 오프셋 | **없음** | **없음** |
 
-그래서 BMS 쪽 생성기는 두 보드를 **한 파일에** 쓰고, 각 보드 앞에 어느 대역인지
-주석을 답니다:
+심 PC 의 실제 설정을 보면 BMS 바인딩은 **이 XML 쪽에** 들어 있습니다. 그래서
+`gen_bms_setup_xml.py` 를 권합니다.
+
+### BMS 에만 있는 또 하나의 경로 — 공용 `.key`
+
+BMS 는 게임 전체가 공유하는 `.key` 파일로도 DX 를 바인딩할 수 있습니다. 이쪽은
+성격이 완전히 다릅니다:
+
+- 파일이 **하나**이고 HOTAS·MFD 등 모든 장치가 같이 들어갑니다
+- 파일 안에 장치 구분 필드가 **없습니다** — DX 번호 **대역**이 장치를 가리킵니다.
+  N번째 장치는 `(N-1) × g_nButtonsPerDevice` 부터
+- 그래서 `--device-index` 와 `DeviceSorting.txt` 가 필요하고, 다른 장치 바인딩을
+  보존하려면 `--merge` 가 필요합니다
 
 ```
 # ---- CONSOLE : 장치 2, BMS DX 128~191 (Windows DX 1~64) ----
 # ---- AUX : 장치 3, BMS DX 256~306 (Windows DX 1~51) ----
 ```
 
-`--device-index` 와 `DeviceSorting.txt` 가 필요한 이유가 이것뿐입니다 — 대역 시작점을
-알아야 하니까요. **DCS 에는 이 개념이 없습니다.** 장치마다 파일이 따로라
-`JOY_BTN1` 이 그 장치의 1번 버튼이고, 오프셋을 더하면 오히려 틀립니다.
+`gen_bms_keyfile.py` 가 이쪽입니다. **장치 순서가 바뀌면 대역이 밀려 다른 장치까지
+깨지는** 약점이 있어, 장치별 XML 쪽이 더 안전합니다.
+
+> **DCS 에는 이 대역 개념이 없습니다.** `JOY_BTN1` 이 그 장치의 1번 버튼이고,
+> 오프셋을 더하면 오히려 틀립니다.
 
 ---
 
@@ -290,83 +305,83 @@ SimCATIII 56 -2 -2 0x42 0x0 115
 
 ---
 
-## 6. DCS 계획
-
-**미착수.** 구조는 BMS 와 같게 가되, 데이터 두 가지가 DCS 설치본에만 있습니다.
-
-### 대응 관계
-
-| | BMS (완료) | DCS (예정) |
-|---|---|---|
-| 카탈로그 원천 | `User\Config\BMS - Full.key` | 모듈의 `Input\F-16C_50\joystick\default.lua` |
-| 커밋된 기준선 | `tools/bms_catalog.txt` | `tools/dcs_catalog.txt` |
-| 이름→명령 표 | `tools/bms_callbacks.py` | `tools/dcs_commands.py` |
-| 출력 | `.key` 조각 1개 | `.diff.lua` **장치당 1개** |
-| 출력 위치 | BMS 키 파일에 병합 | `Saved Games\DCS\Config\Input\F-16C_50\joystick\<장치명> {GUID}.diff.lua` |
-| 버튼 번호 | 장치 대역이 더해진 전역 번호 | **그 장치 안에서 1부터** |
-
-DX 맵을 보드에서 읽는 부분(`?DX`, 포트 탐지, 파서)은 **그대로 재사용**합니다. 보드가
-`device=CONSOLE` 을 알려주므로 어느 파일에 쓸지도 자동으로 갈립니다.
-
-**BMS 쪽 코드를 그대로 가져오면 안 되는 지점이 둘 있습니다.**
-
-1. **장치 대역 오프셋을 적용하면 안 됩니다.** `(N-1) × 128` 은 BMS 가 파일 하나에
-   모든 장치를 담기 때문에 필요한 것이고, DCS 는 파일이 나뉘어 있어 그 장치의
-   1번 버튼이 그냥 `JOY_BTN1` 입니다. `--device-index` 와 `DeviceSorting.txt` 도
-   DCS 에서는 쓰지 않습니다.
-2. **출력이 조각이 아니라 완결된 파일입니다.** BMS 는 기존 키 파일에 붙이는
-   텍스트 조각이지만, `.diff.lua` 는 `local diff = { ... } return diff` 로 닫히는
-   온전한 Lua 파일이고 장치마다 하나씩 덮어씁니다.
-
-### 막히는 지점
-
-**`.diff.lua` 의 명령 ID 형식이 확인되지 않았습니다.** `d3001pnt3` 같은 문자열이
-`cockpit_device_id` 와 `device_commands.Button_N` 에서 어떤 순서로 조합되는지 —
-추측으로 쓰면 **파일은 정상 로드되는데 버튼이 안 먹는** 식으로 조용히 실패합니다.
-
-파일명의 GUID 도 Windows 가 장치마다 정하는 값이라 만들어낼 수 없습니다.
-
-### 가져와야 할 파일
-
-DCS 설치 폴더(보통 `C:\Program Files\Eagle Dynamics\DCS World`)에서:
+## 6. DCS
 
 ```
-Mods\aircraft\F-16C\Input\F-16C_50\joystick\default.lua
-Mods\aircraft\F-16C\Cockpit\Scripts\devices.lua
-Mods\aircraft\F-16C\Cockpit\Scripts\command_defs.lua
+python tools/gen_dcs_profile.py --profiles-dir "<InputUserProfiles>" -o out
 ```
 
-| 파일 | 왜 |
+장치마다 `.diff.lua` 하나를 만들고, `Saved Games\DCS\Config\Input\...\InputUserProfiles\`
+에 넣은 뒤 DCS 입력 설정에서 장치에 지정합니다. GUID 가 없어 파일명은 자유입니다
+(`--name CONSOLE "이름"` 으로 바꿀 수 있습니다).
+
+| 파일 | 역할 |
 |---|---|
-| `default.lua` | 바인딩 가능한 전체 명령 목록 (이름·카테고리 포함) |
-| `devices.lua` | `devices.ELEC_INTERFACE` 같은 심볼을 숫자로 |
-| `command_defs.lua` | `device_commands.Button_1` 을 숫자로 |
+| `tools/dcs_catalog.txt` | 명령 ID ↔ 이름. BMS 의 `bms_catalog.txt` 에 해당 |
+| `tools/dcs_commands.py` | 컨트롤 이름 → 명령 ID |
+| `tools/gen_dcs_profile.py` | 생성기 |
 
-`default.lua` 는 명령을 심볼 이름으로만 적어 놓아서, 뒤의 둘이 없으면 숫자 ID 를
-만들 수 없습니다.
-
-그리고 **DCS 에서 직접 만든 샘플** — 입력 설정에서 아무 컨트롤 2~3개를 Teensy 버튼에
-바인딩하고 저장하면 생기는 파일을, **양쪽 보드 모두**:
+### 명령 ID 는 구조체입니다
 
 ```
-%USERPROFILE%\Saved Games\DCS\Config\Input\F-16C_50\joystick\
-    F16 LEFT CONSOLE {GUID}.diff.lua
-    F16 LEFT AUX MISC {GUID}.diff.lua
+d<down>p<pressed>u<up>cd<cockpit_device>vd<value_down>vp<value_pressed>vu<value_up>
 ```
 
-바인딩 종류를 섞으면(모멘터리 버튼 · 2단 스위치 · 3단 스위치의 한 위치) ID 형식과
-파일명 규칙, GUID, 그리고 2단/3단을 어떻게 표현하는지를 한 번에 확인할 수 있습니다.
+`nil` 은 그 필드 없음. `d3001pnilunilcd32vd0vpnilvunil` = 명령 3001, 콕핏 장치 32,
+value_down 0. 축은 `a<command>cd<device>` 입니다.
 
-> `Saved Games\DCS` 가 `DCS.openbeta` 일 수 있습니다. 있는 쪽으로.
+버튼은 `JOY_BTN<n>`, **뗄 때는 `JOY_BTN<n>_OFF`**. 3단 스위치의 가운데는 양쪽
+릴리스를 한 항목에 묶습니다 — `bms_callbacks.py` 의 `(위치, 중립)` 모델 그대로라
+표가 거의 그대로 옮겨갑니다:
 
-### 예상되는 차이
+```lua
+["name"] = "EPU Switch - NORM",
+  [1] = { ["key"] = "JOY_BTN58_OFF" },
+  [2] = { ["key"] = "JOY_BTN59_OFF" },
+```
 
-- **커버 DX 3개가 DCS 에서는 살아납니다.** BMS 에선 비웠지만 DCS 는 커버를 따로
-  여닫습니다 — 애초에 이 DX 를 만든 이유가 DCS 쪽입니다.
-- **BMS 가 안 모델링한 것 상당수가 DCS 엔 있을 것**입니다 — HOT MIC, CIPHER,
-  UHF SQUELCH · T-TONE, ADF 위치 등. DCS 가 더 세밀한 편입니다.
-- **축 10개**는 버튼이 아니라 `.diff.lua` 의 `axisDiffs` 쪽이라 형식이 다릅니다.
-  필요하면 같이 생성합니다.
+모멘터리 버튼은 릴리스 키가 필요 없습니다 — 명령 자체가 `vd=1 vu=0` 을 품습니다.
+
+### 축은 다시 만들지 않고 베껴 옵니다
+
+> ⚠ **`--profiles-dir` 없이 돌리지 마십시오.** 이 패널의 포트는 전부
+> `invert = true` 이고 `curvature`·`filter` 도 붙어 있습니다. 생성기는 이걸 알 수
+> 없으므로, 다시 만들면 **볼륨 노브 일곱 개와 HMCS 가 전부 반대로 돕니다.**
+
+그래서 기존 프로파일의 `axisDiffs` 블록을 **원문 그대로** 복사합니다. 버튼 재배열은
+축을 건드리지 않으므로 기존 블록이 그대로 유효합니다.
+
+그 안에 **`removed` 항목**도 들어 있습니다 — DCS 가 새 조이스틱에 자동으로 거는
+`Pitch←JOY_Y` · `Roll←JOY_X` · `Thrust←JOY_Z` (콘솔은 `Rudder←JOY_RZ` 까지) 를
+떼어내는 줄입니다. 없으면 **HMCS 노브가 스로틀을 움직이고** 빈 축이 기수를 밉니다.
+
+### DCS 가 BMS 보다 많이 가진 것
+
+BMS 에서 비워 둔 자리 상당수가 DCS 엔 있습니다 — UHF SQUELCH · TEST DISPLAY ·
+STATUS, FUNCTION 의 ADF, MAX POWER, MPO, AB RESET 과 ENG DATA 각각,
+HOT MIC/CIPHER 3단, ECM RESET, ECM 1~6 · FRM · SPL 전부, ALT REL, RWR ACT/PWR.
+
+**`ENG CONT Switch Cover - OPEN / CLOSE`** 도 있습니다. 커버 DX 를 만든 이유가
+원래 이쪽입니다.
+
+### 남은 자리 5개
+
+매번 실행할 때마다 보고됩니다.
+
+| | |
+|---|---|
+| UHF T-TONE | 프로파일에 안 묶여 있음 |
+| AVTR ×2 | 안 묶여 있음 |
+| EPU 커버 ×2 | DCS 가 ENG CONT 에만 커버 명령을 주는 것으로 보임 |
+
+앞의 셋은 DCS 에서 한 번 묶어 저장한 뒤 카탈로그를 다시 뽑으면 채워집니다.
+EPU 커버는 모듈의 `Input/F-16C_50/joystick/default.lua` 를 봐야 확실합니다.
+
+### 카탈로그를 다시 뽑으려면
+
+`tools/dcs_catalog.txt` 는 사용자의 프로파일에서 추출한 것입니다. DCS 에서 새로
+바인딩한 뒤 다시 뽑으면 그 명령이 카탈로그에 들어오고, `dcs_commands.py` 의
+`TODO` 를 채울 수 있습니다.
 
 ---
 
