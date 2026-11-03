@@ -64,18 +64,12 @@ def profile_name(prof_dir, device):
 
 def no_profile(prof_dir, devices):
     """빠진 프로파일을 한꺼번에 안내합니다 — DCS 에 한 번만 다녀오게."""
-    msg = ['다음 프로파일이 DCS 폴더에 없습니다:']
-    msg += ['  %-8s %s.diff.lua' % (d, AX.DCS_PROFILE[d]) for d in devices]
-    msg += ['  (%s)' % prof_dir, '',
-            'DCS 를 켜고 Options - Controls 에서 F-16C 의 해당 장치 열을 고른 뒤',
-            '"Save Profile As..." 로 위 이름 그대로 한 번씩 저장하십시오. 빈',
-            '프로파일이 생기면 그 뒤 다시 실행해 덮어씁니다.']
-    others = sorted(f for f in os.listdir(prof_dir) if f.endswith('.diff.lua'))
-    if others:
-        msg += ['', '폴더에 이미 있는 프로파일입니다. 이 중 하나를 쓰던 거라면',
-                'tools/sim_axes.py 의 DCS_PROFILE 을 그 이름으로 맞추십시오:']
-        msg += ['  ' + f for f in others]
-    return '\n'.join(msg)
+    return '\n'.join(
+        ['다음 프로파일이 DCS 폴더에 없습니다:']
+        + ['  %-8s %s.diff.lua' % (d, AX.DCS_PROFILE[d]) for d in devices]
+        + ['  (%s)' % prof_dir, '',
+           'DCS 의 Options - Controls 에서 F-16C 의 해당 장치 열을 고르고',
+           '"Save Profile As..." 로 위 이름 그대로 저장하십시오. 그 뒤 다시 실행.'])
 
 
 def load_catalog():

@@ -64,14 +64,12 @@ def device_guid(cfg_dir, device):
 
 def no_setup_xml(cfg_dir, devices):
     """빠진 Setup XML 을 한꺼번에 안내합니다 — BMS 에 한 번만 다녀오게."""
-    msg = ['다음 장치의 Setup XML 이 BMS 설정 폴더에 없습니다:']
-    msg += ['  %-8s Setup.v100.%s {GUID}.xml' % (d, AX.PRODUCT[d]) for d in devices]
-    msg += ['  (%s)' % cfg_dir, '',
-            'GUID 는 Windows 가 장치에 붙이는 값이라 보드도 생성기도 모릅니다.',
-            'BMS 를 켜고 SETUP - CONTROLLERS 에서 해당 장치를 고른 다음 아무 버튼이나',
-            '한 번씩 바인드하고 저장하십시오. BMS 가 더미 파일을 만들면 그 이름에서',
-            'GUID 를 가져옵니다. 그 뒤 다시 실행하십시오.']
-    return '\n'.join(msg)
+    return '\n'.join(
+        ['다음 장치의 Setup XML 이 BMS 설정 폴더에 없습니다:']
+        + ['  %-8s Setup.v100.%s {GUID}.xml' % (d, AX.PRODUCT[d]) for d in devices]
+        + ['  (%s)' % cfg_dir, '',
+           'BMS 의 SETUP - CONTROLLERS 에서 해당 장치를 고르고 아무 버튼이나',
+           '한 번 바인드한 뒤 저장하십시오. 그 뒤 다시 실행.'])
 
 
 I = '  '          # BMS 가 쓰는 들여쓰기
