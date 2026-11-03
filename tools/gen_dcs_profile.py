@@ -9,9 +9,9 @@ BMS 와 달리 DCS 는 **장치마다 파일 하나**이고 버튼 번호에 오
 DeviceSorting 도, 다른 장치와의 병합도 필요 없습니다.
 
 BMS 의 GUID 와 달리 프로파일은 **이름**으로 식별되고, 그 이름은 기계가 정하는
-값이 아니라 우리가 단 말입니다. 그래서 `tools/sim_axes.py` 의 `DCS_PROFILE` 하나만
-보며, 따로 지정하는 옵션은 없습니다 — 이름을 바꾸려면 그 파일을 고치십시오.
-**DCS 입력 설정에서 장치에 지정해야** 적용되며, 그때 고른 이름과 같아야 합니다.
+값이 아니라 우리가 단 말입니다 — `tools/sim_axes.py` 의 `DCS_PROFILE` 에 있습니다.
+발견할 수는 없으니, 대신 **그 이름의 파일이 이미 있을 때만 씁니다.** 없으면
+DCS 에서 한 번 만들라고 하고 멈춥니다 — 읽히지도 않을 파일을 남기지 않게.
 
 명령 ID 와 이름은 tools/dcs_catalog.txt, 컨트롤 대응은 tools/dcs_commands.py.
 
@@ -48,6 +48,34 @@ def default_out_dir():
         if os.path.isdir(cand):
             return cand
     return None
+
+
+def profile_name(prof_dir, device):
+    """그 장치의 프로파일 파일명. 폴더에 없으면 None.
+
+    BMS 의 GUID 처럼 이름을 어디서 발견할 수는 없습니다 — 프로파일 이름은
+    기계가 정하는 값이 아니라 우리가 고른 라벨이라, 어느 파일이 어느 장치의
+    것인지는 이름만이 말해 줍니다. 대신 **그 이름의 파일이 실제로 있는지**를
+    확인해, DCS 가 읽지도 않을 새 파일을 만들어 두고 끝내는 일을 막습니다.
+    """
+    name = AX.DCS_PROFILE[device] + '.diff.lua'
+    return name if os.path.isfile(os.path.join(prof_dir, name)) else None
+
+
+def no_profile(prof_dir, devices):
+    """빠진 프로파일을 한꺼번에 안내합니다 — DCS 에 한 번만 다녀오게."""
+    msg = ['다음 프로파일이 DCS 폴더에 없습니다:']
+    msg += ['  %-8s %s.diff.lua' % (d, AX.DCS_PROFILE[d]) for d in devices]
+    msg += ['  (%s)' % prof_dir, '',
+            'DCS 를 켜고 Options - Controls 에서 F-16C 의 해당 장치 열을 고른 뒤',
+            '"Save Profile As..." 로 위 이름 그대로 한 번씩 저장하십시오. 빈',
+            '프로파일이 생기면 그 뒤 다시 실행해 덮어씁니다.']
+    others = sorted(f for f in os.listdir(prof_dir) if f.endswith('.diff.lua'))
+    if others:
+        msg += ['', '폴더에 이미 있는 프로파일입니다. 이 중 하나를 쓰던 거라면',
+                'tools/sim_axes.py 의 DCS_PROFILE 을 그 이름으로 맞추십시오:']
+        msg += ['  ' + f for f in others]
+    return '\n'.join(msg)
 
 
 def load_catalog():
@@ -146,19 +174,24 @@ def lua(keydiffs, axes, names):
 def main():
     ap = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap.add_argument('--profiles', metavar='DIR',
+                    help='DCS 의 InputUserProfiles 경로 (기본은 Saved Games 에서 탐색)')
     ap.add_argument('-o', '--out-dir', metavar='DIR',
                     help='따로 뽑아볼 폴더 (기본은 DCS 의 InputUserProfiles 에 직접)')
     ap.add_argument('--port', action='append', metavar='COMx', help='포트 직접 지정')
     args = ap.parse_args()
 
-    out_dir = args.out_dir or default_out_dir()
-    if not out_dir:
+    prof_dir = args.profiles or default_out_dir()
+    if not prof_dir:
         raise SystemExit(
             'DCS 의 InputUserProfiles 폴더를 찾지 못했습니다:\n'
             '  %s\n\n'
-            '이 PC 에 DCS 가 없거나 폴더명이 다릅니다. -o 로 직접 주십시오.'
+            '이 PC 에 DCS 가 없거나 폴더명이 다릅니다. --profiles 로 직접 주십시오.'
             % ('\n  '.join(os.path.join(os.path.expanduser('~'), 'Saved Games',
                                        d, 'InputUserProfiles') for d in DCS_DIRS)))
+    if not os.path.isdir(prof_dir):
+        raise SystemExit('--profiles 가 폴더가 아닙니다: %s' % prof_dir)
+    out_dir = args.out_dir or prof_dir
     in_place = args.out_dir is None
 
     maps = {}
@@ -171,23 +204,26 @@ def main():
         sys.stderr.write('%s 에서 %s DX 맵 %d 항목 수신\n' % (port, dev, len(entries)))
         maps[dev] = entries
 
+    # 한 줄이라도 쓰기 전에, 빠진 프로파일을 한꺼번에 모아 알립니다.
+    profiles = {dev: profile_name(prof_dir, dev) for dev in sorted(maps)}
+    gone = [d for d in sorted(profiles) if profiles[d] is None]
+    if gone:
+        raise SystemExit(no_profile(prof_dir, gone))
+
     names, axes = load_catalog()
     if not os.path.isdir(out_dir):
         os.makedirs(out_dir)
 
-    todos, unmapped_all, new_names = [], [], []
+    todos, unmapped_all = [], []
     for dev in sorted(maps):
         kd, todo, unmapped = collect(maps[dev], dcs_commands.MAPS[dev], dev)
         ax = AX.DCS_AXES[dev]
-        dest = os.path.join(out_dir, AX.DCS_PROFILE[dev] + '.diff.lua')
-        fresh = not os.path.exists(dest)
-        if not fresh:
+        dest = os.path.join(out_dir, profiles[dev])
+        if os.path.exists(dest):
             bak = dest + '.bak'
             if os.path.exists(bak):
                 os.remove(bak)
             os.replace(dest, bak)
-        else:
-            new_names.append((dev, os.path.basename(dest)))
         open(dest, 'w', encoding='utf-8', newline='\n').write(lua(kd, ax, names))
         keys = sum(len(v) for v in kd.values())
         sys.stderr.write('%-8s %s\n' % (dev, os.path.basename(dest)))
@@ -207,19 +243,6 @@ def main():
                          % len(unmapped_all))
         for dev, dx, name, w in unmapped_all:
             sys.stderr.write('  %-8s DX %-3d %s (x%d)\n' % (dev, dx, name, w))
-    if new_names and in_place:
-        sys.stderr.write('\n아래는 새 파일입니다 — DCS 에서 아직 아무 장치에도 붙지 않았습니다:\n')
-        for dev, fn in new_names:
-            sys.stderr.write('  %-8s %s\n' % (dev, fn))
-        others = sorted(f for f in os.listdir(out_dir)
-                        if f.endswith('.diff.lua')
-                        and f not in [n for _, n in new_names])
-        if others:
-            sys.stderr.write('\n이미 있는 프로파일입니다. 이 중 하나를 쓰던 거라면\n'
-                             'tools/sim_axes.py 의 DCS_PROFILE 을 그 이름으로 맞추십시오:\n')
-            for f in others:
-                sys.stderr.write('  %s\n' % f)
-
     if in_place:
         sys.stderr.write('\nDCS 의 InputUserProfiles 에 바로 썼습니다 (전 파일은 .bak):\n'
                          '  %s\n' % out_dir)

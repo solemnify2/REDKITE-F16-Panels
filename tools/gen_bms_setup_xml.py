@@ -43,33 +43,35 @@ EMPTY = ('SimDoNothing', 'Default', 0)
 
 
 def device_guid(cfg_dir, device):
-    r"""BMS 의 User\Config 에서 그 장치의 GUID 를 찾습니다.
+    r"""BMS 의 User\Config 에서 그 장치의 GUID 를 찾습니다. 없으면 None.
 
     GUID 는 Windows DirectInput 이 장치를 처음 열거할 때 만드는 값이라
     보드도 생성기도 모릅니다. 다만 BMS 가 장치를 인식하면
     `Setup.v100.<제품명> {GUID}.xml` 을 만들어 두므로, 그 **파일 이름**에서
     가져올 수 있습니다 (내용은 안 읽습니다).
     """
-    product = AX.PRODUCT[device]
-    pre = 'Setup.v100.' + product + ' {'
+    pre = 'Setup.v100.' + AX.PRODUCT[device] + ' {'
     names = sorted(os.listdir(cfg_dir)) if os.path.isdir(cfg_dir) else []
-    hits = [GUID_RE.search(f).group(1) for f in names
-            if f.startswith(pre) and GUID_RE.search(f)]
+    hits = [f for f in names if f.startswith(pre) and GUID_RE.search(f)]
     if len(hits) == 1:
-        return hits[0]
+        return GUID_RE.search(hits[0]).group(1)
     if hits:
         raise SystemExit(
             '%s 의 Setup XML 이 %d 개 입니다. 쓸 것 하나만 남기고 다시 실행하십시오:\n  %s'
-            % (product, len(hits),
-               '\n  '.join(f for f in names if f.startswith(pre))))
-    raise SystemExit(
-        '%s 의 Setup XML 이 BMS 설정 폴더에 없습니다:\n'
-        '  %s\n\n'
-        'GUID 는 Windows 가 장치에 붙이는 값이라 보드도 생성기도 모릅니다.\n'
-        'BMS 를 켜고 SETUP - CONTROLLERS 에서 이 장치를 고른 다음 아무 버튼이나\n'
-        '한 번 바인드하고 저장하십시오. BMS 가 더미 파일을 만들면 그 이름에서\n'
-        'GUID 를 가져옵니다. 그 뒤 다시 실행하십시오.'
-        % (product, cfg_dir))
+            % (AX.PRODUCT[device], len(hits), '\n  '.join(hits)))
+    return None
+
+
+def no_setup_xml(cfg_dir, devices):
+    """빠진 Setup XML 을 한꺼번에 안내합니다 — BMS 에 한 번만 다녀오게."""
+    msg = ['다음 장치의 Setup XML 이 BMS 설정 폴더에 없습니다:']
+    msg += ['  %-8s Setup.v100.%s {GUID}.xml' % (d, AX.PRODUCT[d]) for d in devices]
+    msg += ['  (%s)' % cfg_dir, '',
+            'GUID 는 Windows 가 장치에 붙이는 값이라 보드도 생성기도 모릅니다.',
+            'BMS 를 켜고 SETUP - CONTROLLERS 에서 해당 장치를 고른 다음 아무 버튼이나',
+            '한 번씩 바인드하고 저장하십시오. BMS 가 더미 파일을 만들면 그 이름에서',
+            'GUID 를 가져옵니다. 그 뒤 다시 실행하십시오.']
+    return '\n'.join(msg)
 
 
 I = '  '          # BMS 가 쓰는 들여쓰기
@@ -193,8 +195,11 @@ def main():
         sys.stderr.write('%s 에서 %s DX 맵 %d 항목 수신\n' % (port, dev, len(entries)))
         maps[dev] = entries
 
-    # 보드를 모두 읽은 뒤에 GUID 를 보여야 한쪽만 없어도 양쪽 안내가 나옵니다.
+    # 한 줄이라도 쓰기 전에, 빠진 XML 을 한꺼번에 모아 알립니다.
     guids = {dev: device_guid(cfg_dir, dev) for dev in sorted(maps)}
+    gone = [d for d in sorted(guids) if guids[d] is None]
+    if gone:
+        raise SystemExit(no_setup_xml(cfg_dir, gone))
 
     catalog = K.load_catalog(args.bms_root)
     if not os.path.isdir(out_dir):
