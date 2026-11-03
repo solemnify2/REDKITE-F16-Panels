@@ -38,7 +38,7 @@ Teensy 4.1 기반 USB 디바이스 **2대**가 핵심이고, 각각 별도의 �
 
 | 디바이스 | 폴더 | PID | 규모 | 담당 |
 |---|---|---|---|---|
-| **Left Aux + MISC** | `F16_LEFT_AUX_MISC/` | `0x0489` | DX 51 · 축 4 | Gear, CMDS, TWA, Alt Gear, MISC, HMCS, Pedal |
+| **Left Aux + MISC** | `F16_LEFT_AUX_MISC/` | `0x0487` | DX 51 · 축 4 | Gear, CMDS, TWA, Alt Gear, MISC, HMCS, Pedal |
 | **Left Console** | `F16_LEFT_CONSOLE/` | `0x048E` | DX 64 · 축 10 | ECM, ELEC, EPU, AVTR, UHF, ENGINE START, MPO, AUDIO 1/2 |
 | **MFD + LCD** | — | — | — | Thrustmaster MFD ×2 (USB) · 7.6인치 정사각 LCD ×2 (HDMI). **Teensy 와 연결되지 않습니다** — 다만 MFD 백라이트는 이 프로젝트의 브릿지가 인게임 조명에 맞춰 줍니다 |
 | **ICP** | — | — | — | SimGears ICP (USB). 역시 Teensy 와 무관하며, **백라이트 연동은 포기**했습니다 |
@@ -211,7 +211,7 @@ AUX 51버튼, 콘솔 66버튼이므로 **두 스케치 모두** 128버튼 Extrem
 
 ```c
 #define JOYSTICK_SIZE         64    //  12 = normal, 64 = extreme joystick
-#define PRODUCT_ID            0x0489  // AUX 보드 / 콘솔 보드는 0x048E
+#define PRODUCT_ID            0x0487  // AUX 보드 / 콘솔 보드는 0x048E
 ```
 
 두 보드가 `JOYSTICK_SIZE 64`를 공유하므로 빌드 사이에 이 값을 고칠 필요는 없습니다. **`PRODUCT_ID`만 디바이스에 맞게** 바꿔 빌드합니다. 값이 틀리면 각 스케치의 `#error`가 빌드를 막아줍니다.
@@ -226,7 +226,7 @@ Arduino IDE에서 해당 `.ino`를 열고 Upload합니다. `usb_desc.h`의 `PROD
 
 | 보드 | 파일 | PRODUCT_ID |
 |---|---|---|
-| Left Aux + MISC | `F16_LEFT_AUX_MISC/F16_LEFT_AUX_MISC.ino` | `0x0489` |
+| Left Aux + MISC | `F16_LEFT_AUX_MISC/F16_LEFT_AUX_MISC.ino` | `0x0487` |
 | Left Console | `F16_LEFT_CONSOLE/F16_LEFT_CONSOLE.ino` | `0x048E` |
 
 라이브러리는 `Wire`, `Keyboard` (모두 built-in)만 필요합니다.
@@ -323,7 +323,7 @@ UHF 엔코더의 CW/CCW가 반대면 `encoders[]`의 `pinA`/`pinB`를 교체하�
 
 ```
 REDKITE-F16-Panels/
-├── F16_LEFT_AUX_MISC/             # Teensy 4.1 (PID 0x0489)
+├── F16_LEFT_AUX_MISC/             # Teensy 4.1 (PID 0x0487)
 │   │                              #   Gear, CMDS, TWA, Alt Gear, MISC, HMCS, Pedal
 │   ├── F16_LEFT_AUX_MISC.ino
 │   ├── BiosHandler/               # DcsBiosParser.h / BmsBiosParser.h
