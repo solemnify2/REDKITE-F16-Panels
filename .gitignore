@@ -2,3 +2,5 @@
 *.bak
 *.stl
 !3d stl/*.stl
+
+__pycache__/
