@@ -115,7 +115,7 @@ LightBits3 (offset 128):
 | LeftGearDown | 0x00020000 | 17 | Left gear down and locked |
 | RightGearDown | 0x00040000 | 18 | Right gear down and locked |
 
-## 3. LED Index Mapping — Left Aux + MISC (0x0489)
+## 3. LED Index Mapping — Left Aux + MISC (0x0487)
 
 | ledBits | Name | Location | BMS LightBit | DCS-BIOS |
 |---|---|---|---|---|

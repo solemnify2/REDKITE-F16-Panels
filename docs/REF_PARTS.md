@@ -48,7 +48,7 @@
 
 | 부품 | 수량 | 비고 |
 |------|------|------|
-| [Teensy 4.1](https://www.pjrc.com/store/teensy41.html) | 2 | 보드당 1대 — AUX `PID 0x0489`, 콘솔 `PID 0x048E`. 128버튼 USB 조이스틱 네이티브 지원, 42 GPIO + 하단 SD 패드 |
+| [Teensy 4.1](https://www.pjrc.com/store/teensy41.html) | 2 | 보드당 1대 — AUX `PID 0x0487`, 콘솔 `PID 0x048E`. 128버튼 USB 조이스틱 네이티브 지원, 42 GPIO + 하단 SD 패드 |
 
 모자라는 핀은 MCP23017 로 확장합니다 (AUX 1장, 콘솔 3장). 보드별 핀 소진 상황과 확장 여지는
 각 배선도의 「리소스 사용」 절에 있습니다.
