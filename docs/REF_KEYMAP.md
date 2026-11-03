@@ -9,8 +9,31 @@
 
 | 시뮬 | 상태 | 생성기 | 출력 |
 |---|---|---|---|
-| **Falcon BMS** | 동작함 (바인딩 128줄) | `tools/gen_bms_keyfile.py` | `.key` 조각 |
-| **DCS World** | **미착수** — 아래 「DCS 계획」 | — | `.diff.lua` |
+| **Falcon BMS** | 동작함 (바인딩 128줄) | `tools/gen_bms_keyfile.py` | `.key` 조각 **1개** |
+| **DCS World** | **미착수** — 아래 「DCS 계획」 | — | `.diff.lua` **장치당 1개** |
+
+## 장치를 구분하는 방식이 두 시뮬에서 다릅니다
+
+보드가 둘이라 먼저 짚고 갑니다. **BMS 는 파일 하나, DCS 는 장치마다 하나**입니다.
+
+| | BMS | DCS |
+|---|---|---|
+| 파일 수 | **1개** — 게임 전체가 키 파일 하나 | **장치당 1개** |
+| 파일 안에 장치 구분이 | **없습니다** | 파일명에 장치명 + GUID |
+| 그럼 어떻게 구분하나 | **DX 번호 대역으로.** N번째 장치는 `(N-1) × g_nButtonsPerDevice` 부터 | 파일이 나뉘어 있으니 구분 불필요 |
+| 버튼 번호 | 대역이 더해진 **전역 번호** | 그 장치 안에서 **1부터** — 오프셋 없음 |
+
+그래서 BMS 쪽 생성기는 두 보드를 **한 파일에** 쓰고, 각 보드 앞에 어느 대역인지
+주석을 답니다:
+
+```
+# ---- CONSOLE : 장치 2, BMS DX 128~191 (Windows DX 1~64) ----
+# ---- AUX : 장치 3, BMS DX 256~306 (Windows DX 1~51) ----
+```
+
+`--device-index` 와 `DeviceSorting.txt` 가 필요한 이유가 이것뿐입니다 — 대역 시작점을
+알아야 하니까요. **DCS 에는 이 개념이 없습니다.** 장치마다 파일이 따로라
+`JOY_BTN1` 이 그 장치의 1번 버튼이고, 오프셋을 더하면 오히려 틀립니다.
 
 ---
 
@@ -217,11 +240,22 @@ SimCATIII 56 -2 -2 0x42 0x0 115
 | 카탈로그 원천 | `User\Config\BMS - Full.key` | 모듈의 `Input\F-16C_50\joystick\default.lua` |
 | 커밋된 기준선 | `tools/bms_catalog.txt` | `tools/dcs_catalog.txt` |
 | 이름→명령 표 | `tools/bms_callbacks.py` | `tools/dcs_commands.py` |
-| 출력 | `.key` 조각 | `.diff.lua` |
+| 출력 | `.key` 조각 1개 | `.diff.lua` **장치당 1개** |
 | 출력 위치 | BMS 키 파일에 병합 | `Saved Games\DCS\Config\Input\F-16C_50\joystick\<장치명> {GUID}.diff.lua` |
+| 버튼 번호 | 장치 대역이 더해진 전역 번호 | **그 장치 안에서 1부터** |
 
 DX 맵을 보드에서 읽는 부분(`?DX`, 포트 탐지, 파서)은 **그대로 재사용**합니다. 보드가
-`device=CONSOLE` 을 알려주므로 장치 구분도 이미 됩니다.
+`device=CONSOLE` 을 알려주므로 어느 파일에 쓸지도 자동으로 갈립니다.
+
+**BMS 쪽 코드를 그대로 가져오면 안 되는 지점이 둘 있습니다.**
+
+1. **장치 대역 오프셋을 적용하면 안 됩니다.** `(N-1) × 128` 은 BMS 가 파일 하나에
+   모든 장치를 담기 때문에 필요한 것이고, DCS 는 파일이 나뉘어 있어 그 장치의
+   1번 버튼이 그냥 `JOY_BTN1` 입니다. `--device-index` 와 `DeviceSorting.txt` 도
+   DCS 에서는 쓰지 않습니다.
+2. **출력이 조각이 아니라 완결된 파일입니다.** BMS 는 기존 키 파일에 붙이는
+   텍스트 조각이지만, `.diff.lua` 는 `local diff = { ... } return diff` 로 닫히는
+   온전한 Lua 파일이고 장치마다 하나씩 덮어씁니다.
 
 ### 막히는 지점
 
