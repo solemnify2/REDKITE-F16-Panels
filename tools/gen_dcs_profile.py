@@ -13,16 +13,13 @@ DeviceSorting 도, 다른 장치와의 병합도 필요 없습니다.
 
 명령 ID 와 이름은 tools/dcs_catalog.txt, 컨트롤 대응은 tools/dcs_commands.py.
 
-**축은 기존 프로파일에서 원문 그대로 베껴 옵니다** (`--profiles-dir`). 이 패널의
-포트는 전부 `invert = true` 이고 `curvature`·`filter` 도 들어 있어, 다시 만들면
-노브가 전부 반대로 돕니다. 버튼 재배열은 축을 건드리지 않으므로 기존 블록이
-그대로 유효합니다.
+**파일을 처음부터 전부 만듭니다.** 기존 프로파일을 참고하지 않습니다 — 축 설정처럼
+유도할 수 없는 값은 `tools/sim_axes.py` 에 데이터로 적혀 있습니다. 이 패널의 포트는
+전부 `invert = true` 라, 그 값이 빠지면 노브가 반대로 돕니다.
 
-그 안의 `removed` 항목이 특히 중요합니다 — 오늘까지의 작업에서 `pots[]` 의 `axis` 열은
-건드리지 않았으므로 기존 축 바인딩이 그대로 유효합니다. 특히 `removed` 항목 —
-DCS 가 새 조이스틱에 자동으로 거는 Pitch←JOY_Y, Roll←JOY_X, Thrust←JOY_Z
-(콘솔은 Rudder←JOY_RZ 까지) 를 떼어내는 줄 — 을 빠뜨리면 HMCS 노브나
-오디오 포트가 기체를 조종하게 됩니다.
+축의 `removed` 항목이 특히 중요합니다 — DCS 가 새 조이스틱에 자동으로 거는
+`Pitch←JOY_Y` · `Roll←JOY_X` · `Thrust←JOY_Z` (콘솔은 `Rudder←JOY_RZ` 까지) 를
+떼어내는 줄이라, 없으면 HMCS 노브가 스로틀을 움직입니다.
 """
 import argparse
 import os
@@ -32,13 +29,13 @@ import sys
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 import dcs_commands  # noqa: E402
+import sim_axes as AX  # noqa: E402
 import gen_bms_keyfile as K  # noqa: E402
 
 CATALOG = os.path.join(HERE, 'dcs_catalog.txt')
 
 # 파일명. DCS 는 GUID 가 아니라 이름으로 찾으므로 바꿔도 됩니다.
-PROFILE_NAME = {'CONSOLE': 'F16 Left Console panel',
-                'AUX':     'F16 Left AUX MISCpanel'}
+PROFILE_NAME = dict(AX.DCS_PROFILE)
 
 
 def load_catalog():
@@ -92,51 +89,45 @@ def collect(entries, mapping, device):
     return out, todo, unmapped
 
 
-def axis_block(profiles_dir, device):
-    """기존 프로파일의 axisDiffs 안쪽을 **원문 그대로** 돌려줍니다.
+def filt(f, ind):
+    """DCS 가 쓰는 모양의 ["filter"] 블록."""
+    L = [ind + '["filter"] = {',
+         ind + '	["curvature"] = {']
+    for i, v in enumerate(f['curvature'], 1):
+        L.append(ind + '		[%d] = %s,' % (i, v))
+    L.append(ind + '	},')
+    for k in ('deadzone', 'hardwareDetent', 'hardwareDetentAB', 'hardwareDetentMax',
+              'invert', 'saturationX', 'saturationY', 'slider'):
+        v = f[k]
+        L.append(ind + '	["%s"] = %s,' % (k, 'true' if v is True else
+                                            'false' if v is False else v))
+    L.append(ind + '},')
+    return L
 
-    invert / curvature / filter / deadzone 같은 축 설정은 생성기가 알 수 없어서,
-    다시 만드는 대신 베껴 옵니다. BMS 쪽 Setup XML 생성기와 같은 방식입니다.
-    """
-    if not profiles_dir:
-        return None, None
-    path = os.path.join(profiles_dir, PROFILE_NAME[device] + '.diff.lua')
-    if not os.path.isfile(path):
-        return None, path
-    text = open(path, encoding='utf-8', errors='replace').read()
-    m = re.search(r'\["axisDiffs"\]\s*=\s*\{\n(.*?)\n\t\},\n', text, re.S)
-    return (m.group(1) if m else None), path
 
-
-def lua(keydiffs, axes, names, axis_raw=None):
-    """DCS 가 쓰는 것과 같은 모양으로 — 탭 들여쓰기, [n] 인덱스 테이블.
-
-    axis_raw 가 있으면 축 블록은 원문을 그대로 씁니다.
-    """
-    L = ['local diff = {', '\t["axisDiffs"] = {']
-    if axis_raw is not None:
-        L.append(axis_raw)
-        axes = []
-    for aid, nm, add, rem in axes:
-        L.append('\t\t["%s"] = {' % aid)
-        for tag, keys in (('added', add), ('removed', rem)):
-            if not keys:
-                continue
-            L.append('\t\t\t["%s"] = {' % tag)
-            for i, k in enumerate(keys, 1):
-                L += ['\t\t\t\t[%d] = {' % i, '\t\t\t\t\t["key"] = "%s",' % k, '\t\t\t\t},']
-            L.append('\t\t\t},')
-        L += ['\t\t\t["name"] = "%s",' % nm, '\t\t},']
-    L += ['\t},', '\t["keyDiffs"] = {']
+def lua(keydiffs, axes, names):
+    """DCS 가 쓰는 것과 같은 모양 — 탭 들여쓰기, [n] 인덱스 테이블."""
+    L = ['local diff = {', '	["axisDiffs"] = {']
+    for aid, nm, tag, key, f in axes:
+        block = ['			["%s"] = {' % tag, '				[1] = {']
+        if f:
+            block += filt(f, '					')
+        block += ['					["key"] = "%s",' % key, '				},', '			},']
+        name = ['			["name"] = "%s",' % nm]
+        # DCS 는 테이블 키를 알파벳순으로 씁니다: added < name < removed
+        L.append('		["%s"] = {' % aid)
+        L += (block + name) if tag == 'added' else (name + block)
+        L.append('		},')
+    L += ['	},', '	["keyDiffs"] = {']
     for cid in sorted(keydiffs):
-        L.append('\t\t["%s"] = {' % cid)
-        L.append('\t\t\t["added"] = {')
+        L.append('		["%s"] = {' % cid)
+        L.append('			["added"] = {')
         for i, k in enumerate(keydiffs[cid], 1):
-            L += ['\t\t\t\t[%d] = {' % i, '\t\t\t\t\t["key"] = "%s",' % k, '\t\t\t\t},']
-        L.append('\t\t\t},')
-        L.append('\t\t\t["name"] = "%s",' % names.get(cid, cid))
-        L.append('\t\t},')
-    L += ['\t},', '}', 'return diff']
+            L += ['				[%d] = {' % i, '					["key"] = "%s",' % k, '				},']
+        L.append('			},')
+        L.append('			["name"] = "%s",' % names.get(cid, cid))
+        L.append('		},')
+    L += ['	},', '}', 'return diff']
     return '\n'.join(L) + '\n'
 
 
@@ -147,9 +138,6 @@ def main():
     ap.add_argument('--from-source', action='store_true',
                     help='보드 대신 스케치의 dxOrder[] 를 읽습니다 (오프라인용)')
     ap.add_argument('--port', action='append', metavar='COMx', help='포트 직접 지정')
-    ap.add_argument('--profiles-dir',
-                    help='기존 .diff.lua 가 있는 폴더. 축 블록을 여기서 원문 그대로 '
-                         '베껴 옵니다 — invert/curvature 는 생성기가 만들 수 없습니다')
     ap.add_argument('--name', action='append', nargs=2, metavar=('DEVICE', 'NAME'),
                     help='프로파일 파일명 지정 (기본: %s)' % PROFILE_NAME)
     args = ap.parse_args()
@@ -180,23 +168,15 @@ def main():
     todos, unmapped_all = [], []
     for dev in sorted(maps):
         kd, todo, unmapped = collect(maps[dev], dcs_commands.MAPS[dev], dev)
-        ax = axes.get(dev, [])
-        raw, tried = axis_block(args.profiles_dir, dev)
+        ax = AX.DCS_AXES[dev]
         dest = os.path.join(args.out_dir, PROFILE_NAME[dev] + '.diff.lua')
-        open(dest, 'w', encoding='utf-8', newline='\n').write(lua(kd, ax, names, raw))
+        open(dest, 'w', encoding='utf-8', newline='\n').write(lua(kd, ax, names))
         keys = sum(len(v) for v in kd.values())
         sys.stderr.write('%-8s %s\n' % (dev, os.path.basename(dest)))
-        sys.stderr.write('         명령 %d개 / 버튼 키 %d개 / 축 %d개\n'
-                         % (len(kd), keys, len(ax)))
-        if raw is not None:
-            sys.stderr.write('         축: %s 에서 원문 복사 — invert/curvature 보존\n'
-                             % os.path.basename(tried))
-        else:
-            rem = sum(1 for a in ax if a[3])
-            sys.stderr.write('         축: 카탈로그에서 재구성 %d개 (해제 %d개)\n'
-                             % (len(ax), rem))
-            sys.stderr.write('         [!] invert/curvature 가 빠집니다 — '
-                             '--profiles-dir 로 기존 프로파일을 지정하십시오\n')
+        sys.stderr.write('         명령 %d개 / 버튼 키 %d개\n' % (len(kd), keys))
+        rem = sum(1 for a in ax if a[2] == 'removed')
+        sys.stderr.write('         축 %d개 (기본 할당 해제 %d개) — sim_axes.py\n'
+                         % (len(ax), rem))
         todos += [(dev,) + t for t in todo]
         unmapped_all += [(dev,) + u for u in unmapped]
 

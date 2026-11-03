@@ -59,18 +59,18 @@ pyserial, 그리고 해당 심 설치본이면 됩니다. 심 PC 에 그대로 �
 ### 1-1. BMS — 장치별 Setup XML
 
 ```
-python tools/gen_bms_setup_xml.py --config-dir "<BMS User\Config>" -o out
+python tools/gen_bms_setup_xml.py -o out
 ```
 
 | 옵션 | |
 |---|---|
-| `--config-dir` | 기존 Setup XML 이 있는 폴더 (템플릿·GUID 출처) |
 | `--bms-root` | BMS 설치 경로 (기본 `C:\Falcon BMS 4.38`) |
+| `--guid DEVICE GUID` | 장치 GUID 지정 (기본은 `sim_axes.py` 의 값) |
 
-**기존 XML 을 템플릿으로 씁니다.** 축 보정(Invert/Saturation/Deadzone),
-`<detentPosition>`, `<pov>` 는 바이트 단위로 그대로 두고 `<DxAssgn>` 만 갈아끼웁니다.
-그래서 `--config-dir` 에 지금 쓰고 있는 XML 이 있어야 하고, GUID 도 거기서 가져옵니다.
-`-o` 로 받아 확인한 뒤 `User\Config` 로 복사하십시오.
+**파일을 처음부터 전부 만듭니다** — 기존 XML 이 없어도 되고 참고하지도 않습니다.
+축 보정(Invert/Saturation/Deadzone), `<detentPosition>`, GUID 처럼 유도할 수 없는
+값은 `tools/sim_axes.py` 에 데이터로 들어 있습니다. `-o` 로 받아 확인한 뒤
+`User\Config` 로 복사하십시오.
 
 버튼 하나가 `<Assgn>` 4칸입니다:
 
@@ -87,29 +87,29 @@ python tools/gen_bms_setup_xml.py --config-dir "<BMS User\Config>" -o out
 ### 1-2. DCS — 입력 프로파일
 
 ```
-python tools/gen_dcs_profile.py --profiles-dir "<InputUserProfiles>" -o out
+python tools/gen_dcs_profile.py -o out
 ```
 
 | 옵션 | |
 |---|---|
-| `--profiles-dir` | 기존 `.diff.lua` 가 있는 폴더 (**축 블록 출처**) |
-| `--name CONSOLE "이름"` | 파일명 지정 |
+| `--name CONSOLE "이름"` | 파일명 지정 (기본은 `sim_axes.py` 의 값) |
 
 장치마다 `.diff.lua` 하나를 만들고, `Saved Games\DCS\Config\Input\...\InputUserProfiles\`
 에 넣은 뒤 DCS 입력 설정에서 장치에 지정합니다. GUID 가 없어 파일명은 자유입니다.
 
-#### 축은 다시 만들지 않고 베껴 옵니다
+#### 축 설정은 `sim_axes.py` 에 있습니다
 
-> ⚠ **`--profiles-dir` 없이 돌리지 마십시오.** 이 패널의 포트는 전부
-> `invert = true` 이고 `curvature`·`filter` 도 붙어 있습니다. 생성기는 이걸 알 수
-> 없으므로, 다시 만들면 **볼륨 노브 일곱 개와 HMCS 가 전부 반대로 돕니다.**
+이 패널의 포트는 전부 `invert = true` 이고 `curvature`·`filter` 도 붙습니다.
+생성기가 유도할 수 없는 값이라, 기존 설정에서 한 번 뽑아 `tools/sim_axes.py` 에
+적어 두었습니다. 바꾸고 싶으면 그 파일을 고치십시오.
 
-그래서 기존 프로파일의 `axisDiffs` 블록을 **원문 그대로** 복사합니다. 버튼 재배열은
-축을 건드리지 않으므로 기존 블록이 그대로 유효합니다.
-
-그 안에 **`removed` 항목**도 들어 있습니다 — DCS 가 새 조이스틱에 자동으로 거는
+그중 **`removed` 항목**이 특히 중요합니다 — DCS 가 새 조이스틱에 자동으로 거는
 `Pitch←JOY_Y` · `Roll←JOY_X` · `Thrust←JOY_Z` (콘솔은 `Rudder←JOY_RZ` 까지) 를
 떼어내는 줄입니다. 없으면 **HMCS 노브가 스로틀을 움직이고** 빈 축이 기수를 밉니다.
+
+> **슬라이더 번호 주의** — 펌웨어의 `slider(1)`(ILS)이 두 심 모두에서 **두 번째**
+> 슬라이더로 보입니다. BMS 는 `<AxAssgn>` 슬롯 7, DCS 는 `JOY_SLIDER2`.
+> 양쪽이 일치하므로 HID 디스크립터 쪽 특성으로 보고 그대로 둡니다.
 
 ---
 
