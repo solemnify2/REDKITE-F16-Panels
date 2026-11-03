@@ -30,6 +30,7 @@ import argparse
 import os
 import re
 import sys
+import time
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
@@ -56,9 +57,16 @@ def device_guid(cfg_dir, device):
     if len(hits) == 1:
         return GUID_RE.search(hits[0]).group(1)
     if hits:
-        raise SystemExit(
-            '%s 의 Setup XML 이 %d 개 입니다. 쓸 것 하나만 남기고 다시 실행하십시오:\n  %s'
-            % (AX.PRODUCT[device], len(hits), '\n  '.join(hits)))
+        when = [time.strftime('%Y-%m-%d %H:%M',
+                              time.localtime(os.path.getmtime(
+                                  os.path.join(cfg_dir, f)))) for f in hits]
+        raise SystemExit('\n'.join(
+            ['%s 의 Setup XML 이 %d 개 입니다:' % (AX.PRODUCT[device], len(hits))]
+            + ['  %s  %s' % (w, f) for w, f in sorted(zip(when, hits), reverse=True)]
+            + ['',
+               'BMS 의 SETUP - CONTROLLERS 에서 이 장치의 바인딩을 아무거나 하나',
+               '바꾸고 저장하면 지금 쓰이는 쪽의 시각이 갱신됩니다.',
+               '나머지는 지우고 다시 실행하십시오.']))
     return None
 
 
