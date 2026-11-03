@@ -4,12 +4,16 @@ r"""Redkite 보드의 DX 맵에서 Falcon BMS 의 **장치별 Setup XML** 을 �
 
     python tools/gen_bms_setup_xml.py
 
+보이는 보드마다 `left_console_new1.xml` 같은 파일을 현재 폴더에 남깁니다.
+번호는 비어 있는 것으로 골라서, 전에 뽑은 걸 덮어쓰지 않습니다.
+
+**생성기는 BMS 폴더를 건드리지 않습니다.** 나온 파일을 BMS 가 만들어 둔
+`Setup.v100.<제품명> {GUID}.xml` 이름으로 바꿔 `User\Config` 에 넣는 것은
+사람의 일입니다. 그래서 생성기는 GUID 를 몰라도 됩니다 — GUID 는 파일 이름에만
+있고 내용에는 없습니다. BMS 설치 경로는 콜백 목록을 읽는 데만 씁니다.
+
 **파일을 처음부터 전부 만듭니다.** 기존 XML 을 참고하지 않습니다 — 축 설정처럼
 유도할 수 없는 값은 `tools/sim_axes.py` 에 데이터로 적혀 있습니다.
-축의 invert/deadzone 을 바꾸고 싶으면 그 파일을 고치십시오.
-
-기본으로 BMS 의 `User\Config` 에 바로 씁니다 — 기존 파일은 `.bak` 으로
-옮기고 덮어씁니다. 다른 곳에 뽑아 확인하려면 `-o out` 을 주십시오.
 
 BMS 는 버튼 바인딩을 장치마다 하나씩인 `Setup.v100.<장치명> {GUID}.xml` 에 둡니다.
 장치별이라 대역 오프셋도, `DeviceSorting.txt` 도, 다른 장치와의 병합도 필요 없습니다.
@@ -28,9 +32,7 @@ BMS 는 버튼 바인딩을 장치마다 하나씩인 `Setup.v100.<장치명> {G
 """
 import argparse
 import os
-import re
 import sys
-import time
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
@@ -38,46 +40,7 @@ import bms_callbacks  # noqa: E402
 import sim_axes as AX  # noqa: E402
 import gen_bms_keyfile as K  # noqa: E402
 
-GUID_RE = re.compile(r'\{([0-9A-Fa-f-]{36})\}\.xml$')
-
 EMPTY = ('SimDoNothing', 'Default', 0)
-
-
-def device_guid(cfg_dir, device):
-    r"""BMS 의 User\Config 에서 그 장치의 GUID 를 찾습니다. 없으면 None.
-
-    GUID 는 Windows DirectInput 이 장치를 처음 열거할 때 만드는 값이라
-    보드도 생성기도 모릅니다. 다만 BMS 가 장치를 인식하면
-    `Setup.v100.<제품명> {GUID}.xml` 을 만들어 두므로, 그 **파일 이름**에서
-    가져올 수 있습니다 (내용은 안 읽습니다).
-    """
-    pre = 'Setup.v100.' + AX.PRODUCT[device] + ' {'
-    names = sorted(os.listdir(cfg_dir)) if os.path.isdir(cfg_dir) else []
-    hits = [f for f in names if f.startswith(pre) and GUID_RE.search(f)]
-    if len(hits) == 1:
-        return GUID_RE.search(hits[0]).group(1)
-    if hits:
-        when = [time.strftime('%Y-%m-%d %H:%M',
-                              time.localtime(os.path.getmtime(
-                                  os.path.join(cfg_dir, f)))) for f in hits]
-        raise SystemExit('\n'.join(
-            ['%s 의 Setup XML 이 %d 개 입니다:' % (AX.PRODUCT[device], len(hits))]
-            + ['  %s  %s' % (w, f) for w, f in sorted(zip(when, hits), reverse=True)]
-            + ['',
-               'BMS 의 SETUP - CONTROLLERS 에서 이 장치의 바인딩을 아무거나 하나',
-               '바꾸고 저장하면 지금 쓰이는 쪽의 시각이 갱신됩니다.',
-               '나머지는 지우고 다시 실행하십시오.']))
-    return None
-
-
-def no_setup_xml(cfg_dir, devices):
-    """빠진 Setup XML 을 한꺼번에 안내합니다 — BMS 에 한 번만 다녀오게."""
-    return '\n'.join(
-        ['다음 장치의 Setup XML 이 BMS 설정 폴더에 없습니다:']
-        + ['  %-8s Setup.v100.%s {GUID}.xml' % (d, AX.PRODUCT[d]) for d in devices]
-        + ['  (%s)' % cfg_dir, '',
-           'BMS 의 SETUP - CONTROLLERS 에서 해당 장치를 고르고 아무 버튼이나',
-           '한 번 바인드한 뒤 저장하십시오. 그 뒤 다시 실행.'])
 
 
 I = '  '          # BMS 가 쓰는 들여쓰기
@@ -179,15 +142,10 @@ def render(device, dxmap):
 def main():
     ap = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument('--bms-root', default=K.DEFAULT_BMS, help='BMS 설치 경로')
-    ap.add_argument('-o', '--out-dir', metavar='DIR',
-                    help='따로 뽑아볼 폴더 (기본은 BMS 의 User\\Config 에 직접)')
+    ap.add_argument('--bms-root', default=K.DEFAULT_BMS,
+                    help='BMS 설치 경로 — 콜백 목록을 읽습니다')
     ap.add_argument('--port', action='append', metavar='COMx', help='포트 직접 지정')
     args = ap.parse_args()
-
-    cfg_dir = os.path.join(args.bms_root, 'User', 'Config')
-    out_dir = args.out_dir or cfg_dir
-    in_place = os.path.abspath(out_dir) == os.path.abspath(cfg_dir)
 
     maps = {}
     boards = [(p, None) for p in args.port] if args.port else K.find_boards()
@@ -201,41 +159,29 @@ def main():
         sys.stderr.write('%s 에서 %s DX 맵 %d 항목 수신\n' % (port, dev, len(entries)))
         maps[dev] = entries
 
-    # 한 줄이라도 쓰기 전에, 빠진 XML 을 한꺼번에 모아 알립니다.
-    guids = {dev: device_guid(cfg_dir, dev) for dev in sorted(maps)}
-    gone = [d for d in sorted(guids) if guids[d] is None]
-    if gone:
-        raise SystemExit(no_setup_xml(cfg_dir, gone))
-
     catalog = K.load_catalog(args.bms_root)
-    if not os.path.isdir(out_dir):
-        os.makedirs(out_dir)
-
+    made = []
     for dev in sorted(maps):
         dxmap, missing = build_map(maps[dev], bms_callbacks.MAPS[dev], catalog, dev)
-        fn = 'Setup.v100.%s {%s}.xml' % (AX.PRODUCT[dev], guids[dev])
-        dest = os.path.join(out_dir, fn)
-        if os.path.exists(dest):
-            bak = dest + '.bak'
-            if os.path.exists(bak):
-                os.remove(bak)
-            os.replace(dest, bak)
+        dest = K.next_out(AX.OUT_BASE[dev], '.xml')
         open(dest, 'w', encoding='utf-8', newline='\n').write(render(dev, dxmap))
+        made.append((dev, dest))
         bound = sum(1 for v in dxmap.values() if v[0] is not EMPTY)
         total = maps[dev][-1][0] + maps[dev][-1][2] - 1
-        sys.stderr.write('%-8s %s\n' % (dev, fn))
+        sys.stderr.write('%-8s %s\n' % (dev, dest))
         sys.stderr.write('         바인딩 %d개 / DX %d, 축 %d칸\n'
                          % (bound, total, len(AX.BMS_AXES[dev])))
         for dx, name, w in missing:
             sys.stderr.write('         매핑 없음: DX %d %s (x%d)\n' % (dx, name, w))
 
-    if in_place:
-        sys.stderr.write('\nBMS 의 User%sConfig 에 바로 썼습니다 (전 파일은 .bak).\n'
-                         % chr(92))
-    else:
-        sys.stderr.write('\n%s 에 기록했습니다. BMS 의 User%sConfig 로 복사하십시오.\n'
-                         % (out_dir, chr(92)))
-    sys.stderr.write('축 설정(invert/deadzone)은 tools/sim_axes.py 에 있습니다.\n')
+    cfg = os.path.join(args.bms_root, 'User', 'Config')
+    sys.stderr.write('\n덮어쓰려면 (PowerShell):\n')
+    for dev, dest in made:
+        sys.stderr.write('  Copy-Item "%s" (Get-ChildItem "%s")\n'
+                         % (dest, os.path.join(cfg, 'Setup.v100.%s {*}.xml'
+                                               % AX.PRODUCT[dev])))
+    sys.stderr.write('\nGet-ChildItem 이 파일을 못 찾으면 BMS 가 아직 그 장치를 모르는 것입니다.\n'
+                     'SETUP - CONTROLLERS 에서 아무 버튼이나 한 번 바인드하고 저장하십시오.\n')
     return 0
 
 

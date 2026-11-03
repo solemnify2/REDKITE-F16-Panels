@@ -32,7 +32,6 @@ pyserial, 그리고 해당 심 설치본이면 됩니다. 심 PC 에 그대로 �
 |---|---|
 | (없음) | 보드에 질의 — 기본 |
 | `--port COMx` | 자동 탐지 대신 포트 지정 |
-| `-o DIR` | 따로 뽑아볼 폴더. **없으면 심 설정 폴더에 바로 씁니다** |
 
 > 생성하기 전에 **업로드를 깜빡했는지** 보려면
 > `python tools/gen_bms_keyfile.py --verify` — 보드와 소스를 대조만 하고
@@ -46,12 +45,13 @@ python tools/gen_bms_setup_xml.py
 
 | 옵션 | |
 |---|---|
-| `--bms-root` | BMS 설치 경로 (기본 `C:\Falcon BMS 4.38`) |
+| `--bms-root` | BMS 설치 경로 (기본 `C:\Falcon BMS 4.38`). 콜백 목록을 읽는 데만 씁니다 |
 
-BMS 의 `User\Config` 에 **바로 씁니다.** 전 파일은 같은 이름 뒤에 `.bak` 을
-붙여 남기므로 되돌릴 수 있습니다. 먼저 눈으로 보고 싶으면 `-o out`.
+보이는 보드마다 `left_console_new1.xml` · `left_aux_misc_new1.xml` 을 현재 폴더에
+남깁니다. 번호는 비어 있는 것으로 골라서 전에 뽑은 걸 덮어쓰지 않습니다.
+**BMS 폴더는 읽기만 합니다.**
 
-폴더가 이렇게 되어 있어야 합니다:
+덮어쓸 대상은 BMS 가 만들어 둔 이 파일들입니다:
 
 ```
 C:\Falcon BMS 4.38\User\Config\
@@ -61,11 +61,15 @@ C:\Falcon BMS 4.38\User\Config\
   Setup.v100.Throttle - HOTAS Warthog {…}.xml                  ← 다른 장치. 안 건드립니다
 ```
 
-중괄호 안 GUID 는 **PC 마다 다릅니다** — 위 값은 심 PC 의 예일 뿐입니다.
+중괄호 안 GUID 는 **PC 마다 다릅니다.** 손으로 칠 필요는 없고, 실행 끝에 나오는
+명령을 그대로 붙여넣으면 됩니다 — 글롭이 그 자리에서 찾습니다:
 
-그 장치의 XML 이 아직 없으면 아무것도 쓰지 않고 멈춥니다. BMS 의
-**SETUP – CONTROLLERS** 에서 그 장치를 고르고 아무 버튼이나 한 번 바인드한 뒤
-저장하십시오. 빈 파일이 생기고, 그 뒤로는 생성기가 그걸 계속 덮어씁니다.
+```powershell
+Copy-Item "left_console_new1.xml" (Get-ChildItem "C:\Falcon BMS 4.38\User\Config\Setup.v100.F16 LEFT CONSOLE {*}.xml")
+```
+
+`Get-ChildItem` 이 못 찾으면 BMS 가 아직 그 장치를 모르는 것입니다. **SETUP –
+CONTROLLERS** 에서 아무 버튼이나 한 번 바인드하고 저장하면 생깁니다.
 
 ### 1-2. DCS — 입력 프로파일
 
@@ -73,14 +77,8 @@ C:\Falcon BMS 4.38\User\Config\
 python tools/gen_dcs_profile.py
 ```
 
-`Saved Games\DCS\InputUserProfiles` (없으면 `DCS.openbeta`) 에 바로 씁니다.
-전 파일은 `.bak` 으로 남습니다.
-
-| 옵션 | |
-|---|---|
-| `--profiles DIR` | InputUserProfiles 경로 (못 찾을 때) |
-
-폴더가 이렇게 되어 있어야 합니다:
+같은 식으로 `left_console_new1.diff.lua` · `left_aux_misc_new1.diff.lua` 를 남깁니다.
+덮어쓸 대상은 이쪽입니다:
 
 ```
 C:\Users\<계정>\Saved Games\DCS\InputUserProfiles\
@@ -89,16 +87,16 @@ C:\Users\<계정>\Saved Games\DCS\InputUserProfiles\
   Warthog Throttle.diff.lua            ← 다른 장치. 안 건드립니다
 ```
 
-`sim_axes.py` 의 `DCS_PROFILE` 과 **띄어쓰기까지 같아야** 합니다.
+```powershell
+$p = "$env:USERPROFILE\Saved Games\DCS\InputUserProfiles"
+Copy-Item "left_console_new1.diff.lua" "$p\F16 Left Console panel.diff.lua"
+```
 
-그 프로파일이 아직 없으면 아무것도 쓰지 않고 멈춥니다. DCS 의
-**Options – Controls** 에서 F-16C 의 그 장치 열을 고르고 **Save Profile As...** 로
-그 이름 그대로 한 번 저장하십시오. 빈 프로파일이 생기고, 그 뒤로는 생성기가
-그걸 계속 덮어씁니다.
-
-이름은 그 대화상자에서 **사람이 타이핑하는 것**이라, 이미 다른 이름으로 쓰던
-프로파일이 있으면 새로 만들지 말고 `DCS_PROFILE` 을 그 이름으로 고치는 쪽이
-낫습니다.
+마지막 이름은 **DCS 에서 쓰던 프로파일 이름**입니다. 그 이름은 **Save Profile
+As...** 에서 사람이 타이핑한 값이라 생성기가 알 방법은 없고, 마지막에 보여주는
+명령에만 씁니다 — `sim_axes.py` 의 `DCS_PROFILE` 을 써 본 이름으로 고쳐 두면 편합니다.
+아직 프로파일을 만든 적이 없으면 DCS 의 **Options – Controls** 에서 F-16C 의 그
+장치 열을 고르고 **Save Profile As...** 로 한 번 저장하십시오.
 
 ## 2. 보드가 DX 맵을 알려주는 방법
 
@@ -320,7 +318,7 @@ EPU 커버는 모듈의 `Input/F-16C_50/joystick/default.lua` 를 봐야 확실�
 |---|---|---|
 | 데이터 | `BMS_AXES` — `<AxAssgn>` 8칸 | `DCS_AXES` — 명령별 필터 |
 | 담는 값 | AxisName · Invert · Saturation · Deadzone | invert · deadzone · curvature · saturation |
-| 그 외 | `BMS_DETENT`, `PRODUCT` (제품명) | `DCS_PROFILE` (파일명) |
+| 그 외 | `BMS_DETENT`, `PRODUCT` · `OUT_BASE` | `DCS_PROFILE` · `OUT_BASE` |
 
 DCS 쪽에는 **`removed` 항목**도 들어 있습니다. 이게 특히 중요합니다 — DCS 가 새 조이스틱에 자동으로 거는
 `Pitch←JOY_Y` · `Roll←JOY_X` · `Thrust←JOY_Z` (콘솔은 `Rudder←JOY_RZ` 까지) 를

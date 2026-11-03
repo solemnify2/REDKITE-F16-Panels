@@ -58,6 +58,14 @@ for _s in (sys.stdout, sys.stderr):
     except (AttributeError, ValueError):  # 파이프로 묶였을 때
         pass
 
+def next_out(base, ext):
+    """`base` + 비어 있는 가장 작은 번호 + `ext`. 전에 뽑은 걸 덮어쓰지 않게."""
+    n = 1
+    while os.path.exists('%s%d%s' % (base, n, ext)):
+        n += 1
+    return '%s%d%s' % (base, n, ext)
+
+
 DEFAULT_BMS = r'C:\Falcon BMS 4.38'
 
 SKETCHES = {
