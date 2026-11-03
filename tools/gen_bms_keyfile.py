@@ -19,8 +19,10 @@ BMS 설치본뿐입니다.
 브리지를 끄고 실행하십시오. Windows 는 COM 포트를 한 프로세스만 열 수 있고,
 펌웨어도 프로토콜 미검출 상태에서만 "?DX" 에 응답합니다.
 
-출력은 DX 바인딩 줄만 모은 **조각**입니다. 기존 .key 파일 끝에 붙이거나,
---merge 로 원본을 읽어 같은 DX·같은 콜백 줄을 걷어내고 합치십시오.
+BMS 키 파일은 **게임 전체에 하나**이고 장치 구분 필드가 없습니다 — 어느 장치인지는
+DX 번호 대역이 말해 줍니다. 그래서 출력은 조각이고, HOTAS·MFD 등 다른 장치의
+바인딩과 한 파일을 공유합니다. `--merge` 로 합치면 **우리 장치 대역의 DX 줄만**
+걷어내고 나머지는 그대로 둡니다.
 
 BMS DX 바인딩 줄 형식 (7필드, 설명 문자열 없음):
 
@@ -255,6 +257,35 @@ def emit(entries, mapping, catalog, base, device_label):
 
 CATALOG_BASELINE = os.path.join(HERE, 'bms_catalog.txt')
 
+# DX 바인딩 줄: <Callback> <DX#> <-1|-2> -2 ...
+#  4번째 필드가 리터럴 -2 인 것이 DX 바인딩의 표식입니다. 키보드 줄은
+#  그 자리에 스캔코드(0x3B 등)가 오므로 섞일 일이 없습니다.
+DX_LINE = re.compile(r'^(\w+)\s+(-?\d+)\s+(-1|-2)\s+-2\s')
+
+
+def merge_into(existing_path, blocks, new_lines):
+    """기존 .key 에서 우리 DX 대역 줄만 걷어내고 새 줄을 붙인다.
+
+    blocks 는 [(device, 시작 DX, 끝 DX)]. 다른 장치의 바인딩, 키보드 바인딩,
+    주석, 섹션 헤더는 전부 그대로 둡니다 — 건드리는 것은 우리 대역뿐입니다.
+    """
+    kept, dropped = [], []
+    for line in open(existing_path, encoding='utf-8', errors='replace'):
+        line = line.rstrip('\n')
+        m = DX_LINE.match(line.strip())
+        if m:
+            dx = int(m.group(2))
+            hit = next((b for b in blocks if b[1] <= dx <= b[2]), None)
+            if hit:
+                dropped.append((hit[0], dx, m.group(1)))
+                continue
+        kept.append(line)
+    while kept and not kept[-1].strip():
+        kept.pop()
+    body = kept + ['', '# ==== Redkite — 아래는 생성기 출력입니다. 손으로 고치지 마십시오 ===='] \
+        + new_lines
+    return '\n'.join(body) + '\n', dropped
+
 
 def check_unmodeled(unmodeled_all, catalog):
     """UNMODELED 자리의 검색어를 현재 콜백 목록에 다시 걸어 본다.
@@ -319,6 +350,10 @@ def main():
                     help='보드와 소스를 모두 읽어 DX 맵이 같은지 대조만 합니다')
     ap.add_argument('--port', action='append', metavar='COMx',
                     help='자동 탐지 대신 쓸 포트. 여러 번 지정 가능')
+    ap.add_argument('--merge', metavar='KEYFILE',
+                    help='기존 .key 를 읽어 우리 장치 대역의 DX 줄만 걷어내고 합칩니다. '
+                         '다른 장치와 키보드 바인딩은 그대로 둡니다. '
+                         '-o 와 같이 쓰십시오 (원본을 덮어쓰지 않습니다)')
     ap.add_argument('-o', '--out', help='출력 파일 (기본: 표준출력)')
     ap.add_argument('--comments', action='store_true',
                     help='각 줄 뒤에 컨트롤 이름을 주석으로 (BMS 는 무시하지만 '
@@ -395,13 +430,17 @@ def main():
                              '(DeviceSorting.txt 에서 몇 번째인지, 1-base).' % (dev, dev))
 
     catalog = load_catalog(args.bms_root)
-    out, todos, unmapped_all, unmodeled_all = [], [], [], []
+    out, todos, unmapped_all, unmodeled_all, blocks = [], [], [], [], []
     for dev in sorted(maps):
         n = idx[dev]
         base = (n - 1) * args.buttons_per_device
         entries = maps[dev]
         lines, unmapped, todo, unmod = emit(entries, bms_callbacks.MAPS[dev],
                                            catalog, base, dev)
+        # 이 장치가 차지하는 BMS DX 대역 — --merge 가 걷어낼 범위.
+        # 지금 쓰는 DX 가 아니라 **대역 전체**를 잡습니다. 안 그러면 예전에
+        # 더 많은 DX 를 쓰던 시절의 줄이 남습니다.
+        blocks.append((dev, base, base + args.buttons_per_device - 1))
         out.append('')
         out.append('# ---- %s : 장치 %s, BMS DX %d~%d (Windows DX %d~%d) ----'
                    % (dev, n, base, base + entries[-1][0] + entries[-1][2] - 2,
@@ -415,6 +454,17 @@ def main():
         unmodeled_all += [(dev,) + u for u in unmod]
 
     body = '\n'.join(out).lstrip('\n') + '\n'
+    dropped = []
+    if args.merge:
+        if not os.path.isfile(args.merge):
+            raise SystemExit('--merge 대상이 없습니다: %s' % args.merge)
+        body, dropped = merge_into(args.merge, blocks, out)
+        sys.stderr.write('\n%s 와 병합\n' % args.merge)
+        for dev, lo, hi in blocks:
+            n = sum(1 for d, _, _ in dropped if d == dev)
+            sys.stderr.write('  %-8s DX %d~%d — 기존 %d 줄 교체\n' % (dev, lo, hi, n))
+        sys.stderr.write('  그 밖의 장치·키보드 바인딩은 그대로 두었습니다\n')
+
     if args.out:
         open(args.out, 'w', encoding='utf-8', newline='\n').write(body)
         print('%s 에 %d 줄 기록' % (args.out, body.count('\n')))
