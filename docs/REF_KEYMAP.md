@@ -9,20 +9,18 @@
 
 | 시뮬 | 상태 | 생성기 | 출력 |
 |---|---|---|---|
-| **Falcon BMS** — 장치별 | 동작함 **(권장)** | `tools/gen_bms_setup_xml.py` | `Setup.v100.*.xml` **장치당 1개** |
-| **Falcon BMS** — 키 파일 | 동작함 | `tools/gen_bms_keyfile.py` | `.key` 조각 **1개** |
+| **Falcon BMS** | 동작함 | `tools/gen_bms_setup_xml.py` | `Setup.v100.*.xml` **장치당 1개** |
 | **DCS World** | 동작함 | `tools/gen_dcs_profile.py` | `.diff.lua` **장치당 1개** |
 
-> **BMS 는 바인딩을 두 곳에 둡니다.** 게임 전체가 공유하는 `.key` 와, 장치마다 하나씩인
-> `Setup.v100.<장치명> {GUID}.xml` 입니다. 심 PC 의 실제 설정을 보면 **장치별 XML 쪽에**
-> 바인딩이 들어 있습니다. 장치별이라 오프셋도 `DeviceSorting.txt` 도 병합도 필요 없고,
-> 장치 순서가 바뀌어도 파일명의 GUID 로 찾으므로 안 깨집니다 — **이쪽을 권합니다.**
-> `.key` 생성기는 그쪽을 쓰는 설정을 위해 남겨 둡니다.
+> **BMS 는 바인딩을 장치마다 하나씩인 `Setup.v100.<장치명> {GUID}.xml` 에 둡니다.**
+> 게임 전체가 공유하는 `.key` 로도 DX 를 바인딩할 수는 있지만, 이 프로젝트는
+> **`.key` 를 건드리지 않습니다** — 장치별 파일이면 오프셋도 `DeviceSorting.txt` 도
+> 병합도 필요 없고, 장치 순서가 바뀌어도 파일명의 GUID 로 찾으므로 안 깨집니다.
 
-## 장치 구분 — 두 시뮬 모두 장치별 파일이 있습니다
+## 장치 구분 — 두 시뮬 모두 장치별 파일입니다
 
 보드가 둘이라 먼저 짚고 갑니다. **BMS 도 DCS 도 장치마다 파일이 따로** 있고,
-거기에는 오프셋 개념이 없습니다.
+버튼 번호에 오프셋이 없습니다 — `JOY_BTN1` / `DxAssgn[0]` 이 그 보드의 DX 1 입니다.
 
 | | BMS 장치별 | DCS |
 |---|---|---|
@@ -35,30 +33,6 @@
 심 PC 의 실제 설정을 보면 BMS 바인딩은 **이 XML 쪽에** 들어 있습니다. 그래서
 `gen_bms_setup_xml.py` 를 권합니다.
 
-### BMS 에만 있는 또 하나의 경로 — 공용 `.key`
-
-BMS 는 게임 전체가 공유하는 `.key` 파일로도 DX 를 바인딩할 수 있습니다. 이쪽은
-성격이 완전히 다릅니다:
-
-- 파일이 **하나**이고 HOTAS·MFD 등 모든 장치가 같이 들어갑니다
-- 파일 안에 장치 구분 필드가 **없습니다** — DX 번호 **대역**이 장치를 가리킵니다.
-  N번째 장치는 `(N-1) × g_nButtonsPerDevice` 부터
-- 그래서 `--device-index` 와 `DeviceSorting.txt` 가 필요하고, 다른 장치 바인딩을
-  보존하려면 `--merge` 가 필요합니다
-
-```
-# ---- CONSOLE : 장치 2, BMS DX 128~191 (Windows DX 1~64) ----
-# ---- AUX : 장치 3, BMS DX 256~306 (Windows DX 1~51) ----
-```
-
-`gen_bms_keyfile.py` 가 이쪽입니다. **장치 순서가 바뀌면 대역이 밀려 다른 장치까지
-깨지는** 약점이 있어, 장치별 XML 쪽이 더 안전합니다.
-
-> **DCS 에는 이 대역 개념이 없습니다.** `JOY_BTN1` 이 그 장치의 1번 버튼이고,
-> 오프셋을 더하면 오히려 틀립니다.
-
----
-
 ## 1. 쓰는 법 (BMS)
 
 브리지를 **끄고** 실행하십시오. Windows 는 COM 포트를 한 프로세스만 열 수 있고,
@@ -68,7 +42,7 @@ BMS 는 게임 전체가 공유하는 `.key` 파일로도 DX 를 바인딩할 �
 스스로 정합니다. **소스나 개발환경이 필요 없습니다** — `tools/` 폴더와 pyserial,
 BMS 설치본이면 됩니다. 심 PC 에 그대로 들고 가도 동작합니다.
 
-두 생성기가 공통으로 받는 옵션:
+옵션:
 
 | 옵션 | |
 |---|---|
@@ -76,11 +50,8 @@ BMS 설치본이면 됩니다. 심 PC 에 그대로 들고 가도 동작합니�
 | `--from-source` | 보드 대신 스케치의 `dxOrder[]` 를 읽음 (오프라인용) |
 | `--port COMx` | 자동 탐지 대신 포트 지정 |
 | `--bms-root` | BMS 설치 경로 (기본 `C:\Falcon BMS 4.38`) |
-
-### 1-1. 장치별 Setup XML — 권장
-
-실제 바인딩이 들어 있는 곳입니다. 장치마다 파일이 따로라 오프셋도,
-`DeviceSorting.txt` 도, 병합도 필요 없습니다.
+| `--config-dir` | 기존 Setup XML 이 있는 폴더 (템플릿·GUID 출처) |
+| `-o` | 출력 폴더. 원본을 덮어쓰지 않습니다 |
 
 ```
 python tools/gen_bms_setup_xml.py --config-dir "<BMS User\Config>" -o out
@@ -104,73 +75,9 @@ python tools/gen_bms_setup_xml.py --config-dir "<BMS User\Config>" -o out
 앞 둘은 내용이 같고 셋째는 비어 있어, 관측된 그대로 재현합니다.
 
 > 보드와 소스가 어긋나지 않았는지(업로드를 깜빡했는지) 보려면
-> `python tools/gen_bms_keyfile.py --verify` 를 쓰십시오 — 파일을 쓰지 않고
-> 대조만 합니다. DX 맵은 두 생성기가 같은 것을 읽으므로 그대로 유효합니다.
-
-### 1-2. 공용 `.key` — 그쪽을 쓰는 설정일 때만
-
-```
-python tools/gen_bms_keyfile.py --comments --merge <기존.key> -o <나올.key>
-```
-
-이쪽만의 옵션:
-
-| 옵션 | |
-|---|---|
-| `--device-index CONSOLE 2` | `DeviceSorting.txt` 기준 장치 순번 (1-base) |
-| `--buttons-per-device` | `g_nButtonsPerDevice` (기본 128). 대역 폭 |
-| `--merge <파일>` | 기존 키 파일에서 **우리 대역만** 교체하고 합침 (아래) |
-| `--comments` | 줄마다 `# DX 28  ENG CONT` 주석 — 현장 확인용 |
-| `--verify` | 보드와 소스를 대조만 함. 업로드를 깜빡했는지 잡힙니다 |
-| `--update-catalog` | BMS 콜백 기준선 갱신 (아래 4절) |
-
-> ⚠ **`--comments` 로 만든 파일을 BMS 설정 UI 에서 저장하면 주석이 사라집니다.**
-> 키 파일 맨 위의 경고와 같은 이유입니다. 확인용으로만 쓰고 배포본은 주석 없이 뽑으십시오.
-
-#### 다른 장치들과 한 파일을 쓴다
-
-HOTAS, MFD, 그 밖에 BMS 가 인식하는 모든 장치의 바인딩이 **이 파일 하나**에 들어
-있습니다. 그래서 생성기 출력을 그냥 덮어쓰면 다른 장치 바인딩이 전부 날아갑니다.
-
-`--merge` 를 쓰십시오. 우리 두 보드의 **DX 대역에 속하는 줄만** 걷어내고 나머지는
-건드리지 않습니다:
-
-```
-python tools/gen_bms_keyfile.py --merge "C:\Falcon BMS 4.38\User\Config\BMS - Redkite.key" ^
-                                -o "C:\Falcon BMS 4.38\User\Config\BMS - Redkite.key"
-```
-
-```
-  AUX      DX 256~383 — 기존 2 줄 교체
-  CONSOLE  DX 128~255 — 기존 2 줄 교체
-  그 밖의 장치·키보드 바인딩은 그대로 두었습니다
-```
-
-- **대역 전체**를 걷어냅니다 (`128~255`), 지금 쓰는 `128~191` 만이 아니라. 예전에 DX 를
-  더 많이 쓰던 시절의 줄이 남는 것을 막기 위해서입니다.
-- **키보드 바인딩은 DX 가 아니므로 보존됩니다.** 4번째 필드가 `-2` 인 줄만 DX
-  바인딩이고, 키보드 줄은 그 자리에 스캔코드가 옵니다.
-- 원본을 덮어쓰지 않으니 `-o` 를 따로 주십시오. 위 예처럼 같은 경로를 줘도 됩니다.
-
-> ⚠ **장치 순서가 바뀌면 다른 장치까지 전부 깨집니다.** 대역이 순번으로 정해지니,
-> 장치를 꽂거나 빼서 순서가 밀리면 우리 보드뿐 아니라 HOTAS·MFD 바인딩도
-> 같이 어긋납니다. `DeviceSorting.txt` 를 채워 순서를 고정해 두십시오 —
-> 생성기를 다시 돌리는 것으로는 다른 장치를 되살릴 수 없습니다.
-
-#### 장치 순번과 BMS 설정
-
-BMS 는 장치마다 `g_nButtonsPerDevice` 만큼의 블록을 줍니다 — N번째 장치는
-`(N-1) × 128` 부터 시작합니다. 순서는 `User\Config\DeviceSorting.txt` 가 정합니다.
-그 파일이 채워져 있으면 생성기가 읽고, 비어 있으면 `--device-index` 로 직접 줘야 합니다.
-
-심 PC 의 `User\Config\Falcon BMS User.cfg` 에 다음이 필요합니다:
-
-```
-set g_nButtonsPerDevice 128
-set g_nHotasPinkyShiftMagnitude 0
-```
-
----
+> `python tools/gen_bms_keyfile.py --verify` 를 쓰십시오 — 아무 파일도 쓰지 않고
+> 대조만 합니다. `gen_bms_keyfile.py` 는 보드 질의·DX 맵 파싱 코드를 담고 있어
+> 다른 두 생성기가 이 파일을 import 합니다. 지우지 마십시오.
 
 ## 2. 보드가 DX 맵을 알려주는 방법
 
@@ -227,32 +134,23 @@ set g_nHotasPinkyShiftMagnitude 0
 > 없는 이름은 죽은 바인딩을 뱉는 대신 에러로 중단합니다. 사운드 ID 도 같은 파일에서
 > 읽어 오므로 하드코딩이 없습니다.
 
-### BMS DX 바인딩 줄 형식
+### 누름 / 뗌 쌍이라는 모양
+
+2단 스위치를 **누를 때와 뗄 때 두 콜백**으로 표현하는 것이 BMS 의 기본 모양입니다.
+Setup XML 에서는 한 버튼의 `<Assgn>` 슬롯 0(`Default`)과 2(`Down`) 가 그 둘이고,
+BMS 가 배포하는 스톡 HOTAS 파일도 같은 쌍으로 적습니다:
 
 ```
-<Callback> <BMS DX#> <-1|-2> -2 <0|0x42> 0x0 <soundID|-1>
+SimCATI   56 -2 -2 0    0x0 115     <- 누를 때
+SimCATIII 56 -2 -2 0x42 0x0 115     <- 뗄 때
 ```
 
-| 필드 | |
-|---|---|
-| 2 | BMS DX 번호. **0-base** — Windows 의 DX1 이 BMS 의 0 |
-| 3 | `-1` 모멘터리, `-2` 유지형(누름/뗌 2줄 한 쌍) |
-| 4 | 항상 `-2` — 키보드가 아니라 DX 바인딩이라는 표시 |
-| 5 | `0` 누를 때, `0x42` 뗄 때 |
-| 7 | 사운드 ID. 같은 콜백의 키보드 줄에서 가져옴 |
+COMM 전원을 모멘터리 펄스가 아니라 **유지형 DX** 로 만든 근거가 이것입니다 —
+펄스는 전환 순간에만 나가서, 심을 나중에 띄우면 이미 올라가 있는 노브를 알 방법이
+없습니다.
 
-스톡 파일(`Hotas\Archive\BMS - BasicDX *.key`)의 실제 예:
-
-```
-SimCATI   56 -2 -2 0    0x0 115
-SimCATIII 56 -2 -2 0x42 0x0 115
-```
-
-2단 스위치가 **같은 DX 두 줄**인 것이 핵심입니다 — COMM 전원을 펄스가 아니라
-유지형 DX 로 만든 근거입니다.
-
-`-1` 모멘터리는 BMS 가 누름·뗌 양쪽 엣지를 받으므로 "- Hold" 계열 콜백이 쥐고 있는
-동안 유효합니다 (`SimTriggerFirstDetent`, `SimHotasPinkyShift` 가 같은 모양).
+모멘터리 바인딩은 BMS 가 누름·뗌 양쪽 엣지를 받으므로 "- Hold" 계열 콜백이 쥐고
+있는 동안 유효합니다 — MPO 를 `SimMPO` 하나로 거는 근거입니다.
 
 ---
 
@@ -279,7 +177,7 @@ SimCATIII 56 -2 -2 0x42 0x0 115
       SimBupUhfSquelch       UHF: SQUELCH Switch - Toggle
 ```
 
-**BMS 를 올린 뒤 키 파일을 다시 뽑는 것, 그게 절차 전부입니다.**
+**BMS 를 올린 뒤 생성기를 다시 돌리는 것, 그게 절차 전부입니다.**
 
 ### 콜백 목록 전체 기준선
 
@@ -318,7 +216,7 @@ SimCATIII 56 -2 -2 0x42 0x0 115
 | 3단 토글 13개의 접점 방향 | 위로 올렸을 때 나가는 DX 가 `--comments` 의 위치와 맞는지 | 튜플 순서 뒤집기 |
 
 전부 `bms_callbacks.py` 또는 `switches[]` 의 **한 줄 수정**으로 끝나고, DX 번호는
-움직이지 않으므로 키 파일을 다시 뽑을 필요도 없습니다 (핀 순서 변경의 경우).
+움직이지 않으므로 바인딩 파일을 다시 뽑을 필요도 없습니다 (핀 순서 변경의 경우).
 
 ---
 

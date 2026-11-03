@@ -342,7 +342,7 @@ REDKITE-F16-Panels/
 │   ├── dcsbios_bridge.py
 │   ├── patch_usb_desc_h.py        #   IDE 업데이트 후 usb_desc.h 자동 패치
 │   ├── gen_bms_setup_xml.py       #   BMS 장치별 Setup XML 생성기 (권장)
-│   ├── gen_bms_keyfile.py         #   BMS 공용 .key 생성기
+│   ├── gen_bms_keyfile.py         #   보드 질의·DX 맵 파싱 (위 둘이 import)
 │   ├── gen_dcs_profile.py         #   DCS 입력 프로파일(.diff.lua) 생성기
 │   ├── bms_callbacks.py           #   컨트롤 이름 → BMS 콜백 표
 │   ├── bms_catalog.txt            #   BMS 콜백 목록 기준선 (버전업 감지용)
