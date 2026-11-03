@@ -9,8 +9,38 @@
 
 | 시뮬 | 상태 | 생성기 | 출력 |
 |---|---|---|---|
-| **Falcon BMS** | 동작함 (바인딩 128줄) | `tools/gen_bms_keyfile.py` | `.key` 조각 **1개** |
+| **Falcon BMS** — 장치별 | 동작함 **(권장)** | `tools/gen_bms_setup_xml.py` | `Setup.v100.*.xml` **장치당 1개** |
+| **Falcon BMS** — 키 파일 | 동작함 | `tools/gen_bms_keyfile.py` | `.key` 조각 **1개** |
 | **DCS World** | **미착수** — 아래 「DCS 계획」 | — | `.diff.lua` **장치당 1개** |
+
+> **BMS 는 바인딩을 두 곳에 둡니다.** 게임 전체가 공유하는 `.key` 와, 장치마다 하나씩인
+> `Setup.v100.<장치명> {GUID}.xml` 입니다. 심 PC 의 실제 설정을 보면 **장치별 XML 쪽에**
+> 바인딩이 들어 있습니다. 장치별이라 오프셋도 `DeviceSorting.txt` 도 병합도 필요 없고,
+> 장치 순서가 바뀌어도 파일명의 GUID 로 찾으므로 안 깨집니다 — **이쪽을 권합니다.**
+> `.key` 생성기는 그쪽을 쓰는 설정을 위해 남겨 둡니다.
+
+## 장치별 XML 생성
+
+```
+python tools/gen_bms_setup_xml.py --config-dir "<BMS User\Config>" -o out
+```
+
+**기존 XML 을 템플릿으로 씁니다.** 축 보정(Invert/Saturation/Deadzone),
+`<detentPosition>`, `<pov>` 는 바이트 단위로 그대로 두고 `<DxAssgn>` 만 갈아끼웁니다.
+그래서 `--config-dir` 에 지금 쓰고 있는 XML 이 있어야 하고, GUID 도 거기서 가져옵니다.
+원본을 덮어쓰지 않으니 `-o` 로 받아서 확인한 뒤 복사하십시오.
+
+구조 — 버튼 하나가 `<Assgn>` 4칸입니다:
+
+| 슬롯 | `<Invoke>` | 뜻 |
+|---|---|---|
+| 0 | `Default` | 누를 때 |
+| 1 | — | 미사용 (`SimDoNothing`) |
+| 2 | `Down` | 뗄 때 |
+| 3 | — | 미사용 |
+
+`DxAssgn[i]` 가 그 장치의 **DX 버튼 i+1** 입니다 — 오프셋 없음. `<dx>` 섹션이 셋인데
+앞 둘은 내용이 같고 셋째는 비어 있어, 관측된 그대로 재현합니다.
 
 ## 장치를 구분하는 방식이 두 시뮬에서 다릅니다
 
