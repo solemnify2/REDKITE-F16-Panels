@@ -5,13 +5,12 @@
 #
 # 버튼 명령 ID:
 #   d<down>p<pressed>u<up>cd<cockpit_device>vd<value_down>vp<value_pressed>vu<value_up>
-# 축 명령 ID:
-#   a<command>cd<cockpit_device>
+# 축 명령 ID:  a<command>cd<cockpit_device>
 # nil 은 그 필드가 없다는 뜻. 버튼은 JOY_BTN<n>, 뗄 때는 JOY_BTN<n>_OFF.
 #
 # 열: <장치> 	 <명령 ID> 	 <이름> 	 <그 프로파일이 묶어 둔 키>
 
-## BUTTONS (132)
+## BUTTONS (134)
 CONSOLE	d3018pnilunilcd66vd1vpnilvunil	ECM 1 Button - Depressed/Released	JOY_BTN39
 AUX	d3034pnilunilcd2vd1vpnilvunil	ADV MODE Switch - Depressed/Released	JOY_BTN7
 AUX	d3008pnilunilcd7vd1vpnilvunil	ALT GEAR Handle, PULL	JOY_BTN33
@@ -77,6 +76,7 @@ AUX	d3010pnilu3010cd33vd1vpnilvu0	RWR Indicator Control ACT/PWR Button	JOY_BTN34
 AUX	d3012pnilu3012cd33vd1vpnilvu0	RWR Indicator Control ALTITUDE Button	JOY_BTN36
 AUX	d3017pnilunilcd33vd1vpnilvunil	RWR Indicator Control POWER Button - Depressed/Released	JOY_BTN37
 AUX	d3009pnilu3009cd33vd1vpnilvu0	RWR Indicator Control SEARCH Button	JOY_BTN35
+AUX	d3001pnilunilcd32vd0vpnilvunil	RWR Source Switch - OFF	JOY_BTN25_OFF
 AUX	d3001pnilunilcd32vd1vpnilvunil	RWR Source Switch - ON	JOY_BTN25
 AUX	d3011pnilunilcd2vd1vpnilvunil	STORES CONFIG Switch - CAT I	JOY_BTN13
 AUX	d3011pnilunilcd2vd0vpnilvunil	STORES CONFIG Switch - CAT III	JOY_BTN13_OFF
@@ -133,6 +133,7 @@ CONSOLE	d1207pnilunilcdnilvdnilvpnilvunil	UHF 1Mhz Manual Frequency Knob - Incre
 CONSOLE	d3027pnilunilcd37vd-1vpnilvunil	UHF A-3-2 Knob - CCW/Decrease	JOY_BTN49
 CONSOLE	d3027pnilunilcd37vd1vpnilvunil	UHF A-3-2 Knob - CW/Increase	JOY_BTN50
 CONSOLE	d1200pnilunilcdnilvdnilvpnilvunil	UHF CHAN Knob - CCW/Decrease	JOY_BTN47
+CONSOLE	d1199pnilunilcdnilvdnilvpnilvunil	UHF CHAN Knob - CW/Increase	JOY_BTN48
 CONSOLE	d1221pnilunilcdnilvdnilvpnilvunil	UHF Function Knob - ADF	JOY_BTN21
 CONSOLE	d1220pnilunilcdnilvdnilvpnilvunil	UHF Function Knob - BOTH	JOY_BTN20
 CONSOLE	d1219pnilunilcdnilvdnilvpnilvunil	UHF Function Knob - MAIN	JOY_BTN19
@@ -145,12 +146,14 @@ CONSOLE	d3010pnilunilcd37vd1vpnilvunil	UHF SQUELCH Switch - ON	JOY_BTN25_OFF
 CONSOLE	d1214pnilu1214cdnilvd1vpnilvu0	UHF STATUS Button	JOY_BTN27
 CONSOLE	d1213pnilu1213cdnilvd1vpnilvu0	UHF TEST DISPLAY Button	JOY_BTN66
 
-## AXES (15)
+## AXES (17)
+AUX	a2001cdnil	Pitch	+	-JOY_Y
 AUX	a2002cdnil	Roll	+	-JOY_X
 AUX	a2004cdnil	Thrust	+	-JOY_Z
 AUX	a2112cdnil	Wheel Brake Left	+JOY_RX	-
 AUX	a2113cdnil	Wheel Brake Right	+JOY_RY	-
 AUX	a3003cd30	HMCS SYMBOLOGY INT Knob	+JOY_Z	-
+CONSOLE	a2001cdnil	Pitch	+	-JOY_Y
 CONSOLE	a2002cdnil	Roll	+	-JOY_X
 CONSOLE	a2003cdnil	Rudder	+	-JOY_RZ
 CONSOLE	a2004cdnil	Thrust	+	-JOY_Z

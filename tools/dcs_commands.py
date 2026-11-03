@@ -19,7 +19,9 @@ TODO = '!TODO'
 
 CONSOLE = {
     'MPO':                 ['d3010pnilu3010cd2vd1vpnilvu0'],   # MANUAL PITCH Override Switch
-    'UHF PRESET':          ['d1200pnilunilcdnilvdnilvpnilvunil', TODO],   # UHF CHAN Knob
+    'UHF PRESET':          ['d1200pnilunilcdnilvdnilvpnilvunil',
+                             'd1199pnilunilcdnilvdnilvpnilvunil',
+                            ],   # UHF CHAN Knob
     'UHF TEST':            ['d1213pnilu1213cdnilvd1vpnilvu0'],   # UHF TEST DISPLAY Button
     'UHF STATUS':          ['d1214pnilu1214cdnilvd1vpnilvu0'],   # UHF STATUS Button
     'UHF 100MHz':          ['d3027pnilunilcd37vd-1vpnilvunil',
@@ -135,7 +137,8 @@ AUX = {
                              'd3012pnilu3012cd33vd1vpnilvu0',
                              'd3017pnilunilcd33vd1vpnilvunil',
                             ],   # RWR Indicator Control ACT/PWR Button
-    'CMDS RWR':            ['d3001pnilunilcd32vd1vpnilvunil'],   # RWR Source Switch
+    'CMDS RWR':            [('d3001pnilunilcd32vd1vpnilvunil', 'd3001pnilunilcd32vd0vpnilvunil'),
+                            ],   # RWR Source Switch
     'CMDS JMR':            [('d3002pnilunilcd32vd1vpnilvunil', 'd3002pnilunilcd32vd0vpnilvunil'),
                             ],   # JMR Source Switch
     'CMDS MWS':            [('d3003pnilunilcd32vd1vpnilvunil', 'd3003pnilunilcd32vd0vpnilvunil'),
