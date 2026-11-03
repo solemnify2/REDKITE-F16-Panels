@@ -168,6 +168,7 @@
 enum SwitchType {
   SW_ON_OFF,      // 1 pin  -> 1 button
   SW_ON_OFF_ON,   // 2 pins -> 2 buttons (center = both off)
+  SW_ON_OFF_NC,   // 1 pin  -> 1 button, normally closed (DX inverted)
   SW_ROTARY       // numPos positions -> numPos buttons (one active). pins[] 참조
 };
 
@@ -332,7 +333,7 @@ const SwitchDef switches[] = {
   // ---- ECM Panel (MCP 0x22, GPB) ----
   {"ECM OPR/STBY",        PNL_ECM,     SW_ON_OFF_ON,     2,  11,  10,  0},  // GPB3/GPB2  (OPR/OFF)
   {"ECM XMIT",            PNL_ECM,     SW_ON_OFF_ON,     2,  13,  12,  0},  // GPB5/GPB4  (XMIT1/XMIT3)
-  {"ECM RESET",           PNL_ECM,     SW_ON_OFF,        2,  15,   0,  0},  // GPB7  momentary
+  {"ECM RESET",           PNL_ECM,     SW_ON_OFF_NC,     2,  15,   0,  0},  // GPB7  momentary (NC — DX inverted)
   {"ECM BIT",             PNL_ECM,     SW_ON_OFF,        2,  14,   0,  0},  // GPB6  momentary
 
   // ---- EPU Panel (MCP 0x21) ----
@@ -348,7 +349,7 @@ const SwitchDef switches[] = {
   {"ELEC CAUTION RST",    PNL_ELEC,    SW_ON_OFF,        1,  10,   0,  0},  // GPB2  momentary (CAUTION RST)
 
   // ---- AVTR Panel (MCP 0x22) ----
-  {"AVTR",                PNL_AVTR,    SW_ON_OFF_ON,     2,   8,   9,  0},  // GPB0/GPB1  UNTHRD/RECORD/EVENT MRK
+  {"AVTR",                PNL_AVTR,    SW_ON_OFF_ON,     2,   9,   8,  0},  // GPB1(AUTO)/GPB0(OFF)  UNTHRD/RECORD/EVENT MRK
 };
 
 // --- Rotary Encoders (Teensy direct, interrupt-polled) ---
@@ -778,6 +779,7 @@ static uint32_t lastInputTime = 0;
 int switchButtonCount(const SwitchDef& sw) {
   switch (sw.type) {
     case SW_ON_OFF:    return 1;
+    case SW_ON_OFF_NC: return 1;
     case SW_ON_OFF_ON: return 2;
     case SW_ROTARY:    return sw.numPos;
   }
@@ -821,6 +823,11 @@ struct DxEntry {
   uint8_t idx;
 };
 
+// Forward declarations (prevent Arduino IDE auto-prototype insertion before DxEntry)
+uint8_t dxEntryCount(const DxEntry& e);
+const char* dxEntryName(const DxEntry& e);
+uint8_t dxEntryStart(const DxEntry& e);
+
 const DxEntry dxOrder[] = {
   // ---- MANUAL PITCH (MPO) — 최전방 인보드 ----
   {DX_SW,       0},   // MPO                  x1
@@ -863,9 +870,9 @@ const DxEntry dxOrder[] = {
   {DX_SW,      17},   // ECM BIT              x1
 
   // ---- EPU ----
-  {DX_COVER,    1},   // EPU OFF COVER        x1
   {DX_COVER,    2},   // EPU ON COVER         x1
   {DX_SW,      18},   // EPU                  x2
+  {DX_COVER,    1},   // EPU OFF COVER        x1
 
   // ---- ELEC ----
   {DX_SW,      19},   // ELEC MAIN PWR        x2
@@ -1171,8 +1178,10 @@ void processSwitches() {
     int btn = switchBtnStart[i];
 
     switch (sw.type) {
-      case SW_ON_OFF: {
-        int state = !readSwPin(sw, sw.pin1);          // active-low
+      case SW_ON_OFF:
+      case SW_ON_OFF_NC: {
+        int raw = readSwPin(sw, sw.pin1);
+        int state = (sw.type == SW_ON_OFF_NC) ? raw : !raw;  // NC: LOW=OFF, NO: LOW=ON
         if (prevBtnState[btn] != state) {
           //if (ALLOW_DEBUG) Serial.printf("[SW] btn %d %s = %s\n", btn, sw.name, state ? "ON" : "OFF");
           prevBtnState[btn] = state;

@@ -117,19 +117,19 @@ CONSOLE = {
     # ---- AVTR ----
     # 이 패널의 AVTR 토글은 OFF - ON - AUTO 순서입니다. 가운데가 ON 이라
     # 양쪽 위치를 놓으면 ON 으로 돌아옵니다 (AUTO 가 아님).
-    'AVTR':              [('SimAVTRSwitchOff', 'SimAVTRSwitchOn'),
-                          ('SimAVTRSwitchAuto', 'SimAVTRSwitchOn')],
+    'AVTR':              [('SimAVTRSwitchAuto', 'SimAVTRSwitchOn'),
+                          ('SimAVTRSwitchOff', 'SimAVTRSwitchOn')],
 }
 
 AUX = {
     # ---- MISC ----
-    # pin1(GPA4)=SILENT, pin2(GPA5)=NORM, 가운데 QUIET
-    'RF':                [('SimRFSilent', 'SimRFQuiet'), ('SimRFNorm', 'SimRFQuiet')],
+    # pin1(GPA5)=NORM, pin2(GPA4)=SILENT, 가운데 QUIET
+    'RF':                [('SimRFNorm', 'SimRFQuiet'), ('SimRFSilent', 'SimRFQuiet')],
     'Laser ARM':         [('SimLaserArmOn', 'SimLaserArmOff')],
     'ALT REL':           [UNMODELED('ALT REL', 'Alternate Release')],
-    # pin1(GPA0)=SIM, pin2(GPA1)=ARM, 가운데 OFF
-    'Master ARM':        [('SimSimMasterArm', 'SimSafeMasterArm'),
-                          ('SimArmMasterArm', 'SimSafeMasterArm')],
+    # pin1(GPA1)=ARM, pin2(GPA0)=SIM, 가운데 OFF
+    'Master ARM':        [('SimArmMasterArm', 'SimSafeMasterArm'),
+                          ('SimSimMasterArm', 'SimSafeMasterArm')],
     'ADV MODE':          ['SimToggleTFR'],
     'Roll AP':           [('SimLeftAPUp', 'SimLeftAPMid'),
                           ('SimLeftAPDown', 'SimLeftAPMid')],
@@ -147,10 +147,9 @@ AUX = {
     'Landing Gear':      ['AFGearUp', 'AFGearDown'],
     'Store CAT':         [('SimCATI', 'SimCATIII')],
     'Horn Silencer':     ['SimSilenceHorn'],
-    # pin1(3)=TAXI, pin2(4)=LANDING, 가운데 OFF. pin2=UP 은 페달 브레이크
-    # 모드의 PEDAL_BRAKE_SW_VALUE 1 (= pin2 활성 = landing light UP) 과도 일치합니다.
-    'Landing Light':     [('SimLandingLightDown', 'SimLandingLightMid'),
-                          ('SimLandingLightUp', 'SimLandingLightMid')],
+    # pin1(4)=LANDING, pin2(3)=TAXI, 가운데 OFF
+    'Landing Light':     [('SimLandingLightUp', 'SimLandingLightMid'),
+                          ('SimLandingLightDown', 'SimLandingLightMid')],
     # ---- TWA (래더 4: ACT/PWR, SEARCH, ALT, SYS PWR) ----
     # BMS 의 'TWA:' 버튼은 SEARCH / LOW / POWER 셋뿐입니다. 실기 4개 중
     # ACT/PWR 은 활성·전원 표시등 쪽이라 대응 콜백이 없습니다.

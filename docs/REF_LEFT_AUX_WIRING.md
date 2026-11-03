@@ -198,8 +198,8 @@ LAN pin 8 ── GND ───┴──┴── MCP23017 GND
   ---   GND                      ─────┤ ○         ○ ├──  0  -- spare --              --
   ---   3V3                      ─────┤ ○         ○ ├──  1  DN LOCK REL              C1
   C2    CMDS FL            (A9)  23 ──┤ ○         ○ ├──  2  HORN SILENCER            C1
-  C2    CMDS CH            (A8)  22 ──┤ ○         ○ ├──  3  LANDING LIGHT 1          C1
-  C2    CMDS O2            (A7)  21 ──┤ ○         ○ ├──  4  LANDING LIGHT 2          C1
+  C2    CMDS CH            (A8)  22 ──┤ ○         ○ ├──  3  LANDING LIGHT TAXI       C1
+  C2    CMDS O2            (A7)  21 ──┤ ○         ○ ├──  4  LANDING LIGHT LANDING   C1
   C2    CMDS O1            (A6)  20 ──┤ ○         ○ ├──  5  STORE CAT                C1
   I1    I2C SCL            (A5)  19 ──┤ ○         ○ ├──  6  ANTI SKID 1              C1
   I1    I2C SDA            (A4)  18 ──┤ ○         ○ ├──  7  ANTI SKID 2              C1
@@ -226,7 +226,7 @@ LAN pin 8 ── GND ───┴──┴── MCP23017 GND
   pin 12 = MISC backlight MOSFET (instr panel channel). Gear Warn LED는 pin 27로 이설.
   pin 13 = AUX backlight MOSFET (console channel).
 
-  -- spare -- = 여유 핀 (미사용). pin 0, pin 38 (A14)
+  -- spare -- = 여유 핀 (미사용). pin 0
 ```
 
 헤더 42핀 외에 **하단 SD 패드** 5개(43·44·45·46·47)를 CMDS 램프가 씁니다. 42 는 미사용.
@@ -243,12 +243,12 @@ FPC 배선표는 아래 **CMDS 램프** 절에 있습니다.
    -----------------------------------------
     1  PA7  ECM LED
     2  PA6  -- spare --
-    3  PA5  RF pos2
-    4  PA4  RF pos1
+    3  PA5  RF NORM (pin1)
+    4  PA4  RF SILENT (pin2)
     5  PA3  LASER ARM
     6  PA2  ALT REL
-    7  PA1  MASTER ARM pos2
-    8  PA0  MASTER ARM pos1
+    7  PA1  MASTER ARM ARM (pin1)
+    8  PA0  MASTER ARM SIM (pin2)
     9  GND  GND
    10  VCC  3.3V
    11  PB0  ADV STANDBY LED
@@ -438,10 +438,10 @@ LED 1개만 연결한 상태에서 **320Ω 양단 = 1.2V** → 단독 전류 **3
 
 | 버튼 | 패널 | 신호 |
 |------|------|------|
-| 1–2 | MISC | RF |
+| 1–2 | MISC | RF (NORM / SILENT) |
 | 3 | MISC | Laser ARM |
 | 4 | MISC | ALT REL (NC — DX 반전) |
-| 5–6 | MISC | Master ARM |
+| 5–6 | MISC | Master ARM (ARM / SIM) |
 | 7 | MISC | ADV MODE |
 | 8–9 | MISC | Roll AP |
 | 10–11 | MISC | Pitch AP |
@@ -454,7 +454,7 @@ LED 1개만 연결한 상태에서 **320Ω 양단 = 1.2V** → 단독 전류 **3
 | 19–20 | GEAR | Landing Gear UP / DN |
 | 21 | GEAR | Store CAT |
 | 22 | GEAR | Horn Silencer |
-| 23–24 | GEAR | Landing Light |
+| 23–24 | GEAR | Landing Light (LANDING / TAXI) |
 | 25–28 | TWA | 저항 래더 — ACT/PWR, SEARCH, ALT, SYS PWR |
 | 29 | CMDS | RWR |
 | 30 | CMDS | JMR |
@@ -496,10 +496,10 @@ LED 1개만 연결한 상태에서 **320Ω 양단 = 1.2V** → 단독 전류 **3
 
 | 항목 | 값 |
 |---|---|
-| **Teensy 헤더 핀** | **40 / 42** (여유 2개: pin 0, A14) |
+| **Teensy 헤더 핀** | **41 / 42** (여유 1개: pin 0) |
 | **하단 SD 패드** | **5 / 6** (CMDS 램프 5핀, 42 = 미사용) |
-| ├ 아날로그 입력 | 6 / 18 (래더 3 + HMCS 1 + 페달 2) — A0~A9 는 CMDS 스위치·I2C 가 디지털로 점유 |
-| └ 여유 핀 | 2개 (pin 0, A14) |
+| ├ 아날로그 입력 | 7 / 18 (래더 3 + HMCS 1 + TWA dimm 1 + 페달 2) — A0~A9 는 CMDS 스위치·I2C 가 디지털로 점유 |
+| └ 여유 핀 | 1개 (pin 0) |
 | **MCP23017 GPIO** | 14 / 16 (여유 PA6, PB7) |
 | LED | 16 (GEAR 4 + TWA 4 + MISC 3 + CMDS 5핀/8LED) |
 | **DX 버튼** | **51 / 128** (switches 33 + ladder 18) |
@@ -507,7 +507,7 @@ LED 1개만 연결한 상태에서 **320Ω 양단 = 1.2V** → 단독 전류 **3
 | I2C | `Wire`(18/19) 100kHz, `0x20` 1장 |
 | 메인 루프 | 20Hz (50ms) |
 
-**확장 여지** — 헤더 여유가 2핀(0, A14)뿐이라 본격적인 추가는 **MCP23017 증설**로 합니다
+**확장 여지** — 헤더 여유가 1핀(0)뿐이라 본격적인 추가는 **MCP23017 증설**로 합니다
 (주소 `0x21`~`0x27`, 칩당 16 GPIO). 현재 `0x20` 에도 PA6·PB7 2핀이 남아 있습니다.
 래더·POT 는 아날로그라 MCP 를 거칠 수 없고 Teensy ADC 핀을 써야 합니다.
 

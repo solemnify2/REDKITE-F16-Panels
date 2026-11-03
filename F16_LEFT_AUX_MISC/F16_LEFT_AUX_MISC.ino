@@ -148,10 +148,10 @@ const SwitchDef switches[] = {
 
   // ---- MISC Panel — 전방 계기판, 좌측 MFD 왼쪽 (MCP23017 device 0, addr 0x20) ----
   // MCP pin mapping: GPA0–7 = 0–7, GPB0–7 = 8–15
-  {"RF",                    PNL_MISC,       SW_ON_OFF_ON,    0,   4,   5,  NULL},   // GPA4, GPA5
+  {"RF",                    PNL_MISC,       SW_ON_OFF_ON,    0,   5,   4,  NULL},   // GPA5(NORM), GPA4(SILENT)
   {"Laser ARM",             PNL_MISC,       SW_ON_OFF,       0,   3,   0,  NULL},   // GPA3
   {"ALT REL",               PNL_MISC,       SW_ON_OFF_NC,    0,   2,   0,  NULL},   // GPA2 (normally closed)
-  {"Master ARM",            PNL_MISC,       SW_ON_OFF_ON,    0,   0,   1,  NULL},   // GPA0, GPA1
+  {"Master ARM",            PNL_MISC,       SW_ON_OFF_ON,    0,   1,   0,  NULL},   // GPA1(ARM), GPA0(SIM)
   {"ADV MODE",              PNL_MISC,       SW_ON_OFF,       0,   10,  0,  NULL},   // GPB2
   {"Roll AP",               PNL_MISC,       SW_ON_OFF_ON,    0,   11,  12,  NULL},  // GPB3, GPB4
   {"Pitch AP",              PNL_MISC,       SW_ON_OFF_ON,    0,   13,  14,  NULL},  // GPB5, GPB6
@@ -168,7 +168,7 @@ const SwitchDef switches[] = {
   {"Landing Gear",          PNL_GEAR,       SW_ON_OFF_ON,   -1,   34,   35,  &swGear},  // UP / DN (swapped with TWA Power/Low for PWM)
   {"Store CAT",             PNL_GEAR,       SW_ON_OFF,      -1,   5,   0,  NULL},   // CAT I / CAT III
   {"Horn Silencer",         PNL_GEAR,       SW_ON_OFF,      -1,   2,   0,  NULL},
-  {"Landing Light",         PNL_GEAR,       SW_ON_OFF_ON,   -1,   3,   4,  &swLandingLight},
+  {"Landing Light",         PNL_GEAR,       SW_ON_OFF_ON,   -1,   4,   3,  &swLandingLight},  // pin4(LANDING), pin3(TAXI)
 
   // ---- CMDS Panel (Teensy direct) ----
   {"CMDS RWR",              PNL_CMDS,       SW_ON_OFF,      -1,  17,   0,  NULL},
@@ -288,7 +288,7 @@ const McpDeviceDef mcpDevices[] = {
 // Pedal brake mode: activates when *PEDAL_BRAKE_SW_REF equals PEDAL_BRAKE_SW_VALUE
 // Set PEDAL_BRAKE_SW_REF to NULL to disable switch-linked brake mode
 #define PEDAL_BRAKE_SW_REF    (&swLandingLight)
-#define PEDAL_BRAKE_SW_VALUE  (1)    // landing light UP position
+#define PEDAL_BRAKE_SW_VALUE  (-1)   // landing light LANDING position (pin1)
 
 // DN LOCK REL switch index (used as modifier key for combos)
 #define SW_IDX_DN_LOCK_REL    12
@@ -523,6 +523,11 @@ struct DxEntry {
   DxKind  kind;
   uint8_t idx;
 };
+
+// Forward declarations (prevent Arduino IDE auto-prototype insertion before DxEntry)
+uint8_t dxEntryCount(const DxEntry& e);
+const char* dxEntryName(const DxEntry& e);
+uint8_t dxEntryStart(const DxEntry& e);
 
 const DxEntry dxOrder[] = {
   // ---- MISC — 전방 계기판, 좌측 MFD 왼쪽 ----

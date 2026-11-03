@@ -42,16 +42,16 @@ AUX	d3004pnilunilcd32vd1vpnilvunil	JETT Switch - JETT	JOY_BTN32
 AUX	d3004pnilunilcd32vd0vpnilvunil	JETT Switch - OFF	JOY_BTN32_OFF
 AUX	d3002pnilunilcd32vd0vpnilvunil	JMR Source Switch - OFF	JOY_BTN26_OFF
 AUX	d3002pnilunilcd32vd1vpnilvunil	JMR Source Switch - ON	JOY_BTN26
-AUX	d3008pnilunilcd11vd1vpnilvunil	LANDING TAXI LIGHTS Switch - LANDING	JOY_BTN16
-AUX	d3008pnilunilcd11vd0vpnilvunil	LANDING TAXI LIGHTS Switch - OFF	JOY_BTN16_OFF,JOY_BTN15_OFF
-AUX	d3008pnilunilcd11vd-1vpnilvunil	LANDING TAXI LIGHTS Switch - TAXI	JOY_BTN15
+AUX	d3008pnilunilcd11vd1vpnilvunil	LANDING TAXI LIGHTS Switch - LANDING	JOY_BTN23
+AUX	d3008pnilunilcd11vd0vpnilvunil	LANDING TAXI LIGHTS Switch - OFF	JOY_BTN23_OFF,JOY_BTN24_OFF
+AUX	d3008pnilunilcd11vd-1vpnilvunil	LANDING TAXI LIGHTS Switch - TAXI	JOY_BTN24
 AUX	d3004pnilunilcd22vd1vpnilvunil	LASER ARM Switch - ARM	JOY_BTN3
 AUX	d3004pnilunilcd22vd0vpnilvunil	LASER ARM Switch - OFF	JOY_BTN3_OFF
 AUX	d431pnilunilcdnilvdnilvpnilvunil	LG Handle - DN	JOY_BTN19
 AUX	d430pnilunilcdnilvdnilvpnilvunil	LG Handle - UP	JOY_BTN18
-AUX	d3002pnilunilcd19vd1vpnilvunil	MASTER ARM Switch - MASTER ARM	JOY_BTN6
-AUX	d3002pnilunilcd19vd0vpnilvunil	MASTER ARM Switch - OFF	JOY_BTN6_OFF,JOY_BTN5_OFF
-AUX	d3002pnilunilcd19vd-1vpnilvunil	MASTER ARM Switch - SIMULATE	JOY_BTN5
+AUX	d3002pnilunilcd19vd1vpnilvunil	MASTER ARM Switch - MASTER ARM	JOY_BTN5
+AUX	d3002pnilunilcd19vd0vpnilvunil	MASTER ARM Switch - OFF	JOY_BTN5_OFF,JOY_BTN6_OFF
+AUX	d3002pnilunilcd19vd-1vpnilvunil	MASTER ARM Switch - SIMULATE	JOY_BTN6
 AUX	d3010pnilunilcd32vd0.4vpnilvunil	MODE Knob - AUTO	JOY_BTN42
 AUX	d3010pnilunilcd32vd0.5vpnilvunil	MODE Knob - BYP	JOY_BTN43
 AUX	d3010pnilunilcd32vd0.2vpnilvunil	MODE Knob - MAN	JOY_BTN40
@@ -69,9 +69,9 @@ AUX	d3009pnilunilcd32vd0.2vpnilvunil	PROGRAM Knob - 2	JOY_BTN47
 AUX	d3009pnilunilcd32vd0.3vpnilvunil	PROGRAM Knob - 3	JOY_BTN48
 AUX	d3009pnilunilcd32vd0.4vpnilvunil	PROGRAM Knob - 4	JOY_BTN49
 AUX	d3009pnilunilcd32vd0vpnilvunil	PROGRAM Knob - BIT	JOY_BTN45
-AUX	d3038pnilunilcd17vd1vpnilvunil	RF Switch - NORM	JOY_BTN2
-AUX	d3038pnilunilcd17vd0vpnilvunil	RF Switch - QUIET	JOY_BTN2_OFF,JOY_BTN1_OFF
-AUX	d3038pnilunilcd17vd-1vpnilvunil	RF Switch - SILENT	JOY_BTN1
+AUX	d3038pnilunilcd17vd1vpnilvunil	RF Switch - NORM	JOY_BTN1
+AUX	d3038pnilunilcd17vd0vpnilvunil	RF Switch - QUIET	JOY_BTN1_OFF,JOY_BTN2_OFF
+AUX	d3038pnilunilcd17vd-1vpnilvunil	RF Switch - SILENT	JOY_BTN2
 AUX	d3010pnilu3010cd33vd1vpnilvu0	RWR Indicator Control ACT/PWR Button	JOY_BTN34
 AUX	d3012pnilu3012cd33vd1vpnilvu0	RWR Indicator Control ALTITUDE Button	JOY_BTN36
 AUX	d3017pnilunilcd33vd1vpnilvunil	RWR Indicator Control POWER Button - Depressed/Released	JOY_BTN37

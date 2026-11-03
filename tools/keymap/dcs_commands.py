@@ -99,15 +99,15 @@ CONSOLE = {
 }
 
 AUX = {
-    'RF':                  [('d3038pnilunilcd17vd-1vpnilvunil', 'd3038pnilunilcd17vd0vpnilvunil'),
-                             ('d3038pnilunilcd17vd1vpnilvunil', 'd3038pnilunilcd17vd0vpnilvunil'),
-                            ],   # RF Switch
+    'RF':                  [('d3038pnilunilcd17vd1vpnilvunil', 'd3038pnilunilcd17vd0vpnilvunil'),
+                             ('d3038pnilunilcd17vd-1vpnilvunil', 'd3038pnilunilcd17vd0vpnilvunil'),
+                            ],   # RF Switch (pin1=NORM, pin2=SILENT)
     'Laser ARM':           [('d3004pnilunilcd22vd1vpnilvunil', 'd3004pnilunilcd22vd0vpnilvunil'),
                             ],   # LASER ARM Switch
     'ALT REL':             ['d3005pnilu3005cd19vd1vpnilvu0'],   # ALT REL Button
-    'Master ARM':          [('d3002pnilunilcd19vd-1vpnilvunil', 'd3002pnilunilcd19vd0vpnilvunil'),
-                             ('d3002pnilunilcd19vd1vpnilvunil', 'd3002pnilunilcd19vd0vpnilvunil'),
-                            ],   # MASTER ARM Switch
+    'Master ARM':          [('d3002pnilunilcd19vd1vpnilvunil', 'd3002pnilunilcd19vd0vpnilvunil'),
+                             ('d3002pnilunilcd19vd-1vpnilvunil', 'd3002pnilunilcd19vd0vpnilvunil'),
+                            ],   # MASTER ARM Switch (pin1=ARM, pin2=SIM)
     'ADV MODE':            ['d3034pnilunilcd2vd1vpnilvunil'],   # ADV MODE Switch
     'Roll AP':             [('d3014pnilunilcd2vd1vpnilvunil', 'd3014pnilunilcd2vd0vpnilvunil'),
                              ('d3014pnilunilcd2vd-1vpnilvunil', 'd3014pnilunilcd2vd0vpnilvunil'),
@@ -129,9 +129,9 @@ AUX = {
                             ],   # LG Handle
     'Store CAT':           [('d3011pnilunilcd2vd1vpnilvunil', 'd3011pnilunilcd2vd0vpnilvunil')],   # STORES CONFIG Switch
     'Horn Silencer':       ['d3007pnilu3007cd7vd1vpnilvu0'],   # HORN SILENCER Button
-    'Landing Light':       [('d3008pnilunilcd11vd-1vpnilvunil', 'd3008pnilunilcd11vd0vpnilvunil'),
-                             ('d3008pnilunilcd11vd1vpnilvunil', 'd3008pnilunilcd11vd0vpnilvunil'),
-                            ],   # LANDING TAXI LIGHTS Switch
+    'Landing Light':       [('d3008pnilunilcd11vd1vpnilvunil', 'd3008pnilunilcd11vd0vpnilvunil'),
+                             ('d3008pnilunilcd11vd-1vpnilvunil', 'd3008pnilunilcd11vd0vpnilvunil'),
+                            ],   # LANDING TAXI LIGHTS Switch (pin1=LANDING, pin2=TAXI)
     'TWA Buttons':         ['d3010pnilu3010cd33vd1vpnilvu0',
                              'd3009pnilu3009cd33vd1vpnilvu0',
                              'd3012pnilu3012cd33vd1vpnilvu0',
