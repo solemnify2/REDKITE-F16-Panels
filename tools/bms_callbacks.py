@@ -22,7 +22,10 @@ TODO = '!TODO'
 
 CONSOLE = {
     # ---- MPO ----
-    'MPO':               [TODO],          # SimMPO(Hold) / SimMPOToggle 중 택일
+    # 실기 MPO 는 OVRD 로 눌러 쥐고 있는 스위치입니다. DX 를 -1 로 걸면
+    # BMS 가 누름/뗌을 모두 받아 쥐고 있는 동안 유효합니다 — 스톡 키 파일의
+    # SimTriggerFirstDetent / SimHotasPinkyShift 와 같은 모양.
+    'MPO':               ['SimMPO'],
     # ---- UHF ----
     'UHF PRESET':        ['SimCycleRadioChannel', 'SimDecRadioChannel'],
     'UHF TEST':          [None],          # BMS 미모델링
@@ -58,7 +61,9 @@ CONSOLE = {
     'COMM2 SQL':         ['SimAud1Com2Sql'],
     'COMM2 GD':          ['SimAud1Com2Gd'],
     # ---- AUDIO 2 ----
-    'HOT MIC/CIPHER':    [TODO, TODO],    # 이름이 일치하는 콜백 없음
+    # HOT MIC 도 CIPHER 도 BMS 에 콜백이 없습니다 (Mic/Cipher/Secure 전부 0건).
+    # BMS 가 모델링하지 않는 스위치입니다.
+    'HOT MIC/CIPHER':    [None, None],
     # ---- ECM ----
     'ECM OPR/STBY':      [('SimEcmPowerOn', None), ('SimEcmPowerOff', None)],
     'ECM XMIT':          [('SimXMit1', 'SimXMit2'), ('SimXMit3', 'SimXMit2')],
@@ -106,8 +111,14 @@ AUX = {
     'Landing Light':     [('SimLandingLightUp', 'SimLandingLightMid'),
                           ('SimLandingLightDown', 'SimLandingLightMid')],
     # ---- TWA (래더 4: ACT/PWR, SEARCH, ALT, SYS PWR) ----
-    'TWA Buttons':       ['SimRwrPower', 'SimRWRSetSearch',
-                          'SimRWRSetGroundPriority', TODO],   # SYS PWR 미확정
+    # BMS 의 'TWA:' 버튼은 SEARCH / LOW / POWER 셋뿐입니다. 실기 4개 중
+    # ACT/PWR 은 활성·전원 표시등 쪽이라 대응 콜백이 없습니다.
+    # POWER 는 실제로 계통을 켜는 SYSTEM POWER 에 걸었습니다 — 패널에서
+    # 반대로 동작하면 아래 두 항목을 맞바꾸십시오.
+    'TWA Buttons':       [None,                      # ACT/PWR — 콜백 없음
+                          'SimRWRSetSearch',         # SEARCH
+                          'SimRWRSetGroundPriority',  # LOW ALTITUDE
+                          'SimRwrPower'],            # SYSTEM POWER
     # ---- CMDS ----
     'CMDS RWR':          [('SimEWSRWROn', 'SimEWSRWROff')],
     'CMDS JMR':          [('SimEWSJammerOn', 'SimEWSJammerOff')],
@@ -120,8 +131,15 @@ AUX = {
     # PRGM 래더 7 = BIT, 1~6 — BMS 는 1~4 만 있음
     'CMDS PRGM':         [None, 'SimEWSProgOne', 'SimEWSProgTwo', 'SimEWSProgThree',
                           'SimEWSProgFour', None, None],
-    # MODE 래더 7 — BMS MODE 는 OFF/STBY/MAN/SEMI/AUTO/BYP 6 위치
-    'CMDS MODE':         [TODO] * 7,
+    # MODE 래더 7 — 실기 MODE 노브는 6 위치(OFF·STBY·MAN·SEMI·AUTO·BYP)이고
+    # 여기 쓴 로터리는 7 단이라 한 자리가 남습니다. 아래는 래더 위치 1 이
+    # 노브의 반시계 끝(OFF)이라고 본 배치입니다.
+    #
+    # ※ 방향 확인: joy.cpl 에서 노브를 반시계 끝까지 돌려 DX 44 가 켜지면 그대로,
+    #   DX 49 가 켜지면 이 여섯 줄을 뒤집고 None 을 맨 앞으로 옮기십시오.
+    'CMDS MODE':         ['SimEWSModeOff', 'SimEWSModeStby', 'SimEWSModeMan',
+                          'SimEWSModeSemi', 'SimEWSModeAuto', 'SimEWSModeByp',
+                          None],           # 7번째 — 실기에 없는 여분 자리
     # ---- ALT GEAR ----
     'ALT GEAR Handle':   ['AFAlternateGear'],
 }
