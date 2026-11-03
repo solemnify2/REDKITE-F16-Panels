@@ -164,8 +164,11 @@ AUX = {
     # 여기 쓴 로터리는 7 단이라 한 자리가 남습니다. 아래는 래더 위치 1 이
     # 노브의 반시계 끝(OFF)이라고 본 배치입니다.
     #
-    # ※ 방향 확인: joy.cpl 에서 노브를 반시계 끝까지 돌려 DX 44 가 켜지면 그대로,
-    #   DX 49 가 켜지면 이 여섯 줄을 뒤집고 None 을 맨 앞으로 옮기십시오.
+    # ※ 방향 확인: joy.cpl 에서 노브를 반시계 끝(OFF)까지 돌려 보십시오.
+    #   래더는 DX 44~50 을 씁니다. DX 44 가 켜지면 이대로 맞습니다.
+    #   44 가 아니면(끝쪽 번호면) 순서가 거꾸로이니 여섯 줄을 뒤집고
+    #   None 을 맨 앞으로 옮기십시오. 남는 자리가 어느 쪽 끝인지도
+    #   그때 같이 드러납니다 — 어느 detent 에서 아무 DX 도 안 켜지는지 보면 됩니다.
     'CMDS MODE':         ['SimEWSModeOff', 'SimEWSModeStby', 'SimEWSModeMan',
                           'SimEWSModeSemi', 'SimEWSModeAuto', 'SimEWSModeByp',
                           None],           # 7번째 — 실기에 없는 여분 자리

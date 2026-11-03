@@ -439,6 +439,8 @@ C14 는 SD 확장 케이블 4선(DIN · CLK · CS · GND) + VIN 1선 = **5선**�
 | 62 | ELEC | CAUTION RST |
 | 63–64 | AVTR | AUTO / ON |
 
+> 이 DX 로 BMS 키 파일을 만드는 법은 [REF_KEYMAP.md](REF_KEYMAP.md) 에 있습니다.
+>
 > 줄을 옮기면 그 뒤 DX 가 전부 밀립니다. 바인딩 파일은 손으로 유지하지 말고 다시 생성하십시오.
 > 기동 시 시리얼 요약이 현재 DX 를 이 순서 그대로 찍어 줍니다.
 >

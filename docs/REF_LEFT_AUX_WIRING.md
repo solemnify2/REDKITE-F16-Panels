@@ -468,6 +468,8 @@ LED 1개만 연결한 상태에서 **320Ω 양단 = 1.2V** → 단독 전류 **3
 | 44–50 | CMDS | MODE 래더 — 1~7 |
 | 51 | ALT GEAR | Handle |
 
+> 이 DX 로 BMS 키 파일을 만드는 법은 [REF_KEYMAP.md](REF_KEYMAP.md) 에 있습니다.
+>
 > 줄을 옮기면 그 뒤 DX 가 전부 밀립니다. 기동 시 시리얼 요약이 현재 DX 를 찍어 줍니다.
 >
 > TWA 래더의 내부 순서(ACT/PWR → SEARCH → ALT → SYS PWR)는 저항값으로 고정되어 있어

@@ -341,9 +341,13 @@ REDKITE-F16-Panels/
 │   ├── bmsbios_bridge.py          #   VID/PID로 두 디바이스 동시 인식
 │   ├── dcsbios_bridge.py
 │   ├── patch_usb_desc_h.py        #   IDE 업데이트 후 usb_desc.h 자동 패치
+│   ├── gen_bms_keyfile.py         #   BMS 키맵 생성기 (보드에 DX 맵 질의)
+│   ├── bms_callbacks.py           #   컨트롤 이름 → BMS 콜백 표
+│   ├── bms_catalog.txt            #   BMS 콜백 목록 기준선 (버전업 감지용)
 │   ├── patch_usb_desc_c.py        #   usb_desc.c HID 슬라이더 디스크립터 패치
 │   └── reset_joystick_name.bat
 ├── docs/                          # 배선도, 프로토콜 참조
+│   ├── REF_KEYMAP.md              #   BMS/DCS 키맵 자동 생성
 │   ├── REF_BACKLIGHT.md           #   백라이트 회로·전원·LED 배치
 │   ├── REF_PARTS.md               #   부품 목록
 │   ├── REF_PROTOCOL.md            #   DCS/BMS 프로토콜·LED 주소 맵
