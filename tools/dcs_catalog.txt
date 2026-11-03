@@ -1,0 +1,85 @@
+# DCS F-16C 입력 명령 카탈로그 — 사용자의 InputUserProfiles 에서 추출했습니다.
+# gen_dcs_profile.py 가 이 파일과 현재 DCS 설치본을 비교해, 버전업으로
+# 추가/삭제된 명령을 알려줍니다. BMS 의 bms_catalog.txt 와 같은 역할입니다.
+#
+# ID 형식:
+#   d<down>p<pressed>u<up>cd<cockpit_device_id>vd<value_down>vp<value_pressed>vu<value_up>
+#   nil 은 그 필드가 없다는 뜻입니다.
+#
+# 열: <명령 ID> 	 <이름> 	 <원본 프로파일>
+#
+# ※ 두 프로파일에 묶여 있던 것만 들어 있습니다 (72개). 아직 안 묶은 컨트롤은
+#   모듈의 Input/F-16C_50/joystick/default.lua 를 읽어야 합니다.
+
+d3001pnilunilcd32vd0vpnilvunil	RWR Source Switch - OFF	redkite left aux panel.diff.lua
+d3001pnilunilcd32vd1vpnilvunil	RWR Source Switch - ON	redkite left aux panel.diff.lua
+d3001pnilunilcd3vd-1vpnilvunil	MAIN PWR Switch - OFF	redkite elec ecm avtr panel.diff.lua
+d3001pnilunilcd3vd0vpnilvunil	MAIN PWR Switch - BATT	redkite elec ecm avtr panel.diff.lua
+d3001pnilunilcd3vd1vpnilvunil	MAIN PWR Switch - MAIN PWR	redkite elec ecm avtr panel.diff.lua
+d3001pnilunilcd66vd-1vpnilvunil	ECM Power Switch - OFF	redkite elec ecm avtr panel.diff.lua
+d3001pnilunilcd66vd0vpnilvunil	ECM Power Switch - STBY	redkite elec ecm avtr panel.diff.lua
+d3001pnilunilcd66vd1vpnilvunil	ECM Power Switch - OPR	redkite elec ecm avtr panel.diff.lua
+d3002pnilu3002cd3vd1vpnilvu0	ELEC CAUTION RESET Button	redkite elec ecm avtr panel.diff.lua
+d3002pnilu3002cd7vd1vpnilvu0	DN LOCK REL Button	redkite left aux panel.diff.lua
+d3002pnilunilcd19vd-1vpnilvunil	MASTER ARM Switch - SIMULATE	redkite left aux panel.diff.lua
+d3002pnilunilcd19vd0vpnilvunil	MASTER ARM Switch - OFF	redkite left aux panel.diff.lua
+d3002pnilunilcd19vd1vpnilvunil	MASTER ARM Switch - MASTER ARM	redkite left aux panel.diff.lua
+d3002pnilunilcd32vd0vpnilvunil	JMR Source Switch - OFF	redkite left aux panel.diff.lua
+d3002pnilunilcd32vd1vpnilvunil	JMR Source Switch - ON	redkite left aux panel.diff.lua
+d3002pnilunilcd66vd-1vpnilvunil	ECM XMIT Switch - 3	redkite elec ecm avtr panel.diff.lua
+d3002pnilunilcd66vd0vpnilvunil	ECM XMIT Switch - 2	redkite elec ecm avtr panel.diff.lua
+d3002pnilunilcd66vd1vpnilvunil	ECM XMIT Switch - 1	redkite elec ecm avtr panel.diff.lua
+d3003pnilu3003cd19vd1vpnilvu0	EMER STORES JETTISON Button	redkite left aux panel.diff.lua
+d3003pnilunilcd32vd0vpnilvunil	MWS Source Switch - OFF	redkite left aux panel.diff.lua
+d3003pnilunilcd32vd1vpnilvunil	MWS Source Switch - ON	redkite left aux panel.diff.lua
+d3004pnilu3004cd66vd1vpnilvu0	ECM RESET Button	redkite elec ecm avtr panel.diff.lua
+d3004pnilunilcd19vd0vpnilvunil	GND JETT ENABLE Switch - OFF	redkite left aux panel.diff.lua
+d3004pnilunilcd19vd1vpnilvunil	GND JETT ENABLE Switch - ENABLE	redkite left aux panel.diff.lua
+d3004pnilunilcd22vd0vpnilvunil	LASER ARM Switch - OFF	redkite left aux panel.diff.lua
+d3004pnilunilcd22vd1vpnilvunil	LASER ARM Switch - ARM	redkite left aux panel.diff.lua
+d3004pnilunilcd32vd0vpnilvunil	JETT Switch - OFF	redkite left aux panel.diff.lua
+d3004pnilunilcd32vd1vpnilvunil	JETT Switch - JETT	redkite left aux panel.diff.lua
+d3004pnilunilcd7vd-1vpnilvunil	ANTI-SKID Switch - Down	redkite left aux panel.diff.lua
+d3005pnilu3005cd66vd1vpnilvu0	ECM BIT Button	redkite elec ecm avtr panel.diff.lua
+d3005pnilunilcd32vd0vpnilvunil	O1 Expendable Category Switch - OFF	redkite left aux panel.diff.lua
+d3005pnilunilcd32vd1vpnilvunil	O1 Expendable Category Switch - ON	redkite left aux panel.diff.lua
+d3005pnilunilcd7vd0vpnilvunil	BRAKES Channel Switch - CHAN 2	redkite left aux panel.diff.lua
+d3005pnilunilcd7vd1vpnilvunil	BRAKES Channel Switch - CHAN 1	redkite left aux panel.diff.lua
+d3006pnilunilcd32vd0vpnilvunil	O2 Expendable Category Switch - OFF	redkite left aux panel.diff.lua
+d3006pnilunilcd32vd1vpnilvunil	O2 Expendable Category Switch - ON	redkite left aux panel.diff.lua
+d3006pnilunilcd7vd0vpnilvunil	HOOK Switch - DN	redkite left aux panel.diff.lua
+d3006pnilunilcd7vd1vpnilvunil	HOOK Switch - UP	redkite left aux panel.diff.lua
+d3007pnilu3007cd7vd1vpnilvu0	HORN SILENCER Button	redkite left aux panel.diff.lua
+d3008pnilunilcd11vd-1vpnilvunil	LANDING TAXI LIGHTS Switch - TAXI	redkite left aux panel.diff.lua
+d3008pnilunilcd11vd0vpnilvunil	LANDING TAXI LIGHTS Switch - OFF	redkite left aux panel.diff.lua
+d3008pnilunilcd11vd1vpnilvunil	LANDING TAXI LIGHTS Switch - LANDING	redkite left aux panel.diff.lua
+d3008pnilunilcd7vd0vpnilvunil	ALT GEAR Handle, STOW	redkite left aux panel.diff.lua
+d3008pnilunilcd7vd1vpnilvunil	ALT GEAR Handle, PULL	redkite left aux panel.diff.lua
+d3009pnilu3009cd33vd1vpnilvu0	RWR Indicator Control SEARCH Button	redkite left aux panel.diff.lua
+d3010pnilu3010cd33vd1vpnilvu0	RWR Indicator Control ACT/PWR Button	redkite left aux panel.diff.lua
+d3010pnilunilcd7vd0vpnilvunil	ANTI-SKID Switch - ANTI-SKID	redkite left aux panel.diff.lua
+d3011pnilunilcd2vd0vpnilvunil	STORES CONFIG Switch - CAT III	redkite left aux panel.diff.lua
+d3011pnilunilcd2vd1vpnilvunil	STORES CONFIG Switch - CAT I	redkite left aux panel.diff.lua
+d3011pnilunilcd33vd1vpnilvunil	RWR Indicator Control POWER Button - Depressed	redkite left aux panel.diff.lua
+d3012pnilu3012cd33vd1vpnilvu0	RWR Indicator Control ALTITUDE Button	redkite left aux panel.diff.lua
+d3014pnilu3014cd7vd1vpnilvu0	ANTI-SKID Switch - PARKING BRAKE	redkite left aux panel.diff.lua
+d3014pnilunilcd2vd-1vpnilvunil	Autopilot ROLL Switch - STRG SEL	redkite left aux panel.diff.lua
+d3014pnilunilcd2vd0vpnilvunil	Autopilot ROLL Switch - ATT HOLD	redkite left aux panel.diff.lua
+d3014pnilunilcd2vd1vpnilvunil	Autopilot ROLL Switch - HDG SEL	redkite left aux panel.diff.lua
+d3018pnilunilcd66vd1vpnilvunil	ECM 1 Button - Depressed/Released	redkite elec ecm avtr panel.diff.lua
+d3019pnilunilcd66vd1vpnilvunil	ECM 2 Button - Depressed/Released	redkite elec ecm avtr panel.diff.lua
+d3020pnilunilcd66vd1vpnilvunil	ECM 3 Button - Depressed/Released	redkite elec ecm avtr panel.diff.lua
+d3021pnilunilcd66vd1vpnilvunil	ECM 4 Button - Depressed/Released	redkite elec ecm avtr panel.diff.lua
+d3022pnilunilcd66vd1vpnilvunil	ECM 5 Button - Depressed/Released	redkite elec ecm avtr panel.diff.lua
+d3023pnilunilcd66vd1vpnilvunil	ECM 6 Button - Depressed/Released	redkite elec ecm avtr panel.diff.lua
+d3024pnilunilcd66vd1vpnilvunil	ECM FRM Button - Depressed/Released	redkite elec ecm avtr panel.diff.lua
+d3025pnilunilcd66vd1vpnilvunil	ECM SPL Button - Depressed/Released	redkite elec ecm avtr panel.diff.lua
+d3031pnilu3031cd2vd-1vpnilvu0	Autopilot PITCH Switch - ATT HOLD	redkite left aux panel.diff.lua
+d3032pnilu3032cd2vd1vpnilvu0	Autopilot PITCH Switch - ALT HOLD	redkite left aux panel.diff.lua
+d3032pnilunilcd2vd-1vpnilvunil	Autopilot PITCH Switch - A/P OFF	redkite left aux panel.diff.lua
+d3034pnilunilcd2vd1vpnilvunil	ADV MODE Switch - Depressed/Released	redkite left aux panel.diff.lua
+d3038pnilunilcd17vd-1vpnilvunil	RF Switch - SILENT	redkite left aux panel.diff.lua
+d3038pnilunilcd17vd0vpnilvunil	RF Switch - QUIET	redkite left aux panel.diff.lua
+d3038pnilunilcd17vd1vpnilvunil	RF Switch - NORM	redkite left aux panel.diff.lua
+d430pnilunilcdnilvdnilvpnilvunil	LG Handle - UP	redkite left aux panel.diff.lua
+d431pnilunilcdnilvdnilvpnilvunil	LG Handle - DN	redkite left aux panel.diff.lua
