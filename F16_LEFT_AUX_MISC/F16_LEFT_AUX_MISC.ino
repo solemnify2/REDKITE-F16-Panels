@@ -985,7 +985,7 @@ void resetProtocol() {
 //
 //  브리지가 붙지 않은 상태(PROTO_UNKNOWN)에서 "?DX" 한 줄을 받으면
 //  현재 DX 배정을 기계가 읽을 수 있는 형태로 내보냅니다.
-//  tools/gen_bms_keyfile.py 가 이걸 읽어 BMS 키 파일을 만듭니다 —
+//  tools/gen_bms_setup_xml.py 가 이걸 읽어 BMS 바인딩을 만듭니다 —
 //  소스가 없는 PC(심 PC)에서도 보드만 꽂혀 있으면 됩니다.
 //
 //  요청에만 응답하는 이유: Teensy USB CDC 는 읽는 호스트가 없으면

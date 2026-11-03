@@ -13,7 +13,7 @@ r"""Redkite 보드의 DX 맵에서 Falcon BMS 의 **장치별 Setup XML** 을 �
 있고 내용에는 없습니다. BMS 설치 경로는 콜백 목록을 읽는 데만 씁니다.
 
 **파일을 처음부터 전부 만듭니다.** 기존 XML 을 참고하지 않습니다 — 축 설정처럼
-유도할 수 없는 값은 `tools/sim_axes.py` 에 데이터로 적혀 있습니다.
+유도할 수 없는 값은 `tools/keymap/sim_axes.py` 에 데이터로 적혀 있습니다.
 
 BMS 는 버튼 바인딩을 장치마다 하나씩인 `Setup.v100.<장치명> {GUID}.xml` 에 둡니다.
 장치별이라 대역 오프셋도, `DeviceSorting.txt` 도, 다른 장치와의 병합도 필요 없습니다.
@@ -35,10 +35,10 @@ import os
 import sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-sys.path.insert(0, HERE)
+sys.path.insert(0, os.path.join(HERE, 'keymap'))
 import bms_callbacks  # noqa: E402
 import sim_axes as AX  # noqa: E402
-import gen_bms_keyfile as K  # noqa: E402
+import board as K  # noqa: E402
 
 EMPTY = ('SimDoNothing', 'Default', 0)
 
@@ -59,8 +59,8 @@ def slots_for(bind, catalog):
 
 
 def build_map(entries, mapping, catalog, device):
-    """[(dx, 이름, 폭)] -> ({dx: 슬롯 4개}, 미매핑 목록)"""
-    out, missing = {}, []
+    """[(dx, 이름, 폭)] -> ({dx: 슬롯 4개}, 미매핑, 미모델링)"""
+    out, missing, unmodeled = {}, [], []
     for dx, name, w in entries:
         binds = mapping.get(name)
         if binds is None:
@@ -70,13 +70,16 @@ def build_map(entries, mapping, catalog, device):
             raise SystemExit('%s: %r 는 DX %d 개인데 매핑은 %d 개입니다'
                              % (device, name, w, len(binds)))
         for k, b in enumerate(binds):
+            if isinstance(b, bms_callbacks.Unmodeled):
+                label = name if w == 1 else '%s [%d]' % (name, k + 1)
+                unmodeled.append((device, dx + k, label, b))
             for cb in ([b] if isinstance(b, str)
                        else list(b) if isinstance(b, tuple) else []):
                 if cb and cb not in catalog:
                     raise SystemExit('%s: 콜백 %r 가 BMS - Full.key 에 없습니다 (%s)'
                                      % (device, cb, name))
             out[dx + k] = slots_for(b, catalog)
-    return out, missing
+    return out, missing, unmodeled
 
 
 def render(device, dxmap):
@@ -145,7 +148,22 @@ def main():
     ap.add_argument('--bms-root', default=K.DEFAULT_BMS,
                     help='BMS 설치 경로 — 콜백 목록을 읽습니다')
     ap.add_argument('--port', action='append', metavar='COMx', help='포트 직접 지정')
+    ap.add_argument('--verify', action='store_true',
+                    help='보드와 스케치 소스의 DX 맵이 같은지 대조만 합니다')
+    ap.add_argument('--update-catalog', action='store_true',
+                    help='현재 BMS 의 콜백 목록을 기준선에 기록하고 끝냅니다')
     args = ap.parse_args()
+
+    if args.update_catalog:
+        catalog = K.load_catalog(args.bms_root)
+        added, removed = K.catalog_diff(catalog)
+        n = K.write_catalog_baseline(catalog)
+        sys.stderr.write('%s 에 콜백 %d 개 기록\n' % (K.CATALOG_BASELINE, n))
+        if added:
+            sys.stderr.write('추가 %d: %s\n' % (len(added), ', '.join(added[:20])))
+        if removed:
+            sys.stderr.write('삭제 %d: %s\n' % (len(removed), ', '.join(removed[:20])))
+        return 0
 
     maps = {}
     boards = [(p, None) for p in args.port] if args.port else K.find_boards()
@@ -159,13 +177,33 @@ def main():
         sys.stderr.write('%s 에서 %s DX 맵 %d 항목 수신\n' % (port, dev, len(entries)))
         maps[dev] = entries
 
+    if args.verify:
+        bad = 0
+        for dev, rel in sorted(K.SKETCHES.items()):
+            path = os.path.join(K.ROOT, rel)
+            if dev not in maps or not os.path.isfile(path):
+                continue
+            src = K.dx_map(path)
+            if src == maps[dev]:
+                sys.stderr.write('%s: 보드 = 소스 (%d 항목)\n' % (dev, len(src)))
+                continue
+            bad = 1
+            sys.stderr.write('\n%s: 보드와 소스의 DX 맵이 다릅니다\n' % dev)
+            for a, b in zip(src, maps[dev]):
+                if a != b:
+                    sys.stderr.write('  소스 %-28s  보드 %s\n' % (a, b))
+        if not bad:
+            sys.stderr.write('\n대조 완료 — 업로드된 펜웨어가 소스와 일치합니다.\n')
+        return bad
+
     catalog = K.load_catalog(args.bms_root)
-    made = []
+    made, unmodeled_all = [], []
     for dev in sorted(maps):
-        dxmap, missing = build_map(maps[dev], bms_callbacks.MAPS[dev], catalog, dev)
+        dxmap, missing, unmod = build_map(maps[dev], bms_callbacks.MAPS[dev], catalog, dev)
         dest = K.next_out(AX.OUT_BASE[dev], '.xml')
         open(dest, 'w', encoding='utf-8', newline='\n').write(render(dev, dxmap))
         made.append((dev, dest))
+        unmodeled_all += unmod
         bound = sum(1 for v in dxmap.values() if v[0] is not EMPTY)
         total = maps[dev][-1][0] + maps[dev][-1][2] - 1
         sys.stderr.write('%-8s %s\n' % (dev, dest))
@@ -173,6 +211,15 @@ def main():
                          % (bound, total, len(AX.BMS_AXES[dev])))
         for dx, name, w in missing:
             sys.stderr.write('         매핑 없음: DX %d %s (x%d)\n' % (dx, name, w))
+
+    hits = K.check_unmodeled(unmodeled_all, catalog)
+    if hits:
+        sys.stderr.write('\nBMS 가 그사이 지원하게 된 것 같습니다 (%d) — '
+                         'bms_callbacks.py 를 고쳐 보십시오:\n' % len(hits))
+        for dev, dx, label, found in hits:
+            sys.stderr.write('  %-8s DX %-3d %s\n' % (dev, dx, label))
+            for cb, desc in found[:4]:
+                sys.stderr.write('      %-28s %s\n' % (cb, desc))
 
     cfg = os.path.join(args.bms_root, 'User', 'Config')
     sys.stderr.write('\n덮어쓰려면 (PowerShell):\n')

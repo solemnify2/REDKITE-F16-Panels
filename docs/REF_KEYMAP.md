@@ -34,7 +34,7 @@ pyserial, 그리고 해당 심 설치본이면 됩니다. 심 PC 에 그대로 �
 | `--port COMx` | 자동 탐지 대신 포트 지정 |
 
 > 생성하기 전에 **업로드를 깜빡했는지** 보려면
-> `python tools/gen_bms_keyfile.py --verify` — 보드와 소스를 대조만 하고
+> `python tools/gen_bms_setup_xml.py --verify` — 보드와 소스를 대조만 하고
 > 아무 파일도 쓰지 않습니다.
 
 ### 1-1. BMS — 장치별 Setup XML
@@ -126,7 +126,7 @@ As...** 에서 사람이 타이핑한 값이라 생성기가 알 방법은 없�
 
 ## 3. 이름 → 콜백 표 (BMS)
 
-`tools/bms_callbacks.py`. **DX 번호가 아니라 컨트롤 이름이 키**입니다. 그래서
+`tools/keymap/bms_callbacks.py`. **DX 번호가 아니라 컨트롤 이름이 키**입니다. 그래서
 `dxOrder[]` 를 재배열해도 이 표는 그대로고, 하드웨어를 추가할 때만 늘어납니다.
 
 컨트롤이 차지하는 DX 하나당 한 항목:
@@ -214,10 +214,10 @@ COMM 전원을 모멘터리 펄스가 아니라 **유지형 DX** 로 만든 근�
 
 ### 콜백 목록 전체 기준선
 
-위 방식은 우리가 검색해 본 것만 잡습니다. `tools/bms_catalog.txt` 가 콜백 1207개
+위 방식은 우리가 검색해 본 것만 잡습니다. `tools/keymap/bms_catalog.txt` 가 콜백 1207개
 전부를 커밋된 기준선으로 들고 있고, 차이가 생기면 보고합니다. 정렬된 상태로 git 에
 있으므로 **`git diff` 자체가 "이번 BMS 가 뭘 바꿨나" 목록**이 됩니다.
-확인 후 `--update-catalog` 로 갱신하십시오.
+확인 후 `python tools/gen_bms_setup_xml.py --update-catalog` 로 갱신하십시오.
 
 ### 현재 비어 있는 자리
 
@@ -246,7 +246,7 @@ COMM 전원을 모멘터리 펄스가 아니라 **유지형 DX** 로 만든 근�
 | UHF FUNCTION / MODE 핀 방향 | 노브를 OFF 에 두고 켜지는 DX — 16 이면 정상, 19 면 역매핑 | `switches[]` 의 `uhfFuncPins[]` 를 뒤집기 |
 | CMDS MODE 노브 방향 | 래더는 DX 44~50. 반시계 끝(OFF)에서 **DX 44** 면 정상 | `'CMDS MODE'` 6줄 뒤집고 `None` 을 앞으로 |
 | TWA ACT/PWR vs SYS PWR | 어느 버튼이 계통을 켜는지 | 두 항목 맞바꾸기 |
-| 3단 토글 13개의 접점 방향 | 위로 올렸을 때 나가는 DX 가 `--comments` 의 위치와 맞는지 | 튜플 순서 뒤집기 |
+| 3단 토글 13개의 접점 방향 | 위로 올렸을 때 나가는 DX 가 `bms_callbacks.py` 의 첫 칸과 맞는지 | 튜플 순서 뒤집기 |
 
 전부 `bms_callbacks.py` 또는 `switches[]` 의 **한 줄 수정**으로 끝나고, DX 번호는
 움직이지 않으므로 바인딩 파일을 다시 뽑을 필요도 없습니다 (핀 순서 변경의 경우).
@@ -300,7 +300,7 @@ EPU 커버는 모듈의 `Input/F-16C_50/joystick/default.lua` 를 봐야 확실�
 
 ### 카탈로그를 다시 뽑으려면
 
-`tools/dcs_catalog.txt` 는 사용자의 프로파일에서 추출한 것입니다. DCS 에서 새로
+`tools/keymap/dcs_catalog.txt` 는 사용자의 프로파일에서 추출한 것입니다. DCS 에서 새로
 바인딩한 뒤 다시 뽑으면 그 명령이 카탈로그에 들어오고, `dcs_commands.py` 의
 `TODO` 를 채울 수 있습니다.
 
@@ -311,7 +311,7 @@ EPU 커버는 모듈의 `Input/F-16C_50/joystick/default.lua` 를 봐야 확실�
 두 생성기는 **파일을 처음부터 전부 만듭니다** — 기존 파일이 없어도 되고 참고하지도
 않습니다. 버튼은 `dxOrder[]` 와 매핑 표에서 전부 유도되지만, **축에는 유도할 수 없는
 값이 붙습니다** — `invert`, `deadzone`, `saturation` 같은 것들입니다. 이 패널의 포트는
-전부 반전이고요. 그래서 기존 설정에서 한 번 뽑아 `tools/sim_axes.py` 에 적어 두고,
+전부 반전이고요. 그래서 기존 설정에서 한 번 뽑아 `tools/keymap/sim_axes.py` 에 적어 두고,
 두 생성기가 그 파일만 보고 축 블록을 만듭니다. 바꾸려면 그 파일을 고치십시오.
 
 | | BMS | DCS |
@@ -334,16 +334,21 @@ DCS 쪽에는 **`removed` 항목**도 들어 있습니다. 이게 특히 중요�
 
 ## 8. 파일
 
-| 파일 | 역할 |
+`tools/` 최상위는 **실행하는 것**, `tools/keymap/` 은 **생성기가 읽는 데이터**입니다.
+
+| 실행 | |
 |---|---|
 | `tools/gen_bms_setup_xml.py` | BMS 생성기 |
 | `tools/gen_dcs_profile.py` | DCS 생성기 |
-| `tools/bms_callbacks.py` | 컨트롤 이름 → BMS 콜백 |
-| `tools/dcs_commands.py` | 컨트롤 이름 → DCS 명령 ID |
-| `tools/bms_catalog.txt` | BMS 콜백 목록 기준선 (버전업 감지) |
-| `tools/dcs_catalog.txt` | DCS 명령 ID ↔ 이름 |
-| `tools/sim_axes.py` | **축 설정 · 제품명 · 파일명** — 두 심 공통 |
-| `tools/gen_bms_keyfile.py` | 보드 질의 · `?DX` 파서 · DX 맵 리더. **위 둘이 import 합니다** |
+
+| `tools/keymap/` — 읽기만 합니다 | |
+|---|---|
+| `board.py` | 보드 질의 · `?DX` 파서 · 콜백 목록 로더 — 생성기 둘이 import |
+| `sim_axes.py` | **축 설정 · 제품명 · 파일명** — 두 심 공통 |
+| `bms_callbacks.py` | 컨트롤 이름 → BMS 콜백 |
+| `dcs_commands.py` | 컨트롤 이름 → DCS 명령 ID |
+| `bms_catalog.txt` | BMS 콜백 목록 기준선 (버전업 감지) |
+| `dcs_catalog.txt` | DCS 명령 ID ↔ 이름 |
 
 컨트롤 이름이 모든 표의 키입니다. `dxOrder[]` 를 재배열해도 표는 그대로고,
 하드웨어를 추가할 때만 늘어납니다.

@@ -1,5 +1,5 @@
 # Falcon BMS 콜백 목록 기준선 — BMS - Full.key 에서 생성.
-# gen_bms_keyfile.py 가 매번 이 파일과 현재 BMS 를 비교해,
+# 생성기가 매번 이 파일과 현재 BMS 를 비교해,
 # 버전업으로 추가/삭제된 콜백을 알려줍니다.
 # BMS 를 올린 뒤 내용을 확인했으면 --update-catalog 로 갱신하십시오.
 # git diff 가 그대로 "이번 BMS 가 뭘 추가했나" 목록이 됩니다.

@@ -341,14 +341,15 @@ REDKITE-F16-Panels/
 │   ├── bmsbios_bridge.py          #   VID/PID로 두 디바이스 동시 인식
 │   ├── dcsbios_bridge.py
 │   ├── patch_usb_desc_h.py        #   IDE 업데이트 후 usb_desc.h 자동 패치
-│   ├── gen_bms_setup_xml.py       #   BMS 장치별 Setup XML 생성기 (권장)
-│   ├── gen_bms_keyfile.py         #   보드 질의·DX 맵 파싱 (위 둘이 import)
+│   ├── gen_bms_setup_xml.py       #   BMS 장치별 Setup XML 생성기
 │   ├── gen_dcs_profile.py         #   DCS 입력 프로파일(.diff.lua) 생성기
-│   ├── bms_callbacks.py           #   컨트롤 이름 → BMS 콜백 표
-│   ├── bms_catalog.txt            #   BMS 콜백 목록 기준선 (버전업 감지용)
-│   ├── dcs_commands.py            #   컨트롤 이름 → DCS 명령 ID 표
-│   ├── dcs_catalog.txt            #   DCS 명령 목록 기준선
-│   ├── sim_axes.py                #   축 설정·제품명 (파일을 처음부터 만들 때 쓰는 데이터)
+│   ├── keymap/                    #   생성기가 읽는 데이터 (실행 안 함)
+│   │   ├── board.py               #     보드 질의·?DX 파서 (생성기 둘이 import)
+│   │   ├── sim_axes.py            #     축 설정·제품명·파일명
+│   │   ├── bms_callbacks.py       #     컨트롤 이름 → BMS 콜백 표
+│   │   ├── dcs_commands.py        #     컨트롤 이름 → DCS 명령 ID 표
+│   │   ├── bms_catalog.txt        #     BMS 콜백 목록 기준선 (버전업 감지용)
+│   │   └── dcs_catalog.txt        #     DCS 명령 목록 기준선
 │   ├── patch_usb_desc_c.py        #   usb_desc.c HID 슬라이더 디스크립터 패치
 │   └── reset_joystick_name.bat
 ├── docs/                          # 배선도, 프로토콜 참조

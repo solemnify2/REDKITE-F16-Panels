@@ -15,10 +15,10 @@ Save Profile As... 에서 사람이 타이핑한 것이라, 생성기가 알 방
 BMS 와 달리 DCS 는 버튼 번호에 오프셋이 없습니다 — `JOY_BTN<n>` 의 n 이
 그 장치의 DX 번호 그대로입니다.
 
-명령 ID 와 이름은 tools/dcs_catalog.txt, 컨트롤 대응은 tools/dcs_commands.py.
+명령 ID 와 이름은 tools/keymap/dcs_catalog.txt, 컨트롤 대응은 tools/keymap/dcs_commands.py.
 
 **파일을 처음부터 전부 만듭니다.** 기존 프로파일을 참고하지 않습니다 — 축 설정처럼
-유도할 수 없는 값은 `tools/sim_axes.py` 에 데이터로 적혀 있습니다. 이 패널의 포트는
+유도할 수 없는 값은 `tools/keymap/sim_axes.py` 에 데이터로 적혀 있습니다. 이 패널의 포트는
 전부 `invert = true` 라, 그 값이 빠지면 노브가 반대로 돕니다.
 
 축의 `removed` 항목이 특히 중요합니다 — DCS 가 새 조이스틱에 자동으로 거는
@@ -31,12 +31,12 @@ import re
 import sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-sys.path.insert(0, HERE)
+sys.path.insert(0, os.path.join(HERE, 'keymap'))
 import dcs_commands  # noqa: E402
 import sim_axes as AX  # noqa: E402
-import gen_bms_keyfile as K  # noqa: E402
+import board as K  # noqa: E402
 
-CATALOG = os.path.join(HERE, 'dcs_catalog.txt')
+CATALOG = os.path.join(HERE, 'keymap', 'dcs_catalog.txt')
 
 def load_catalog():
     """(이름 사전, 장치별 축 목록) 반환."""
