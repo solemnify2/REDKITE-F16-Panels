@@ -11,7 +11,8 @@
 #
 # 열: <장치> 	 <명령 ID> 	 <이름> 	 <그 프로파일이 묶어 둔 키>
 
-## BUTTONS (131)
+## BUTTONS (132)
+CONSOLE	d3018pnilunilcd66vd1vpnilvunil	ECM 1 Button - Depressed/Released	JOY_BTN39
 AUX	d3034pnilunilcd2vd1vpnilvunil	ADV MODE Switch - Depressed/Released	JOY_BTN7
 AUX	d3008pnilunilcd7vd1vpnilvunil	ALT GEAR Handle, PULL	JOY_BTN33
 AUX	d3008pnilunilcd7vd0vpnilvunil	ALT GEAR Handle, STOW	JOY_BTN33_OFF
