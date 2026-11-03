@@ -1,85 +1,162 @@
-# DCS F-16C 입력 명령 카탈로그 — 사용자의 InputUserProfiles 에서 추출했습니다.
-# gen_dcs_profile.py 가 이 파일과 현재 DCS 설치본을 비교해, 버전업으로
-# 추가/삭제된 명령을 알려줍니다. BMS 의 bms_catalog.txt 와 같은 역할입니다.
+# DCS F-16C 입력 명령 카탈로그
 #
-# ID 형식:
-#   d<down>p<pressed>u<up>cd<cockpit_device_id>vd<value_down>vp<value_pressed>vu<value_up>
-#   nil 은 그 필드가 없다는 뜻입니다.
+# 사용자의 DCS/InputUserProfiles 프로파일에서 추출했습니다. BMS 의
+# bms_catalog.txt 와 같은 역할 — DCS 버전업으로 명령이 바뀌면 여기서 드러납니다.
 #
-# 열: <명령 ID> 	 <이름> 	 <원본 프로파일>
+# 버튼 명령 ID:
+#   d<down>p<pressed>u<up>cd<cockpit_device>vd<value_down>vp<value_pressed>vu<value_up>
+# 축 명령 ID:
+#   a<command>cd<cockpit_device>
+# nil 은 그 필드가 없다는 뜻. 버튼은 JOY_BTN<n>, 뗄 때는 JOY_BTN<n>_OFF.
 #
-# ※ 두 프로파일에 묶여 있던 것만 들어 있습니다 (72개). 아직 안 묶은 컨트롤은
-#   모듈의 Input/F-16C_50/joystick/default.lua 를 읽어야 합니다.
+# 열: <장치> 	 <명령 ID> 	 <이름> 	 <그 프로파일이 묶어 둔 키>
 
-d3001pnilunilcd32vd0vpnilvunil	RWR Source Switch - OFF	redkite left aux panel.diff.lua
-d3001pnilunilcd32vd1vpnilvunil	RWR Source Switch - ON	redkite left aux panel.diff.lua
-d3001pnilunilcd3vd-1vpnilvunil	MAIN PWR Switch - OFF	redkite elec ecm avtr panel.diff.lua
-d3001pnilunilcd3vd0vpnilvunil	MAIN PWR Switch - BATT	redkite elec ecm avtr panel.diff.lua
-d3001pnilunilcd3vd1vpnilvunil	MAIN PWR Switch - MAIN PWR	redkite elec ecm avtr panel.diff.lua
-d3001pnilunilcd66vd-1vpnilvunil	ECM Power Switch - OFF	redkite elec ecm avtr panel.diff.lua
-d3001pnilunilcd66vd0vpnilvunil	ECM Power Switch - STBY	redkite elec ecm avtr panel.diff.lua
-d3001pnilunilcd66vd1vpnilvunil	ECM Power Switch - OPR	redkite elec ecm avtr panel.diff.lua
-d3002pnilu3002cd3vd1vpnilvu0	ELEC CAUTION RESET Button	redkite elec ecm avtr panel.diff.lua
-d3002pnilu3002cd7vd1vpnilvu0	DN LOCK REL Button	redkite left aux panel.diff.lua
-d3002pnilunilcd19vd-1vpnilvunil	MASTER ARM Switch - SIMULATE	redkite left aux panel.diff.lua
-d3002pnilunilcd19vd0vpnilvunil	MASTER ARM Switch - OFF	redkite left aux panel.diff.lua
-d3002pnilunilcd19vd1vpnilvunil	MASTER ARM Switch - MASTER ARM	redkite left aux panel.diff.lua
-d3002pnilunilcd32vd0vpnilvunil	JMR Source Switch - OFF	redkite left aux panel.diff.lua
-d3002pnilunilcd32vd1vpnilvunil	JMR Source Switch - ON	redkite left aux panel.diff.lua
-d3002pnilunilcd66vd-1vpnilvunil	ECM XMIT Switch - 3	redkite elec ecm avtr panel.diff.lua
-d3002pnilunilcd66vd0vpnilvunil	ECM XMIT Switch - 2	redkite elec ecm avtr panel.diff.lua
-d3002pnilunilcd66vd1vpnilvunil	ECM XMIT Switch - 1	redkite elec ecm avtr panel.diff.lua
-d3003pnilu3003cd19vd1vpnilvu0	EMER STORES JETTISON Button	redkite left aux panel.diff.lua
-d3003pnilunilcd32vd0vpnilvunil	MWS Source Switch - OFF	redkite left aux panel.diff.lua
-d3003pnilunilcd32vd1vpnilvunil	MWS Source Switch - ON	redkite left aux panel.diff.lua
-d3004pnilu3004cd66vd1vpnilvu0	ECM RESET Button	redkite elec ecm avtr panel.diff.lua
-d3004pnilunilcd19vd0vpnilvunil	GND JETT ENABLE Switch - OFF	redkite left aux panel.diff.lua
-d3004pnilunilcd19vd1vpnilvunil	GND JETT ENABLE Switch - ENABLE	redkite left aux panel.diff.lua
-d3004pnilunilcd22vd0vpnilvunil	LASER ARM Switch - OFF	redkite left aux panel.diff.lua
-d3004pnilunilcd22vd1vpnilvunil	LASER ARM Switch - ARM	redkite left aux panel.diff.lua
-d3004pnilunilcd32vd0vpnilvunil	JETT Switch - OFF	redkite left aux panel.diff.lua
-d3004pnilunilcd32vd1vpnilvunil	JETT Switch - JETT	redkite left aux panel.diff.lua
-d3004pnilunilcd7vd-1vpnilvunil	ANTI-SKID Switch - Down	redkite left aux panel.diff.lua
-d3005pnilu3005cd66vd1vpnilvu0	ECM BIT Button	redkite elec ecm avtr panel.diff.lua
-d3005pnilunilcd32vd0vpnilvunil	O1 Expendable Category Switch - OFF	redkite left aux panel.diff.lua
-d3005pnilunilcd32vd1vpnilvunil	O1 Expendable Category Switch - ON	redkite left aux panel.diff.lua
-d3005pnilunilcd7vd0vpnilvunil	BRAKES Channel Switch - CHAN 2	redkite left aux panel.diff.lua
-d3005pnilunilcd7vd1vpnilvunil	BRAKES Channel Switch - CHAN 1	redkite left aux panel.diff.lua
-d3006pnilunilcd32vd0vpnilvunil	O2 Expendable Category Switch - OFF	redkite left aux panel.diff.lua
-d3006pnilunilcd32vd1vpnilvunil	O2 Expendable Category Switch - ON	redkite left aux panel.diff.lua
-d3006pnilunilcd7vd0vpnilvunil	HOOK Switch - DN	redkite left aux panel.diff.lua
-d3006pnilunilcd7vd1vpnilvunil	HOOK Switch - UP	redkite left aux panel.diff.lua
-d3007pnilu3007cd7vd1vpnilvu0	HORN SILENCER Button	redkite left aux panel.diff.lua
-d3008pnilunilcd11vd-1vpnilvunil	LANDING TAXI LIGHTS Switch - TAXI	redkite left aux panel.diff.lua
-d3008pnilunilcd11vd0vpnilvunil	LANDING TAXI LIGHTS Switch - OFF	redkite left aux panel.diff.lua
-d3008pnilunilcd11vd1vpnilvunil	LANDING TAXI LIGHTS Switch - LANDING	redkite left aux panel.diff.lua
-d3008pnilunilcd7vd0vpnilvunil	ALT GEAR Handle, STOW	redkite left aux panel.diff.lua
-d3008pnilunilcd7vd1vpnilvunil	ALT GEAR Handle, PULL	redkite left aux panel.diff.lua
-d3009pnilu3009cd33vd1vpnilvu0	RWR Indicator Control SEARCH Button	redkite left aux panel.diff.lua
-d3010pnilu3010cd33vd1vpnilvu0	RWR Indicator Control ACT/PWR Button	redkite left aux panel.diff.lua
-d3010pnilunilcd7vd0vpnilvunil	ANTI-SKID Switch - ANTI-SKID	redkite left aux panel.diff.lua
-d3011pnilunilcd2vd0vpnilvunil	STORES CONFIG Switch - CAT III	redkite left aux panel.diff.lua
-d3011pnilunilcd2vd1vpnilvunil	STORES CONFIG Switch - CAT I	redkite left aux panel.diff.lua
-d3011pnilunilcd33vd1vpnilvunil	RWR Indicator Control POWER Button - Depressed	redkite left aux panel.diff.lua
-d3012pnilu3012cd33vd1vpnilvu0	RWR Indicator Control ALTITUDE Button	redkite left aux panel.diff.lua
-d3014pnilu3014cd7vd1vpnilvu0	ANTI-SKID Switch - PARKING BRAKE	redkite left aux panel.diff.lua
-d3014pnilunilcd2vd-1vpnilvunil	Autopilot ROLL Switch - STRG SEL	redkite left aux panel.diff.lua
-d3014pnilunilcd2vd0vpnilvunil	Autopilot ROLL Switch - ATT HOLD	redkite left aux panel.diff.lua
-d3014pnilunilcd2vd1vpnilvunil	Autopilot ROLL Switch - HDG SEL	redkite left aux panel.diff.lua
-d3018pnilunilcd66vd1vpnilvunil	ECM 1 Button - Depressed/Released	redkite elec ecm avtr panel.diff.lua
-d3019pnilunilcd66vd1vpnilvunil	ECM 2 Button - Depressed/Released	redkite elec ecm avtr panel.diff.lua
-d3020pnilunilcd66vd1vpnilvunil	ECM 3 Button - Depressed/Released	redkite elec ecm avtr panel.diff.lua
-d3021pnilunilcd66vd1vpnilvunil	ECM 4 Button - Depressed/Released	redkite elec ecm avtr panel.diff.lua
-d3022pnilunilcd66vd1vpnilvunil	ECM 5 Button - Depressed/Released	redkite elec ecm avtr panel.diff.lua
-d3023pnilunilcd66vd1vpnilvunil	ECM 6 Button - Depressed/Released	redkite elec ecm avtr panel.diff.lua
-d3024pnilunilcd66vd1vpnilvunil	ECM FRM Button - Depressed/Released	redkite elec ecm avtr panel.diff.lua
-d3025pnilunilcd66vd1vpnilvunil	ECM SPL Button - Depressed/Released	redkite elec ecm avtr panel.diff.lua
-d3031pnilu3031cd2vd-1vpnilvu0	Autopilot PITCH Switch - ATT HOLD	redkite left aux panel.diff.lua
-d3032pnilu3032cd2vd1vpnilvu0	Autopilot PITCH Switch - ALT HOLD	redkite left aux panel.diff.lua
-d3032pnilunilcd2vd-1vpnilvunil	Autopilot PITCH Switch - A/P OFF	redkite left aux panel.diff.lua
-d3034pnilunilcd2vd1vpnilvunil	ADV MODE Switch - Depressed/Released	redkite left aux panel.diff.lua
-d3038pnilunilcd17vd-1vpnilvunil	RF Switch - SILENT	redkite left aux panel.diff.lua
-d3038pnilunilcd17vd0vpnilvunil	RF Switch - QUIET	redkite left aux panel.diff.lua
-d3038pnilunilcd17vd1vpnilvunil	RF Switch - NORM	redkite left aux panel.diff.lua
-d430pnilunilcdnilvdnilvpnilvunil	LG Handle - UP	redkite left aux panel.diff.lua
-d431pnilunilcdnilvdnilvpnilvunil	LG Handle - DN	redkite left aux panel.diff.lua
+## BUTTONS (131)
+AUX	d3034pnilunilcd2vd1vpnilvunil	ADV MODE Switch - Depressed/Released	JOY_BTN7
+AUX	d3008pnilunilcd7vd1vpnilvunil	ALT GEAR Handle, PULL	JOY_BTN33
+AUX	d3008pnilunilcd7vd0vpnilvunil	ALT GEAR Handle, STOW	JOY_BTN33_OFF
+AUX	d3005pnilu3005cd19vd1vpnilvu0	ALT REL Button	JOY_BTN4
+AUX	d3010pnilunilcd7vd0vpnilvunil	ANTI-SKID Switch - ANTI-SKID	JOY_BTN22_OFF,JOY_BTN23_OFF
+AUX	d3010pnilunilcd7vd-1vpnilvunil	ANTI-SKID Switch - OFF	JOY_BTN23
+AUX	d3014pnilu3014cd7vd1vpnilvu0	ANTI-SKID Switch - PARKING BRAKE	JOY_BTN22
+AUX	d3032pnilunilcd2vd-1vpnilvunil	Autopilot PITCH Switch - A/P OFF	JOY_BTN10_OFF,JOY_BTN11_OFF
+AUX	d3032pnilu3032cd2vd1vpnilvu0	Autopilot PITCH Switch - ALT HOLD	JOY_BTN10
+AUX	d3031pnilu3031cd2vd-1vpnilvu0	Autopilot PITCH Switch - ATT HOLD	JOY_BTN11
+AUX	d3014pnilunilcd2vd0vpnilvunil	Autopilot ROLL Switch - ATT HOLD	JOY_BTN8_OFF,JOY_BTN9_OFF
+AUX	d3014pnilunilcd2vd1vpnilvunil	Autopilot ROLL Switch - HDG SEL	JOY_BTN8
+AUX	d3014pnilunilcd2vd-1vpnilvunil	Autopilot ROLL Switch - STRG SEL	JOY_BTN9
+AUX	d3005pnilunilcd7vd1vpnilvunil	BRAKES Channel Switch - CHAN 1	JOY_BTN24
+AUX	d3005pnilunilcd7vd0vpnilvunil	BRAKES Channel Switch - CHAN 2	JOY_BTN24_OFF
+AUX	d3007pnilunilcd32vd0vpnilvunil	CH Expendable Category Switch - OFF	JOY_BTN29_OFF
+AUX	d3007pnilunilcd32vd1vpnilvunil	CH Expendable Category Switch - ON	JOY_BTN29
+AUX	d3002pnilu3002cd7vd1vpnilvu0	DN LOCK REL Button	JOY_BTN20
+AUX	d3003pnilu3003cd19vd1vpnilvu0	EMER STORES JETTISON Button	JOY_BTN12
+AUX	d3008pnilunilcd32vd0vpnilvunil	FL Expendable Category Switch - OFF	JOY_BTN28_OFF
+AUX	d3008pnilunilcd32vd1vpnilvunil	FL Expendable Category Switch - ON	JOY_BTN28
+AUX	d3004pnilunilcd19vd1vpnilvunil	GND JETT ENABLE Switch - ENABLE	JOY_BTN21
+AUX	d3004pnilunilcd19vd0vpnilvunil	GND JETT ENABLE Switch - OFF	JOY_BTN21_OFF
+AUX	d3006pnilunilcd7vd0vpnilvunil	HOOK Switch - DN	JOY_BTN17_OFF
+AUX	d3006pnilunilcd7vd1vpnilvunil	HOOK Switch - UP	JOY_BTN17
+AUX	d3007pnilu3007cd7vd1vpnilvu0	HORN SILENCER Button	JOY_BTN14
+AUX	d3004pnilunilcd32vd1vpnilvunil	JETT Switch - JETT	JOY_BTN32
+AUX	d3004pnilunilcd32vd0vpnilvunil	JETT Switch - OFF	JOY_BTN32_OFF
+AUX	d3002pnilunilcd32vd0vpnilvunil	JMR Source Switch - OFF	JOY_BTN26_OFF
+AUX	d3002pnilunilcd32vd1vpnilvunil	JMR Source Switch - ON	JOY_BTN26
+AUX	d3008pnilunilcd11vd1vpnilvunil	LANDING TAXI LIGHTS Switch - LANDING	JOY_BTN16
+AUX	d3008pnilunilcd11vd0vpnilvunil	LANDING TAXI LIGHTS Switch - OFF	JOY_BTN16_OFF,JOY_BTN15_OFF
+AUX	d3008pnilunilcd11vd-1vpnilvunil	LANDING TAXI LIGHTS Switch - TAXI	JOY_BTN15
+AUX	d3004pnilunilcd22vd1vpnilvunil	LASER ARM Switch - ARM	JOY_BTN3
+AUX	d3004pnilunilcd22vd0vpnilvunil	LASER ARM Switch - OFF	JOY_BTN3_OFF
+AUX	d431pnilunilcdnilvdnilvpnilvunil	LG Handle - DN	JOY_BTN19
+AUX	d430pnilunilcdnilvdnilvpnilvunil	LG Handle - UP	JOY_BTN18
+AUX	d3002pnilunilcd19vd1vpnilvunil	MASTER ARM Switch - MASTER ARM	JOY_BTN6
+AUX	d3002pnilunilcd19vd0vpnilvunil	MASTER ARM Switch - OFF	JOY_BTN6_OFF,JOY_BTN5_OFF
+AUX	d3002pnilunilcd19vd-1vpnilvunil	MASTER ARM Switch - SIMULATE	JOY_BTN5
+AUX	d3010pnilunilcd32vd0.4vpnilvunil	MODE Knob - AUTO	JOY_BTN42
+AUX	d3010pnilunilcd32vd0.5vpnilvunil	MODE Knob - BYP	JOY_BTN43
+AUX	d3010pnilunilcd32vd0.2vpnilvunil	MODE Knob - MAN	JOY_BTN40
+AUX	d3010pnilunilcd32vd0vpnilvunil	MODE Knob - OFF	JOY_BTN38
+AUX	d3010pnilunilcd32vd0.3vpnilvunil	MODE Knob - SEMI	JOY_BTN41
+AUX	d3010pnilunilcd32vd0.1vpnilvunil	MODE Knob - STBY	JOY_BTN39
+AUX	d3003pnilunilcd32vd0vpnilvunil	MWS Source Switch - OFF	JOY_BTN27_OFF
+AUX	d3003pnilunilcd32vd1vpnilvunil	MWS Source Switch - ON	JOY_BTN27
+AUX	d3005pnilunilcd32vd0vpnilvunil	O1 Expendable Category Switch - OFF	JOY_BTN31_OFF
+AUX	d3005pnilunilcd32vd1vpnilvunil	O1 Expendable Category Switch - ON	JOY_BTN31
+AUX	d3006pnilunilcd32vd0vpnilvunil	O2 Expendable Category Switch - OFF	JOY_BTN30_OFF
+AUX	d3006pnilunilcd32vd1vpnilvunil	O2 Expendable Category Switch - ON	JOY_BTN30
+AUX	d3009pnilunilcd32vd0.1vpnilvunil	PROGRAM Knob - 1	JOY_BTN46
+AUX	d3009pnilunilcd32vd0.2vpnilvunil	PROGRAM Knob - 2	JOY_BTN47
+AUX	d3009pnilunilcd32vd0.3vpnilvunil	PROGRAM Knob - 3	JOY_BTN48
+AUX	d3009pnilunilcd32vd0.4vpnilvunil	PROGRAM Knob - 4	JOY_BTN49
+AUX	d3009pnilunilcd32vd0vpnilvunil	PROGRAM Knob - BIT	JOY_BTN45
+AUX	d3038pnilunilcd17vd1vpnilvunil	RF Switch - NORM	JOY_BTN2
+AUX	d3038pnilunilcd17vd0vpnilvunil	RF Switch - QUIET	JOY_BTN2_OFF,JOY_BTN1_OFF
+AUX	d3038pnilunilcd17vd-1vpnilvunil	RF Switch - SILENT	JOY_BTN1
+AUX	d3010pnilu3010cd33vd1vpnilvu0	RWR Indicator Control ACT/PWR Button	JOY_BTN34
+AUX	d3012pnilu3012cd33vd1vpnilvu0	RWR Indicator Control ALTITUDE Button	JOY_BTN36
+AUX	d3017pnilunilcd33vd1vpnilvunil	RWR Indicator Control POWER Button - Depressed/Released	JOY_BTN37
+AUX	d3009pnilu3009cd33vd1vpnilvu0	RWR Indicator Control SEARCH Button	JOY_BTN35
+AUX	d3001pnilunilcd32vd1vpnilvunil	RWR Source Switch - ON	JOY_BTN25
+AUX	d3011pnilunilcd2vd1vpnilvunil	STORES CONFIG Switch - CAT I	JOY_BTN13
+AUX	d3011pnilunilcd2vd0vpnilvunil	STORES CONFIG Switch - CAT III	JOY_BTN13_OFF
+CONSOLE	d3010pnilu3010cd6vd1vpnilvu0	AB RESET Switch - AB RESET/NORM	JOY_BTN34
+CONSOLE	d3011pnilu3011cd6vd-1vpnilvu0	AB RESET Switch - ENG DATA/NORM	JOY_BTN35
+CONSOLE	d3002pnilunilcd39vd1vpnilvunil	COMM 1 (UHF) Mode Knob - GD	JOY_BTN30
+CONSOLE	d3002pnilunilcd39vd0vpnilvunil	COMM 1 (UHF) Mode Knob - OFF	JOY_BTN28
+CONSOLE	d3002pnilunilcd39vd0.5vpnilvunil	COMM 1 (UHF) Mode Knob - SQL	JOY_BTN29
+CONSOLE	d3004pnilunilcd39vd1vpnilvunil	COMM 2 (VHF) Mode Knob - GD	JOY_BTN33
+CONSOLE	d3004pnilunilcd39vd0vpnilvunil	COMM 2 (VHF) Mode Knob - OFF	JOY_BTN31
+CONSOLE	d3004pnilunilcd39vd0.5vpnilvunil	COMM 2 (VHF) Mode Knob - SQL	JOY_BTN32
+CONSOLE	d3019pnilunilcd66vd1vpnilvunil	ECM 2 Button - Depressed/Released	JOY_BTN40
+CONSOLE	d3020pnilunilcd66vd1vpnilvunil	ECM 3 Button - Depressed/Released	JOY_BTN41
+CONSOLE	d3021pnilunilcd66vd1vpnilvunil	ECM 4 Button - Depressed/Released	JOY_BTN42
+CONSOLE	d3022pnilunilcd66vd1vpnilvunil	ECM 5 Button - Depressed/Released	JOY_BTN43
+CONSOLE	d3023pnilunilcd66vd1vpnilvunil	ECM 6 Button - Depressed/Released	JOY_BTN44
+CONSOLE	d3005pnilu3005cd66vd1vpnilvu0	ECM BIT Button	JOY_BTN5
+CONSOLE	d3024pnilunilcd66vd1vpnilvunil	ECM FRM Button - Depressed/Released	JOY_BTN45
+CONSOLE	d3001pnilunilcd66vd-1vpnilvunil	ECM Power Switch - OFF	JOY_BTN2
+CONSOLE	d3001pnilunilcd66vd1vpnilvunil	ECM Power Switch - OPR	JOY_BTN1
+CONSOLE	d3001pnilunilcd66vd0vpnilvunil	ECM Power Switch - STBY	JOY_BTN1_OFF,JOY_BTN2_OFF
+CONSOLE	d3004pnilu3004cd66vd1vpnilvu0	ECM RESET Button	JOY_BTN6
+CONSOLE	d3025pnilunilcd66vd1vpnilvunil	ECM SPL Button - Depressed/Released	JOY_BTN46
+CONSOLE	d3002pnilunilcd66vd1vpnilvunil	ECM XMIT Switch - 1	JOY_BTN3
+CONSOLE	d3002pnilunilcd66vd0vpnilvunil	ECM XMIT Switch - 2	JOY_BTN3_OFF,JOY_BTN4_OFF
+CONSOLE	d3002pnilunilcd66vd-1vpnilvunil	ECM XMIT Switch - 3	JOY_BTN4
+CONSOLE	d3002pnilu3002cd3vd1vpnilvu0	ELEC CAUTION RESET Button	JOY_BTN9
+CONSOLE	d3008pnilunilcd6vd0vpnilvunil	ENG CONT Switch - PRI	JOY_BTN14_OFF
+CONSOLE	d3008pnilunilcd6vd1vpnilvunil	ENG CONT Switch - SEC	JOY_BTN14
+CONSOLE	d3007pnilunilcd6vd0vpnilvunil	ENG CONT Switch Cover - CLOSE	JOY_BTN59_OFF
+CONSOLE	d3007pnilunilcd6vd1vpnilvunil	ENG CONT Switch Cover - OPEN	JOY_BTN59
+CONSOLE	d3003pnilunilcd6vd0vpnilvunil	EPU Switch - NORM	JOY_BTN8_OFF,JOY_BTN7_OFF
+CONSOLE	d3003pnilunilcd6vd-1vpnilvunil	EPU Switch - OFF	JOY_BTN8
+CONSOLE	d3003pnilunilcd6vd1vpnilvunil	EPU Switch - ON	JOY_BTN7
+CONSOLE	d3012pnilunilcd39vd-1vpnilvunil	HOT MIC CIPHER Switch - CIPHER	JOY_BTN38
+CONSOLE	d3012pnilunilcd39vd1vpnilvunil	HOT MIC CIPHER Switch - HOT MIC	JOY_BTN37
+CONSOLE	d3012pnilunilcd39vd0vpnilvunil	HOT MIC CIPHER Switch - OFF	JOY_BTN38_OFF,JOY_BTN37_OFF
+CONSOLE	d3005pnilu3005cd6vd1vpnilvu0	JFS Switch - START 1 / OFF	JOY_BTN12
+CONSOLE	d3006pnilu3006cd6vd-1vpnilvu0	JFS Switch - START 2 / OFF	JOY_BTN13
+CONSOLE	d3001pnilunilcd3vd0vpnilvunil	MAIN PWR Switch - BATT	JOY_BTN17_OFF,JOY_BTN16_OFF
+CONSOLE	d3001pnilunilcd3vd1vpnilvunil	MAIN PWR Switch - MAIN PWR	JOY_BTN16
+CONSOLE	d3001pnilunilcd3vd-1vpnilvunil	MAIN PWR Switch - OFF	JOY_BTN17
+CONSOLE	d3010pnilu3010cd2vd1vpnilvu0	MANUAL PITCH Override Switch - OVRD/NORM	JOY_BTN15
+CONSOLE	d3009pnilunilcd6vd1vpnilvunil	MAX POWER Switch - MAX POWER	JOY_BTN36
+CONSOLE	d3009pnilunilcd6vd0vpnilvunil	MAX POWER Switch - OFF	JOY_BTN36_OFF
+CONSOLE	d1212pnilunilcdnilvdnilvpnilvunil	UHF 0.025Mhz Manual Frequency Knob - Decrease	JOY_BTN57
+CONSOLE	d1211pnilunilcdnilvdnilvpnilvunil	UHF 0.025Mhz Manual Frequency Knob - Increase	JOY_BTN58
+CONSOLE	d1210pnilunilcdnilvdnilvpnilvunil	UHF 0.1Mhz Manual Frequency Knob - Decrease	JOY_BTN55
+CONSOLE	d1209pnilunilcdnilvdnilvpnilvunil	UHF 0.1Mhz Manual Frequency Knob - Increase	JOY_BTN56
+CONSOLE	d1206pnilunilcdnilvdnilvpnilvunil	UHF 10Mhz Manual Frequency Knob - Decrease	JOY_BTN51
+CONSOLE	d1205pnilunilcdnilvdnilvpnilvunil	UHF 10Mhz Manual Frequency Knob - Increase	JOY_BTN52
+CONSOLE	d1208pnilunilcdnilvdnilvpnilvunil	UHF 1Mhz Manual Frequency Knob - Decrease	JOY_BTN53
+CONSOLE	d1207pnilunilcdnilvdnilvpnilvunil	UHF 1Mhz Manual Frequency Knob - Increase	JOY_BTN54
+CONSOLE	d3027pnilunilcd37vd-1vpnilvunil	UHF A-3-2 Knob - CCW/Decrease	JOY_BTN49
+CONSOLE	d3027pnilunilcd37vd1vpnilvunil	UHF A-3-2 Knob - CW/Increase	JOY_BTN50
+CONSOLE	d1200pnilunilcdnilvdnilvpnilvunil	UHF CHAN Knob - CCW/Decrease	JOY_BTN47
+CONSOLE	d1221pnilunilcdnilvdnilvpnilvunil	UHF Function Knob - ADF	JOY_BTN21
+CONSOLE	d1220pnilunilcdnilvdnilvpnilvunil	UHF Function Knob - BOTH	JOY_BTN20
+CONSOLE	d1219pnilunilcdnilvdnilvpnilvunil	UHF Function Knob - MAIN	JOY_BTN19
+CONSOLE	d1218pnilunilcdnilvdnilvpnilvunil	UHF Function Knob - OFF	JOY_BTN18
+CONSOLE	d1224pnilunilcdnilvdnilvpnilvunil	UHF Mode Knob - GUARD	JOY_BTN24
+CONSOLE	d1222pnilunilcdnilvdnilvpnilvunil	UHF Mode Knob - MANUAL	JOY_BTN22
+CONSOLE	d1223pnilunilcdnilvdnilvpnilvunil	UHF Mode Knob - PRESET	JOY_BTN23
+CONSOLE	d3010pnilunilcd37vd0vpnilvunil	UHF SQUELCH Switch - OFF	JOY_BTN25
+CONSOLE	d3010pnilunilcd37vd1vpnilvunil	UHF SQUELCH Switch - ON	JOY_BTN25_OFF
+CONSOLE	d1214pnilu1214cdnilvd1vpnilvu0	UHF STATUS Button	JOY_BTN27
+CONSOLE	d1213pnilu1213cdnilvd1vpnilvu0	UHF TEST DISPLAY Button	JOY_BTN66
+
+## AXES (15)
+AUX	a2002cdnil	Roll	+	-JOY_X
+AUX	a2004cdnil	Thrust	+	-JOY_Z
+AUX	a2112cdnil	Wheel Brake Left	+JOY_RX	-
+AUX	a2113cdnil	Wheel Brake Right	+JOY_RY	-
+AUX	a3003cd30	HMCS SYMBOLOGY INT Knob	+JOY_Z	-
+CONSOLE	a2002cdnil	Roll	+	-JOY_X
+CONSOLE	a2003cdnil	Rudder	+	-JOY_RZ
+CONSOLE	a2004cdnil	Thrust	+	-JOY_Z
+CONSOLE	a3020cd39	COMM 1 (UHF) Power Knob	+JOY_X	-
+CONSOLE	a3023cd39	COMM 2 (VHF) Power Knob	+JOY_Y	-
+CONSOLE	a3024cd37	UHF VOL Knob	+JOY_RZ	-
+CONSOLE	a3028cd39	MSL Tone Knob	+JOY_Z	-
+CONSOLE	a3032cd39	THREAT Tone Knob	+JOY_RX	-
+CONSOLE	a3034cd39	ILS Power Knob	+JOY_SLIDER2	-
+CONSOLE	a3038cd39	INTERCOM Knob	+JOY_RY	-
