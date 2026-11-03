@@ -9,8 +9,7 @@
 //  사용 핀: 41 / 42 (헤더),  여유 1
 //  백라이트: pin 13 — 온보드 LED가 상태 표시등이 됨
 //
-//  DX 버튼 배정 순서: switches[0..31](38) → 래더(8) → 엔코더(12) → 커버(3)
-//                     → COMM PWR(4) → switches[32..](1, SWITCH_LATE_START) = 66
+//  DX 버튼 배정 순서: dxOrder[] 표의 줄 순서 그대로 (총 66)
 //  축 10개: AUDIO 1 x6 + AUDIO 2 x3 + UHF VOL x1
 //
 //  USB Type: Serial + Keyboard + Mouse + Joystick
@@ -259,8 +258,8 @@ struct AnalogBtnArrayDef {
 //  예) {"My Switch",  PNL_GEAR, SW_ON_OFF, -1, 5, 0, NULL}   Teensy 핀 5
 //      {"MCP Switch", PNL_MISC, SW_ON_OFF,  0, 5, 0, NULL}   MCP#0 GPA5
 //
-//  ※ 스위치를 추가할 때 기존 DX 번호를 보존하려면 배열 **맨 뒤**에 붙이십시오.
-//    `SWITCH_LATE_START` 이후 항목은 래더·엔코더·커버 뒤에 번호를 받습니다.
+//  ※ 이 배열의 순서는 DX 번호와 무관합니다. 배선대로 두고, 새 하드웨어를
+//    추가하면 `dxOrder[]` 에 한 줄 넣으십시오 — 빠뜨리면 컴파일이 막힙니다.
 //
 
 
@@ -275,37 +274,35 @@ const McpDeviceDef mcpDevices[] = {
 
 // --- Digital Switches ---
 //
-// 순서 주의: ECM -> ELEC -> AVTR 를 먼저 두어 버튼 1~11 이 두 단계에서
-// 동일하게 유지되도록 했습니다. T41 전용 패널은 그 뒤에 붙습니다.
 const SwitchDef switches[] = {
   // name                 panel        type           mcpIdx pin1 pin2 numPos
 
-  // ---- ECM Panel (MCP 0x22, GPB) ----                     btn 1~6
+  // ---- ECM Panel (MCP 0x22, GPB) ----
   {"ECM OPR/STBY",        PNL_ECM,     SW_ON_OFF_ON,     2,  11,  10,  0},  // GPB3/GPB2  (OPR/OFF)
   {"ECM XMIT",            PNL_ECM,     SW_ON_OFF_ON,     2,  13,  12,  0},  // GPB5/GPB4  (XMIT1/XMIT3)
   {"ECM BIT",             PNL_ECM,     SW_ON_OFF,        2,  14,   0,  0},  // GPB6  momentary
   {"ECM RESET",           PNL_ECM,     SW_ON_OFF,        2,  15,   0,  0},  // GPB7  momentary
 
-  // ---- EPU Panel (MCP 0x21) ----                           btn 7~8
+  // ---- EPU Panel (MCP 0x21) ----
   {"EPU",                 PNL_EPU,     SW_ON_OFF_ON,     1,   8,   9,  0},  // GPB0/GPB1  OFF/NORM/ON (배선 교차)
 
-  // ---- ELEC Panel (MCP 0x21) ----                          btn 9
+  // ---- ELEC Panel (MCP 0x21) ----
   {"ELEC CAUTION RST",    PNL_ELEC,    SW_ON_OFF,        1,  10,   0,  0},  // GPB2  momentary (CAUTION RST)
 
-  // ---- AVTR Panel (MCP 0x22) ----                        btn 10~11
+  // ---- AVTR Panel (MCP 0x22) ----
   {"AVTR",                PNL_AVTR,    SW_ON_OFF_ON,     2,   8,   9,  0},  // GPB0/GPB1  UNTHRD/RECORD/EVENT MRK
 
-  // ---- ENGINE START Panel (Teensy direct) ----           btn 12~14
+  // ---- ENGINE START Panel (Teensy direct) ----
   {"JFS",       PNL_ENGINE, SW_ON_OFF_ON, -1, PIN_JFS1, PIN_JFS2, 0},  // OFF/START1/START2
   {"ENG CONT",  PNL_ENGINE, SW_ON_OFF,    -1, PIN_ENG_CONT,   0,  0},  // PRI/SEC
 
-  // ---- MPO (Teensy direct) ----                          btn 15
+  // ---- MPO (Teensy direct) ----
   {"MPO",       PNL_MPO,    SW_ON_OFF,    -1, PIN_MPO,        0,  0},  // NORM/OVRD
 
-  // ---- ELEC MAIN PWR (MCP 0x21) ----                     btn 16~17
+  // ---- ELEC MAIN PWR (MCP 0x21) ----
   {"ELEC MAIN PWR",       PNL_ELEC,    SW_ON_OFF_ON,     1,  14,  15,  0},  // GPB6/GPB7  MAIN/OFF (배선 교차)
 
-  // ---- UHF Panel (MCP 0x20, 패널 실장) ----               btn 18~27
+  // ---- UHF Panel (MCP 0x20, 패널 실장) ----
   // SW_ROTARY 는 pin1 부터 numPos 개 연속 GPIO 를 읽습니다.
   // 실제 배선: FUNCTION(PB4~7) → MODE(PB1~3) → STATUS(PB0)
   // SW_ROTARY 는 오름차순 고정이라 DX 를 뒤집으려면 개별 SW_ON_OFF 로 분리
@@ -320,7 +317,7 @@ const SwitchDef switches[] = {
   {"UHF T-TONE",   PNL_UHF, SW_ON_OFF, -1, PIN_UHF_TTONE,   0, 0},  // Teensy 34  momentary
   {"UHF STATUS",  PNL_UHF, SW_ON_OFF, -1, PIN_UHF_STATUS,  0, 0},  // Teensy 41  momentary
 
-  // ---- AUDIO 1 모드 로터리 (MCP 0x20, 케이블 C8 로 UHF 패널까지 점퍼) ----  btn 28~33
+  // ---- AUDIO 1 모드 로터리 (MCP 0x20, 케이블 C8 로 UHF 패널까지 점퍼) ----
   // 실제 배선: COMM1 PA4=OFF PA3=SQL PA2=GD, COMM2 PA7=OFF PA6=SQL PA5=GD
   // SW_ROTARY 는 오름차순 고정이라 DX 를 뒤집으려면 개별 SW_ON_OFF 로 분리
   {"COMM1 OFF",   PNL_AUDIO1, SW_ON_OFF, 0, 4, 0, 0},  // PA4
@@ -330,16 +327,16 @@ const SwitchDef switches[] = {
   {"COMM2 SQL",   PNL_AUDIO1, SW_ON_OFF, 0, 6, 0, 0},  // PA6
   {"COMM2 GD",    PNL_AUDIO1, SW_ON_OFF, 0, 5, 0, 0},  // PA5
 
-  // ---- ENGINE START 추가 스위치 (Teensy direct) ----      btn 34~36
+  // ---- ENGINE START 추가 스위치 (Teensy direct) ----
   {"AB RESET",  PNL_ENGINE, SW_ON_OFF,    -1, PIN_ABRESET,    0,  0},
   {"ENG DATA",  PNL_ENGINE, SW_ON_OFF,    -1, PIN_ENGDATA,    0,  0},
   {"MAX POWER", PNL_ENGINE, SW_ON_OFF,    -1, PIN_MAXPOWER,   0,  0},
 
-  // ---- AUDIO 2 스위치 (Teensy direct) ----                btn 37~38
+  // ---- AUDIO 2 스위치 (Teensy direct) ----
   {"HOT MIC",   PNL_AUDIO2, SW_ON_OFF,     0,   0,            0,  0},  // MCP#0 PA0
   {"CIPHER",    PNL_AUDIO2, SW_ON_OFF,     0,   1,            0,  0},  // MCP#0 PA1
 
-  // ---- UHF TEST (Teensy direct) ----                      btn 40
+  // ---- UHF TEST (Teensy direct) ----
   {"UHF TEST",  PNL_UHF,    SW_ON_OFF,    -1, PIN_UHF_TEST,   0,  0},  // Teensy 39 (A15) momentary
 };
 
@@ -744,8 +741,8 @@ static uint32_t  protoDetectStart = 0;
 static uint8_t switchBtnStart[NUM_SWITCHES];
 static uint8_t analogBtnStart[NUM_ANALOG_ARRAYS];
 static uint8_t encoderBtnStart[NUM_ENCODERS];
-static uint8_t coverBtnBase;             // 커버 자동화 DX 시작 번호
-static uint8_t commPwrBtnBase;           // COMM 전원 DX 시작 번호
+static uint8_t coverBtnStart[NUM_COVERS];      // 커버 자동화 DX — dxOrder[] 가 배정
+static uint8_t commPwrBtnStart[NUM_COMM_PWR];  // COMM 전원 DX — dxOrder[] 가 배정
 static int     totalButtons = 0;
 
 static uint8_t prevBtnState[128];
@@ -760,46 +757,157 @@ int switchButtonCount(const SwitchDef& sw) {
   return 1;
 }
 
-// switches[] 의 이 인덱스부터는 DX 번호를 **맨 마지막**에 배정합니다.
-// 새 스위치를 배열 뒤에 붙여도 기존 버튼 번호가 밀리지 않아 BMS 재바인딩이 불필요합니다.
-// 스위치를 추가했는데 번호를 밀고 싶지 않으면 이 값은 건드리지 말고 배열 뒤에만 추가하십시오.
-#define SWITCH_LATE_START 32
-static_assert(SWITCH_LATE_START <= NUM_SWITCHES,
-              "SWITCH_LATE_START 가 switches[] 길이를 넘습니다");
+// 커버 / COMM 전원은 물리 스위치가 아니라 펌웨어가 합성하는 DX 라
+// 이름이 배열에 없습니다. dxOrder[] 와 기동 요약에서 쓰려고 여기 둡니다.
+static const char* const coverNames[NUM_COVERS] = {
+  "ENG CONT COVER", "EPU OFF COVER", "EPU ON COVER"
+};
+static const char* const commPwrNames[NUM_COMM_PWR] = {
+  "COMM1 PWR OFF", "COMM1 PWR ON", "COMM2 PWR OFF", "COMM2 PWR ON"
+};
+
+
+// ================================================================
+//  DX 배정 순서 — dxOrder[]
+// ================================================================
+//
+//  이 표의 **줄 순서**가 그대로 DX 번호 순서입니다. 번호는 적지 않습니다.
+//  각 항목이 몇 개를 차지하는지는 그 항목의 타입에서 나옵니다
+//  (SW_ON_OFF 1, SW_ON_OFF_ON 2, SW_ROTARY numPos, 엔코더 2(CW/CCW),
+//   래더 numButtons, 커버/COMM 전원 각 1). 주석의 xN 이 그 폭입니다.
+//
+//  idx 는 해당 배열의 인덱스입니다. switches[] / encoders[] /
+//  analogBtnArrays[] 의 순서는 배선 정보라 건드리지 않고, DX 순서만
+//  여기서 따로 정합니다 — 핀 배치는 그대로 둔 채 번호만 바뀝니다.
+//
+//  ※ 줄을 옮기면 그 뒤 DX 가 전부 밀립니다. 바인딩 파일을 손으로
+//    유지하지 말고 다시 생성하십시오. 현재 번호는 기동 시 시리얼
+//    요약이 이 순서 그대로 찍어 줍니다.
+
+enum DxKind { DX_SW, DX_LADDER, DX_ENC, DX_COVER, DX_COMMPWR };
+
+struct DxEntry {
+  DxKind  kind;
+  uint8_t idx;
+};
+
+const DxEntry dxOrder[] = {
+  {DX_SW,        0},   // ECM OPR/STBY         x2
+  {DX_SW,        1},   // ECM XMIT             x2
+  {DX_SW,        2},   // ECM BIT              x1
+  {DX_SW,        3},   // ECM RESET            x1
+  {DX_SW,        4},   // EPU                  x2
+  {DX_SW,        5},   // ELEC CAUTION RST     x1
+  {DX_SW,        6},   // AVTR                 x2
+  {DX_SW,        7},   // JFS                  x2
+  {DX_SW,        8},   // ENG CONT             x1
+  {DX_SW,        9},   // MPO                  x1
+  {DX_SW,       10},   // ELEC MAIN PWR        x2
+  {DX_SW,       11},   // UHF FUNC ADF         x1
+  {DX_SW,       12},   // UHF FUNC BOTH        x1
+  {DX_SW,       13},   // UHF FUNC MAIN        x1
+  {DX_SW,       14},   // UHF FUNC OFF         x1
+  {DX_SW,       15},   // UHF MODE GRD         x1
+  {DX_SW,       16},   // UHF MODE PRE         x1
+  {DX_SW,       17},   // UHF MODE MNL         x1
+  {DX_SW,       18},   // UHF SQUELCH          x1
+  {DX_SW,       19},   // UHF T-TONE           x1
+  {DX_SW,       20},   // UHF STATUS           x1
+  {DX_SW,       21},   // COMM1 OFF            x1
+  {DX_SW,       22},   // COMM1 SQL            x1
+  {DX_SW,       23},   // COMM1 GD             x1
+  {DX_SW,       24},   // COMM2 OFF            x1
+  {DX_SW,       25},   // COMM2 SQL            x1
+  {DX_SW,       26},   // COMM2 GD             x1
+  {DX_SW,       27},   // AB RESET             x1
+  {DX_SW,       28},   // ENG DATA             x1
+  {DX_SW,       29},   // MAX POWER            x1
+  {DX_SW,       30},   // HOT MIC              x1
+  {DX_SW,       31},   // CIPHER               x1
+  {DX_LADDER,    0},   // ECM Buttons          x8
+  {DX_ENC,       0},   // UHF PRESET           x2
+  {DX_ENC,       1},   // UHF 100MHz           x2
+  {DX_ENC,       2},   // UHF 10MHz            x2
+  {DX_ENC,       3},   // UHF 1MHz             x2
+  {DX_ENC,       4},   // UHF 0.1MHz           x2
+  {DX_ENC,       5},   // UHF 0.025MHz         x2
+  {DX_COVER,     0},   // ENG CONT COVER       x1
+  {DX_COVER,     1},   // EPU OFF COVER        x1
+  {DX_COVER,     2},   // EPU ON COVER         x1
+  {DX_COMMPWR,   0},   // COMM1 PWR OFF        x1
+  {DX_COMMPWR,   1},   // COMM1 PWR ON         x1
+  {DX_COMMPWR,   2},   // COMM2 PWR OFF        x1
+  {DX_COMMPWR,   3},   // COMM2 PWR ON         x1
+  {DX_SW,       32},   // UHF TEST             x1
+};
+#define NUM_DX_ORDER (sizeof(dxOrder) / sizeof(dxOrder[0]))
+
+// 항목을 빠뜨리면 그 컨트롤의 BtnStart 가 0 으로 남아 조용히 DX 0 을
+// 누르게 됩니다. 개수는 여기서, 누락/중복은 assignButtons() 에서 잡습니다.
+static_assert(NUM_DX_ORDER == NUM_SWITCHES + NUM_ANALOG_ARRAYS + NUM_ENCODERS
+                              + NUM_COVERS + NUM_COMM_PWR,
+              "dxOrder[] 항목 수가 하드웨어 총 개수와 맞지 않습니다");
+
+uint8_t dxEntryCount(const DxEntry& e) {
+  switch (e.kind) {
+    case DX_SW:     return switchButtonCount(switches[e.idx]);
+    case DX_LADDER: return analogBtnArrays[e.idx].numButtons;
+    case DX_ENC:    return 2;                    // CW, CCW
+    default:        return 1;                    // DX_COVER, DX_COMMPWR
+  }
+}
+
+const char* dxEntryName(const DxEntry& e) {
+  switch (e.kind) {
+    case DX_SW:     return switches[e.idx].name;
+    case DX_LADDER: return analogBtnArrays[e.idx].groupName;
+    case DX_ENC:    return encoders[e.idx].name;
+    case DX_COVER:  return coverNames[e.idx];
+    default:        return commPwrNames[e.idx];
+  }
+}
 
 void assignButtons() {
   int btn = 1;
 
-  for (unsigned int i = 0; i < SWITCH_LATE_START; i++) {
-    switchBtnStart[i] = btn;
-    btn += switchButtonCount(switches[i]);
-  }
-  for (unsigned int i = 0; i < NUM_ANALOG_ARRAYS; i++) {
-    analogBtnStart[i] = btn;
-    btn += analogBtnArrays[i].numButtons;
-  }
-  for (unsigned int i = 0; i < NUM_ENCODERS; i++) {
-    encoderBtnStart[i] = btn;
-    btn += 2;                       // CW, CCW
-  }
+  memset(switchBtnStart,  0, sizeof(switchBtnStart));
+  memset(analogBtnStart,  0, sizeof(analogBtnStart));
+  memset(encoderBtnStart, 0, sizeof(encoderBtnStart));
+  memset(coverBtnStart,   0, sizeof(coverBtnStart));
+  memset(commPwrBtnStart, 0, sizeof(commPwrBtnStart));
 
-  // 커버 자동화 (ENG CONT cover, EPU OFF cover, EPU ON cover)
-  coverBtnBase = btn;
-  btn += NUM_COVERS;
-
-  // COMM1/COMM2 Power ON/OFF (pot threshold)
-  commPwrBtnBase = btn;
-  btn += NUM_COMM_PWR;
-
-  // 뒤늦게 추가된 스위치 — 맨 마지막 번호
-  for (unsigned int i = SWITCH_LATE_START; i < NUM_SWITCHES; i++) {
-    switchBtnStart[i] = btn;
-    btn += switchButtonCount(switches[i]);
+  for (unsigned int i = 0; i < NUM_DX_ORDER; i++) {
+    const DxEntry& e = dxOrder[i];
+    switch (e.kind) {
+      case DX_SW:      switchBtnStart[e.idx]  = btn; break;
+      case DX_LADDER:  analogBtnStart[e.idx]  = btn; break;
+      case DX_ENC:     encoderBtnStart[e.idx] = btn; break;
+      case DX_COVER:   coverBtnStart[e.idx]   = btn; break;
+      case DX_COMMPWR: commPwrBtnStart[e.idx] = btn; break;
+    }
+    btn += dxEntryCount(e);
   }
 
   totalButtons = btn - 1;
   if (totalButtons > 128)
     Serial.printf("ERROR: %d buttons assigned, max is 128\n", totalButtons);
+
+  // 개수가 맞아도 한 항목이 두 번 들어가면 다른 하나가 0 으로 남습니다
+  for (unsigned int i = 0; i < NUM_SWITCHES; i++)
+    if (!switchBtnStart[i])
+      Serial.printf("ERROR: switches[%u] (%s) not in dxOrder[]\n", i, switches[i].name);
+  for (unsigned int i = 0; i < NUM_ANALOG_ARRAYS; i++)
+    if (!analogBtnStart[i])
+      Serial.printf("ERROR: ladder %s not in dxOrder[]\n", analogBtnArrays[i].groupName);
+  for (unsigned int i = 0; i < NUM_ENCODERS; i++)
+    if (!encoderBtnStart[i])
+      Serial.printf("ERROR: encoder %s not in dxOrder[]\n", encoders[i].name);
+  for (unsigned int i = 0; i < NUM_COVERS; i++)
+    if (!coverBtnStart[i])
+      Serial.printf("ERROR: cover %s not in dxOrder[]\n", coverNames[i]);
+  for (unsigned int i = 0; i < NUM_COMM_PWR; i++)
+    if (!commPwrBtnStart[i])
+      Serial.printf("ERROR: %s not in dxOrder[]\n", commPwrNames[i]);
 }
 
 
@@ -815,9 +923,7 @@ void assignButtons() {
 //  개념이 있는 것은 DCS 쪽이라, 실제로 바인딩할 대상은 DCS 에만
 //  있습니다. BMS 는 스위치를 올리면 커버가 알아서 열려 비워 두면 됩니다.
 //
-//  DX 59: ENG CONT COVER
-//  DX 60: EPU OFF COVER
-//  DX 61: EPU ON COVER
+//  DX 번호는 dxOrder[] 가 정합니다. 세 커버가 연속일 필요는 없습니다.
 
 #define SW_IDX_ENG_CONT  8    // switches[] 인덱스 — 배열 순서 변경 시 함께 수정
 #define SW_IDX_EPU       4
@@ -854,16 +960,16 @@ void processCovers() {
 
     if (rt.openTicks > 0) {
       // Opening: 커버 ON, 스위치 억제 (DCS가 커버 열릴 시간 확보)
-      Joystick.button(coverBtnBase + i, 1);
+      Joystick.button(coverBtnStart[i], 1);
       Joystick.button(swBtn, 0);
       rt.openTicks--;
     } else if (rt.closeTicks > 0) {
       // Closing: 스위치 OFF (이미 processSwitches에서 처리), 커버는 아직 ON 유지
-      Joystick.button(coverBtnBase + i, 1);
+      Joystick.button(coverBtnStart[i], 1);
       rt.closeTicks--;
     } else {
       // 정상: 커버 = 스위치 상태 미러링
-      Joystick.button(coverBtnBase + i, swState);
+      Joystick.button(coverBtnStart[i], swState);
     }
   }
 }
@@ -880,10 +986,7 @@ void processCovers() {
 //  이 DX 는 심과 무관하게 항상 나갑니다. 볼륨 노브 끝에 전원을 둔
 //  것은 BMS 의 모델링을 따른 것입니다.
 //
-//  COMM1 PWR OFF = DX 62
-//  COMM1 PWR ON  = DX 63
-//  COMM2 PWR OFF = DX 64
-//  COMM2 PWR ON  = DX 65
+//  DX 번호는 dxOrder[] 가 정합니다. 네 개가 연속일 필요는 없습니다.
 
 #define COMM_PWR_THRESHOLD  5     // ADC threshold (10-bit, 0~1023)
 #define COMM_PWR_PULSE_TICKS 4    // ~40ms pulse @ 100Hz
@@ -915,8 +1018,8 @@ void processCommPower() {
     }
 
     // Emit DX pulse
-    uint8_t offBtn = commPwrBtnBase + ch * 2;       // COMM{ch} PWR OFF
-    uint8_t onBtn  = commPwrBtnBase + ch * 2 + 1;   // COMM{ch} PWR ON
+    uint8_t offBtn = commPwrBtnStart[ch * 2];       // COMM{ch} PWR OFF
+    uint8_t onBtn  = commPwrBtnStart[ch * 2 + 1];   // COMM{ch} PWR ON
     if (rt.pulseTicks > 0) {
       Joystick.button(offBtn, rt.btnOffset == 0 ? 1 : 0);
       Joystick.button(onBtn,  rt.btnOffset == 1 ? 1 : 0);
@@ -1370,23 +1473,30 @@ void setup() {
   Serial.printf("  Total buttons: %d\n", totalButtons);
   Serial.println("=========================");
 
-  for (unsigned int i = 0; i < NUM_SWITCHES; i++) {
-    int cnt = switchButtonCount(switches[i]);
-    const char* loc = (switches[i].mcpIdx >= 0) ? "MCP" : "DIR";
-    if (cnt == 1) Serial.printf("  btn %-3d     : %-20s [%s]\n", switchBtnStart[i], switches[i].name, loc);
-    else          Serial.printf("  btn %-3d~%-3d : %-20s [%s]\n", switchBtnStart[i],
-                                switchBtnStart[i] + cnt - 1, switches[i].name, loc);
+  // dxOrder[] 순서 그대로 = 실제 DX 순서. 커버·COMM 전원까지 전부 나옵니다.
+  for (unsigned int i = 0; i < NUM_DX_ORDER; i++) {
+    const DxEntry& e = dxOrder[i];
+    uint8_t cnt = dxEntryCount(e);
+    uint8_t dx  = 0;
+    switch (e.kind) {
+      case DX_SW:      dx = switchBtnStart[e.idx];  break;
+      case DX_LADDER:  dx = analogBtnStart[e.idx];  break;
+      case DX_ENC:     dx = encoderBtnStart[e.idx]; break;
+      case DX_COVER:   dx = coverBtnStart[e.idx];   break;
+      case DX_COMMPWR: dx = commPwrBtnStart[e.idx]; break;
+    }
+    const char* kindStr;
+    switch (e.kind) {
+      case DX_SW:      kindStr = (switches[e.idx].mcpIdx >= 0) ? "MCP" : "DIR"; break;
+      case DX_LADDER:  kindStr = "ladder";     break;
+      case DX_ENC:     kindStr = "enc CW/CCW"; break;
+      case DX_COVER:   kindStr = "cover auto"; break;
+      default:         kindStr = "pot pulse";  break;
+    }
+    if (cnt == 1) Serial.printf("  btn %-3d     : %-20s [%s]\n", dx, dxEntryName(e), kindStr);
+    else          Serial.printf("  btn %-3d~%-3d : %-20s [%s]\n", dx, dx + cnt - 1,
+                                dxEntryName(e), kindStr);
   }
-  for (unsigned int i = 0; i < NUM_ANALOG_ARRAYS; i++)
-    Serial.printf("  btn %-3d~%-3d : %-20s [ladder %d]\n", analogBtnStart[i],
-                  analogBtnStart[i] + analogBtnArrays[i].numButtons - 1,
-                  analogBtnArrays[i].groupName, analogBtnArrays[i].numButtons);
-  for (unsigned int i = 0; i < NUM_ENCODERS; i++)
-    Serial.printf("  btn %-3d~%-3d : %-20s [enc CW/CCW]\n", encoderBtnStart[i],
-                  encoderBtnStart[i] + 1, encoders[i].name);
-  Serial.printf("  btn %-3d     : %-20s [cover auto]\n", coverBtnBase,     "ENG CONT COVER");
-  Serial.printf("  btn %-3d     : %-20s [cover auto]\n", coverBtnBase + 1, "EPU OFF COVER");
-  Serial.printf("  btn %-3d     : %-20s [cover auto]\n", coverBtnBase + 2, "EPU ON COVER");
   Serial.println("=========================");
 
   welcomeCeremony();

@@ -128,7 +128,8 @@ struct AnalogBtnArrayDef {
 //  예) {"My Switch",  PNL_GEAR, SW_ON_OFF, -1, 5, 0, NULL}   Teensy 핀 5
 //      {"MCP Switch", PNL_MISC, SW_ON_OFF,  0, 5, 0, NULL}   MCP#0 GPA5
 //
-//  ※ 스위치를 추가할 때 기존 DX 번호를 보존하려면 배열 **맨 뒤**에 붙이십시오.
+//  ※ 이 배열의 순서는 DX 번호와 무관합니다. 배선대로 두고, 새 하드웨어를
+//    추가하면 `dxOrder[]` 에 한 줄 넣으십시오 — 빠뜨리면 컴파일이 막힙니다.
 //
 
 
@@ -490,18 +491,90 @@ int switchButtonCount(SwitchType type) {
   return 1;
 }
 
+// ================================================================
+//  DX 배정 순서 — dxOrder[]
+// ================================================================
+//
+//  이 표의 **줄 순서**가 그대로 DX 번호 순서입니다. 번호는 적지 않습니다.
+//  각 항목이 몇 개를 차지하는지는 그 항목의 타입에서 나옵니다
+//  (SW_ON_OFF / SW_ON_OFF_NC 1, SW_ON_OFF_ON 2, 래더 numButtons).
+//  주석의 xN 이 그 폭입니다.
+//
+//  idx 는 해당 배열의 인덱스입니다. switches[] / analogBtnArrays[] 의
+//  순서는 배선 정보라 건드리지 않고, DX 순서만 여기서 따로 정합니다 —
+//  핀 배치는 그대로 둔 채 번호만 바뀝니다.
+//
+//  ※ 줄을 옮기면 그 뒤 DX 가 전부 밀립니다. 바인딩 파일을 손으로
+//    유지하지 말고 다시 생성하십시오. 현재 번호는 기동 시 시리얼
+//    요약이 이 순서 그대로 찍어 줍니다.
+
+enum DxKind { DX_SW, DX_LADDER };
+
+struct DxEntry {
+  DxKind  kind;
+  uint8_t idx;
+};
+
+const DxEntry dxOrder[] = {
+  {DX_SW,      0},   // RF                   x2
+  {DX_SW,      1},   // Laser ARM            x1
+  {DX_SW,      2},   // ALT REL              x1
+  {DX_SW,      3},   // Master ARM           x2
+  {DX_SW,      4},   // ADV MODE             x1
+  {DX_SW,      5},   // Roll AP              x2
+  {DX_SW,      6},   // Pitch AP             x2
+  {DX_SW,      7},   // EMER Jettison        x1
+  {DX_SW,      8},   // Store CAT            x1
+  {DX_SW,      9},   // Horn Silencer        x1
+  {DX_SW,     10},   // Landing Light        x2
+  {DX_SW,     11},   // Hook                 x1
+  {DX_SW,     12},   // Landing Gear         x2
+  {DX_SW,     13},   // DN LOCK REL          x1
+  {DX_SW,     14},   // GND JETT ENABLE      x1
+  {DX_SW,     15},   // ANTI SKID            x2
+  {DX_SW,     16},   // BRAKES Channel       x1
+  {DX_SW,     17},   // CMDS RWR             x1
+  {DX_SW,     18},   // CMDS JMR             x1
+  {DX_SW,     19},   // CMDS MWS             x1
+  {DX_SW,     20},   // CMDS O1              x1
+  {DX_SW,     21},   // CMDS O2              x1
+  {DX_SW,     22},   // CMDS CH              x1
+  {DX_SW,     23},   // CMDS FL              x1
+  {DX_SW,     24},   // CMDS JETT            x1
+  {DX_SW,     25},   // ALT GEAR Handle      x1
+  {DX_LADDER,  0},   // TWA Buttons          x4
+  {DX_LADDER,  1},   // CMDS MODE            x7
+  {DX_LADDER,  2},   // CMDS PRGM            x7
+};
+#define NUM_DX_ORDER (sizeof(dxOrder) / sizeof(dxOrder[0]))
+
+// 항목을 빠뜨리면 그 컨트롤의 BtnStart 가 0 으로 남아 조용히 DX 0 을
+// 누르게 됩니다. 개수는 여기서, 누락/중복은 assignButtons() 에서 잡습니다.
+static_assert(NUM_DX_ORDER == NUM_SWITCHES + NUM_ANALOG_ARRAYS,
+              "dxOrder[] 항목 수가 하드웨어 총 개수와 맞지 않습니다");
+
+uint8_t dxEntryCount(const DxEntry& e) {
+  return (e.kind == DX_SW) ? switchButtonCount(switches[e.idx].type)
+                           : analogBtnArrays[e.idx].numButtons;
+}
+
+const char* dxEntryName(const DxEntry& e) {
+  return (e.kind == DX_SW) ? switches[e.idx].name
+                           : analogBtnArrays[e.idx].groupName;
+}
+
 // Auto-assign joystick button numbers
 void assignButtons() {
   int btn = 1;
 
-  for (unsigned int i = 0; i < NUM_SWITCHES; i++) {
-    switchBtnStart[i] = btn;
-    btn += switchButtonCount(switches[i].type);
-  }
+  memset(switchBtnStart, 0, sizeof(switchBtnStart));
+  memset(analogBtnStart, 0, sizeof(analogBtnStart));
 
-  for (unsigned int i = 0; i < NUM_ANALOG_ARRAYS; i++) {
-    analogBtnStart[i] = btn;
-    btn += analogBtnArrays[i].numButtons;
+  for (unsigned int i = 0; i < NUM_DX_ORDER; i++) {
+    const DxEntry& e = dxOrder[i];
+    if (e.kind == DX_SW) switchBtnStart[e.idx] = btn;
+    else                 analogBtnStart[e.idx] = btn;
+    btn += dxEntryCount(e);
   }
 
   totalButtons = btn - 1;
@@ -512,6 +585,14 @@ void assignButtons() {
     Serial.printf("ERROR: %d buttons assigned, but max is %d (JOYSTICK_SIZE=%d)\n",
       totalButtons, maxButtons, JOYSTICK_SIZE);
   }
+
+  // 개수가 맞아도 한 항목이 두 번 들어가면 다른 하나가 0 으로 남습니다
+  for (unsigned int i = 0; i < NUM_SWITCHES; i++)
+    if (!switchBtnStart[i])
+      Serial.printf("ERROR: switches[%u] (%s) not in dxOrder[]\n", i, switches[i].name);
+  for (unsigned int i = 0; i < NUM_ANALOG_ARRAYS; i++)
+    if (!analogBtnStart[i])
+      Serial.printf("ERROR: ladder %s not in dxOrder[]\n", analogBtnArrays[i].groupName);
 }
 
 // ================================================================
@@ -1026,25 +1107,17 @@ void setup() {
   Serial.printf("  Total buttons: %d\n", totalButtons);
   Serial.println("=========================");
 
-  // Print button mapping detail
-  for (unsigned int i = 0; i < NUM_SWITCHES; i++) {
-    int cnt = switchButtonCount(switches[i].type);
-    if (switches[i].mcpIdx >= 0) {
-      if (cnt == 1)
-        Serial.printf("  btn %d      : %s [MCP@0x%02X]\n", switchBtnStart[i], switches[i].name, mcpDevices[switches[i].mcpIdx].addr);
-      else
-        Serial.printf("  btn %d~%d   : %s [MCP@0x%02X]\n", switchBtnStart[i], switchBtnStart[i] + cnt - 1, switches[i].name, mcpDevices[switches[i].mcpIdx].addr);
-    } else {
-      if (cnt == 1)
-        Serial.printf("  btn %d      : %s\n", switchBtnStart[i], switches[i].name);
-      else
-        Serial.printf("  btn %d~%d   : %s\n", switchBtnStart[i], switchBtnStart[i] + cnt - 1, switches[i].name);
-    }
-  }
-  for (unsigned int i = 0; i < NUM_ANALOG_ARRAYS; i++) {
-    Serial.printf("  btn %d~%d   : %s (%d-btn analog ladder)\n",
-      analogBtnStart[i], analogBtnStart[i] + analogBtnArrays[i].numButtons - 1,
-      analogBtnArrays[i].groupName, analogBtnArrays[i].numButtons);
+  // Print button mapping detail — dxOrder[] 순서 그대로 = 실제 DX 순서
+  for (unsigned int i = 0; i < NUM_DX_ORDER; i++) {
+    const DxEntry& e = dxOrder[i];
+    uint8_t cnt = dxEntryCount(e);
+    uint8_t dx  = (e.kind == DX_SW) ? switchBtnStart[e.idx] : analogBtnStart[e.idx];
+    char loc[16] = "";
+    if (e.kind == DX_LADDER)             snprintf(loc, sizeof(loc), " [ladder]");
+    else if (switches[e.idx].mcpIdx >= 0) snprintf(loc, sizeof(loc), " [MCP@0x%02X]",
+                                                   mcpDevices[switches[e.idx].mcpIdx].addr);
+    if (cnt == 1) Serial.printf("  btn %-3d     : %s%s\n", dx, dxEntryName(e), loc);
+    else          Serial.printf("  btn %-3d~%-3d : %s%s\n", dx, dx + cnt - 1, dxEntryName(e), loc);
   }
   Serial.println("=========================");
 
