@@ -284,13 +284,13 @@ const McpDeviceDef mcpDevices[] = {
 // 노브를 돌리는 순서 그대로 적습니다. MCP 핀 번호가 내림차순이어도
 // (COMM 처럼) 상관없고, 연속이 아니어도 됩니다.
 //
-// ※ UHF FUNCTION 은 배선이 라벨과 거꾸로라는 것이 알려져 있습니다 —
-//   PB7(15) 이 물리적으로 OFF 입니다. 아래는 **현재 동작을 그대로 유지한**
-//   순서라 아직 거꾸로입니다. 바로잡으려면 이 줄 하나를 뒤집으십시오:
-//       {15, 14, 13, 12}
-//   DX 번호는 그대로이므로 생성된 BMS 키 파일은 손댈 필요가 없습니다.
-static const uint8_t uhfFuncPins[]  = {12, 13, 14, 15};  // PB4~PB7  OFF/MAIN/BOTH/ADF
-static const uint8_t uhfModePins[]  = { 9, 10, 11};      // PB1~PB3  MNL/PRESET/GRD
+// ※ UHF FUNCTION 과 MODE 는 배선이 핀 번호 역순입니다 — PB7(15) 이 물리적으로
+//   OFF, PB3(11) 이 MNL 입니다. 그래서 목록도 내림차순입니다.
+//   근거: 심 PC 의 BMS 바인딩이 옛 DX 18(라벨 ADF)에 SimBupUhfOff 를,
+//   옛 DX 22(라벨 GRD)에 SimBupUhfManual 을 걸고 있었습니다. BmsBiosParser 가
+//   7-seg 를 끄려고 읽는 핀이 15 인 것과도 맞습니다.
+static const uint8_t uhfFuncPins[]  = {15, 14, 13, 12};  // PB7~PB4  OFF/MAIN/BOTH/ADF
+static const uint8_t uhfModePins[]  = {11, 10,  9};      // PB3~PB1  MNL/PRESET/GRD
 static const uint8_t comm1ModePins[] = {4, 3, 2};        // PA4/PA3/PA2  OFF/SQL/GD
 static const uint8_t comm2ModePins[] = {7, 6, 5};        // PA7/PA6/PA5  OFF/SQL/GD
 
@@ -347,7 +347,8 @@ const SwitchDef switches[] = {
 };
 
 // --- Rotary Encoders (Teensy direct, interrupt-polled) ---
-// Each encoder emits 2 buttons: CW then CCW.
+// Each encoder emits 2 buttons: CCW first, then CW — processEncoders()
+// takes encoderBtnStart[i] as btnCCW and btnCCW + 1 as btnCW.
 //
 // Pin pairs must stay on the SAME board edge — an encoder's A/B are two wires
 // from one knob. The two Teensy 4.1 edges are 0-12 + 24-32 and 13-23 + 33-41.
@@ -794,7 +795,7 @@ static const char* const commPwrNames[NUM_COMM_PWR] = {
 //
 //  이 표의 **줄 순서**가 그대로 DX 번호 순서입니다. 번호는 적지 않습니다.
 //  각 항목이 몇 개를 차지하는지는 그 항목의 타입에서 나옵니다
-//  (SW_ON_OFF 1, SW_ON_OFF_ON 2, SW_ROTARY numPos, 엔코더 2(CW/CCW),
+//  (SW_ON_OFF 1, SW_ON_OFF_ON 2, SW_ROTARY numPos, 엔코더 2(CCW/CW),
 //   래더 numButtons, 커버/COMM 전원 각 1). 주석의 xN 이 그 폭입니다.
 //
 //  idx 는 해당 배열의 인덱스입니다. switches[] / encoders[] /
@@ -880,7 +881,7 @@ uint8_t dxEntryCount(const DxEntry& e) {
   switch (e.kind) {
     case DX_SW:     return switchButtonCount(switches[e.idx]);
     case DX_LADDER: return analogBtnArrays[e.idx].numButtons;
-    case DX_ENC:    return 2;                    // CW, CCW
+    case DX_ENC:    return 2;                    // CCW, CW
     default:        return 1;                    // DX_COVER, DX_COMMPWR
   }
 }
@@ -1557,7 +1558,7 @@ void setup() {
     switch (e.kind) {
       case DX_SW:      kindStr = (switches[e.idx].mcpIdx >= 0) ? "MCP" : "DIR"; break;
       case DX_LADDER:  kindStr = "ladder";     break;
-      case DX_ENC:     kindStr = "enc CW/CCW"; break;
+      case DX_ENC:     kindStr = "enc CCW/CW"; break;
       case DX_COVER:   kindStr = "cover auto"; break;
       default:         kindStr = "pot hold";   break;
     }

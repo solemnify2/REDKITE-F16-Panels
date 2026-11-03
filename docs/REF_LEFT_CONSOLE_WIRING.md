@@ -405,14 +405,14 @@ C14 는 SD 확장 케이블 4선(DIN · CLK · CS · GND) + VIN 1선 = **5선**�
 | 버튼 | 패널 | 신호 |
 |------|------|------|
 | 1 | MPO | MANUAL PITCH OVERRIDE |
-| 2–3 | UHF | 엔코더 — PRESET CHAN CW / CCW |
+| 2–3 | UHF | 엔코더 — PRESET CHAN CCW / CW |
 | 4 | UHF | TEST DISPLAY |
 | 5 | UHF | STATUS |
-| 6–7 | UHF | 엔코더 — 100MHz CW / CCW |
-| 8–9 | UHF | 엔코더 — 10MHz CW / CCW |
-| 10–11 | UHF | 엔코더 — 1MHz CW / CCW |
-| 12–13 | UHF | 엔코더 — 0.1MHz CW / CCW |
-| 14–15 | UHF | 엔코더 — 0.025MHz CW / CCW |
+| 6–7 | UHF | 엔코더 — 100MHz CCW / CW |
+| 8–9 | UHF | 엔코더 — 10MHz CCW / CW |
+| 10–11 | UHF | 엔코더 — 1MHz CCW / CW |
+| 12–13 | UHF | 엔코더 — 0.1MHz CCW / CW |
+| 14–15 | UHF | 엔코더 — 0.025MHz CCW / CW |
 | 16–19 | UHF | FUNCTION 로터리 — OFF / MAIN / BOTH / ADF |
 | 20–22 | UHF | MODE 로터리 — MNL / PRESET / GRD |
 | 23 | UHF | T-TONE |

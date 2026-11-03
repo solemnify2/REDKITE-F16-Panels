@@ -55,14 +55,18 @@ CONSOLE = {
     # SimTriggerFirstDetent / SimHotasPinkyShift 와 같은 모양.
     'MPO':               ['SimMPO'],
     # ---- UHF ----
-    'UHF PRESET':        ['SimCycleRadioChannel', 'SimDecRadioChannel'],
+    # 엔코더는 **CCW 가 먼저**입니다 — processEncoders() 가
+    # encoderBtnStart[i] 를 btnCCW 로, +1 을 btnCW 로 씁니다.
+    # 그래서 감소(Dec)가 앞, 증가(Inc)가 뒤입니다. 심 PC 의 기존
+    # 바인딩도 전부 이 순서였습니다.
+    'UHF PRESET':        ['SimDecRadioChannel', 'SimCycleRadioChannel'],
     'UHF TEST':          [UNMODELED('UHF.*TEST', 'TEST DISPLAY')],
     'UHF STATUS':        [UNMODELED('UHF.*STATUS')],
-    'UHF 100MHz':        ['SimBupUhfFreq1Inc', 'SimBupUhfFreq1Dec'],
-    'UHF 10MHz':         ['SimBupUhfFreq2Inc', 'SimBupUhfFreq2Dec'],
-    'UHF 1MHz':          ['SimBupUhfFreq3Inc', 'SimBupUhfFreq3Dec'],
-    'UHF 0.1MHz':        ['SimBupUhfFreq4Inc', 'SimBupUhfFreq4Dec'],
-    'UHF 0.025MHz':      ['SimBupUhfFreq5Inc', 'SimBupUhfFreq5Dec'],
+    'UHF 100MHz':        ['SimBupUhfFreq1Dec', 'SimBupUhfFreq1Inc'],
+    'UHF 10MHz':         ['SimBupUhfFreq2Dec', 'SimBupUhfFreq2Inc'],
+    'UHF 1MHz':          ['SimBupUhfFreq3Dec', 'SimBupUhfFreq3Inc'],
+    'UHF 0.1MHz':        ['SimBupUhfFreq4Dec', 'SimBupUhfFreq4Inc'],
+    'UHF 0.025MHz':      ['SimBupUhfFreq5Dec', 'SimBupUhfFreq5Inc'],
     # 로터리는 위치 순서대로 — switches[] 의 pins[] 와 같은 순서입니다
     'UHF FUNCTION':      ['SimBupUhfOff', 'SimBupUhfMain', 'SimBupUhfBoth',
                           UNMODELED('ADF')],           # BMS 에 ADF 위치 없음
