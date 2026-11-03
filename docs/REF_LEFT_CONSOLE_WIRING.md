@@ -413,13 +413,8 @@ C14 는 SD 확장 케이블 4선(DIN · CLK · CS · GND) + VIN 1선 = **5선**�
 | 10–11 | UHF | 엔코더 — 1MHz CW / CCW |
 | 12–13 | UHF | 엔코더 — 0.1MHz CW / CCW |
 | 14–15 | UHF | 엔코더 — 0.025MHz CW / CCW |
-| 16 | UHF | FUNCTION OFF |
-| 17 | UHF | FUNCTION MAIN |
-| 18 | UHF | FUNCTION BOTH |
-| 19 | UHF | FUNCTION ADF |
-| 20 | UHF | MODE MNL |
-| 21 | UHF | MODE PRESET |
-| 22 | UHF | MODE GRD |
+| 16–19 | UHF | FUNCTION 로터리 — OFF / MAIN / BOTH / ADF |
+| 20–22 | UHF | MODE 로터리 — MNL / PRESET / GRD |
 | 23 | UHF | T-TONE |
 | 24 | UHF | SQUELCH |
 | 25–26 | ENGINE | JFS START 1 / START 2 |
@@ -429,12 +424,8 @@ C14 는 SD 확장 케이블 4선(DIN · CLK · CS · GND) + VIN 1선 = **5선**�
 | 31 | ENGINE | MAX POWER |
 | 32 | AUDIO 1 | COMM 1 전원 — 노브가 켜져 있는 동안 **유지** (pot ADC ≥ 5) |
 | 33 | AUDIO 1 | COMM 2 전원 — 노브가 켜져 있는 동안 **유지** (pot ADC ≥ 5) |
-| 34 | AUDIO 1 | COMM 1 MODE OFF |
-| 35 | AUDIO 1 | COMM 1 MODE SQL |
-| 36 | AUDIO 1 | COMM 1 MODE GD XMT |
-| 37 | AUDIO 1 | COMM 2 MODE OFF |
-| 38 | AUDIO 1 | COMM 2 MODE SQL |
-| 39 | AUDIO 1 | COMM 2 MODE GD XMT |
+| 34–36 | AUDIO 1 | COMM 1 모드 로터리 — OFF / SQL / GD XMT |
+| 37–39 | AUDIO 1 | COMM 2 모드 로터리 — OFF / SQL / GD XMT |
 | 40–41 | AUDIO 2 | HOT MIC / OFF / CIPHER (3단 토글) |
 | 42–43 | ECM | OPR / STBY |
 | 44–45 | ECM | XMIT 1 / XMIT 3 |

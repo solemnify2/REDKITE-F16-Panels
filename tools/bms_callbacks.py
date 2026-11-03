@@ -63,13 +63,10 @@ CONSOLE = {
     'UHF 1MHz':          ['SimBupUhfFreq3Inc', 'SimBupUhfFreq3Dec'],
     'UHF 0.1MHz':        ['SimBupUhfFreq4Inc', 'SimBupUhfFreq4Dec'],
     'UHF 0.025MHz':      ['SimBupUhfFreq5Inc', 'SimBupUhfFreq5Dec'],
-    'UHF FUNC OFF':      ['SimBupUhfOff'],
-    'UHF FUNC MAIN':     ['SimBupUhfMain'],
-    'UHF FUNC BOTH':     ['SimBupUhfBoth'],
-    'UHF FUNC ADF':      [UNMODELED('ADF')],
-    'UHF MODE MNL':      ['SimBupUhfManual'],
-    'UHF MODE PRE':      ['SimBupUhfPreset'],
-    'UHF MODE GRD':      ['SimBupUhfGuard'],
+    # 로터리는 위치 순서대로 — switches[] 의 pins[] 와 같은 순서입니다
+    'UHF FUNCTION':      ['SimBupUhfOff', 'SimBupUhfMain', 'SimBupUhfBoth',
+                          UNMODELED('ADF')],           # BMS 에 ADF 위치 없음
+    'UHF MODE':          ['SimBupUhfManual', 'SimBupUhfPreset', 'SimBupUhfGuard'],
     'UHF T-TONE':        [UNMODELED('T-TONE', 'Tone')],
     'UHF SQUELCH':       [UNMODELED('SQUELCH')],
     # ---- ENG & JET START ----
@@ -85,12 +82,10 @@ CONSOLE = {
     # ---- AUDIO 1 ----
     'COMM1 PWR':         [('SimComm1PowerOn', 'SimComm1PowerOff')],
     'COMM2 PWR':         [('SimComm2PowerOn', 'SimComm2PowerOff')],
-    'COMM1 OFF':         [UNMODELED('COMM 1 Mode.*OFF', 'Aud1Com1Off')],
-    'COMM1 SQL':         ['SimAud1Com1Sql'],
-    'COMM1 GD':          ['SimAud1Com1Gd'],
-    'COMM2 OFF':         [UNMODELED('COMM 2 Mode.*OFF', 'Aud1Com2Off')],
-    'COMM2 SQL':         ['SimAud1Com2Sql'],
-    'COMM2 GD':          ['SimAud1Com2Gd'],
+    'COMM1 MODE':        [UNMODELED('COMM 1 Mode.*OFF', 'Aud1Com1Off'),
+                          'SimAud1Com1Sql', 'SimAud1Com1Gd'],
+    'COMM2 MODE':        [UNMODELED('COMM 2 Mode.*OFF', 'Aud1Com2Off'),
+                          'SimAud1Com2Sql', 'SimAud1Com2Gd'],
     # ---- AUDIO 2 ----
     # HOT MIC 도 CIPHER 도 BMS 에 콜백이 없습니다 (Mic/Cipher/Secure 전부 0건).
     # BMS 가 모델링하지 않는 스위치입니다.

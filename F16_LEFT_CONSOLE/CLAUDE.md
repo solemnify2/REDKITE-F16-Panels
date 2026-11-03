@@ -48,13 +48,13 @@ This constraint drives the whole pin layout:
 | Rotary encoders | Need interrupt-rate sampling; I2C polling drops pulses |
 | Potentiometers | MCP23017 has no ADC |
 
-Everything else (29 switches, 11 ELEC/EPU LEDs) rides the 2-wire I2C bus.
+Everything else (22 `switches[]` entries, 11 ELEC/EPU LEDs) rides the 2-wire I2C bus.
 
 ### Switch Types
 
 - `SW_ON_OFF` — 1 pin, 1 button
 - `SW_ON_OFF_ON` — 2 pins, 2 buttons (center = both off)
-- `SW_ROTARY` — `numPos` consecutive pins from `pin1`, `numPos` buttons (one active at a time). Used for UHF FUNCTION (4), UHF MODE (3), and AUDIO 1 COMM 1/COMM 2 MODE (3 each).
+- `SW_ROTARY` — `numPos` positions, `numPos` buttons (one active at a time). `pins` lists the pin for each position **in knob order**, so the pin numbers may descend (COMM 1/2 are wired PA4→PA2) or be non-contiguous; omit it and the pins are read ascending from `pin1`. Used for UHF FUNCTION (4), UHF MODE (3), and AUDIO 1 COMM 1/COMM 2 MODE (3 each).
 
 ### Rotary Encoders
 

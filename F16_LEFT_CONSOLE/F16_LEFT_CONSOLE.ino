@@ -168,7 +168,7 @@
 enum SwitchType {
   SW_ON_OFF,      // 1 pin  -> 1 button
   SW_ON_OFF_ON,   // 2 pins -> 2 buttons (center = both off)
-  SW_ROTARY       // numPos consecutive pins -> numPos buttons (one active)
+  SW_ROTARY       // numPos positions -> numPos buttons (one active). pins[] 참조
 };
 
 enum JoyAxis {
@@ -199,7 +199,11 @@ struct SwitchDef {
   int8_t      mcpIdx;   // -1 = direct Teensy pin, >= 0 = index into mcpDevices[]
   uint8_t     pin1;
   uint8_t     pin2;     // SW_ON_OFF_ON only
-  uint8_t     numPos;   // SW_ROTARY only: consecutive pins starting at pin1
+  uint8_t     numPos;   // SW_ROTARY only: 위치 개수
+  // SW_ROTARY only: 위치 순서대로 numPos 개의 핀.
+  // 패널에서 노브를 돌리는 순서 그대로 적으십시오 — 핀 번호가 거꾸로든
+  // 띄엄띄엄이든 상관없습니다. 생략하면 pin1 부터 오름차순 연속으로 읽습니다.
+  const uint8_t* pins;
 };
 
 // LEDs live on MCP23017 (mcpIdx >= 0) or direct Teensy pins (mcpIdx = -1).
@@ -275,6 +279,21 @@ const McpDeviceDef mcpDevices[] = {
 
 // --- Digital Switches ---
 //
+// --- 로터리 스위치의 위치별 핀 ---
+//
+// 노브를 돌리는 순서 그대로 적습니다. MCP 핀 번호가 내림차순이어도
+// (COMM 처럼) 상관없고, 연속이 아니어도 됩니다.
+//
+// ※ UHF FUNCTION 은 배선이 라벨과 거꾸로라는 것이 알려져 있습니다 —
+//   PB7(15) 이 물리적으로 OFF 입니다. 아래는 **현재 동작을 그대로 유지한**
+//   순서라 아직 거꾸로입니다. 바로잡으려면 이 줄 하나를 뒤집으십시오:
+//       {15, 14, 13, 12}
+//   DX 번호는 그대로이므로 생성된 BMS 키 파일은 손댈 필요가 없습니다.
+static const uint8_t uhfFuncPins[]  = {12, 13, 14, 15};  // PB4~PB7  OFF/MAIN/BOTH/ADF
+static const uint8_t uhfModePins[]  = { 9, 10, 11};      // PB1~PB3  MNL/PRESET/GRD
+static const uint8_t comm1ModePins[] = {4, 3, 2};        // PA4/PA3/PA2  OFF/SQL/GD
+static const uint8_t comm2ModePins[] = {7, 6, 5};        // PA7/PA6/PA5  OFF/SQL/GD
+
 const SwitchDef switches[] = {
   // name                 panel        type           mcpIdx pin1 pin2 numPos
   //
@@ -287,17 +306,10 @@ const SwitchDef switches[] = {
 
   // ---- UHF Panel — 최전방 아웃보드 (MCP 0x20 PB + Teensy direct, 패널 실장) ----
   // 실제 배선: FUNCTION(PB4~7) → MODE(PB1~3) → STATUS(PB0)
-  // SW_ROTARY 는 pin1 부터 numPos 개를 오름차순으로만 읽어 패널 순서대로
-  // 늘어놓을 수 없습니다. 그래서 개별 SW_ON_OFF 로 분리했습니다.
   {"UHF TEST",  PNL_UHF,    SW_ON_OFF,    -1, PIN_UHF_TEST,   0,  0},  // Teensy 39 (A15) momentary
   {"UHF STATUS",  PNL_UHF, SW_ON_OFF, -1, PIN_UHF_STATUS,  0, 0},  // Teensy 41  momentary
-  {"UHF FUNC OFF",   PNL_UHF, SW_ON_OFF, 0, 12, 0, 0},  // PB4
-  {"UHF FUNC MAIN",  PNL_UHF, SW_ON_OFF, 0, 13, 0, 0},  // PB5
-  {"UHF FUNC BOTH",  PNL_UHF, SW_ON_OFF, 0, 14, 0, 0},  // PB6
-  {"UHF FUNC ADF",   PNL_UHF, SW_ON_OFF, 0, 15, 0, 0},  // PB7
-  {"UHF MODE MNL",   PNL_UHF, SW_ON_OFF, 0,  9, 0, 0},  // PB1
-  {"UHF MODE PRE",   PNL_UHF, SW_ON_OFF, 0, 10, 0, 0},  // PB2
-  {"UHF MODE GRD",   PNL_UHF, SW_ON_OFF, 0, 11, 0, 0},  // PB3
+  {"UHF FUNCTION", PNL_UHF, SW_ROTARY, 0, 0, 0, 4, uhfFuncPins},  // OFF/MAIN/BOTH/ADF
+  {"UHF MODE",     PNL_UHF, SW_ROTARY, 0, 0, 0, 3, uhfModePins},  // MNL/PRESET/GRD
   {"UHF T-TONE",   PNL_UHF, SW_ON_OFF, -1, PIN_UHF_TTONE,   0, 0},  // Teensy 34  momentary
   {"UHF SQUELCH",  PNL_UHF, SW_ON_OFF, -1, PIN_UHF_SQUELCH, 0, 0},  // Teensy 33
 
@@ -309,13 +321,8 @@ const SwitchDef switches[] = {
   {"MAX POWER", PNL_ENGINE, SW_ON_OFF,    -1, PIN_MAXPOWER,   0,  0},
 
   // ---- AUDIO 1 모드 로터리 (MCP 0x20 PA, 케이블 C8 로 UHF 패널까지 점퍼) ----
-  // 실제 배선: COMM1 PA4=OFF PA3=SQL PA2=GD, COMM2 PA7=OFF PA6=SQL PA5=GD
-  {"COMM1 OFF",   PNL_AUDIO1, SW_ON_OFF, 0, 4, 0, 0},  // PA4
-  {"COMM1 SQL",   PNL_AUDIO1, SW_ON_OFF, 0, 3, 0, 0},  // PA3
-  {"COMM1 GD",    PNL_AUDIO1, SW_ON_OFF, 0, 2, 0, 0},  // PA2
-  {"COMM2 OFF",   PNL_AUDIO1, SW_ON_OFF, 0, 7, 0, 0},  // PA7
-  {"COMM2 SQL",   PNL_AUDIO1, SW_ON_OFF, 0, 6, 0, 0},  // PA6
-  {"COMM2 GD",    PNL_AUDIO1, SW_ON_OFF, 0, 5, 0, 0},  // PA5
+  {"COMM1 MODE",  PNL_AUDIO1, SW_ROTARY, 0, 0, 0, 3, comm1ModePins},  // OFF/SQL/GD
+  {"COMM2 MODE",  PNL_AUDIO1, SW_ROTARY, 0, 0, 0, 3, comm2ModePins},  // OFF/SQL/GD
 
   // ---- AUDIO 2 Panel (MCP 0x20 PA) ----
   // 실제 하드웨어는 3단 토글 하나입니다 (HOT MIC / OFF / CIPHER).
@@ -821,54 +828,45 @@ const DxEntry dxOrder[] = {
   {DX_ENC,      3},   // UHF 1MHz             x2
   {DX_ENC,      4},   // UHF 0.1MHz           x2
   {DX_ENC,      5},   // UHF 0.025MHz         x2
-  {DX_SW,       3},   // UHF FUNC OFF         x1
-  {DX_SW,       4},   // UHF FUNC MAIN        x1
-  {DX_SW,       5},   // UHF FUNC BOTH        x1
-  {DX_SW,       6},   // UHF FUNC ADF         x1
-  {DX_SW,       7},   // UHF MODE MNL         x1
-  {DX_SW,       8},   // UHF MODE PRE         x1
-  {DX_SW,       9},   // UHF MODE GRD         x1
-  {DX_SW,      10},   // UHF T-TONE           x1
-  {DX_SW,      11},   // UHF SQUELCH          x1
+  {DX_SW,       3},   // UHF FUNCTION         x4
+  {DX_SW,       4},   // UHF MODE             x3
+  {DX_SW,       5},   // UHF T-TONE           x1
+  {DX_SW,       6},   // UHF SQUELCH          x1
 
   // ---- ENG & JET START ----
-  {DX_SW,      12},   // JFS                  x2
+  {DX_SW,       7},   // JFS                  x2
   {DX_COVER,    0},   // ENG CONT COVER       x1
-  {DX_SW,      13},   // ENG CONT             x1
-  {DX_SW,      14},   // AB RESET/ENG DATA    x2
-  {DX_SW,      15},   // MAX POWER            x1
+  {DX_SW,       8},   // ENG CONT             x1
+  {DX_SW,       9},   // AB RESET/ENG DATA    x2
+  {DX_SW,      10},   // MAX POWER            x1
 
   // ---- AUDIO 1 ----
   {DX_COMMPWR,  0},   // COMM1 PWR            x1
   {DX_COMMPWR,  1},   // COMM2 PWR            x1
-  {DX_SW,      16},   // COMM1 OFF            x1
-  {DX_SW,      17},   // COMM1 SQL            x1
-  {DX_SW,      18},   // COMM1 GD             x1
-  {DX_SW,      19},   // COMM2 OFF            x1
-  {DX_SW,      20},   // COMM2 SQL            x1
-  {DX_SW,      21},   // COMM2 GD             x1
+  {DX_SW,      11},   // COMM1 MODE           x3
+  {DX_SW,      12},   // COMM2 MODE           x3
 
   // ---- AUDIO 2 ----
-  {DX_SW,      22},   // HOT MIC/CIPHER       x2
+  {DX_SW,      13},   // HOT MIC/CIPHER       x2
 
   // ---- ECM ----
-  {DX_SW,      23},   // ECM OPR/STBY         x2
-  {DX_SW,      24},   // ECM XMIT             x2
+  {DX_SW,      14},   // ECM OPR/STBY         x2
+  {DX_SW,      15},   // ECM XMIT             x2
   {DX_LADDER,   0},   // ECM Buttons          x8
-  {DX_SW,      25},   // ECM RESET            x1
-  {DX_SW,      26},   // ECM BIT              x1
+  {DX_SW,      16},   // ECM RESET            x1
+  {DX_SW,      17},   // ECM BIT              x1
 
   // ---- EPU ----
   {DX_COVER,    1},   // EPU OFF COVER        x1
   {DX_COVER,    2},   // EPU ON COVER         x1
-  {DX_SW,      27},   // EPU                  x2
+  {DX_SW,      18},   // EPU                  x2
 
   // ---- ELEC ----
-  {DX_SW,      28},   // ELEC MAIN PWR        x2
-  {DX_SW,      29},   // ELEC CAUTION RST     x1
+  {DX_SW,      19},   // ELEC MAIN PWR        x2
+  {DX_SW,      20},   // ELEC CAUTION RST     x1
 
   // ---- AVTR ----
-  {DX_SW,      30},   // AVTR                 x2
+  {DX_SW,      21},   // AVTR                 x2
 };
 #define NUM_DX_ORDER (sizeof(dxOrder) / sizeof(dxOrder[0]))
 
@@ -966,8 +964,8 @@ void assignButtons() {
 //
 //  DX 번호는 dxOrder[] 가 정합니다. 세 커버가 연속일 필요는 없습니다.
 
-#define SW_IDX_ENG_CONT  13    // switches[] 인덱스 — 배열 순서 변경 시 함께 수정
-#define SW_IDX_EPU       27
+#define SW_IDX_ENG_CONT   8    // switches[] 인덱스 — 배열 순서 변경 시 함께 수정
+#define SW_IDX_EPU       18
 
 #define COVER_DELAY_TICKS 10  // 100ms @ 100Hz — 커버/스위치 간 시차
 
@@ -1194,7 +1192,8 @@ void processSwitches() {
 
       case SW_ROTARY: {
         for (uint8_t p = 0; p < sw.numPos; p++) {
-          int state = !readSwPin(sw, sw.pin1 + p);
+          // pins[] 가 있으면 그 순서대로, 없으면 예전처럼 pin1 부터 연속
+          int state = !readSwPin(sw, sw.pins ? sw.pins[p] : (uint8_t)(sw.pin1 + p));
           if (prevBtnState[btn + p] != state) {
             //if (ALLOW_DEBUG && state) Serial.printf("[SW] %s = pos %d\n", sw.name, p);
             prevBtnState[btn + p] = state;
@@ -1466,12 +1465,16 @@ void setup() {
 
   // --- Direct switch pins ---
   for (unsigned int i = 0; i < NUM_SWITCHES; i++) {
-    if (switches[i].mcpIdx >= 0) continue;
-    pinMode(switches[i].pin1, INPUT_PULLUP);
-    if (switches[i].type == SW_ON_OFF_ON) pinMode(switches[i].pin2, INPUT_PULLUP);
-    if (switches[i].type == SW_ROTARY)
-      for (uint8_t p = 1; p < switches[i].numPos; p++)
-        pinMode(switches[i].pin1 + p, INPUT_PULLUP);
+    const SwitchDef& sw = switches[i];
+    if (sw.mcpIdx >= 0) continue;
+    if (sw.type == SW_ROTARY) {
+      // pins[] 가 있으면 pin1 은 쓰이지 않습니다 — 목록만 보고 잡습니다
+      for (uint8_t p = 0; p < sw.numPos; p++)
+        pinMode(sw.pins ? sw.pins[p] : (uint8_t)(sw.pin1 + p), INPUT_PULLUP);
+    } else {
+      pinMode(sw.pin1, INPUT_PULLUP);
+      if (sw.type == SW_ON_OFF_ON) pinMode(sw.pin2, INPUT_PULLUP);
+    }
   }
 
   // --- Encoder pins ---

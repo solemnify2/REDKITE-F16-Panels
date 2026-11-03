@@ -91,7 +91,7 @@ def dx_map(path):
         if kind == 'DX_SW':
             e = sw[idx]
             name = nm(e[0])
-            w = int(e[5]) if e[2] == 'SW_ROTARY' else width[e[2]]
+            w = int(e[6]) if e[2] == 'SW_ROTARY' else width[e[2]]
         elif kind == 'DX_LADDER':
             name, w = nm(ana[idx][0]), int(ana[idx][3])
         elif kind == 'DX_ENC':
