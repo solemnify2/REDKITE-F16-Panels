@@ -85,16 +85,19 @@ python tools/gen_dcs_profile.py
 ```
 C:\Users\<계정>\Saved Games\DCS\InputUserProfiles\
   F16 Left Console panel.diff.lua      ← 덮어씁니다
-  F16 Left AUX MISCpanel.diff.lua      ← 덮어씁니다
+  F16 Left AUX MISC panel.diff.lua     ← 덮어씁니다
   Warthog Throttle.diff.lua            ← 다른 장치. 안 건드립니다
 ```
 
-`sim_axes.py` 의 `DCS_PROFILE` 과 **띄어쓰기까지 같아야** 합니다 — `MISCpanel` 에
-띄어쓰기가 없는 것도 그대로입니다.
+`sim_axes.py` 의 `DCS_PROFILE` 과 **띄어쓰기까지 같아야** 합니다.
 
 그 프로파일이 아직 없으면 아무것도 쓰지 않고 멈춥니다. DCS 의 **Options –
 Controls** 에서 F-16C 의 그 장치 열을 고르고 **Save Profile As...** 로 그 이름 그대로 한 번 저장하십시오. 빈 프로파일이
 생기고, 그 뒤로는 생성기가 그걸 계속 덮어씁니다.
+
+이름은 그 대화상자에서 **사람이 타이핑하는 것**이라, 이미 다른 이름으로 쓰던
+프로파일이 있으면 새로 만들지 말고 `DCS_PROFILE` 을 그 이름으로 고치는 쪽이
+낫습니다.
 
 ## 2. 보드가 DX 맵을 알려주는 방법
 
