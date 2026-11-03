@@ -33,36 +33,46 @@
 심 PC 의 실제 설정을 보면 BMS 바인딩은 **이 XML 쪽에** 들어 있습니다. 그래서
 `gen_bms_setup_xml.py` 를 권합니다.
 
-## 1. 쓰는 법 (BMS)
+## 1. 쓰는 법
 
 브리지를 **끄고** 실행하십시오. Windows 는 COM 포트를 한 프로세스만 열 수 있고,
 펌웨어도 프로토콜 미검출 상태에서만 요청에 응답합니다.
 
-보드를 VID/PID 로 찾아 각각에 물어보고, 응답의 `device=` 로 어느 매핑 표를 쓸지
-스스로 정합니다. **소스나 개발환경이 필요 없습니다** — `tools/` 폴더와 pyserial,
-BMS 설치본이면 됩니다. 심 PC 에 그대로 들고 가도 동작합니다.
+두 생성기 모두 보드를 VID/PID 로 찾아 각각에 물어보고, 응답의 `device=` 로 어느
+매핑 표를 쓸지 스스로 정합니다. **소스나 개발환경이 필요 없습니다** — `tools/` 폴더와
+pyserial, 그리고 해당 심 설치본이면 됩니다. 심 PC 에 그대로 들고 가도 동작합니다.
 
-옵션:
+공통 옵션:
 
 | 옵션 | |
 |---|---|
 | (없음) | 보드에 질의 — 기본 |
 | `--from-source` | 보드 대신 스케치의 `dxOrder[]` 를 읽음 (오프라인용) |
 | `--port COMx` | 자동 탐지 대신 포트 지정 |
-| `--bms-root` | BMS 설치 경로 (기본 `C:\Falcon BMS 4.38`) |
-| `--config-dir` | 기존 Setup XML 이 있는 폴더 (템플릿·GUID 출처) |
-| `-o` | 출력 폴더. 원본을 덮어쓰지 않습니다 |
+| `-o` | 출력 폴더. **원본을 덮어쓰지 않습니다** |
+
+> 보드와 소스가 어긋나지 않았는지(업로드를 깜빡했는지) 보려면
+> `python tools/gen_bms_keyfile.py --verify` 를 쓰십시오 — 아무 파일도 쓰지 않고
+> 대조만 합니다. `gen_bms_keyfile.py` 는 보드 질의·DX 맵 파싱 코드를 담고 있어
+> 다른 두 생성기가 이 파일을 import 합니다. 지우지 마십시오.
+
+### 1-1. BMS — 장치별 Setup XML
 
 ```
 python tools/gen_bms_setup_xml.py --config-dir "<BMS User\Config>" -o out
 ```
 
+| 옵션 | |
+|---|---|
+| `--config-dir` | 기존 Setup XML 이 있는 폴더 (템플릿·GUID 출처) |
+| `--bms-root` | BMS 설치 경로 (기본 `C:\Falcon BMS 4.38`) |
+
 **기존 XML 을 템플릿으로 씁니다.** 축 보정(Invert/Saturation/Deadzone),
 `<detentPosition>`, `<pov>` 는 바이트 단위로 그대로 두고 `<DxAssgn>` 만 갈아끼웁니다.
 그래서 `--config-dir` 에 지금 쓰고 있는 XML 이 있어야 하고, GUID 도 거기서 가져옵니다.
-원본을 덮어쓰지 않으니 `-o` 로 받아서 확인한 뒤 `User\Config` 로 복사하십시오.
+`-o` 로 받아 확인한 뒤 `User\Config` 로 복사하십시오.
 
-구조 — 버튼 하나가 `<Assgn>` 4칸입니다:
+버튼 하나가 `<Assgn>` 4칸입니다:
 
 | 슬롯 | `<Invoke>` | 뜻 |
 |---|---|---|
@@ -74,10 +84,34 @@ python tools/gen_bms_setup_xml.py --config-dir "<BMS User\Config>" -o out
 `DxAssgn[i]` 가 그 장치의 **DX 버튼 i+1** 입니다 — 오프셋 없음. `<dx>` 섹션이 셋인데
 앞 둘은 내용이 같고 셋째는 비어 있어, 관측된 그대로 재현합니다.
 
-> 보드와 소스가 어긋나지 않았는지(업로드를 깜빡했는지) 보려면
-> `python tools/gen_bms_keyfile.py --verify` 를 쓰십시오 — 아무 파일도 쓰지 않고
-> 대조만 합니다. `gen_bms_keyfile.py` 는 보드 질의·DX 맵 파싱 코드를 담고 있어
-> 다른 두 생성기가 이 파일을 import 합니다. 지우지 마십시오.
+### 1-2. DCS — 입력 프로파일
+
+```
+python tools/gen_dcs_profile.py --profiles-dir "<InputUserProfiles>" -o out
+```
+
+| 옵션 | |
+|---|---|
+| `--profiles-dir` | 기존 `.diff.lua` 가 있는 폴더 (**축 블록 출처**) |
+| `--name CONSOLE "이름"` | 파일명 지정 |
+
+장치마다 `.diff.lua` 하나를 만들고, `Saved Games\DCS\Config\Input\...\InputUserProfiles\`
+에 넣은 뒤 DCS 입력 설정에서 장치에 지정합니다. GUID 가 없어 파일명은 자유입니다.
+
+#### 축은 다시 만들지 않고 베껴 옵니다
+
+> ⚠ **`--profiles-dir` 없이 돌리지 마십시오.** 이 패널의 포트는 전부
+> `invert = true` 이고 `curvature`·`filter` 도 붙어 있습니다. 생성기는 이걸 알 수
+> 없으므로, 다시 만들면 **볼륨 노브 일곱 개와 HMCS 가 전부 반대로 돕니다.**
+
+그래서 기존 프로파일의 `axisDiffs` 블록을 **원문 그대로** 복사합니다. 버튼 재배열은
+축을 건드리지 않으므로 기존 블록이 그대로 유효합니다.
+
+그 안에 **`removed` 항목**도 들어 있습니다 — DCS 가 새 조이스틱에 자동으로 거는
+`Pitch←JOY_Y` · `Roll←JOY_X` · `Thrust←JOY_Z` (콘솔은 `Rudder←JOY_RZ` 까지) 를
+떼어내는 줄입니다. 없으면 **HMCS 노브가 스로틀을 움직이고** 빈 축이 기수를 밉니다.
+
+---
 
 ## 2. 보드가 DX 맵을 알려주는 방법
 
@@ -105,7 +139,7 @@ python tools/gen_bms_setup_xml.py --config-dir "<BMS User\Config>" -o out
 
 ---
 
-## 3. 이름 → 콜백 표
+## 3. 이름 → 콜백 표 (BMS)
 
 `tools/bms_callbacks.py`. **DX 번호가 아니라 컨트롤 이름이 키**입니다. 그래서
 `dxOrder[]` 를 재배열해도 이 표는 그대로고, 하드웨어를 추가할 때만 늘어납니다.
@@ -220,15 +254,7 @@ COMM 전원을 모멘터리 펄스가 아니라 **유지형 DX** 로 만든 근�
 
 ---
 
-## 6. DCS
-
-```
-python tools/gen_dcs_profile.py --profiles-dir "<InputUserProfiles>" -o out
-```
-
-장치마다 `.diff.lua` 하나를 만들고, `Saved Games\DCS\Config\Input\...\InputUserProfiles\`
-에 넣은 뒤 DCS 입력 설정에서 장치에 지정합니다. GUID 가 없어 파일명은 자유입니다
-(`--name CONSOLE "이름"` 으로 바꿀 수 있습니다).
+## 6. DCS 쪽 참고
 
 | 파일 | 역할 |
 |---|---|
@@ -257,19 +283,6 @@ value_down 0. 축은 `a<command>cd<device>` 입니다.
 
 모멘터리 버튼은 릴리스 키가 필요 없습니다 — 명령 자체가 `vd=1 vu=0` 을 품습니다.
 
-### 축은 다시 만들지 않고 베껴 옵니다
-
-> ⚠ **`--profiles-dir` 없이 돌리지 마십시오.** 이 패널의 포트는 전부
-> `invert = true` 이고 `curvature`·`filter` 도 붙어 있습니다. 생성기는 이걸 알 수
-> 없으므로, 다시 만들면 **볼륨 노브 일곱 개와 HMCS 가 전부 반대로 돕니다.**
-
-그래서 기존 프로파일의 `axisDiffs` 블록을 **원문 그대로** 복사합니다. 버튼 재배열은
-축을 건드리지 않으므로 기존 블록이 그대로 유효합니다.
-
-그 안에 **`removed` 항목**도 들어 있습니다 — DCS 가 새 조이스틱에 자동으로 거는
-`Pitch←JOY_Y` · `Roll←JOY_X` · `Thrust←JOY_Z` (콘솔은 `Rudder←JOY_RZ` 까지) 를
-떼어내는 줄입니다. 없으면 **HMCS 노브가 스로틀을 움직이고** 빈 축이 기수를 밉니다.
-
 ### DCS 가 BMS 보다 많이 가진 것
 
 BMS 에서 비워 둔 자리 상당수가 DCS 엔 있습니다 — UHF SQUELCH · TEST DISPLAY ·
@@ -297,6 +310,8 @@ EPU 커버는 모듈의 `Input/F-16C_50/joystick/default.lua` 를 봐야 확실�
 `tools/dcs_catalog.txt` 는 사용자의 프로파일에서 추출한 것입니다. DCS 에서 새로
 바인딩한 뒤 다시 뽑으면 그 명령이 카탈로그에 들어오고, `dcs_commands.py` 의
 `TODO` 를 채울 수 있습니다.
+
+---
 
 ---
 
