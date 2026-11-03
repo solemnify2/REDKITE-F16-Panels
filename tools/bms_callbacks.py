@@ -123,11 +123,13 @@ CONSOLE = {
 
 AUX = {
     # ---- MISC ----
-    'RF':                [('SimRFNorm', 'SimRFQuiet'), ('SimRFSilent', 'SimRFQuiet')],
+    # pin1(GPA4)=SILENT, pin2(GPA5)=NORM, 가운데 QUIET
+    'RF':                [('SimRFSilent', 'SimRFQuiet'), ('SimRFNorm', 'SimRFQuiet')],
     'Laser ARM':         [('SimLaserArmOn', 'SimLaserArmOff')],
     'ALT REL':           [UNMODELED('ALT REL', 'Alternate Release')],
-    'Master ARM':        [('SimArmMasterArm', 'SimSafeMasterArm'),
-                          ('SimSimMasterArm', 'SimSafeMasterArm')],
+    # pin1(GPA0)=SIM, pin2(GPA1)=ARM, 가운데 OFF
+    'Master ARM':        [('SimSimMasterArm', 'SimSafeMasterArm'),
+                          ('SimArmMasterArm', 'SimSafeMasterArm')],
     'ADV MODE':          ['SimToggleTFR'],
     'Roll AP':           [('SimLeftAPUp', 'SimLeftAPMid'),
                           ('SimLeftAPDown', 'SimLeftAPMid')],
@@ -135,9 +137,9 @@ AUX = {
                           ('SimRightAPDown', 'SimRightAPMid')],
     # ---- GEAR ----
     'EMER Jettison':     ['SimEmergencyJettison'],
-    'Hook':              [('SimHookDown', 'SimHookUp')],
+    'Hook':              [('SimHookUp', 'SimHookDown')],
     'GND JETT ENABLE':   [('SimGndJettOn', 'SimGndJettOff')],
-    'BRAKES Channel':    [('SimBrakeChannelDown', 'SimBrakeChannelUp')],
+    'BRAKES Channel':    [('SimBrakeChannelUp', 'SimBrakeChannelDown')],
     'ANTI SKID':         [('SimParkingBrakeUp', 'SimParkingBrakeMid'),
                           ('SimParkingBrakeDown', 'SimParkingBrakeMid')],
     'DN LOCK REL':       ['AFEmergencyGearHandleUnlock'],
@@ -145,8 +147,10 @@ AUX = {
     'Landing Gear':      ['AFGearUp', 'AFGearDown'],
     'Store CAT':         [('SimCATI', 'SimCATIII')],
     'Horn Silencer':     ['SimSilenceHorn'],
-    'Landing Light':     [('SimLandingLightUp', 'SimLandingLightMid'),
-                          ('SimLandingLightDown', 'SimLandingLightMid')],
+    # pin1(3)=TAXI, pin2(4)=LANDING, 가운데 OFF. pin2=UP 은 페달 브레이크
+    # 모드의 PEDAL_BRAKE_SW_VALUE 1 (= pin2 활성 = landing light UP) 과도 일치합니다.
+    'Landing Light':     [('SimLandingLightDown', 'SimLandingLightMid'),
+                          ('SimLandingLightUp', 'SimLandingLightMid')],
     # ---- TWA (래더 4: ACT/PWR, SEARCH, ALT, SYS PWR) ----
     # BMS 의 'TWA:' 버튼은 SEARCH / LOW / POWER 셋뿐입니다. 실기 4개 중
     # ACT/PWR 은 활성·전원 표시등 쪽이라 대응 콜백이 없습니다.

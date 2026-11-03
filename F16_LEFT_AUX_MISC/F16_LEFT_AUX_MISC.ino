@@ -174,10 +174,12 @@ const SwitchDef switches[] = {
   {"CMDS RWR",              PNL_CMDS,       SW_ON_OFF,      -1,  17,   0,  NULL},
   {"CMDS JMR",              PNL_CMDS,       SW_ON_OFF,      -1,  16,   0,  NULL},
   {"CMDS MWS",              PNL_CMDS,       SW_ON_OFF,      -1,  15,   0,  NULL},
-  {"CMDS O1",               PNL_CMDS,       SW_ON_OFF,      -1,  20,   0,  NULL},
-  {"CMDS O2",               PNL_CMDS,       SW_ON_OFF,      -1,  21,   0,  NULL},
-  {"CMDS CH",               PNL_CMDS,       SW_ON_OFF,      -1,  22,   0,  NULL},
-  {"CMDS FL",               PNL_CMDS,       SW_ON_OFF,      -1,  23,   0,  NULL},
+  // 핀 23~20 이 O1·O2·CH·FL 입니다 — RWR·JMR·MWS(17·16·15)와 같은 내림차순.
+  // 전에는 오름차순으로 적혀 있어 네 스위치의 이름이 통째로 뒤바뀌어 있었습니다.
+  {"CMDS O1",               PNL_CMDS,       SW_ON_OFF,      -1,  23,   0,  NULL},
+  {"CMDS O2",               PNL_CMDS,       SW_ON_OFF,      -1,  22,   0,  NULL},
+  {"CMDS CH",               PNL_CMDS,       SW_ON_OFF,      -1,  21,   0,  NULL},
+  {"CMDS FL",               PNL_CMDS,       SW_ON_OFF,      -1,  20,   0,  NULL},
   {"CMDS JETT",             PNL_CMDS,       SW_ON_OFF,      -1,  14,   0,  NULL},
 
   // ---- Alt Gear Panel (Teensy direct) ----
