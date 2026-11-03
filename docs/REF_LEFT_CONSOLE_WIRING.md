@@ -363,7 +363,7 @@ C14 는 SD 확장 케이블 4선(DIN · CLK · CS · GND) + VIN 1선 = **5선**�
    15  PB4  ECM XMIT 3           C11
    16  PB5  ECM XMIT 1           C11
    17  PB6  ECM BIT              C11
-   18  PB7  ECM RESET            C11
+   18  PB7  ECM RESET (NC)       C11
    19  GND  GND                  C11
    20  VCC  3.3V                 ---
 
@@ -400,7 +400,7 @@ C14 는 SD 확장 케이블 4선(DIN · CLK · CS · GND) + VIN 1선 = **5선**�
 
 버튼 번호는 `.ino` 의 **`dxOrder[]`** 표에서 나옵니다. 그 표의 줄 순서가 곧 DX 순서이고,
 순서는 **실기 콘솔 전→후**, 패널 안에서는 **좌→우 / 상→하** 입니다.
-아래 표는 소스에서 생성한 것이라 손으로 고치지 마십시오 — `dxOrder[]` 를 고치고 다시 뽑으십시오.
+아래 표는 `dxOrder[]` 와 같은 순서입니다. 그쪽을 고치면 이 표도 같이 고치십시오.
 
 | 버튼 | 패널 | 신호 |
 |------|------|------|
@@ -432,12 +432,12 @@ C14 는 SD 확장 케이블 4선(DIN · CLK · CS · GND) + VIN 1선 = **5선**�
 | 46–53 | ECM | 저항 래더 — ECM 1~6, FRM, SPL |
 | 54 | ECM | RESET |
 | 55 | ECM | BIT |
-| 56 | EPU | EPU OFF COVER (커버 자동화) |
-| 57 | EPU | EPU ON COVER (커버 자동화) |
-| 58–59 | EPU | OFF / NORM / ON (3단 토글) |
+| 56 | EPU | EPU ON COVER (커버 자동화) |
+| 57–58 | EPU | OFF / NORM / ON (3단 토글) |
+| 59 | EPU | EPU OFF COVER (커버 자동화) |
 | 60–61 | ELEC | MAIN PWR — MAIN / BATT / OFF (3단 토글) |
 | 62 | ELEC | CAUTION RST |
-| 63–64 | AVTR | OFF / ON / AUTO (3단 토글, 가운데 ON) |
+| 63–64 | AVTR | AUTO / ON / OFF (3단 토글, 가운데 ON) |
 
 > 이 DX 로 BMS 키 파일을 만드는 법은 [REF_KEYMAP.md](REF_KEYMAP.md) 에 있습니다.
 >

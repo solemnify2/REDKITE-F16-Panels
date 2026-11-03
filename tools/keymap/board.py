@@ -39,11 +39,8 @@ def next_out(base, ext):
 
 DEFAULT_BMS = r'C:\Falcon BMS 4.38'
 
-COVER_NAMES = ['ENG CONT COVER', 'EPU OFF COVER', 'EPU ON COVER']
-COMMPWR_NAMES = ['COMM1 PWR', 'COMM2 PWR']
 
-
-# ----------------------------------------------------------------- 소스 파싱
+# ----------------------------------------------------------------- 보드 질의
 TEENSY_VID = 0x16C0
 PID_DEVICES = {0x0487: 'AUX', 0x0489: 'AUX', 0x048E: 'CONSOLE'}
 
@@ -128,10 +125,3 @@ def load_catalog(bms_root):
         if m and m.group(1) != 'SimDoNothing':
             cat.setdefault(m.group(1), (int(m.group(2)), m.group(3)))
     return cat
-
-
-# ----------------------------------------------------------------- 줄 생성
-
-# DX 바인딩 줄: <Callback> <DX#> <-1|-2> -2 ...
-#  4번째 필드가 리터럴 -2 인 것이 DX 바인딩의 표식입니다. 키보드 줄은
-#  그 자리에 스캔코드(0x3B 등)가 오므로 섞일 일이 없습니다.
