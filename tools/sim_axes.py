@@ -59,7 +59,9 @@ BMS_ASSGN_DATE = '1998-12-12T12:00:00'
 # BMS 설정 폴더에서 GUID 를 찾을 때 이 이름으로 골라냅니다.
 PRODUCT = {'CONSOLE': 'F16 LEFT CONSOLE', 'AUX': 'F16 LEFT AUX MISC'}
 
-# DCS 프로파일 파일명. DCS 는 GUID 가 아니라 이름으로 찾습니다.
+# DCS 프로파일 파일명. DCS 는 GUID 가 아니라 이름으로 찾고, 그 이름은
+# 기계가 정하는 값이 아니라 우리가 고른 라벨입니다 — 여기가 유일한 출처입니다.
+# DCS 입력 설정에서 장치에 고른 프로파일 이름과 반드시 같아야 합니다.
 DCS_PROFILE = {'CONSOLE': 'F16 Left Console panel', 'AUX': 'F16 Left AUX MISCpanel'}
 
 # `<dx>` 섹션 수와 섹션당 버튼 수. 앞 두 벌에 같은 내용이 들어가고 셋째는 빕니다.
