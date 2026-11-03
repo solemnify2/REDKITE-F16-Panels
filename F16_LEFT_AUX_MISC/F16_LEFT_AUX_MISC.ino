@@ -579,6 +579,11 @@ const char* dxEntryName(const DxEntry& e) {
                            : analogBtnArrays[e.idx].groupName;
 }
 
+// assignButtons() 가 배정한 이 항목의 첫 DX 번호
+uint8_t dxEntryStart(const DxEntry& e) {
+  return (e.kind == DX_SW) ? switchBtnStart[e.idx] : analogBtnStart[e.idx];
+}
+
 // Auto-assign joystick button numbers
 void assignButtons() {
   int btn = 1;
@@ -972,6 +977,54 @@ void resetProtocol() {
   //if (ALLOW_DEBUG) Serial.println("[Proto] Reset to UNKNOWN");
 }
 
+// ================================================================
+//  Host Request — DX 맵 덤프
+// ================================================================
+//
+//  브리지가 붙지 않은 상태(PROTO_UNKNOWN)에서 "?DX" 한 줄을 받으면
+//  현재 DX 배정을 기계가 읽을 수 있는 형태로 내보냅니다.
+//  tools/gen_bms_keyfile.py 가 이걸 읽어 BMS 키 파일을 만듭니다 —
+//  소스가 없는 PC(심 PC)에서도 보드만 꽂혀 있으면 됩니다.
+//
+//  요청에만 응답하는 이유: Teensy USB CDC 는 읽는 호스트가 없으면
+//  출력을 버리므로, 기동 시 찍어 두면 대개 아무도 못 받습니다.
+//
+//  PROTO_UNKNOWN 에서만 받는 이유: BIOS 프레임이 흐르는 중에
+//  ASCII 를 섞으면 프레임 해석을 망칩니다. Windows 는 COM 포트를
+//  한 프로세스만 열 수 있으므로, 어차피 브리지를 끄고 써야 합니다.
+//
+//  출력 형식 (각 줄 '#DX' 로 시작):
+//    #DX BEGIN device=AUX pid=0x0487 entries=29 total=51
+//    #DX <첫 DX 번호> <차지하는 개수> <컨트롤 이름>
+//    #DX END
+
+#define DX_DEVICE_NAME "AUX"
+
+static char    reqBuf[16];
+static uint8_t reqLen = 0;
+
+void dumpDxMap() {
+  Serial.printf("#DX BEGIN device=%s pid=0x%04X entries=%u total=%d\n",
+                DX_DEVICE_NAME, PRODUCT_ID, (unsigned)NUM_DX_ORDER, totalButtons);
+  for (unsigned int i = 0; i < NUM_DX_ORDER; i++) {
+    const DxEntry& e = dxOrder[i];
+    Serial.printf("#DX %u %u %s\n",
+                  (unsigned)dxEntryStart(e), (unsigned)dxEntryCount(e), dxEntryName(e));
+  }
+  Serial.println("#DX END");
+}
+
+void feedHostRequest(uint8_t b) {
+  if (b == '\n' || b == '\r') {
+    reqBuf[reqLen] = '\0';
+    if (reqLen && strcmp(reqBuf, "?DX") == 0) dumpDxMap();
+    reqLen = 0;
+  } else if (b >= 0x20 && b < 0x7F && reqLen < sizeof(reqBuf) - 1) {
+    reqBuf[reqLen++] = (char)b;
+  }
+}
+
+
 // Read all available serial bytes, auto-detect protocol, and route.
 // Returns true if any data was received (heartbeat reset).
 bool detectAndRouteSerial() {
@@ -1020,7 +1073,7 @@ bool detectAndRouteSerial() {
         } else {
           syncCount = 0;
           bmsBiosSync1 = false;
-          // else: non-sync byte → ignore, keep detecting
+          feedHostRequest(b);   // ASCII 요청 — 브리지가 안 붙은 동안에만
         }
         break;
       }
@@ -1127,7 +1180,7 @@ void setup() {
   for (unsigned int i = 0; i < NUM_DX_ORDER; i++) {
     const DxEntry& e = dxOrder[i];
     uint8_t cnt = dxEntryCount(e);
-    uint8_t dx  = (e.kind == DX_SW) ? switchBtnStart[e.idx] : analogBtnStart[e.idx];
+    uint8_t dx  = dxEntryStart(e);
     char loc[16] = "";
     if (e.kind == DX_LADDER)             snprintf(loc, sizeof(loc), " [ladder]");
     else if (switches[e.idx].mcpIdx >= 0) snprintf(loc, sizeof(loc), " [MCP@0x%02X]",

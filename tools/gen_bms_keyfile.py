@@ -2,12 +2,22 @@
 # -*- coding: utf-8 -*-
 """Redkite 펌웨어의 DX 맵에서 Falcon BMS .key 바인딩을 생성합니다.
 
-    python tools/gen_bms_keyfile.py --device-index 2 -o redkite.key
+    python tools/gen_bms_keyfile.py -o redkite.key
 
-DX 번호는 스케치의 `dxOrder[]` 표에서 직접 읽습니다. dxOrder[] 가 DX 순서의
-유일한 근거이므로, 재배열한 뒤 다시 돌리기만 하면 바인딩이 따라옵니다.
+**기본은 보드에 직접 물어봅니다.** Teensy 를 VID/PID 로 찾아 "?DX" 를 보내고,
+펌웨어가 돌려주는 현재 DX 맵을 읽습니다. 그래서 소스나 개발환경이 없는
+PC(심 PC)에서도 이 폴더만 있으면 동작합니다. 필요한 것은 pyserial 과
+BMS 설치본뿐입니다.
+
+업로드된 펌웨어가 곧 BMS 가 보는 장치이므로, 보드가 유일하게 믿을 만한
+근거입니다. 소스를 읽는 --from-source 는 보드가 없을 때를 위한 보조 수단이고,
+--verify 로 둘을 대조하면 업로드를 깜빡했는지 바로 드러납니다.
+
 콜백은 tools/bms_callbacks.py 의 이름 기반 표에서 오고, 모든 콜백이
 'BMS - Full.key' 에 실재하는지 생성 시점에 검증합니다 — 없는 이름은 에러입니다.
+
+브리지를 끄고 실행하십시오. Windows 는 COM 포트를 한 프로세스만 열 수 있고,
+펌웨어도 프로토콜 미검출 상태에서만 "?DX" 에 응답합니다.
 
 출력은 DX 바인딩 줄만 모은 **조각**입니다. 기존 .key 파일 끝에 붙이거나,
 --merge 로 원본을 읽어 같은 DX·같은 콜백 줄을 걷어내고 합치십시오.
@@ -25,6 +35,7 @@ import argparse
 import os
 import re
 import sys
+import time
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
@@ -96,6 +107,92 @@ def dx_map(path):
     return out
 
 
+# --------------------------------------------------------------- 보드 질의
+TEENSY_VID = 0x16C0
+PID_DEVICES = {0x0487: 'AUX', 0x0489: 'AUX', 0x048E: 'CONSOLE'}
+
+
+def _require_serial():
+    try:
+        import serial              # noqa: F401
+        import serial.tools.list_ports
+    except ImportError:
+        raise SystemExit('pyserial 이 필요합니다:  pip install pyserial\n'
+                         '(보드 없이 소스로 만들려면 --from-source)')
+    return serial
+
+
+def find_boards():
+    """VID/PID 로 Teensy 를 찾아 [(포트, 'CONSOLE'|'AUX')] 반환."""
+    serial = _require_serial()
+    found = []
+    for p in serial.tools.list_ports.comports():
+        if p.vid == TEENSY_VID and p.pid in PID_DEVICES:
+            found.append((p.device, PID_DEVICES[p.pid]))
+    return found
+
+
+class DumpParser(object):
+    """펌웨어의 '#DX ...' 덤프를 누적 파싱. 완성되면 done 이 True.
+
+    #DX BEGIN device=CONSOLE pid=0x048E entries=43 total=64
+    #DX <첫 DX 번호> <차지하는 개수> <컨트롤 이름>
+    #DX END
+    """
+
+    def __init__(self):
+        self.device, self.entries, self.done = None, [], False
+
+    def feed(self, line):
+        line = line.strip()
+        if not line.startswith('#DX '):
+            return
+        body = line[4:]
+        if body.startswith('BEGIN'):
+            m = re.search(r'device=(\w+)', body)
+            self.device, self.entries, self.done = (m.group(1) if m else None), [], False
+        elif body == 'END':
+            self.done = True
+        else:
+            parts = body.split(None, 2)
+            if len(parts) == 3 and parts[0].isdigit() and parts[1].isdigit():
+                self.entries.append((int(parts[0]), parts[2], int(parts[1])))
+
+
+def query_board(port, timeout=3.0):
+    """'?DX' 를 보내고 #DX 덤프를 받아 (device, [(dx, 이름, 폭)]) 반환."""
+    serial = _require_serial()
+    with serial.Serial(port, 1000000, timeout=0.2) as ser:
+        ser.reset_input_buffer()
+        ser.write(b'?DX\n')
+        ser.flush()
+        p, deadline = DumpParser(), time.time() + timeout
+        while time.time() < deadline:
+            raw = ser.readline()
+            if not raw:
+                continue
+            p.feed(raw.decode('ascii', 'replace'))
+            if p.done:
+                return p.device, p.entries
+    raise SystemExit('%s: 보드가 "?DX" 에 응답하지 않았습니다.\n'
+                     '  - 브리지가 돌고 있으면 끄십시오 (포트를 선점합니다)\n'
+                     '  - 펌웨어가 이 기능이 들어간 빌드인지 확인하십시오\n'
+                     '  - 보드 없이 쓰려면 --from-source' % port)
+
+
+def read_device_sorting(bms_root):
+    """DeviceSorting.txt 를 읽어 [(순번, 원문)] 반환. 비어 있으면 []."""
+    path = os.path.join(bms_root, 'User', 'Config', 'DeviceSorting.txt')
+    if not os.path.isfile(path):
+        return []
+    out = []
+    for line in open(path, encoding='utf-8', errors='replace'):
+        line = line.strip()
+        if line and not line.startswith('#'):
+            out.append((len(out) + 1, line))
+    return out
+
+
 # ------------------------------------------------------------- BMS 콜백 카탈로그
 def load_catalog(bms_root):
     """BMS - Full.key 에서 콜백 → 사운드 ID. 콜백 실재 여부 검증에도 씁니다."""
@@ -163,25 +260,79 @@ def main():
                          'DEVICE 는 CONSOLE 또는 AUX. 여러 번 지정 가능')
     ap.add_argument('--buttons-per-device', type=int, default=128,
                     help='Falcon BMS User.cfg 의 g_nButtonsPerDevice (기본 128)')
+    ap.add_argument('--from-source', action='store_true',
+                    help='보드 대신 스케치 소스의 dxOrder[] 를 읽습니다 (오프라인용)')
+    ap.add_argument('--verify', action='store_true',
+                    help='보드와 소스를 모두 읽어 DX 맵이 같은지 대조만 합니다')
+    ap.add_argument('--port', action='append', metavar='COMx',
+                    help='자동 탐지 대신 쓸 포트. 여러 번 지정 가능')
     ap.add_argument('-o', '--out', help='출력 파일 (기본: 표준출력)')
     ap.add_argument('--comments', action='store_true',
                     help='각 줄 뒤에 컨트롤 이름을 주석으로 (BMS 는 무시하지만 '
                          'BMS UI 에서 저장하면 사라집니다)')
     args = ap.parse_args()
 
-    if not args.device_index:
-        ap.error('--device-index 가 필요합니다. 예: --device-index CONSOLE 2 '
-                 '--device-index AUX 3\n'
-                 'DeviceSorting.txt 에서 각 Teensy 가 몇 번째인지 확인하십시오.')
+    # --- DX 맵 확보: 보드 질의가 기본, --from-source 는 보조 ---
+    maps = {}            # device -> [(dx, name, width)]
+    if args.verify or not args.from_source:
+        boards = [(p, None) for p in args.port] if args.port else find_boards()
+        if not boards:
+            raise SystemExit('Teensy 보드를 찾지 못했습니다 (VID 0x16C0).\n'
+                             '  - USB 가 꽂혀 있는지, 브리지가 꺼져 있는지 확인하십시오\n'
+                             '  - 포트를 직접 주려면 --port COM7\n'
+                             '  - 보드 없이 소스로 만들려면 --from-source')
+        for port, _ in boards:
+            dev, entries = query_board(port)
+            if dev not in SKETCHES:
+                raise SystemExit('%s: 알 수 없는 device=%r' % (port, dev))
+            sys.stderr.write('%s 에서 %s DX 맵 %d 항목 수신\n' % (port, dev, len(entries)))
+            maps[dev] = entries
+    if args.verify or args.from_source:
+        for dev, rel in SKETCHES.items():
+            path = os.path.join(ROOT, rel)
+            if not os.path.isfile(path):
+                continue
+            src_entries = dx_map(path)
+            if args.verify and dev in maps:
+                if src_entries != maps[dev]:
+                    sys.stderr.write('\n%s: 보드와 소스의 DX 맵이 다릅니다\n' % dev)
+                    for a, b in zip(src_entries, maps[dev]):
+                        if a != b:
+                            sys.stderr.write('  소스 %-28s  보드 %s\n' % (a, b))
+                    return 1
+                sys.stderr.write('%s: 보드 = 소스 (%d 항목)\n' % (dev, len(src_entries)))
+            elif args.from_source:
+                maps[dev] = src_entries
+    if args.verify:
+        sys.stderr.write('\n대조 완료 — 업로드된 펌웨어가 소스와 일치합니다.\n')
+        return 0
+
+    # --- BMS 블록 오프셋 ---
+    sorting = read_device_sorting(args.bms_root)
+    idx = {d.upper(): int(n) for d, n in (args.device_index or [])}
+    if sorting and not idx:
+        sys.stderr.write('\nDeviceSorting.txt:\n')
+        for n, text in sorting:
+            sys.stderr.write('  %d: %s\n' % (n, text))
+    for dev in maps:
+        if dev in idx:
+            continue
+        hit = [n for n, text in sorting if 'CONSOLE' in text.upper()] if dev == 'CONSOLE' \
+            else [n for n, text in sorting if 'AUX' in text.upper()]
+        if len(hit) == 1:
+            idx[dev] = hit[0]
+            sys.stderr.write('%s: DeviceSorting.txt 에서 순번 %d 로 판단\n' % (dev, hit[0]))
+        else:
+            raise SystemExit('%s 의 장치 순번을 정할 수 없습니다.\n'
+                             '  --device-index %s N 으로 직접 주십시오 '
+                             '(DeviceSorting.txt 에서 몇 번째인지, 1-base).' % (dev, dev))
 
     catalog = load_catalog(args.bms_root)
     out, todos, unmapped_all = [], [], []
-    for dev, n in args.device_index:
-        dev = dev.upper()
-        if dev not in SKETCHES:
-            ap.error('알 수 없는 장치 %r (CONSOLE 또는 AUX)' % dev)
-        base = (int(n) - 1) * args.buttons_per_device
-        entries = dx_map(os.path.join(ROOT, SKETCHES[dev]))
+    for dev in sorted(maps):
+        n = idx[dev]
+        base = (n - 1) * args.buttons_per_device
+        entries = maps[dev]
         lines, unmapped, todo = emit(entries, bms_callbacks.MAPS[dev], catalog, base, dev)
         out.append('')
         out.append('# ---- %s : 장치 %s, BMS DX %d~%d (Windows DX %d~%d) ----'
