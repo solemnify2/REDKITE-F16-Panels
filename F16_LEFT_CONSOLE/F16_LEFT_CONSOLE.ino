@@ -336,10 +336,15 @@ const SwitchDef switches[] = {
   {"ECM BIT",             PNL_ECM,     SW_ON_OFF,        2,  14,   0,  0},  // GPB6  momentary
 
   // ---- EPU Panel (MCP 0x21) ----
-  {"EPU",                 PNL_EPU,     SW_ON_OFF_ON,     1,   8,   9,  0},  // GPB0/GPB1  OFF/NORM/ON (배선 교차)
+  // GPB1=OFF, GPB0=ON 으로 커넥터에서 교차돼 있습니다. 이 배열은 핀 번호가
+  // 아니라 **위치 순서**(OFF/NORM/ON)로 적으므로 pin1=9, pin2=8 입니다 —
+  // UHF·COMM 로터리의 pins[] 와 같은 규칙. 중립(NORM)은 양쪽 다 열림.
+  {"EPU",                 PNL_EPU,     SW_ON_OFF_ON,     1,   9,   8,  0},  // OFF/NORM/ON
 
   // ---- ELEC Panel (MCP 0x21) ----
-  {"ELEC MAIN PWR",       PNL_ELEC,    SW_ON_OFF_ON,     1,  14,  15,  0},  // GPB6/GPB7  MAIN/OFF (배선 교차)
+  // GPB6=MAIN, GPB7=OFF. 커넥터에서 교차시켜 놓아 결과적으로 위치 순서와
+  // 핀 번호가 같습니다 — 심 PC 의 BMS 바인딩(pin1=MAIN)으로 확인했습니다.
+  {"ELEC MAIN PWR",       PNL_ELEC,    SW_ON_OFF_ON,     1,  14,  15,  0},  // MAIN/BATT/OFF
   {"ELEC CAUTION RST",    PNL_ELEC,    SW_ON_OFF,        1,  10,   0,  0},  // GPB2  momentary (CAUTION RST)
 
   // ---- AVTR Panel (MCP 0x22) ----

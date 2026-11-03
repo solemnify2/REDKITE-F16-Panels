@@ -434,10 +434,10 @@ C14 는 SD 확장 케이블 4선(DIN · CLK · CS · GND) + VIN 1선 = **5선**�
 | 55 | ECM | BIT |
 | 56 | EPU | EPU OFF COVER (커버 자동화) |
 | 57 | EPU | EPU ON COVER (커버 자동화) |
-| 58–59 | EPU | NORM / ON |
-| 60–61 | ELEC | MAIN PWR — BATT / MAIN |
+| 58–59 | EPU | OFF / NORM / ON (3단 토글) |
+| 60–61 | ELEC | MAIN PWR — MAIN / BATT / OFF (3단 토글) |
 | 62 | ELEC | CAUTION RST |
-| 63–64 | AVTR | AUTO / ON |
+| 63–64 | AVTR | OFF / ON / AUTO (3단 토글, 가운데 ON) |
 
 > 이 DX 로 BMS 키 파일을 만드는 법은 [REF_KEYMAP.md](REF_KEYMAP.md) 에 있습니다.
 >
