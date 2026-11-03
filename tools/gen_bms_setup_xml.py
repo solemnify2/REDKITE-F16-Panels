@@ -1,12 +1,15 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""Redkite 보드의 DX 맵에서 Falcon BMS 의 **장치별 Setup XML** 을 만듭니다.
+r"""Redkite 보드의 DX 맵에서 Falcon BMS 의 **장치별 Setup XML** 을 만듭니다.
 
-    python tools/gen_bms_setup_xml.py -o out
+    python tools/gen_bms_setup_xml.py
 
-**파일을 처음부터 전부 만듭니다.** 기존 XML 이 없어도 되고, 참고하지도 않습니다 —
-축 설정·GUID 처럼 유도할 수 없는 값은 `tools/sim_axes.py` 에 데이터로 적혀 있습니다.
+**파일을 처음부터 전부 만듭니다.** 기존 XML 을 참고하지 않습니다 — 축 설정처럼
+유도할 수 없는 값은 `tools/sim_axes.py` 에 데이터로 적혀 있습니다.
 축의 invert/deadzone 을 바꾸고 싶으면 그 파일을 고치십시오.
+
+기본으로 BMS 의 `User\Config` 에 바로 씁니다 — 기존 파일은 `.bak` 으로
+옮기고 덮어씁니다. 다른 곳에 뽑아 확인하려면 `-o out` 을 주십시오.
 
 BMS 는 버튼 바인딩을 장치마다 하나씩인 `Setup.v100.<장치명> {GUID}.xml` 에 둡니다.
 장치별이라 대역 오프셋도, `DeviceSorting.txt` 도, 다른 장치와의 병합도 필요 없습니다.
@@ -39,20 +42,36 @@ GUID_RE = re.compile(r'\{([0-9A-Fa-f-]{36})\}\.xml$')
 EMPTY = ('SimDoNothing', 'Default', 0)
 
 
-def discover_guid(bms_root, device):
+def device_guid(cfg_dir, device):
     r"""BMS 의 User\Config 에서 그 장치의 GUID 를 찾습니다.
 
-    GUID 는 Windows DirectInput 이 장치를 처음 열거할 때 만드는 값이라 보드는
-    모릅니다. 다만 BMS 가 장치를 인식하면 `Setup.v100.<제품명> {GUID}.xml` 을
-    만들어 두므로, 그 **파일 이름**에서 가져올 수 있습니다 (내용은 안 읽습니다).
+    GUID 는 Windows DirectInput 이 장치를 처음 열거할 때 만드는 값이라
+    보드도 생성기도 모릅니다. 다만 BMS 가 장치를 인식하면
+    `Setup.v100.<제품명> {GUID}.xml` 을 만들어 두므로, 그 **파일 이름**에서
+    가져올 수 있습니다 (내용은 안 읽습니다).
     """
-    d = os.path.join(bms_root, 'User', 'Config')
-    if not os.path.isdir(d):
-        return None
-    pre = 'Setup.v100.' + AX.PRODUCT[device] + ' {'
-    hits = [GUID_RE.search(f).group(1) for f in os.listdir(d)
+    product = AX.PRODUCT[device]
+    pre = 'Setup.v100.' + product + ' {'
+    names = sorted(os.listdir(cfg_dir)) if os.path.isdir(cfg_dir) else []
+    hits = [GUID_RE.search(f).group(1) for f in names
             if f.startswith(pre) and GUID_RE.search(f)]
-    return hits[0] if len(hits) == 1 else None
+    if len(hits) == 1:
+        return hits[0]
+    if hits:
+        raise SystemExit(
+            '%s 의 Setup XML 이 %d 개 입니다. 쓸 것 하나만 남기고 다시 실행하십시오:\n  %s'
+            % (product, len(hits),
+               '\n  '.join(f for f in names if f.startswith(pre))))
+    raise SystemExit(
+        '%s 의 Setup XML 이 BMS 설정 폴더에 없습니다:\n'
+        '  %s\n\n'
+        'GUID 는 Windows 가 장치에 붙이는 값이라 보드도 생성기도 모릅니다.\n'
+        'BMS 를 켜고 SETUP - CONTROLLERS 에서 이 장치를 고른 다음 아무 버튼이나\n'
+        '한 번 바인드하고 저장하십시오. BMS 가 더미 파일을 만들면 그 이름에서\n'
+        'GUID 를 가져옵니다. 그 뒤 다시 실행하십시오.'
+        % (product, cfg_dir))
+
+
 I = '  '          # BMS 가 쓰는 들여쓰기
 
 
@@ -152,14 +171,15 @@ def render(device, dxmap):
 def main():
     ap = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument('-o', '--out-dir', required=True, help='생성한 XML 을 쓸 폴더')
     ap.add_argument('--bms-root', default=K.DEFAULT_BMS, help='BMS 설치 경로')
+    ap.add_argument('-o', '--out-dir', metavar='DIR',
+                    help='따로 뽑아볼 폴더 (기본은 BMS 의 User\\Config 에 직접)')
     ap.add_argument('--port', action='append', metavar='COMx', help='포트 직접 지정')
-    ap.add_argument('--guid', action='append', nargs=2, metavar=('DEVICE', 'GUID'),
-                    help='장치 GUID 지정 (기본은 sim_axes.py 의 값)')
     args = ap.parse_args()
 
-    forced = {d.upper(): g.strip('{}') for d, g in (args.guid or [])}
+    cfg_dir = os.path.join(args.bms_root, 'User', 'Config')
+    out_dir = args.out_dir or cfg_dir
+    in_place = os.path.abspath(out_dir) == os.path.abspath(cfg_dir)
 
     maps = {}
     boards = [(p, None) for p in args.port] if args.port else K.find_boards()
@@ -173,23 +193,22 @@ def main():
         sys.stderr.write('%s 에서 %s DX 맵 %d 항목 수신\n' % (port, dev, len(entries)))
         maps[dev] = entries
 
+    # 보드를 모두 읽은 뒤에 GUID 를 보여야 한쪽만 없어도 양쪽 안내가 나옵니다.
+    guids = {dev: device_guid(cfg_dir, dev) for dev in sorted(maps)}
+
     catalog = K.load_catalog(args.bms_root)
-    if not os.path.isdir(args.out_dir):
-        os.makedirs(args.out_dir)
+    if not os.path.isdir(out_dir):
+        os.makedirs(out_dir)
 
     for dev in sorted(maps):
         dxmap, missing = build_map(maps[dev], bms_callbacks.MAPS[dev], catalog, dev)
-        # GUID 는 --guid > BMS 설정 폴더에서 발견 > sim_axes.py 기본값 순
-        guid, how = forced.get(dev), '--guid'
-        if not guid:
-            guid, how = discover_guid(args.bms_root, dev), 'BMS 설정 폴더에서 발견'
-        if not guid:
-            guid, how = AX.BMS_GUID.get(dev), 'sim_axes.py 기본값'
-        if not guid:
-            raise SystemExit('%s 의 GUID 를 알 수 없습니다. --guid %s "{...}" 로 '
-                             '지정하십시오.' % (dev, dev))
-        fn = 'Setup.v100.%s {%s}.xml' % (AX.PRODUCT[dev], guid)
-        dest = os.path.join(args.out_dir, fn)
+        fn = 'Setup.v100.%s {%s}.xml' % (AX.PRODUCT[dev], guids[dev])
+        dest = os.path.join(out_dir, fn)
+        if os.path.exists(dest):
+            bak = dest + '.bak'
+            if os.path.exists(bak):
+                os.remove(bak)
+            os.replace(dest, bak)
         open(dest, 'w', encoding='utf-8', newline='\n').write(render(dev, dxmap))
         bound = sum(1 for v in dxmap.values() if v[0] is not EMPTY)
         total = maps[dev][-1][0] + maps[dev][-1][2] - 1
@@ -198,9 +217,14 @@ def main():
                          % (bound, total, len(AX.BMS_AXES[dev])))
         for dx, name, w in missing:
             sys.stderr.write('         매핑 없음: DX %d %s (x%d)\n' % (dx, name, w))
-    sys.stderr.write('\n%s 에 기록했습니다. BMS 의 User\\Config 로 복사하십시오.\n'
-                     '축 설정(invert/deadzone)과 GUID 는 tools/sim_axes.py 에 있습니다.\n'
-                     % args.out_dir)
+
+    if in_place:
+        sys.stderr.write('\nBMS 의 User%sConfig 에 바로 썼습니다 (전 파일은 .bak).\n'
+                         % chr(92))
+    else:
+        sys.stderr.write('\n%s 에 기록했습니다. BMS 의 User%sConfig 로 복사하십시오.\n'
+                         % (out_dir, chr(92)))
+    sys.stderr.write('축 설정(invert/deadzone)은 tools/sim_axes.py 에 있습니다.\n')
     return 0
 
 

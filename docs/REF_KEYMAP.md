@@ -32,7 +32,7 @@ pyserial, 그리고 해당 심 설치본이면 됩니다. 심 PC 에 그대로 �
 |---|---|
 | (없음) | 보드에 질의 — 기본 |
 | `--port COMx` | 자동 탐지 대신 포트 지정 |
-| `-o` | 출력 폴더. **원본을 덮어쓰지 않습니다** |
+| `-o DIR` | 따로 뽑아볼 폴더. **없으면 심 설정 폴더에 바로 씁니다** |
 
 > 생성하기 전에 **업로드를 깜빡했는지** 보려면
 > `python tools/gen_bms_keyfile.py --verify` — 보드와 소스를 대조만 하고
@@ -41,33 +41,38 @@ pyserial, 그리고 해당 심 설치본이면 됩니다. 심 PC 에 그대로 �
 ### 1-1. BMS — 장치별 Setup XML
 
 ```
-python tools/gen_bms_setup_xml.py -o out
+python tools/gen_bms_setup_xml.py
 ```
 
 | 옵션 | |
 |---|---|
 | `--bms-root` | BMS 설치 경로 (기본 `C:\Falcon BMS 4.38`) |
-| `--guid DEVICE GUID` | GUID 직접 지정 (아래) |
 
-확인한 뒤 `User\Config` 로 복사하십시오.
+BMS 의 `User\Config` 에 **바로 씁니다.** 전 파일은 같은 이름 뒤에 `.bak` 을
+붙여 남기므로 되돌릴 수 있습니다. 먼저 눈으로 보고 싶으면 `-o out`.
 
-파일명의 GUID 는 **Windows 가 장치에 붙이는 값이라 보드는 모릅니다.** BMS 가 장치를
-인식하면 `Setup.v100.<제품명> {GUID}.xml` 을 만들어 두므로, 생성기가 `--bms-root`
-아래 `User\Config` 의 **파일 이름에서** 가져옵니다. 못 찾으면 `sim_axes.py` 의 값을
-쓰고, 그것도 없으면 `--guid` 로 줘야 합니다. 어느 쪽을 썼는지 실행할 때 찍힙니다.
+파일명의 GUID 는 **Windows 가 장치에 붙이는 값이라 보드도 생성기도
+모릅니다.** BMS 가 장치를 인식하면 `Setup.v100.<제품명> {GUID}.xml` 을 만들어
+두므로, 생성기는 `User\Config` 의 **파일 이름에서** 가져옵니다 (내용은 안 읽습니다).
+
+그 파일이 없으면 생성기는 아무 것도 쓰지 않고 멈춥니다. **BMS 의
+SETUP – CONTROLLERS 에서 그 장치를 고르고 아무 버튼이나 한 번 바인드한 뒤
+저장**하십시오. 더미 파일이 생기면 그 이름에서 GUID 를 가져옵니다.
 
 ### 1-2. DCS — 입력 프로파일
 
 ```
-python tools/gen_dcs_profile.py -o out
+python tools/gen_dcs_profile.py
 ```
 
 | 옵션 | |
 |---|---|
 | `--name CONSOLE "이름"` | 파일명 지정 (기본은 `sim_axes.py` 의 값) |
 
-확인한 뒤 `Saved Games\DCS\Config\Input\...\InputUserProfiles\` 로 복사하고,
-DCS 입력 설정에서 장치에 지정하십시오.
+`Saved Games\DCS\InputUserProfiles` (없으면 `DCS.openbeta`) 에 바로 씁니다.
+전 파일은 `.bak` 으로 남습니다. 그 폴더를 못 찾으면 `-o` 로 주십시오.
+
+쓴 뒤에 **DCS 입력 설정에서 장치에 프로파일을 지정**해야 적용됩니다.
 
 ## 2. 보드가 DX 맵을 알려주는 방법
 
@@ -289,7 +294,7 @@ EPU 커버는 모듈의 `Input/F-16C_50/joystick/default.lua` 를 봐야 확실�
 |---|---|---|
 | 데이터 | `BMS_AXES` — `<AxAssgn>` 8칸 | `DCS_AXES` — 명령별 필터 |
 | 담는 값 | AxisName · Invert · Saturation · Deadzone | invert · deadzone · curvature · saturation |
-| 그 외 | `BMS_DETENT`, `BMS_GUID` | `DCS_PROFILE` (파일명) |
+| 그 외 | `BMS_DETENT`, `PRODUCT` (제품명) | `DCS_PROFILE` (파일명) |
 
 DCS 쪽에는 **`removed` 항목**도 들어 있습니다. 이게 특히 중요합니다 — DCS 가 새 조이스틱에 자동으로 거는
 `Pitch←JOY_Y` · `Roll←JOY_X` · `Thrust←JOY_Z` (콘솔은 `Rudder←JOY_RZ` 까지) 를
@@ -313,7 +318,7 @@ DCS 쪽에는 **`removed` 항목**도 들어 있습니다. 이게 특히 중요�
 | `tools/dcs_commands.py` | 컨트롤 이름 → DCS 명령 ID |
 | `tools/bms_catalog.txt` | BMS 콜백 목록 기준선 (버전업 감지) |
 | `tools/dcs_catalog.txt` | DCS 명령 ID ↔ 이름 |
-| `tools/sim_axes.py` | **축 설정 · 장치 GUID · 파일명** — 두 심 공통 |
+| `tools/sim_axes.py` | **축 설정 · 제품명 · 파일명** — 두 심 공통 |
 | `tools/gen_bms_keyfile.py` | 보드 질의 · `?DX` 파서 · DX 맵 리더. **위 둘이 import 합니다** |
 
 컨트롤 이름이 모든 표의 키입니다. `dxOrder[]` 를 재배열해도 표는 그대로고,

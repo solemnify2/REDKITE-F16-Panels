@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """Redkite 보드의 DX 맵에서 DCS F-16C 입력 프로파일(.diff.lua)을 생성합니다.
 
-    python tools/gen_dcs_profile.py -o out
+    python tools/gen_dcs_profile.py
 
 BMS 와 달리 DCS 는 **장치마다 파일 하나**이고 버튼 번호에 오프셋이 없습니다 —
 `JOY_BTN<n>` 의 n 이 그 장치의 DX 번호 그대로입니다. 그래서 장치 순번도,
@@ -36,6 +36,20 @@ CATALOG = os.path.join(HERE, 'dcs_catalog.txt')
 
 # 파일명. DCS 는 GUID 가 아니라 이름으로 찾으므로 바꿔도 됩니다.
 PROFILE_NAME = dict(AX.DCS_PROFILE)
+
+
+# DCS 가 사용자 프로파일을 두는 곳. 설치 별로 폴더명이 다릅니다.
+DCS_DIRS = ('DCS', 'DCS.openbeta')
+
+
+def default_out_dir():
+    """Saved Games 에서 InputUserProfiles 폴더를 찾습니다. 없으면 None."""
+    home = os.path.expanduser('~')
+    for d in DCS_DIRS:
+        cand = os.path.join(home, 'Saved Games', d, 'InputUserProfiles')
+        if os.path.isdir(cand):
+            return cand
+    return None
 
 
 def load_catalog():
@@ -134,11 +148,22 @@ def lua(keydiffs, axes, names):
 def main():
     ap = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument('-o', '--out-dir', required=True, help='생성한 .diff.lua 를 쓸 폴더')
+    ap.add_argument('-o', '--out-dir', metavar='DIR',
+                    help='따로 뽑아볼 폴더 (기본은 DCS 의 InputUserProfiles 에 직접)')
     ap.add_argument('--port', action='append', metavar='COMx', help='포트 직접 지정')
     ap.add_argument('--name', action='append', nargs=2, metavar=('DEVICE', 'NAME'),
                     help='프로파일 파일명 지정 (기본: %s)' % PROFILE_NAME)
     args = ap.parse_args()
+
+    out_dir = args.out_dir or default_out_dir()
+    if not out_dir:
+        raise SystemExit(
+            'DCS 의 InputUserProfiles 폴더를 찾지 못했습니다:\n'
+            '  %s\n\n'
+            '이 PC 에 DCS 가 없거나 폴더명이 다릅니다. -o 로 직접 주십시오.'
+            % ('\n  '.join(os.path.join(os.path.expanduser('~'), 'Saved Games',
+                                       d, 'InputUserProfiles') for d in DCS_DIRS)))
+    in_place = args.out_dir is None
 
     for dev, nm in (args.name or []):
         PROFILE_NAME[dev.upper()] = nm
@@ -154,14 +179,19 @@ def main():
         maps[dev] = entries
 
     names, axes = load_catalog()
-    if not os.path.isdir(args.out_dir):
-        os.makedirs(args.out_dir)
+    if not os.path.isdir(out_dir):
+        os.makedirs(out_dir)
 
     todos, unmapped_all = [], []
     for dev in sorted(maps):
         kd, todo, unmapped = collect(maps[dev], dcs_commands.MAPS[dev], dev)
         ax = AX.DCS_AXES[dev]
-        dest = os.path.join(args.out_dir, PROFILE_NAME[dev] + '.diff.lua')
+        dest = os.path.join(out_dir, PROFILE_NAME[dev] + '.diff.lua')
+        if os.path.exists(dest):
+            bak = dest + '.bak'
+            if os.path.exists(bak):
+                os.remove(bak)
+            os.replace(dest, bak)
         open(dest, 'w', encoding='utf-8', newline='\n').write(lua(kd, ax, names))
         keys = sum(len(v) for v in kd.values())
         sys.stderr.write('%-8s %s\n' % (dev, os.path.basename(dest)))
@@ -181,8 +211,13 @@ def main():
                          % len(unmapped_all))
         for dev, dx, name, w in unmapped_all:
             sys.stderr.write('  %-8s DX %-3d %s (x%d)\n' % (dev, dx, name, w))
-    sys.stderr.write('\n%s 에 기록했습니다. DCS 의 Saved Games\\...\\InputUserProfiles 로 '
-                     '복사한 뒤 입력 설정에서 장치에 지정하십시오.\n' % args.out_dir)
+    if in_place:
+        sys.stderr.write('\nDCS 의 InputUserProfiles 에 바로 썼습니다 (전 파일은 .bak):\n'
+                         '  %s\n' % out_dir)
+    else:
+        sys.stderr.write('\n%s 에 기록했습니다. DCS 의 InputUserProfiles 로 복사하십시오.\n'
+                         % out_dir)
+    sys.stderr.write('DCS 입력 설정에서 장치에 프로파일을 지정하십시오.\n')
     return 0
 
 

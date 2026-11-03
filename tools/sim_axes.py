@@ -55,14 +55,8 @@ BMS_DIR_ASSGN = 8
 # BMS 가 AssgnDate 에 쓰는 '비어 있음' 값. 설정 UI 를 건드리면 BMS 가 다시 씁니다.
 BMS_ASSGN_DATE = '1998-12-12T12:00:00'
 
-# 장치 GUID — Setup XML 파일명에 들어갑니다. Windows 가 장치마다 정하는 값이라
-# 다른 PC 에서는 달라집니다. `--guid` 로 덮어쓸 수 있습니다.
-BMS_GUID = {
-    'CONSOLE': '6AE05230-5FA3-11F1-8002-444553540000',
-    'AUX':     '024F5980-C258-11EF-800F-444553540000',
-}
-
-# USB 제품명 (name.c). Setup XML 파일명의 앞부분입니다.
+# USB 제품명 (name.c). Setup XML 파일명의 앞부분이라, 생성기가
+# BMS 설정 폴더에서 GUID 를 찾을 때 이 이름으로 골라냅니다.
 PRODUCT = {'CONSOLE': 'F16 LEFT CONSOLE', 'AUX': 'F16 LEFT AUX MISC'}
 
 # DCS 프로파일 파일명. DCS 는 GUID 가 아니라 이름으로 찾습니다.

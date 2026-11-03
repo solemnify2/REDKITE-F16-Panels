@@ -44,6 +44,13 @@ ROOT = os.path.dirname(HERE)
 sys.path.insert(0, HERE)
 import bms_callbacks  # noqa: E402
 
+# 한글 콘솔(cp949)에서 줄표(—) 하나에 --help 가 터지는 것을 막습니다.
+for _s in (sys.stdout, sys.stderr):
+    try:
+        _s.reconfigure(errors='backslashreplace')
+    except (AttributeError, ValueError):  # 파이프로 묶였을 때
+        pass
+
 DEFAULT_BMS = r'C:\Falcon BMS 4.38'
 
 SKETCHES = {
