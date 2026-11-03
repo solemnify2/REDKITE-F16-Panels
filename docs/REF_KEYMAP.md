@@ -47,9 +47,14 @@ python tools/gen_bms_setup_xml.py -o out
 | 옵션 | |
 |---|---|
 | `--bms-root` | BMS 설치 경로 (기본 `C:\Falcon BMS 4.38`) |
-| `--guid DEVICE GUID` | 장치 GUID 지정 (기본은 `sim_axes.py` 의 값) |
+| `--guid DEVICE GUID` | GUID 직접 지정 (아래) |
 
 확인한 뒤 `User\Config` 로 복사하십시오.
+
+파일명의 GUID 는 **Windows 가 장치에 붙이는 값이라 보드는 모릅니다.** BMS 가 장치를
+인식하면 `Setup.v100.<제품명> {GUID}.xml` 을 만들어 두므로, 생성기가 `--bms-root`
+아래 `User\Config` 의 **파일 이름에서** 가져옵니다. 못 찾으면 `sim_axes.py` 의 값을
+쓰고, 그것도 없으면 `--guid` 로 줘야 합니다. 어느 쪽을 썼는지 실행할 때 찍힙니다.
 
 ### 1-2. DCS — 입력 프로파일
 

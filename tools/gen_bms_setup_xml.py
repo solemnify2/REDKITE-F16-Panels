@@ -25,6 +25,7 @@ BMS 는 버튼 바인딩을 장치마다 하나씩인 `Setup.v100.<장치명> {G
 """
 import argparse
 import os
+import re
 import sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -33,7 +34,25 @@ import bms_callbacks  # noqa: E402
 import sim_axes as AX  # noqa: E402
 import gen_bms_keyfile as K  # noqa: E402
 
+GUID_RE = re.compile(r'\{([0-9A-Fa-f-]{36})\}\.xml$')
+
 EMPTY = ('SimDoNothing', 'Default', 0)
+
+
+def discover_guid(bms_root, device):
+    r"""BMS 의 User\Config 에서 그 장치의 GUID 를 찾습니다.
+
+    GUID 는 Windows DirectInput 이 장치를 처음 열거할 때 만드는 값이라 보드는
+    모릅니다. 다만 BMS 가 장치를 인식하면 `Setup.v100.<제품명> {GUID}.xml` 을
+    만들어 두므로, 그 **파일 이름**에서 가져올 수 있습니다 (내용은 안 읽습니다).
+    """
+    d = os.path.join(bms_root, 'User', 'Config')
+    if not os.path.isdir(d):
+        return None
+    pre = 'Setup.v100.' + AX.PRODUCT[device] + ' {'
+    hits = [GUID_RE.search(f).group(1) for f in os.listdir(d)
+            if f.startswith(pre) and GUID_RE.search(f)]
+    return hits[0] if len(hits) == 1 else None
 I = '  '          # BMS 가 쓰는 들여쓰기
 
 
@@ -140,8 +159,7 @@ def main():
                     help='장치 GUID 지정 (기본은 sim_axes.py 의 값)')
     args = ap.parse_args()
 
-    for dev, g in (args.guid or []):
-        AX.BMS_GUID[dev.upper()] = g.strip('{}')
+    forced = {d.upper(): g.strip('{}') for d, g in (args.guid or [])}
 
     maps = {}
     boards = [(p, None) for p in args.port] if args.port else K.find_boards()
@@ -161,7 +179,16 @@ def main():
 
     for dev in sorted(maps):
         dxmap, missing = build_map(maps[dev], bms_callbacks.MAPS[dev], catalog, dev)
-        fn = 'Setup.v100.%s {%s}.xml' % (AX.PRODUCT[dev], AX.BMS_GUID[dev])
+        # GUID 는 --guid > BMS 설정 폴더에서 발견 > sim_axes.py 기본값 순
+        guid, how = forced.get(dev), '--guid'
+        if not guid:
+            guid, how = discover_guid(args.bms_root, dev), 'BMS 설정 폴더에서 발견'
+        if not guid:
+            guid, how = AX.BMS_GUID.get(dev), 'sim_axes.py 기본값'
+        if not guid:
+            raise SystemExit('%s 의 GUID 를 알 수 없습니다. --guid %s "{...}" 로 '
+                             '지정하십시오.' % (dev, dev))
+        fn = 'Setup.v100.%s {%s}.xml' % (AX.PRODUCT[dev], guid)
         dest = os.path.join(args.out_dir, fn)
         open(dest, 'w', encoding='utf-8', newline='\n').write(render(dev, dxmap))
         bound = sum(1 for v in dxmap.values() if v[0] is not EMPTY)
