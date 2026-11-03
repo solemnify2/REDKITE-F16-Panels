@@ -178,22 +178,31 @@ def main():
         maps[dev] = entries
 
     if args.verify:
-        bad = 0
+        bad, done = 0, 0
         for dev, rel in sorted(K.SKETCHES.items()):
             path = os.path.join(K.ROOT, rel)
-            if dev not in maps or not os.path.isfile(path):
+            if dev not in maps:
+                continue
+            if not os.path.isfile(path):
+                sys.stderr.write('%s: 비교할 소스가 없습니다 — %s\n' % (dev, path))
+                bad = 1
                 continue
             src = K.dx_map(path)
+            done += 1
             if src == maps[dev]:
                 sys.stderr.write('%s: 보드 = 소스 (%d 항목)\n' % (dev, len(src)))
                 continue
             bad = 1
             sys.stderr.write('\n%s: 보드와 소스의 DX 맵이 다릅니다\n' % dev)
-            for a, b in zip(src, maps[dev]):
-                if a != b:
-                    sys.stderr.write('  소스 %-28s  보드 %s\n' % (a, b))
+            for x, y in zip(src, maps[dev]):
+                if x != y:
+                    sys.stderr.write('  소스 %-28s  보드 %s\n' % (x, y))
+        if not done:
+            sys.stderr.write('\n대조한 것이 하나도 없습니다. --verify 는 스케치 소스가 있는\n'
+                             '리포 안에서만 쓸 수 있습니다.\n')
+            return 1
         if not bad:
-            sys.stderr.write('\n대조 완료 — 업로드된 펜웨어가 소스와 일치합니다.\n')
+            sys.stderr.write('\n대조 완료 — 업로드된 펌웨어가 소스와 일치합니다.\n')
         return bad
 
     catalog = K.load_catalog(args.bms_root)
