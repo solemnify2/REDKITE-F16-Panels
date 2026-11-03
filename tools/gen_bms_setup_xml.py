@@ -148,8 +148,6 @@ def main():
     ap.add_argument('--bms-root', default=K.DEFAULT_BMS,
                     help='BMS 설치 경로 — 콜백 목록을 읽습니다')
     ap.add_argument('--port', action='append', metavar='COMx', help='포트 직접 지정')
-    ap.add_argument('--verify', action='store_true',
-                    help='보드와 스케치 소스의 DX 맵이 같은지 대조만 합니다')
     ap.add_argument('--update-catalog', action='store_true',
                     help='현재 BMS 의 콜백 목록을 기준선에 기록하고 끝냅니다')
     args = ap.parse_args()
@@ -176,34 +174,6 @@ def main():
             raise SystemExit('%s: 알 수 없는 device=%r' % (port, dev))
         sys.stderr.write('%s 에서 %s DX 맵 %d 항목 수신\n' % (port, dev, len(entries)))
         maps[dev] = entries
-
-    if args.verify:
-        bad, done = 0, 0
-        for dev, rel in sorted(K.SKETCHES.items()):
-            path = os.path.join(K.ROOT, rel)
-            if dev not in maps:
-                continue
-            if not os.path.isfile(path):
-                sys.stderr.write('%s: 비교할 소스가 없습니다 — %s\n' % (dev, path))
-                bad = 1
-                continue
-            src = K.dx_map(path)
-            done += 1
-            if src == maps[dev]:
-                sys.stderr.write('%s: 보드 = 소스 (%d 항목)\n' % (dev, len(src)))
-                continue
-            bad = 1
-            sys.stderr.write('\n%s: 보드와 소스의 DX 맵이 다릅니다\n' % dev)
-            for x, y in zip(src, maps[dev]):
-                if x != y:
-                    sys.stderr.write('  소스 %-28s  보드 %s\n' % (x, y))
-        if not done:
-            sys.stderr.write('\n대조한 것이 하나도 없습니다. --verify 는 스케치 소스가 있는\n'
-                             '리포 안에서만 쓸 수 있습니다.\n')
-            return 1
-        if not bad:
-            sys.stderr.write('\n대조 완료 — 업로드된 펌웨어가 소스와 일치합니다.\n')
-        return bad
 
     catalog = K.load_catalog(args.bms_root)
     made, unmodeled_all = [], []

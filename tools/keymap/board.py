@@ -6,16 +6,15 @@
 
     find_boards()      VID/PID 로 Teensy 찾기
     query_board(port)  "?DX" 를 보내 현재 DX 맵을 받기
-    dx_map(ino)        스케치 소스의 dxOrder[] 읽기 (--verify 용)
     load_catalog()     BMS - Full.key 에서 콜백 목록 읽기
     check_unmodeled()  UNMODELED 검색어를 현재 목록에 다시 걸어 보기
     next_out(base,ext) 비어 있는 번호를 붙인 출력 파일명
 
-업로드된 펜웨어가 곰 심이 보는 장치이므로, 소스가 아니라 보드가 기준입니다.
-그래서 생성기는 항상 보드에 물어보고, `--verify` 가 둘을 대조합니다.
+업로드된 펌웨어가 곧 심이 보는 장치이므로, 소스가 아니라 보드가 기준입니다.
+생성기는 스케치 소스를 아예 읽지 않습니다.
 
 브리지를 끄고 실행하십시오. Windows 는 COM 포트를 한 프로세스만 열 수 있고,
-펜웨어도 프로토콜 미검출 상태에서만 "?DX" 에 응답합니다.
+펌웨어도 프로토콜 미검출 상태에서만 "?DX" 에 응답합니다.
 """
 import os
 import re
@@ -23,7 +22,6 @@ import sys
 import time
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-ROOT = os.path.dirname(os.path.dirname(HERE))   # 리포 루트
 
 # 한글 콘솔(cp949)에서 줄표(—) 하나에 --help 가 터지는 것을 막습니다.
 for _s in (sys.stdout, sys.stderr):
@@ -42,70 +40,11 @@ def next_out(base, ext):
 
 DEFAULT_BMS = r'C:\Falcon BMS 4.38'
 
-SKETCHES = {
-    'CONSOLE': 'F16_LEFT_CONSOLE/F16_LEFT_CONSOLE.ino',
-    'AUX':     'F16_LEFT_AUX_MISC/F16_LEFT_AUX_MISC.ino',
-}
-
 COVER_NAMES = ['ENG CONT COVER', 'EPU OFF COVER', 'EPU ON COVER']
 COMMPWR_NAMES = ['COMM1 PWR', 'COMM2 PWR']
 
 
 # ----------------------------------------------------------------- 소스 파싱
-def _strip(src):
-    src = re.sub(r'/\*.*?\*/', '', src, flags=re.S)
-    return '\n'.join(re.sub(r'//.*$', '', ln) for ln in src.split('\n'))
-
-
-def _array(src, name):
-    m = re.search(r'\b' + name + r'\[\]\s*=\s*\{', src)
-    if not m:
-        return []
-    i, depth = m.end(), 1
-    while depth:
-        if src[i] == '{':
-            depth += 1
-        elif src[i] == '}':
-            depth -= 1
-        i += 1
-    body = src[m.end():i - 1]
-    return [[f.strip() for f in e.split(',')] for e in re.findall(r'\{([^{}]*)\}', body)]
-
-
-def dx_map(path):
-    """dxOrder[] 를 assignButtons() 와 같은 규칙으로 펼쳐 [(dx, 이름, 폭)] 반환."""
-    src = _strip(open(path, encoding='utf-8').read())
-    sw = _array(src, 'switches')
-    enc = _array(src, 'encoders')
-    ana = _array(src, 'analogBtnArrays')
-    order = _array(src, 'dxOrder')
-    if not order:
-        raise SystemExit('%s: dxOrder[] 를 찾지 못했습니다' % path)
-    width = {'SW_ON_OFF': 1, 'SW_ON_OFF_ON': 2, 'SW_ON_OFF_NC': 1}
-    nm = lambda f: f.strip().strip('"')  # noqa: E731
-
-    out, dx = [], 1
-    for kind, idx in [(e[0], int(e[1])) for e in order]:
-        if kind == 'DX_SW':
-            e = sw[idx]
-            name = nm(e[0])
-            w = int(e[6]) if e[2] == 'SW_ROTARY' else width[e[2]]
-        elif kind == 'DX_LADDER':
-            name, w = nm(ana[idx][0]), int(ana[idx][3])
-        elif kind == 'DX_ENC':
-            name, w = nm(enc[idx][0]), 2
-        elif kind == 'DX_COVER':
-            name, w = COVER_NAMES[idx], 1
-        elif kind == 'DX_COMMPWR':
-            name, w = COMMPWR_NAMES[idx], 1
-        else:
-            raise SystemExit('알 수 없는 DxKind: %s' % kind)
-        out.append((dx, name, w))
-        dx += w
-    return out
-
-
-# --------------------------------------------------------------- 보드 질의
 TEENSY_VID = 0x16C0
 PID_DEVICES = {0x0487: 'AUX', 0x0489: 'AUX', 0x048E: 'CONSOLE'}
 
