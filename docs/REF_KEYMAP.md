@@ -19,29 +19,6 @@
 > 장치 순서가 바뀌어도 파일명의 GUID 로 찾으므로 안 깨집니다 — **이쪽을 권합니다.**
 > `.key` 생성기는 그쪽을 쓰는 설정을 위해 남겨 둡니다.
 
-## 장치별 XML 생성
-
-```
-python tools/gen_bms_setup_xml.py --config-dir "<BMS User\Config>" -o out
-```
-
-**기존 XML 을 템플릿으로 씁니다.** 축 보정(Invert/Saturation/Deadzone),
-`<detentPosition>`, `<pov>` 는 바이트 단위로 그대로 두고 `<DxAssgn>` 만 갈아끼웁니다.
-그래서 `--config-dir` 에 지금 쓰고 있는 XML 이 있어야 하고, GUID 도 거기서 가져옵니다.
-원본을 덮어쓰지 않으니 `-o` 로 받아서 확인한 뒤 복사하십시오.
-
-구조 — 버튼 하나가 `<Assgn>` 4칸입니다:
-
-| 슬롯 | `<Invoke>` | 뜻 |
-|---|---|---|
-| 0 | `Default` | 누를 때 |
-| 1 | — | 미사용 (`SimDoNothing`) |
-| 2 | `Down` | 뗄 때 |
-| 3 | — | 미사용 |
-
-`DxAssgn[i]` 가 그 장치의 **DX 버튼 i+1** 입니다 — 오프셋 없음. `<dx>` 섹션이 셋인데
-앞 둘은 내용이 같고 셋째는 비어 있어, 관측된 그대로 재현합니다.
-
 ## 장치 구분 — 두 시뮬 모두 장치별 파일이 있습니다
 
 보드가 둘이라 먼저 짚고 갑니다. **BMS 도 DCS 도 장치마다 파일이 따로** 있고,
@@ -87,30 +64,70 @@ BMS 는 게임 전체가 공유하는 `.key` 파일로도 DX 를 바인딩할 �
 브리지를 **끄고** 실행하십시오. Windows 는 COM 포트를 한 프로세스만 열 수 있고,
 펌웨어도 프로토콜 미검출 상태에서만 요청에 응답합니다.
 
-```
-python tools/gen_bms_keyfile.py --comments -o redkite.key
-```
-
 보드를 VID/PID 로 찾아 각각에 물어보고, 응답의 `device=` 로 어느 매핑 표를 쓸지
 스스로 정합니다. **소스나 개발환경이 필요 없습니다** — `tools/` 폴더와 pyserial,
 BMS 설치본이면 됩니다. 심 PC 에 그대로 들고 가도 동작합니다.
+
+두 생성기가 공통으로 받는 옵션:
 
 | 옵션 | |
 |---|---|
 | (없음) | 보드에 질의 — 기본 |
 | `--from-source` | 보드 대신 스케치의 `dxOrder[]` 를 읽음 (오프라인용) |
-| `--verify` | 보드와 소스를 모두 읽어 **대조만** 함. 업로드를 깜빡했는지 잡힙니다 |
 | `--port COMx` | 자동 탐지 대신 포트 지정 |
+| `--bms-root` | BMS 설치 경로 (기본 `C:\Falcon BMS 4.38`) |
+
+### 1-1. 장치별 Setup XML — 권장
+
+실제 바인딩이 들어 있는 곳입니다. 장치마다 파일이 따로라 오프셋도,
+`DeviceSorting.txt` 도, 병합도 필요 없습니다.
+
+```
+python tools/gen_bms_setup_xml.py --config-dir "<BMS User\Config>" -o out
+```
+
+**기존 XML 을 템플릿으로 씁니다.** 축 보정(Invert/Saturation/Deadzone),
+`<detentPosition>`, `<pov>` 는 바이트 단위로 그대로 두고 `<DxAssgn>` 만 갈아끼웁니다.
+그래서 `--config-dir` 에 지금 쓰고 있는 XML 이 있어야 하고, GUID 도 거기서 가져옵니다.
+원본을 덮어쓰지 않으니 `-o` 로 받아서 확인한 뒤 `User\Config` 로 복사하십시오.
+
+구조 — 버튼 하나가 `<Assgn>` 4칸입니다:
+
+| 슬롯 | `<Invoke>` | 뜻 |
+|---|---|---|
+| 0 | `Default` | 누를 때 |
+| 1 | — | 미사용 (`SimDoNothing`) |
+| 2 | `Down` | 뗄 때 |
+| 3 | — | 미사용 |
+
+`DxAssgn[i]` 가 그 장치의 **DX 버튼 i+1** 입니다 — 오프셋 없음. `<dx>` 섹션이 셋인데
+앞 둘은 내용이 같고 셋째는 비어 있어, 관측된 그대로 재현합니다.
+
+> 보드와 소스가 어긋나지 않았는지(업로드를 깜빡했는지) 보려면
+> `python tools/gen_bms_keyfile.py --verify` 를 쓰십시오 — 파일을 쓰지 않고
+> 대조만 합니다. DX 맵은 두 생성기가 같은 것을 읽으므로 그대로 유효합니다.
+
+### 1-2. 공용 `.key` — 그쪽을 쓰는 설정일 때만
+
+```
+python tools/gen_bms_keyfile.py --comments --merge <기존.key> -o <나올.key>
+```
+
+이쪽만의 옵션:
+
+| 옵션 | |
+|---|---|
 | `--device-index CONSOLE 2` | `DeviceSorting.txt` 기준 장치 순번 (1-base) |
+| `--buttons-per-device` | `g_nButtonsPerDevice` (기본 128). 대역 폭 |
 | `--merge <파일>` | 기존 키 파일에서 **우리 대역만** 교체하고 합침 (아래) |
 | `--comments` | 줄마다 `# DX 28  ENG CONT` 주석 — 현장 확인용 |
+| `--verify` | 보드와 소스를 대조만 함. 업로드를 깜빡했는지 잡힙니다 |
 | `--update-catalog` | BMS 콜백 기준선 갱신 (아래 4절) |
-| `--bms-root` | BMS 설치 경로 (기본 `C:\Falcon BMS 4.38`) |
 
 > ⚠ **`--comments` 로 만든 파일을 BMS 설정 UI 에서 저장하면 주석이 사라집니다.**
 > 키 파일 맨 위의 경고와 같은 이유입니다. 확인용으로만 쓰고 배포본은 주석 없이 뽑으십시오.
 
-### 다른 장치들과 한 파일을 쓴다
+#### 다른 장치들과 한 파일을 쓴다
 
 HOTAS, MFD, 그 밖에 BMS 가 인식하는 모든 장치의 바인딩이 **이 파일 하나**에 들어
 있습니다. 그래서 생성기 출력을 그냥 덮어쓰면 다른 장치 바인딩이 전부 날아갑니다.
@@ -140,7 +157,7 @@ python tools/gen_bms_keyfile.py --merge "C:\Falcon BMS 4.38\User\Config\BMS - Re
 > 같이 어긋납니다. `DeviceSorting.txt` 를 채워 순서를 고정해 두십시오 —
 > 생성기를 다시 돌리는 것으로는 다른 장치를 되살릴 수 없습니다.
 
-### 장치 순번
+#### 장치 순번과 BMS 설정
 
 BMS 는 장치마다 `g_nButtonsPerDevice` 만큼의 블록을 줍니다 — N번째 장치는
 `(N-1) × 128` 부터 시작합니다. 순서는 `User\Config\DeviceSorting.txt` 가 정합니다.
