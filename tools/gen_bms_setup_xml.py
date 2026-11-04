@@ -171,7 +171,8 @@ def main():
     for dev in sorted(maps):
         dxmap, missing = build_map(maps[dev], bms_callbacks.MAPS[dev], catalog, dev)
         dest = K.next_out(AX.OUT_BASE[dev], '.xml')
-        open(dest, 'w', encoding='utf-8', newline='\n').write(render(dev, dxmap))
+        with open(dest, 'w', encoding='utf-8', newline='\n') as out:
+            out.write(render(dev, dxmap))
         made.append((dev, dest))
         bound = sum(1 for v in dxmap.values() if v[0] is not EMPTY)
         total = maps[dev][-1][0] + maps[dev][-1][2] - 1

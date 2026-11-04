@@ -40,21 +40,22 @@ CATALOG = os.path.join(HERE, 'keymap', 'dcs_catalog.txt')
 def load_catalog():
     """(이름 사전, 장치별 축 목록) 반환."""
     names, axes, sect = {}, {}, None
-    for line in open(CATALOG, encoding='utf-8'):
-        line = line.rstrip('\n')
-        if line.startswith('## '):
-            sect = line.split()[1]
-            continue
-        if not line or line.startswith('#'):
-            continue
-        f = line.split('\t')
-        if sect == 'BUTTONS' and len(f) >= 3:
-            names[f[1]] = f[2]
-        elif sect == 'AXES' and len(f) >= 5:
-            dev, aid, nm = f[0], f[1], f[2]
-            add = [x for x in f[3][1:].split(',') if x]
-            rem = [x for x in f[4][1:].split(',') if x]
-            axes.setdefault(dev, []).append((aid, nm, add, rem))
+    with open(CATALOG, encoding='utf-8') as src:
+        for line in src:
+            line = line.rstrip('\n')
+            if line.startswith('## '):
+                sect = line.split()[1]
+                continue
+            if not line or line.startswith('#'):
+                continue
+            f = line.split('\t')
+            if sect == 'BUTTONS' and len(f) >= 3:
+                names[f[1]] = f[2]
+            elif sect == 'AXES' and len(f) >= 5:
+                dev, aid, nm = f[0], f[1], f[2]
+                add = [x for x in f[3][1:].split(',') if x]
+                rem = [x for x in f[4][1:].split(',') if x]
+                axes.setdefault(dev, []).append((aid, nm, add, rem))
     return names, axes
 
 
@@ -154,7 +155,8 @@ def main():
         kd, todo, unmapped = collect(maps[dev], dcs_commands.MAPS[dev], dev)
         ax = AX.DCS_AXES[dev]
         dest = K.next_out(AX.OUT_BASE[dev], '.diff.lua')
-        open(dest, 'w', encoding='utf-8', newline='\n').write(lua(kd, ax, names))
+        with open(dest, 'w', encoding='utf-8', newline='\n') as out:
+            out.write(lua(kd, ax, names))
         made.append((dev, dest))
         keys = sum(len(v) for v in kd.values())
         rem = sum(1 for a in ax if a[2] == 'removed')

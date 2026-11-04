@@ -150,8 +150,9 @@ def load_catalog(bms_root):
                          '--bms-root 로 BMS 설치 경로를 지정하십시오.' % path)
     cat = {}
     pat = re.compile(r'^(\w+)\s+(-?\d+)\s+\S+\s+\S+\s+\S+\s+\S+\s+\S+\s+-?\d+\s+"(.*)"$')
-    for line in open(path, encoding='utf-8', errors='replace'):
-        m = pat.match(line.strip())
-        if m and m.group(1) != 'SimDoNothing':
-            cat.setdefault(m.group(1), (int(m.group(2)), m.group(3)))
+    with open(path, encoding='utf-8', errors='replace') as src:
+        for line in src:
+            m = pat.match(line.strip())
+            if m and m.group(1) != 'SimDoNothing':
+                cat.setdefault(m.group(1), (int(m.group(2)), m.group(3)))
     return cat
