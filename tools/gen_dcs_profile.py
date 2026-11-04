@@ -7,12 +7,11 @@
 보이는 보드마다 `left_console_new1.diff.lua` 같은 파일을 현재 폴더에 남깁니다.
 번호는 비어 있는 것으로 골라서, 전에 뽑은 걸 덮어쓰지 않습니다.
 
-**생성기는 DCS 폴더를 건드리지 않습니다.** 나온 파일을 `InputUserProfiles` 의
-쓰던 프로파일 이름으로 바꿔 넣는 것은 사람의 일입니다. 그 이름은 DCS 의
-Save Profile As... 에서 사람이 타이핑한 것이라, 생성기가 알 방법은 없습니다 —
-`sim_axes.py` 의 `DCS_PROFILE` 은 마지막에 보여주는 복사 명령에만 씁니다.
+**생성기는 DCS 폴더를 건드리지 않습니다.** DCS의 Options - Controls에서 F-16C와
+해당 장치 열을 선택하고 Load Profile...로 생성 파일을 불러오십시오.
+InputUserProfiles에 복사하는 것만으로는 적용되지 않습니다.
 
-BMS 와 달리 DCS 는 버튼 번호에 오프셋이 없습니다 — `JOY_BTN<n>` 의 n 이
+BMS 장치별 XML과 마찬가지로 버튼 번호에 오프셋이 없습니다 — `JOY_BTN<n>` 의 n 이
 그 장치의 DX 번호 그대로입니다.
 
 명령 ID 와 이름은 tools/keymap/dcs_catalog.txt, 컨트롤 대응은 tools/keymap/dcs_commands.py.
@@ -176,14 +175,12 @@ def main():
         for dev, dx, name, w in unmapped_all:
             sys.stderr.write('  %-8s DX %-3d %s (x%d)\n' % (dev, dx, name, w))
 
-    sys.stderr.write('\n덮어쓰려면 (PowerShell):\n'
-                     '  $p = Resolve-Path "$env:USERPROFILE%sSaved Games%sDCS*%sInputUserProfiles"\n' % (
-                         chr(92), chr(92), chr(92)))
+    sys.stderr.write('\n적용: DCS Options - Controls에서 F-16C를 선택하십시오.\n'
+                     '기존 설정은 해당 장치 열의 Save Profile As...로 백업하십시오.\n')
     for dev, dest in made:
-        sys.stderr.write('  Copy-Item "%s" "$p%s%s.diff.lua"\n'
-                         % (dest, chr(92), AX.DCS_PROFILE[dev]))
-    sys.stderr.write('\n마지막 이름은 DCS 에서 쓰던 프로파일 이름과 같아야 합니다.\n'
-                     '다르면 그쪽 이름으로 바꿔 주십시오.\n')
+        sys.stderr.write('  %s 장치 열: Load Profile... -> %s\n' % (AX.PRODUCT[dev], dest))
+    sys.stderr.write('버튼과 축 설정을 확인한 뒤 저장하십시오.\n'
+                     'InputUserProfiles에 파일을 복사하는 것만으로는 적용되지 않습니다.\n')
     return 0
 
 

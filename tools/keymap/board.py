@@ -75,6 +75,9 @@ class DumpParser(object):
 
     def __init__(self):
         self.device, self.entries, self.done = None, [], False
+        self.expected_entries = self.total = None
+        self.next_dx = 1
+        self.names = set()
 
     def feed(self, line):
         line = line.strip()
@@ -82,14 +85,36 @@ class DumpParser(object):
             return
         body = line[4:]
         if body.startswith('BEGIN'):
-            m = re.search(r'device=(\w+)', body)
-            self.device, self.entries, self.done = (m.group(1) if m else None), [], False
+            m = re.fullmatch(r'BEGIN device=(\w+) pid=0x[0-9A-Fa-f]+ '
+                             r'entries=(\d+) total=(\d+)', body)
+            if not m or self.expected_entries is not None:
+                raise ValueError('DX BEGIN 헤더가 잘못되었거나 중복되었습니다')
+            self.device = m.group(1)
+            self.expected_entries, self.total = int(m.group(2)), int(m.group(3))
+            if not 1 <= self.expected_entries <= self.total <= 128:
+                raise ValueError('DX 항목 수와 총 버튼 수는 1~128 범위여야 합니다')
         elif body == 'END':
+            if self.expected_entries is None:
+                raise ValueError('DX BEGIN 없이 END를 받았습니다')
+            if len(self.entries) != self.expected_entries or self.next_dx != self.total + 1:
+                raise ValueError('DX 응답의 항목 수 또는 총 버튼 수가 헤더와 다릅니다')
             self.done = True
         else:
+            if self.expected_entries is None or self.done:
+                raise ValueError('DX 항목이 BEGIN/END 범위 밖에 있습니다')
             parts = body.split(None, 2)
-            if len(parts) == 3 and parts[0].isdigit() and parts[1].isdigit():
-                self.entries.append((int(parts[0]), parts[2], int(parts[1])))
+            if len(parts) != 3 or not parts[0].isdigit() or not parts[1].isdigit():
+                raise ValueError('DX 항목 형식이 잘못되었습니다')
+            dx, width, name = int(parts[0]), int(parts[1]), parts[2]
+            if width < 1 or dx < 1 or dx + width - 1 > self.total:
+                raise ValueError('DX 번호 또는 개수가 버튼 범위를 벗어났습니다')
+            if dx != self.next_dx:
+                raise ValueError('DX 번호가 중복되었거나 연속적이지 않습니다')
+            if name in self.names or len(self.entries) >= self.expected_entries:
+                raise ValueError('DX 컨트롤 이름이 중복되었거나 항목 수를 초과했습니다')
+            self.entries.append((dx, name, width))
+            self.names.add(name)
+            self.next_dx = dx + width
 
 
 def query_board(port, timeout=3.0):
@@ -104,7 +129,10 @@ def query_board(port, timeout=3.0):
             raw = ser.readline()
             if not raw:
                 continue
-            p.feed(raw.decode('ascii', 'replace'))
+            try:
+                p.feed(raw.decode('ascii', 'replace'))
+            except ValueError as exc:
+                raise SystemExit('%s: 잘못된 DX 응답: %s' % (port, exc)) from exc
             if p.done:
                 return p.device, p.entries
     raise SystemExit('%s: 보드가 "?DX" 에 응답하지 않았습니다.\n'

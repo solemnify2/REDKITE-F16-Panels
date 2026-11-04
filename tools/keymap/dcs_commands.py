@@ -39,15 +39,15 @@ CONSOLE = {
     'UHF 0.025MHz':        ['d1212pnilunilcdnilvdnilvpnilvunil',
                              'd1211pnilunilcdnilvdnilvpnilvunil',
                             ],   # UHF 0.025Mhz Manual Frequency Knob
-    'UHF FUNCTION':        ['d1221pnilunilcdnilvdnilvpnilvunil',
-                             'd1220pnilunilcdnilvdnilvpnilvunil',
+    'UHF FUNCTION':        ['d1218pnilunilcdnilvdnilvpnilvunil',
                              'd1219pnilunilcdnilvdnilvpnilvunil',
-                             'd1218pnilunilcdnilvdnilvpnilvunil',
-                            ],   # UHF Function Knob
-    'UHF MODE':            ['d1224pnilunilcdnilvdnilvpnilvunil',
+                             'd1220pnilunilcdnilvdnilvpnilvunil',
+                             'd1221pnilunilcdnilvdnilvpnilvunil',
+                            ],   # OFF / MAIN / BOTH / ADF — firmware pins[] order
+    'UHF MODE':            ['d1222pnilunilcdnilvdnilvpnilvunil',
                              'd1223pnilunilcdnilvdnilvpnilvunil',
-                             'd1222pnilunilcdnilvdnilvpnilvunil',
-                            ],   # UHF Mode Knob
+                             'd1224pnilunilcdnilvdnilvpnilvunil',
+                            ],   # MANUAL / PRESET / GUARD
     'UHF T-TONE':          [TODO],
     'UHF SQUELCH':         [('d3010pnilunilcd37vd0vpnilvunil', 'd3010pnilunilcd37vd1vpnilvunil'),
                             ],   # UHF SQUELCH Switch
@@ -88,9 +88,9 @@ CONSOLE = {
     'ECM BIT':             ['d3005pnilu3005cd66vd1vpnilvu0'],   # ECM BIT Button
     'EPU OFF COVER':       [TODO],
     'EPU ON COVER':        [TODO],
-    'EPU':                 [('d3003pnilunilcd6vd1vpnilvunil', 'd3003pnilunilcd6vd0vpnilvunil'),
-                             ('d3003pnilunilcd6vd-1vpnilvunil', 'd3003pnilunilcd6vd0vpnilvunil'),
-                            ],   # EPU Switch
+    'EPU':                 [('d3003pnilunilcd6vd-1vpnilvunil', 'd3003pnilunilcd6vd0vpnilvunil'),
+                             ('d3003pnilunilcd6vd1vpnilvunil', 'd3003pnilunilcd6vd0vpnilvunil'),
+                            ],   # pin1=OFF, pin2=ON, release=NORM
     'ELEC MAIN PWR':       [('d3001pnilunilcd3vd1vpnilvunil', 'd3001pnilunilcd3vd0vpnilvunil'),
                              ('d3001pnilunilcd3vd-1vpnilvunil', 'd3001pnilunilcd3vd0vpnilvunil'),
                             ],   # MAIN PWR Switch
@@ -143,14 +143,14 @@ AUX = {
                             ],   # JMR Source Switch
     'CMDS MWS':            [('d3003pnilunilcd32vd1vpnilvunil', 'd3003pnilunilcd32vd0vpnilvunil'),
                             ],   # MWS Source Switch
-    'CMDS O1':             [('d3008pnilunilcd32vd1vpnilvunil', 'd3008pnilunilcd32vd0vpnilvunil'),
-                            ],   # FL Expendable Category Switch
-    'CMDS O2':             [('d3007pnilunilcd32vd1vpnilvunil', 'd3007pnilunilcd32vd0vpnilvunil'),
-                            ],   # CH Expendable Category Switch
-    'CMDS CH':             [('d3006pnilunilcd32vd1vpnilvunil', 'd3006pnilunilcd32vd0vpnilvunil'),
-                            ],   # O2 Expendable Category Switch
-    'CMDS FL':             [('d3005pnilunilcd32vd1vpnilvunil', 'd3005pnilunilcd32vd0vpnilvunil'),
+    'CMDS O1':             [('d3005pnilunilcd32vd1vpnilvunil', 'd3005pnilunilcd32vd0vpnilvunil'),
                             ],   # O1 Expendable Category Switch
+    'CMDS O2':             [('d3006pnilunilcd32vd1vpnilvunil', 'd3006pnilunilcd32vd0vpnilvunil'),
+                            ],   # O2 Expendable Category Switch
+    'CMDS CH':             [('d3007pnilunilcd32vd1vpnilvunil', 'd3007pnilunilcd32vd0vpnilvunil'),
+                            ],   # CH Expendable Category Switch
+    'CMDS FL':             [('d3008pnilunilcd32vd1vpnilvunil', 'd3008pnilunilcd32vd0vpnilvunil'),
+                            ],   # FL Expendable Category Switch
     'CMDS JETT':           [('d3004pnilunilcd32vd1vpnilvunil', 'd3004pnilunilcd32vd0vpnilvunil'),
                             ],   # JETT Switch
     'CMDS PRGM':           ['d3009pnilunilcd32vd0vpnilvunil',

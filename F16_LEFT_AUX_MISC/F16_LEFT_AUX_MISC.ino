@@ -428,14 +428,23 @@ void mcpWritePin(uint8_t deviceIdx, uint8_t pin, bool state) {
 // Unified LED write — handles both direct and MCP LEDs
 #define TWA_BRIGHT_PIN A14  // pin 38 — pot for TWA LED dimming
 uint8_t twaBrightness = 128;
-bool twaLedState[4] = {false};  // LI_TWA_POWER ~ LI_TWA_ACT
+// LedIdx 전체 순서와 무관하게 TWA 네 채널만 같은 표로 추적·갱신합니다.
+static const uint8_t twaLedIndices[] = {
+  LI_TWA_SEARCH, LI_TWA_ACT, LI_TWA_LOW, LI_TWA_POWER
+};
+#define NUM_TWA_LEDS (sizeof(twaLedIndices) / sizeof(twaLedIndices[0]))
+static bool twaLedState[NUM_TWA_LEDS] = {false};
 void writeLed(uint8_t idx, bool state) {
   if (leds[idx].mcpIdx >= 0) {
     mcpWritePin(leds[idx].mcpIdx, leds[idx].pin, state);
-  } else if (idx >= LI_TWA_POWER && idx <= LI_TWA_ACT) {
-    twaLedState[idx - LI_TWA_POWER] = state;
-    analogWrite(leds[idx].pin, state ? twaBrightness : 0);
   } else {
+    for (uint8_t i = 0; i < NUM_TWA_LEDS; i++) {
+      if (idx == twaLedIndices[i]) {
+        twaLedState[i] = state;
+        analogWrite(leds[idx].pin, state ? twaBrightness : 0);
+        return;
+      }
+    }
     digitalWrite(leds[idx].pin, state ? HIGH : LOW);
   }
 }
@@ -1140,6 +1149,9 @@ void setup() {
   for (unsigned int i = 0; i < NUM_POTS; i++) {
     pinMode(pots[i].pin, INPUT);
   }
+  // TWA DIMM은 조이스틱 pots[]와 별개입니다. 초기 OUTPUT 설정을 해제합니다.
+  pinMode(TWA_BRIGHT_PIN, INPUT);
+  for (int d = 0; d < 8; d++) analogRead(TWA_BRIGHT_PIN);
 
   // Configure LED pins (direct only; MCP LEDs are configured by mcpInit)
   for (unsigned int i = 0; i < NUM_LEDS; i++) {
@@ -1239,10 +1251,8 @@ void loop() {
     uint8_t newBright = 255 - (analogRead(TWA_BRIGHT_PIN) >> 2);
     if (newBright != twaBrightness) {
       twaBrightness = newBright;
-      for (uint8_t i = 0; i < 4; i++) {
-        if (twaLedState[i])
-          analogWrite(leds[LI_TWA_POWER + i].pin, twaBrightness);
-      }
+      for (uint8_t i = 0; i < NUM_TWA_LEDS; i++)
+        writeLed(twaLedIndices[i], twaLedState[i]);
     }
   }
 

@@ -46,9 +46,11 @@ BMS_AXES = {
     ],
 }
 
-# `<pov>` 는 3벌, 각 벌에 PovAssgn 4개, 각 PovAssgn 에 direction 1개와
-# DirAssgn 8개. 전부 비어 있습니다 (SimDoNothing).
-BMS_POV_SETS = 3
+# 루트 및 각 기종 프로파일에 pov/dx가 한 벌씩 들어갑니다.
+# 루트와 F-16에는 패널 바인딩을 넣고, F-15는 빈 상태로 둡니다.
+BMS_BUTTON_PROFILES = ((None, True), ('profileDefaultF16', True),
+                       ('profileF15ABCD', False))
+# 각 pov에 PovAssgn 4개, 각 direction에 DirAssgn 8개. 전부 빈값입니다.
 BMS_POV_ASSGN = 4
 BMS_DIR_ASSGN = 8
 
@@ -63,16 +65,8 @@ PRODUCT = {'CONSOLE': 'F16 LEFT CONSOLE', 'AUX': 'F16 LEFT AUX MISC'}
 # 심이 쓰는 이름으로 바꿔 넣는 것은 사람의 일입니다.
 OUT_BASE = {'CONSOLE': 'left_console_new', 'AUX': 'left_aux_misc_new'}
 
-# DCS 프로파일 이름. DCS 의 Save Profile As... 에서 사람이 타이핑한 값이라
-# 생성기가 알 방법은 없습니다. 마지막에 보여주는 복사 명령에만 쓰고,
-# 틀려도 파일을 썰지는 않습니다 — 써 본 이름으로 고쳐 두면 편합니다.
-DCS_PROFILE = {'CONSOLE': 'F16 Left Console panel',
-               'AUX':     'F16 Left AUX MISC panel'}
-
-# `<dx>` 섹션 수와 섹션당 버튼 수. 앞 두 벌에 같은 내용이 들어가고 셋째는 빕니다.
-BMS_DX_SETS = 3
+# 각 프로파일의 <dx>에 들어가는 버튼 수.
 BMS_DX_PER_SET = 128
-BMS_DX_LIVE_SETS = 2
 
 
 # ------------------------------------------------------------------ DCS World

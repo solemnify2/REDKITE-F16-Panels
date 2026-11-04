@@ -23,12 +23,13 @@ BMS 는 버튼 바인딩을 장치마다 하나씩인 `Setup.v100.<장치명> {G
     <JoyAssgn>
       <detentPosition>  AB / IDLE
       <axis>            AxAssgn x8 — HID 축 순서 X Y Z Rx Ry Rz S1 S2
-      <pov>   x3        각 PovAssgn x4, 각 direction 1 + DirAssgn x8 (전부 빈값)
-      <dx>    x3        각 DxAssgn x128
+      <pov> / <dx>             기본 바인딩
+      <profileDefaultF16>      <pov> / <dx> — F-16 바인딩
+      <profileF15ABCD>         <pov> / <dx> — 빈값
 
 `DxAssgn[i]` 가 그 장치의 DX 버튼 i+1 입니다 — 오프셋 없음. 버튼 하나는 `<Assgn>`
 4칸이고 슬롯 0 이 누를 때(`Default`), 슬롯 2 가 뗄 때(`Down`), 1 과 3 은 안 씁니다.
-`<dx>` 세 벌 중 앞 두 벌에 같은 내용이 들어가고 셋째는 빕니다.
+루트와 profileDefaultF16에 같은 바인딩을 넣고, profileF15ABCD는 비웁니다.
 """
 import argparse
 import os
@@ -70,6 +71,9 @@ def build_map(entries, mapping, catalog, device):
             raise SystemExit('%s: %r 는 DX %d 개인데 매핑은 %d 개입니다'
                              % (device, name, w, len(binds)))
         for k, b in enumerate(binds):
+            if b == bms_callbacks.TODO:
+                out[dx + k] = [EMPTY] * 4
+                continue
             for cb in ([b] if isinstance(b, str)
                        else list(b) if isinstance(b, tuple) else []):
                 if cb and cb not in catalog:
@@ -102,38 +106,41 @@ def render(device, dxmap):
         L.append(I * 2 + '</AxAssgn>')
     L.append(I + '</axis>')
 
-    for _ in range(AX.BMS_POV_SETS):
-        L.append(I + '<pov>')
+    for profile, live in AX.BMS_BUTTON_PROFILES:
+        depth = 1 if profile is None else 2
+        if profile is not None:
+            L.append(I + '<%s>' % profile)
+        L.append(I * depth + '<pov>')
         for _ in range(AX.BMS_POV_ASSGN):
-            L += [I * 2 + '<PovAssgn>', I * 3 + '<direction>']
+            L += [I * (depth + 1) + '<PovAssgn>', I * (depth + 2) + '<direction>']
             for _ in range(AX.BMS_DIR_ASSGN):
-                L += [I * 4 + '<DirAssgn>',
-                      I * 5 + '<Callback>',
-                      I * 6 + '<string>SimDoNothing</string>',
-                      I * 6 + '<string>SimDoNothing</string>',
-                      I * 5 + '</Callback>',
-                      I * 5 + '<SoundID>',
-                      I * 6 + '<int>0</int>',
-                      I * 6 + '<int>0</int>',
-                      I * 5 + '</SoundID>',
-                      I * 4 + '</DirAssgn>']
-            L += [I * 3 + '</direction>', I * 2 + '</PovAssgn>']
-        L.append(I + '</pov>')
+                L += [I * (depth + 3) + '<DirAssgn>',
+                      I * (depth + 4) + '<Callback>',
+                      I * (depth + 5) + '<string>SimDoNothing</string>',
+                      I * (depth + 5) + '<string>SimDoNothing</string>',
+                      I * (depth + 4) + '</Callback>',
+                      I * (depth + 4) + '<SoundID>',
+                      I * (depth + 5) + '<int>0</int>',
+                      I * (depth + 5) + '<int>0</int>',
+                      I * (depth + 4) + '</SoundID>',
+                      I * (depth + 3) + '</DirAssgn>']
+            L += [I * (depth + 2) + '</direction>', I * (depth + 1) + '</PovAssgn>']
+        L.append(I * depth + '</pov>')
 
-    for s in range(AX.BMS_DX_SETS):
-        L.append(I + '<dx>')
+        L.append(I * depth + '<dx>')
         for i in range(AX.BMS_DX_PER_SET):
-            slots = dxmap.get(i + 1, [EMPTY] * 4) if s < AX.BMS_DX_LIVE_SETS \
-                else [EMPTY] * 4
-            L += [I * 2 + '<DxAssgn>', I * 3 + '<assign>']
+            slots = dxmap.get(i + 1, [EMPTY] * 4) if live else [EMPTY] * 4
+            L += [I * (depth + 1) + '<DxAssgn>', I * (depth + 2) + '<assign>']
             for cb, inv, snd in slots:
-                L += [I * 4 + '<Assgn>',
-                      I * 5 + '<Callback>%s</Callback>' % cb,
-                      I * 5 + '<Invoke>%s</Invoke>' % inv,
-                      I * 5 + '<SoundID>%s</SoundID>' % snd,
-                      I * 4 + '</Assgn>']
-            L += [I * 3 + '</assign>', I * 2 + '</DxAssgn>']
-        L.append(I + '</dx>')
+                L += [I * (depth + 3) + '<Assgn>',
+                      I * (depth + 4) + '<Callback>%s</Callback>' % cb,
+                      I * (depth + 4) + '<Invoke>%s</Invoke>' % inv,
+                      I * (depth + 4) + '<SoundID>%s</SoundID>' % snd,
+                      I * (depth + 3) + '</Assgn>']
+            L += [I * (depth + 2) + '</assign>', I * (depth + 1) + '</DxAssgn>']
+        L.append(I * depth + '</dx>')
+        if profile is not None:
+            L.append(I + '</%s>' % profile)
 
     L.append('</JoyAssgn>')
     return '\n'.join(L) + '\n'
@@ -173,6 +180,11 @@ def main():
                          % (bound, total, len(AX.BMS_AXES[dev])))
         for dx, name, w in missing:
             sys.stderr.write('         매핑 없음: DX %d %s (x%d)\n' % (dx, name, w))
+        for dx, name, w in maps[dev]:
+            for k, bind in enumerate(bms_callbacks.MAPS[dev].get(name, [])):
+                if bind == bms_callbacks.TODO:
+                    sys.stderr.write('         미확정(TODO): DX %d %s [%d]\n'
+                                     % (dx + k, name, k + 1))
 
     cfg = os.path.join(args.bms_root, 'User', 'Config')
     sys.stderr.write('\n덮어쓰려면 (PowerShell):\n')
