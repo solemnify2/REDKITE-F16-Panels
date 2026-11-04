@@ -126,7 +126,7 @@ AUX = {
     # pin1(GPA5)=NORM, pin2(GPA4)=SILENT, 가운데 QUIET
     'RF':                [('SimRFNorm', 'SimRFQuiet'), ('SimRFSilent', 'SimRFQuiet')],
     'Laser ARM':         [('SimLaserArmOn', 'SimLaserArmOff')],
-    'ALT REL':           [UNMODELED('ALT REL', 'Alternate Release')],
+    'ALT REL':           ['SimPickle'],
     # pin1(GPA1)=ARM, pin2(GPA0)=SIM, 가운데 OFF
     'Master ARM':        [('SimArmMasterArm', 'SimSafeMasterArm'),
                           ('SimSimMasterArm', 'SimSafeMasterArm')],
