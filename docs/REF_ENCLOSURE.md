@@ -1,6 +1,6 @@
 # 3D 프린트 구조물
 
-`3d stl/` 폴더에 STL 파일이 있습니다. 썸네일을 클릭하면 STL 을 내려받습니다.
+`3d stl/` 폴더에 STL 파일이 있습니다. STL 링크가 있는 썸네일을 클릭하면 파일을 내려받을 수 있습니다.
 치수는 바운딩 박스 기준입니다.
 
 ## 출력 재료
@@ -11,7 +11,7 @@
 | 패널 `LED layer` (스위치 체결층) | **투명 PLA** |
 | 백라이트 플레이트 | **PLA** 또는 **레진(SLA)** |
 
-PETG 는 JLC3DP 에서 지원하지 않아 PCBWay 등에 별도 주문해야 합니다.
+출력 업체의 지원 재료와 견적은 발주할 때 확인하십시오.
 
 ## 출력 수량
 
@@ -50,10 +50,10 @@ Stand 는 Center 인클로저 뒷면에 에폭시로 부착합니다 (조립은 
 
 ## Left Console
 
-Upper / Lower 를 맞물려 조립하고, Bottom 2 종이 바닥판입니다.
+Upper와 Lower를 결합한 뒤, Bottom 2종을 바닥판으로 장착합니다.
 
 이 인클로저는 **Thrustmaster Viper TQS** 와 맞물리도록 설계되어 있습니다.
-TQS 를 그대로는 붙일 수 없고, **Mission Pack 또는 더미 뚜껑을 먼저 떼어내야** 합니다.
+결합 전에 TQS의 **Mission Pack 또는 더미 덮개를 분리**합니다.
 
 | LeftConsoleUpper | LeftConsoleLower | LeftConsoleBottomUpper | LeftConsoleBottomLower |
 |:----:|:----:|:----:|:----:|
@@ -71,11 +71,10 @@ MFD 와 **Alibaba 에서 구한 7.6인치 정사각 LCD** 를 겹쳐 놓고 홀�
 
 ## 백라이트 플레이트
 
-패널 **뒤쪽 몇 cm 뒤**에 띄워 배치하는 백라이트 LED 거치판입니다.
-Greenisland 패널의 `LED layer`(스위치가 체결되는 층, [REF_PANEL.md](REF_PANEL.md) 참조)**와는 다른 부품**으로,
-LED 수량을 줄이려고 본 프로젝트에서 추가한 것입니다. 거리를 띄운 만큼 빛이 퍼져 적은 LED 로도 고르게 밝습니다.
+패널 뒤에 간격을 두고 설치하는 LED 거치판입니다. 스위치를 체결하는 `LED layer`와 구분하십시오.
+빛이 퍼질 거리를 확보해 LED 수를 줄이도록 추가했습니다. 설치 원리는 [REF_BACKLIGHT.md](REF_BACKLIGHT.md)를 참고하십시오.
 
-PLA 나 레진 출력으로 충분합니다 — MJF 등 고급 공정은 필요 없고 비용만 올라갑니다.
+이 프로젝트에서는 PLA 또는 레진 출력을 사용합니다.
 
 > 파일명이 `LED Plate …` 이지만 `LED layer` 가 아니라 **백라이트 플레이트**입니다. 자작 모델입니다.
 

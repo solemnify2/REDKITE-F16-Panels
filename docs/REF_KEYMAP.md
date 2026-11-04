@@ -1,371 +1,256 @@
 # 키맵 자동 생성
 
-시뮬레이터 바인딩 파일을 **손으로 쓰지 않고 생성**합니다. DX 번호는 보드에 물어보고,
-스위치 이름은 콜백/명령 이름에 표로 대응시킵니다.
+Teensy에 업로드된 펌웨어에서 현재 DX 번호와 컨트롤 이름을 읽어, 장치별 키맵을 생성합니다.
+`dxOrder[]`를 변경한 뒤에는 펌웨어를 업로드하고 키맵을 다시 생성하십시오.
 
-왜 생성해야 하느냐 — `dxOrder[]` 에서 줄 하나만 옮기면 그 뒤 DX 가 전부 밀립니다
-([REF_LEFT_CONSOLE_WIRING.md](REF_LEFT_CONSOLE_WIRING.md#dx-버튼-맵-64--128) 참조).
-손으로 유지하는 바인딩 파일은 그 순간 조용히 틀어집니다. 생성기를 다시 돌리면 그만입니다.
+| 대상 | 실행 파일 | 출력 파일 예시 |
+|---|---|---|
+| Falcon BMS | `tools/gen_bms_setup_xml.py` | `left_console_new1.xml` |
+| DCS F-16C | `tools/gen_dcs_profile.py` | `left_console_new1.diff.lua` |
 
-| 시뮬 | 상태 | 생성기 | 출력 |
-|---|---|---|---|
-| **Falcon BMS** | 동작함 | `tools/gen_bms_setup_xml.py` | `Setup.v100.*.xml` **장치당 1개** |
-| **DCS World** | 동작함 | `tools/gen_dcs_profile.py` | `.diff.lua` **장치당 1개** |
+연결된 보드마다 파일이 하나씩 생성됩니다. 생성기는 기존 게임 설정을 변경하지 않습니다.
+출력 파일은 현재 작업 폴더에 저장하며, 기존 파일과 겹치지 않는 번호를 붙입니다.
 
-> **BMS 는 바인딩을 장치마다 하나씩인 `Setup.v100.<장치명> {GUID}.xml` 에 둡니다.**
-> 게임 전체가 공유하는 `.key` 로도 DX 를 바인딩할 수는 있지만, 이 프로젝트는
-> **`.key` 를 건드리지 않습니다** — 장치별 파일이면 오프셋도 `DeviceSorting.txt` 도
-> 병합도 필요 없고, 장치 순서가 바뀌어도 파일명의 GUID 로 찾으므로 안 깨집니다.
+## 1. 실행 준비
 
-## 1. 쓰는 법
+1. Teensy를 연결합니다. 펌웨어는 `?DX` 질의를 지원해야 합니다.
+2. BMS/DCS 브리지를 종료하고 **6초 이상** 기다립니다. 브리지가 COM 포트를 사용 중이거나 펌웨어가 BIOS 수신 상태이면 질의에 응답하지 못합니다.
+3. 프로젝트 루트에서 필요한 생성기를 실행합니다.
 
-브리지를 **끄고** 실행하십시오. Windows 는 COM 포트를 한 프로세스만 열 수 있어서,
-브리지가 떠 있으면 생성기는 포트를 열지도 못합니다. 끄고 **몇 초 기다리십시오** —
-BIOS 프레임이 끊기면 펌웨어가 프로토콜 미검출 상태로 돌아가고, 그때부터 `?DX` 에
-응답합니다 (콘솔 3초, AUX 6초).
+Python과 `pyserial`이 필요합니다.
 
-두 생성기 모두 보드를 VID/PID 로 찾아 각각에 물어보고, 응답의 `device=` 로 어느
-매핑 표를 쓸지 스스로 정합니다. **소스나 개발환경이 필요 없습니다** — `tools/` 폴더와
-pyserial, 그리고 해당 심 설치본이면 됩니다. 심 PC 에 그대로 들고 가도 동작합니다.
-
-옵션은 둘을 합쳐 이게 전부입니다:
-
-| 옵션 | |
-|---|---|
-| (없음) | 보드에 질의 — 기본 |
-| `--port COMx` | 자동 탐지 대신 포트 지정 |
-| `--bms-root` | BMS 설치 경로 (기본 `C:\Falcon BMS 4.38`). 콜백 목록을 읽는 데만 쓰며, **BMS 생성기 전용** |
-
-### 1-1. BMS 키맵 생성
-
+```powershell
+python -m pip install pyserial
 ```
+
+실행에는 `tools/` 폴더가 필요하며, Arduino 소스나 개발환경은 필요하지 않습니다.
+BMS 생성기는 설치된 `BMS - Full.key`를 읽습니다. DCS 생성기는 저장소의 명령 카탈로그를 사용합니다.
+
+| 옵션 | 용도 |
+|---|---|
+| 생략 | VID/PID로 보드 자동 탐지 |
+| `--port COM7` | 질의할 포트 지정. 여러 보드는 옵션을 반복 지정 |
+| `--bms-root "D:\Falcon BMS 4.38"` | BMS 설치 경로 지정. BMS 생성기 전용 |
+
+## 2. BMS: 생성 및 적용
+
+```powershell
 python tools/gen_bms_setup_xml.py
 ```
 
-보이는 보드마다 `left_console_new1.xml` · `left_aux_misc_new1.xml` 을 현재 폴더에
-남깁니다. 번호는 비어 있는 것으로 골라서 전에 뽑은 걸 덮어쓰지 않습니다.
-**BMS 폴더는 읽기만 합니다.**
+기본 BMS 경로는 `C:\Falcon BMS 4.38`입니다. 연결된 보드에 따라 다음 파일이 생성됩니다.
 
-덮어쓸 대상은 BMS 가 만들어 둔 이 파일들입니다:
+| 보드 | 생성 파일 예시 | 적용할 파일 (`User\Config` 안) |
+|---|---|---|
+| CONSOLE | `left_console_new1.xml` | `Setup.v100.F16 LEFT CONSOLE {GUID}.xml` |
+| AUX | `left_aux_misc_new1.xml` | `Setup.v100.F16 LEFT AUX MISC {GUID}.xml` |
 
-```
-C:\Falcon BMS 4.38\User\Config\
-  BMS - Full.key                                               ← 콜백 목록을 여기서 읽습니다
-  Setup.v100.F16 LEFT CONSOLE {6AE05230-…-444553540000}.xml    ← 덮어씁니다
-  Setup.v100.F16 LEFT AUX MISC {024F5980-…-444553540000}.xml   ← 덮어씁니다
-  Setup.v100.Throttle - HOTAS Warthog {…}.xml                  ← 다른 장치. 안 건드립니다
-```
+적용 순서:
 
-중괄호 안 GUID 는 **PC 마다 다릅니다.** 손으로 칠 필요는 없고, 실행 끝에 나오는
-명령을 그대로 붙여넣으면 됩니다 — 글롭이 그 자리에서 찾습니다:
+1. BMS의 **SETUP → CONTROLLERS**에서 각 장치에 버튼을 하나 할당하고 저장합니다. 장치별 XML이 이미 있으면 생략합니다.
+2. BMS와 Launcher를 종료하고, 대상 XML을 백업합니다.
+3. 생성 파일을 해당 장치의 XML 이름으로 복사해 덮어씁니다. 실행 마지막에 출력되는 PowerShell 명령을 사용할 수 있습니다.
+4. BMS를 다시 실행해 F-16 버튼 매핑과 축 설정을 확인합니다.
+
+복사 명령 예시:
 
 ```powershell
 Copy-Item "left_console_new1.xml" (Get-ChildItem "C:\Falcon BMS 4.38\User\Config\Setup.v100.F16 LEFT CONSOLE {*}.xml")
 ```
 
-`Get-ChildItem` 이 못 찾으면 BMS 가 아직 그 장치를 모르는 것입니다. **SETUP –
-CONTROLLERS** 에서 아무 버튼이나 한 번 바인드하고 저장하면 생깁니다.
+GUID는 해당 PC에서 만들어진 파일의 값을 사용합니다. 대상 파일이 검색되지 않으면 1단계에서 장치 설정을 저장했는지 확인하십시오.
+같은 제품명으로 여러 파일이 검색되면 사용할 장치의 파일을 직접 지정하십시오.
 
-### 1-2. DCS 키맵 생성
+이 방식은 장치별 XML을 사용하므로 DX 번호에 장치 오프셋을 더하지 않습니다.
+`.key`와 `DeviceSorting.txt`를 수정하거나 다른 장치의 설정을 병합할 필요도 없습니다.
+**덮어쓴 장치의 기존 버튼·축 설정은 생성된 내용으로 바뀝니다.**
 
+### XML 구조
+
+각 장치는 DX 1부터 번호를 사용합니다. `DxAssgn[0]`이 DX 1입니다.
+버튼 하나의 `<Assgn>` 4칸 중 슬롯 0은 누름(`Default`), 슬롯 2는 해제(`Down`)에 사용합니다.
+나머지 슬롯은 `SimDoNothing`으로 둡니다.
+
+```xml
+<JoyAssgn>
+  <detentPosition>...</detentPosition>
+  <axis>...</axis>
+  <pov>...</pov>
+  <dx>...</dx>
+  <profileDefaultF16>
+    <pov>...</pov>
+    <dx>...</dx>
+  </profileDefaultF16>
+  <profileF15ABCD>
+    <pov>...</pov>
+    <dx>...</dx>
+  </profileF15ABCD>
+</JoyAssgn>
 ```
+
+루트와 F-16 프로파일에 같은 버튼 매핑을 넣고, F-15 프로파일은 비웁니다.
+각 `<dx>`에는 버튼 128개가 들어갑니다.
+`profileDefaultF16`을 생략하고 루트에 `<dx>`만 반복하면 F-16 매핑이 표시되지 않을 수 있습니다.
+
+## 3. DCS: 생성 및 적용
+
+```powershell
 python tools/gen_dcs_profile.py
 ```
 
-같은 식으로 `left_console_new1.diff.lua` · `left_aux_misc_new1.diff.lua` 를 남깁니다.
-덮어쓸 대상은 이쪽입니다:
+연결된 보드에 따라 `left_console_new1.diff.lua`, `left_aux_misc_new1.diff.lua`가 생성됩니다.
 
-```
+1. DCS의 **Options → Controls**에서 F-16C를 선택합니다.
+2. 적용할 Teensy 장치 열을 선택하고 **Save Profile As...**로 기존 설정을 백업합니다.
+3. 같은 장치 열에서 **Load Profile...**을 눌러 생성된 `.diff.lua`를 불러옵니다.
+4. 다른 보드에도 반복하고, 버튼·축 설정을 확인한 뒤 저장합니다.
+
+`.diff.lua`에는 장치 GUID가 없습니다. **불러올 때 선택한 장치 열**에 적용되므로 CONSOLE과 AUX 파일을 구분하십시오.
+`InputUserProfiles`에 파일을 복사하는 것만으로는 현재 장치에 적용되지 않습니다.
+생성 파일은 다음 폴더에 보관할 수 있습니다.
+
+```text
 C:\Users\<계정>\Saved Games\DCS\InputUserProfiles\
-  F16 Left Console panel.diff.lua      ← 덮어씁니다
-  F16 Left AUX MISC panel.diff.lua     ← 덮어씁니다
-  Warthog Throttle.diff.lua            ← 다른 장치. 안 건드립니다
 ```
 
-```powershell
-$p = Resolve-Path "$env:USERPROFILE\Saved Games\DCS*\InputUserProfiles"
-Copy-Item "left_console_new1.diff.lua" "$p\F16 Left Console panel.diff.lua"
-```
+생성기는 각 장치 열에서 불러올 파일을 안내합니다. 파일명은 변경해도 되지만,
+CONSOLE과 AUX 중 어느 장치용인지 구분할 수 있도록 보관하십시오.
 
-마지막 이름은 **DCS 에서 쓰던 프로파일 이름**입니다. 그 이름은 **Save Profile
-As...** 에서 사람이 타이핑한 값이라 생성기가 알 방법은 없고, 마지막에 보여주는
-명령에만 씁니다 — `sim_axes.py` 의 `DCS_PROFILE` 을 써 본 이름으로 고쳐 두면 편합니다.
-아직 프로파일을 만든 적이 없으면 DCS 의 **Options – Controls** 에서 F-16C 의 그
-장치 열을 고르고 **Save Profile As...** 로 한 번 저장하십시오.
+## 4. 매핑 기준과 수정 방법
 
-## 2. 동작 원리
+### 펌웨어에서 읽는 정보
 
-### 2-1. 보드의 펌웨어로부터 DX 맵 (DX 번호, 스위치 이름) 얻기
+생성기는 시리얼로 `?DX`를 보내 다음 형식의 응답을 받습니다.
+Arduino 소스의 배열을 읽지 않으므로 **업로드된 펌웨어의 DX 배치**가 기준입니다.
 
-생성기가 시리얼로 `?DX` 를 보내면, 펌웨어가 DX 맵을 시리얼로 회신합니다.
-심도 같은 펌웨어를 보므로 소스가 아니라 **이 응답이 기준**입니다.
-
-```
+```text
 #DX BEGIN device=CONSOLE pid=0x048E entries=34 total=64
 #DX 1 1 MPO
 #DX 2 2 UHF PRESET
-#DX 4 1 UHF TEST
 ...
 #DX END
 ```
 
-`#DX <첫 DX 번호> <차지하는 개수> <스위치 이름>`.
+각 행은 `#DX <첫 DX 번호> <DX 개수> <컨트롤 이름>`입니다.
+응답의 `device=` 값으로 CONSOLE/AUX 매핑 표를 선택합니다.
+헤더의 항목 수·총 버튼 수와 실제 응답을 비교하고, DX 범위(1~128)·연속성·중복을 검사합니다.
+검증에 실패하면 파일을 생성하지 않고 중단합니다.
 
-기동 시가 아니라 요청받을 때 찍습니다 — Teensy USB CDC 는 읽는 쪽이 없으면 출력을
-버려서, 부팅 때 찍어 봐야 아무도 못 받습니다. 기동 시리얼 요약도 같은 정보를 같은
-순서로 찍습니다.
+### 컨트롤 이름으로 기능 연결
 
-### 2-2. DX 맵을 BMS/DCS 에 매핑하기
+| 파일 | 내용 |
+|---|---|
+| `tools/keymap/bms_callbacks.py` | 컨트롤 이름 → BMS 콜백 |
+| `tools/keymap/dcs_commands.py` | 컨트롤 이름 → DCS 명령 ID |
+| `tools/keymap/dcs_catalog.txt` | DCS 명령 ID → 표시 이름 |
+| `tools/keymap/sim_axes.py` | 축 설정, 제품명, 출력 파일명 |
+| `tools/keymap/board.py` | 보드 탐지, DX 질의, BMS 콜백 목록 읽기 |
 
-보드는 **이름과 번호**만 알려주고(`#DX 57 2 EPU`), 심에는 기능이 그냥 존재할 뿐입니다.
-"EPU 는 SimEpuOn 이다" 라고 말해 주는 곳은 어디에도 없습니다 — 그게 사람의 판단이고,
-그 판단을 적어 둔 것이 이 표들입니다.
+매핑 표의 키는 `?DX` 응답에 들어 있는 컨트롤 이름입니다.
+DX 순서만 바꾸면 표를 수정할 필요가 없습니다. 컨트롤을 추가하거나 이름을 바꾸면 두 시뮬레이터의 표도 수정해야 합니다.
+표에 없는 이름은 생성 시 보고되며, 해당 DX는 빈칸으로 남습니다.
 
-| | BMS | DCS |
-|---|---|---|
-| 파일 | `tools/keymap/bms_callbacks.py` | `tools/keymap/dcs_commands.py` |
-| 값 | 콜백 이름 `'SimEpuOn'` | 명령 ID `'d3003pnilunilcd6vd1vpnilvunil'` |
-| 덮는 범위 | 컨트롤 63개 / DX 115칸 | 같음 |
+컨트롤이 사용하는 DX 하나당 목록 항목 하나를 지정합니다.
 
-**DX 번호가 아니라 스위치 이름이 키**입니다. 여기서 이름은 **`?DX` 가 찍는 그 문자열**,
-즉 펌웨어의 `switches[].name` · `encoders[].name` · `analogBtnArrays[].groupName` ·
-`coverNames[]` · `commPwrNames[]` 입니다. `dxOrder[]` 는 번호만 들고 있고 이름은
-가리키는 쪽에서 가져옵니다.
+| 값 | 동작 |
+|---|---|
+| `'X'` | 누를 때 X에 할당. 별도의 해제 명령은 지정하지 않음 |
+| `('X', 'Y')` | 누를 때 X, 뗄 때 Y |
+| `('X', None)` | 누를 때 X, 해제 시 추가 명령 없음 |
+| `None` | 의도적으로 비워 둔 자리 |
+| `UNMODELED(...)` | 현재 BMS에서 대응 기능을 찾지 못한 자리 |
+| `TODO` | 명령 확인이 필요한 자리 |
 
-```
-펌웨어   {"EPU", PNL_EPU, SW_ON_OFF_ON, …}   <- switches[] 의 첫 칸
-?DX      #DX 57 2 EPU
-표       'EPU': [('SimEpuOff', 'SimEpuAuto'), ('SimEpuOn', 'SimEpuAuto')]
-```
-
-그래서 `dxOrder[]` 를 재배열해도 두 표는 그대로고, 하드웨어를 추가할 때만 늘어납니다.
-DX 를 실기 배치 순으로 전부 다시 매겼을 때도 한 줄도 안 고쳤습니다. 반대로 **스위치
-이름을 고치면 두 표의 키도 같이 고쳐야 합니다** — 안 고치면 생성기가 "표에 없는
-컨트롤" 로 보고하고 그 DX 가 빈칸으로 나갑니다.
-
-컨트롤이 차지하는 DX 하나당 한 항목이고, 값의 모양은 양쪽이 같습니다:
-
-| 값 | 뜻 | BMS | DCS |
-|---|---|---|---|
-| `'X'` | 모멘터리 | 슬롯 0 에 한 줄 | `JOY_BTN<n>` 하나 |
-| `('X', 'Y')` | 유지형 | 슬롯 0 = X, 슬롯 2 = Y | `JOY_BTN<n>` + `JOY_BTN<n>_OFF` |
-| `('X', None)` | 유지형, 되돌릴 것 없음 | 슬롯 0 만 | 누를 때만 |
-| `None` | **영구적으로** 대상 없음 | 빈칸 | 빈칸 |
-| `UNMODELED(…)` | BMS 가 **아직** 없음 | 빈칸 — 3-4 | (BMS 전용) |
-| `TODO` | 아직 못 정함 | — | 빈칸 — 4-4 |
-
-3단 토글은 DX 2개로 들어오고 중립이 '뗀 상태'이므로, 각 DX 를 `(해당 위치, 중립)` 으로
-두면 세 위치가 모두 표현됩니다. 115칸 중 **40칸이 이 쌍**입니다:
+3단 토글은 양 끝 위치에 DX를 하나씩 사용합니다. 중립 명령은 양쪽 DX의 해제에 지정합니다.
 
 ```python
-'JFS': [('SimJfsStartUp',   'SimJfsStartMid'),
-        ('SimJfsStartDown', 'SimJfsStartMid')],
+'EPU': [('SimEpuOff', 'SimEpuAuto'),
+        ('SimEpuOn',  'SimEpuAuto')],
 ```
 
-로터리(`SW_ROTARY`)는 위치 순서대로 나열하며, `switches[]` 의 `pins[]` 와 같은
-순서입니다.
-
----
-
-## 3. BMS 참고
-
-### 3-1. 콜백은 생성 시점에 검증됩니다
-
-표에 적은 이름이 `BMS - Full.key` 에 실재하는지 매번 확인하고, 없으면 죽은 바인딩을
-뱉는 대신 **에러로 중단**합니다. 같은 파일에서 **사운드 ID** 도 읽어 옵니다 — 우리가
-쓰는 콜백 116개 전부 0 이 아닌 값이고 17종으로 갈립니다. 유도할 수 없는 값이라
-`--bms-root` 가 필요한 이유가 이것입니다.
-
-### 3-2. Setup XML 에서의 모양
-
-버튼 하나가 `<Assgn>` 4칸입니다:
-
-| 슬롯 | `<Invoke>` | 뜻 |
-|---|---|---|
-| 0 | `Default` | 누를 때 |
-| 1 | — | 미사용 (`SimDoNothing`) |
-| 2 | `Down` | 뗄 때 |
-| 3 | — | 미사용 |
-
-`DxAssgn[i]` 가 그 장치의 **DX 버튼 i+1** 입니다 — 오프셋 없음. `<dx>` 섹션이 셋인데
-앞 둘은 내용이 같고 셋째는 비어 있어, 관측된 그대로 재현합니다.
-
-### 3-3. 누름 / 뗌 쌍이라는 모양
-
-2단 스위치를 **누를 때와 뗄 때 두 콜백**으로 표현하는 것이 BMS 의 기본 모양입니다.
-BMS 가 배포하는 스톡 HOTAS 파일도 같은 쌍으로 적습니다:
-
-```
-SimCATI   56 -2 -2 0    0x0 115     <- 누를 때
-SimCATIII 56 -2 -2 0x42 0x0 115     <- 뗄 때
-```
-
-COMM 전원을 모멘터리 펄스가 아니라 **유지형 DX** 로 만든 근거가 이것입니다 —
-펄스는 전환 순간에만 나가서, 심을 나중에 띄우면 이미 올라가 있는 노브를 알 방법이
-없습니다.
-
-모멘터리 바인딩은 BMS 가 누름·뗌 양쪽 엣지를 받으므로 "- Hold" 계열 콜백이 쥐고
-있는 동안 유효합니다 — MPO 를 `SimMPO` 하나로 거는 근거입니다.
-
-### 3-4. 비워 둔 자리 25개
-
-그중 **21개는 BMS 가 아직 모델링하지 않아서**고, 4개만 영구적으로 대상이 없습니다.
-`None` 은 영구적이고 — 커버 DX 는 DCS 개념이라 BMS 에 생길 리가 없습니다 —
-`UNMODELED` 는 "지금은 없다" 는 뜻이며, 괄호 안은 **그때 찾아본 검색어**입니다:
+JFS는 예외로, 시동 도중 OFF 명령이 나가지 않도록 해제 명령을 지정하지 않습니다.
 
 ```python
-'UHF SQUELCH': [UNMODELED('SQUELCH')],
+'JFS': [('SimJfsStartUp',   None),
+        ('SimJfsStartDown', None)],
 ```
 
-전에는 이 검색어를 매번 콜백 목록에 다시 걸어 보고, 걸리면 알려줬습니다. 지금은
-안 합니다 — 문자열 매치라 BMS 가 다른 이름으로 추가하면 **조용히 놓치는데**,
-"사람이 기억 안 해도 된다" 는 약속을 못 지키는 검사는 없느니만 못합니다.
-대신 아래 표를 두고, BMS 를 크게 올렸을 때 `BMS - Full.key` 를 직접 찾아보십시오.
+로터리(`SW_ROTARY`)는 펌웨어 `switches[]`의 `pins[]` 순서대로 위치별 명령을 지정합니다.
+DCS의 누름 키는 `JOY_BTN<n>`, 해제 키는 `JOY_BTN<n>_OFF`입니다.
+EPU 중립처럼 여러 DX의 해제가 같은 명령이면 하나의 명령 항목으로 합칩니다.
 
-| 보드 | 컨트롤 | 분류 |
+### 축 설정
+
+두 생성기는 기존 설정 파일을 읽거나 병합하지 않습니다.
+축 할당과 반전·데드존·포화 값은 `sim_axes.py`의 `BMS_AXES`, `DCS_AXES`에서 가져옵니다.
+축을 바꾸려면 이 값을 수정한 뒤 다시 생성하십시오.
+
+DCS의 `removed` 항목은 패널 축에 자동 할당된 Pitch·Roll·Thrust 등을 해제합니다.
+이 항목이 빠지면 노브가 비행 조종축으로 동작할 수 있습니다.
+
+펌웨어의 `slider(1)`인 ILS 노브는 BMS의 `<AxAssgn>` 슬롯 7(0부터 계산), DCS의 `JOY_SLIDER2`에 대응합니다.
+
+## 5. 미매핑 항목과 버전 변경
+
+### BMS
+
+생성할 때 설치된 `User\Config\BMS - Full.key`에서 콜백 존재 여부와 사운드 ID를 읽습니다.
+매핑 표에 지정한 콜백이 없으면 생성을 중단합니다. `TODO`는 빈칸으로 생성하고 해당 DX를 로그에 표시합니다.
+
+현재 비워 둔 항목은 다음과 같습니다.
+
+| 보드 | 컨트롤 | 구분 |
 |---|---|---|
-| CONSOLE | UHF TEST, UHF STATUS, UHF T-TONE, UHF SQUELCH | 미모델링 |
-| CONSOLE | UHF FUNCTION 의 ADF 위치 | 미모델링 |
-| CONSOLE | AB RESET, ENG DATA, MAX POWER | 미모델링 |
-| CONSOLE | ECM RESET, ECM 버튼 6 · FRM · SPL | 미모델링 |
-| CONSOLE | COMM1 · COMM2 MODE 의 OFF 위치 | 미모델링 |
-| CONSOLE | HOT MIC, CIPHER | 미모델링 |
-| CONSOLE | ENG CONT · EPU OFF · EPU ON 커버 | **영구** — 커버는 DCS 개념 |
-| AUX | ALT REL | 미모델링 |
-| AUX | TWA ACT/PWR | 미모델링 |
-| AUX | CMDS PRGM 의 BIT · 5 · 6 | 미모델링 |
-| AUX | CMDS MODE 7번째 자리 | **영구** — 7단 로터리인데 실기는 6위치 |
+| CONSOLE | UHF TEST, STATUS, T-TONE, SQUELCH, FUNCTION의 ADF | 대응 기능 미확인 |
+| CONSOLE | AB RESET, ENG DATA, MAX POWER | 대응 기능 미확인 |
+| CONSOLE | ECM RESET, ECM 버튼 6·FRM·SPL | 대응 기능 미확인 |
+| CONSOLE | COMM1·COMM2 MODE의 OFF, HOT MIC/CIPHER | 대응 기능 미확인 |
+| CONSOLE | ENG CONT·EPU OFF·EPU ON 커버 | 현재 매핑 대상에서 제외 |
+| AUX | ALT REL, TWA ACT/PWR | 대응 기능 미확인 |
+| AUX | CMDS PRGM의 BIT·5·6 | 대응 기능 미확인 |
+| AUX | CMDS MODE의 7번째 위치 | 실기에 없는 여분 위치 |
 
----
+`UNMODELED(...)`의 문자열은 기능을 조사할 때 사용한 검색어입니다.
+**생성기는 새로 지원된 기능을 자동 탐지하지 않습니다.** BMS를 업데이트한 뒤에는 다음 순서로 확인하십시오.
 
-## 4. DCS 참고
+1. 릴리스 노트와 `BMS - Full.key`에서 해당 기능의 추가 여부를 확인합니다.
+2. 콜백의 동작과 스위치 위치를 확인해 `bms_callbacks.py`를 수정합니다.
+3. 키맵을 다시 생성하고 게임에서 확인합니다.
 
-### 4-1. 명령 ID 는 어디서 왔나
+### DCS
 
-BMS 는 `BMS - Full.key` 라는 공식 목록이 있지만, DCS 쪽은 이 PC 에 모듈이 없어
-**사용자의 기존 `.diff.lua` 두 개에서 역으로 뽑았습니다.** 그 추출물이
-`tools/keymap/dcs_catalog.txt` 이고, 명령 ID ↔ 사람이 읽는 이름을 들고 있습니다 —
-`.diff.lua` 의 `["name"]` 칸이 여기서 채워집니다. DCS 입력 화면에 뜨는 글자라,
-없으면 ID 만 보입니다.
+명령 카탈로그는 사용자의 기존 `.diff.lua` 두 개에서 추출했습니다.
+모듈의 전체 입력 목록은 아니며, 명령 ID와 표시 이름을 제공합니다.
 
-BMS 쪽 짝이던 `bms_catalog.txt` 는 없습니다. 사운드 ID 때문에 어차피 BMS 설치본을
-읽으므로 커밋해 둘 이유가 없었습니다.
-
-### 4-2. 명령 ID 는 구조체입니다
-
-```
-d<down>p<pressed>u<up>cd<cockpit_device>vd<value_down>vp<value_pressed>vu<value_up>
-```
-
-`nil` 은 그 필드 없음. `d3001pnilunilcd32vd0vpnilvunil` = 명령 3001, 콕핏 장치 32,
-value_down 0. 축은 `a<command>cd<device>` 입니다. **이름이 아니라 구조체**라서 표
-없이는 추측할 여지가 아예 없습니다.
-
-버튼은 `JOY_BTN<n>`, **뗄 때는 `JOY_BTN<n>_OFF`**. 3단 스위치의 가운데는 양쪽
-릴리스를 한 항목에 묶습니다 — 2-2 의 `(위치, 중립)` 모델 그대로라 표가 거의 그대로
-옮겨갑니다:
-
-```lua
-["name"] = "EPU Switch - NORM",
-  [1] = { ["key"] = "JOY_BTN58_OFF" },
-  [2] = { ["key"] = "JOY_BTN59_OFF" },
-```
-
-모멘터리 버튼은 릴리스 키가 필요 없습니다 — 명령 자체가 `vd=1 vu=0` 을 품습니다.
-
-### 4-3. DCS 가 BMS 보다 많이 가진 것
-
-BMS 에서 비워 둔 자리 상당수가 DCS 엔 있습니다 — UHF SQUELCH · TEST DISPLAY ·
-STATUS, FUNCTION 의 ADF, MAX POWER, MPO, AB RESET 과 ENG DATA 각각,
-HOT MIC/CIPHER 3단, ECM RESET, ECM 1~6 · FRM · SPL 전부, ALT REL, RWR ACT/PWR.
-
-**`ENG CONT Switch Cover - OPEN / CLOSE`** 도 있습니다. 커버 DX 를 만든 이유가
-원래 이쪽입니다.
-
-### 4-4. 남은 자리 5개
-
-BMS 쪽 빈자리가 "BMS 가 모델링을 안 해서" 라면, 이쪽은 **DCS 는 지원하는데 사용자가
-안 묶어 둬서** 추출물에 없는 자리입니다. 매번 실행할 때마다 보고됩니다.
-
-| | |
+| 미확정 항목 | 상태 |
 |---|---|
-| UHF T-TONE | 프로파일에 안 묶여 있음 |
-| AVTR ×2 | 안 묶여 있음 |
-| EPU 커버 ×2 | DCS 가 ENG CONT 에만 커버 명령을 주는 것으로 보임 |
+| UHF T-TONE | 기존 프로파일에 명령 없음 |
+| AVTR의 양 끝 위치 | 기존 프로파일에 명령 없음 |
+| EPU OFF·ON 커버 | 별도 커버 명령 지원 여부 확인 필요 |
 
-### 4-5. 카탈로그를 다시 뽑으려면
+위 5개 DX는 `TODO`이며 생성할 때 보고됩니다.
+기능이 지원되지 않는 것인지, 기존 프로파일에만 없는 것인지는 추가 확인이 필요합니다.
 
-DCS 에서 새로 바인딩해 저장한 뒤 그 `.diff.lua` 를 주시면, 명령이 카탈로그에
-들어오고 `dcs_commands.py` 의 `TODO` 를 채울 수 있습니다. 모듈의
-`Input/F-16C_50/joystick/default.lua` 를 주시면 역추출이 아니라 공식 목록에서
-고르게 되므로 EPU 커버까지 확실해집니다.
+DCS에서 해당 기능을 바인딩해 저장한 `.diff.lua` 또는 모듈의
+`Input/F-16C_50/joystick/default.lua`를 확인해 카탈로그와 `dcs_commands.py`를 보완하십시오.
+DCS 명령 ID에는 명령 번호·콕핏 장치 번호·누름/해제 값이 포함되므로, 표시 이름만 보고 ID를 추측하지 않습니다.
 
----
+## 6. 문제 확인
 
-## 5. 축 설정 — 두 심 공통
-
-두 생성기는 **파일을 처음부터 전부 만듭니다** — 기존 파일이 없어도 되고 참고하지도
-않습니다. 버튼은 `dxOrder[]` 와 매핑 표에서 전부 유도되지만, **축에는 유도할 수 없는
-값이 붙습니다** — `invert`, `deadzone`, `saturation` 같은 것들입니다. 이 패널의 포트는
-전부 반전이고요. 그래서 기존 설정에서 한 번 뽑아 `tools/keymap/sim_axes.py` 에 적어 두고,
-두 생성기가 그 파일만 보고 축 블록을 만듭니다. 바꾸려면 그 파일을 고치십시오.
-
-| | BMS | DCS |
-|---|---|---|
-| 데이터 | `BMS_AXES` — `<AxAssgn>` 8칸 | `DCS_AXES` — 명령별 필터 |
-| 담는 값 | AxisName · Invert · Saturation · Deadzone | invert · deadzone · curvature · saturation |
-| 그 외 | `BMS_DETENT`, `PRODUCT` · `OUT_BASE` | `DCS_PROFILE` · `OUT_BASE` |
-
-DCS 쪽에는 **`removed` 항목**도 들어 있습니다. 이게 특히 중요합니다 — DCS 가 새 조이스틱에 자동으로 거는
-`Pitch←JOY_Y` · `Roll←JOY_X` · `Thrust←JOY_Z` (콘솔은 `Rudder←JOY_RZ` 까지) 를
-떼어내는 줄입니다. 없으면 **HMCS 노브가 스로틀을 움직이고** 빈 축이 기수를 밉니다.
-
-> **슬라이더 번호 주의** — 펌웨어의 `slider(1)`(ILS)이 두 심 모두에서 **두 번째**
-> 슬라이더로 보입니다. BMS 는 `<AxAssgn>` 슬롯 7, DCS 는 `JOY_SLIDER2`.
-> 양쪽이 일치하므로 HID 디스크립터 쪽 특성으로 보고 그대로 둡니다.
-
----
-
-## 6. 파일
-
-`tools/` 최상위는 **실행하는 것**, `tools/keymap/` 은 **생성기가 읽는 데이터**입니다.
-
-| 실행 | |
+| 증상 | 확인할 내용 |
 |---|---|
-| `tools/gen_bms_setup_xml.py` | BMS 생성기 |
-| `tools/gen_dcs_profile.py` | DCS 생성기 |
+| 보드를 찾지 못함 | USB 연결, `pyserial` 설치, `--port` 지정 |
+| DX 응답 검증 실패 | 헤더·항목 수·버튼 범위 및 펌웨어 버전 확인 후 다시 생성 |
+| `?DX` 응답 없음 | 브리지 종료 후 6초 대기, 질의 기능이 포함된 펌웨어인지 확인 |
+| BMS 대상 XML이 없음 | CONTROLLERS에서 해당 장치 설정 저장 |
+| BMS 매핑이 표시되지 않음 | 수정된 생성기로 재생성, 실제 장치의 XML에 적용했는지 및 F-16 프로파일 계층 확인 |
+| DCS 매핑이 적용되지 않음 | F-16C의 해당 장치 열에서 Load Profile 실행 |
+| 컨트롤 일부가 빈칸 | 생성 로그의 미매핑/TODO 및 위 미매핑 목록 확인 |
+| DX 번호가 맞지 않음 | 변경한 펌웨어 업로드 후 키맵 재생성 |
 
-| `tools/keymap/` — 읽기만 합니다 | |
-|---|---|
-| `board.py` | 보드 질의 · `?DX` 파서 · 콜백 목록 로더 — 생성기 둘이 import |
-| `sim_axes.py` | **축 설정 · 제품명 · 파일명** — 두 심 공통 |
-| `bms_callbacks.py` | 스위치 이름 → BMS 콜백 |
-| `dcs_commands.py` | 스위치 이름 → DCS 명령 ID |
-| `dcs_catalog.txt` | DCS 명령 ID ↔ 이름 |
+## 7. 관련 문서
 
-스위치 이름이 모든 표의 키입니다. `dxOrder[]` 를 재배열해도 표는 그대로고,
-하드웨어를 추가할 때만 늘어납니다.
-
-## 7. 장치 구분 — 두 시뮬 모두 장치별 파일입니다
-
-보드가 둘이지만 섞일 일이 없습니다. **BMS 도 DCS 도 장치마다 파일이 따로** 있고,
-버튼 번호에 오프셋이 없습니다 — `JOY_BTN1` / `DxAssgn[0]` 이 그 보드의 DX 1 입니다.
-
-| | BMS 장치별 | DCS |
-|---|---|---|
-| 파일 | `Setup.v100.<장치명> {GUID}.xml` | `<프로파일명>.diff.lua` |
-| 어디에 | `User\Config\` | `Saved Games\...\InputUserProfiles\` |
-| 장치 식별 | 파일명의 **GUID** | 파일명 — **GUID 없음**, 이름으로 지정 |
-| 버튼 번호 | `DxAssgn[i]` = DX **i+1** | `JOY_BTN<n>` = DX **n** |
-| 오프셋 | **없음** | **없음** |
-
-심 PC 의 실제 설정을 보면 BMS 바인딩은 **이 XML 쪽에** 들어 있습니다.
-
-## 8. 관련 문서
-
-| | |
-|---|---|
-| DX 맵 (콘솔) | [REF_LEFT_CONSOLE_WIRING.md](REF_LEFT_CONSOLE_WIRING.md#dx-버튼-맵-64--128) |
-| DX 맵 (AUX) | [REF_LEFT_AUX_WIRING.md](REF_LEFT_AUX_WIRING.md#dx-버튼-맵-51--128) |
-| 장치 개요 | [REF_DEVICES.md](REF_DEVICES.md) |
-| BIOS 프로토콜 · LED 주소 | [REF_PROTOCOL.md](REF_PROTOCOL.md) |
+- [콘솔 DX 맵](REF_LEFT_CONSOLE_WIRING.md#dx-버튼-맵-64--128)
+- [AUX DX 맵](REF_LEFT_AUX_WIRING.md#dx-버튼-맵-51--128)
+- [장치 개요](REF_DEVICES.md)
+- [BIOS 프로토콜·LED 주소](REF_PROTOCOL.md)

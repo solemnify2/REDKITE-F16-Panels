@@ -1,18 +1,21 @@
-# 프로토콜 레퍼런스
+# LED·디스플레이 프로토콜
+
+이 문서는 브리지와 펌웨어 사이의 출력 데이터 형식을 정리합니다.
+스위치·축 입력은 USB 조이스틱으로 전달하며, 입력 키맵은 [REF_KEYMAP.md](REF_KEYMAP.md)를 참고하십시오.
 
 ## 1. DCS-BIOS (DCS World F-16C_50)
 
-**Source:** DCS-BIOS `F-16C_50.json`
+**참조:** DCS-BIOS `F-16C_50.json`
 - 로컬: `%USERPROFILE%\Saved Games\DCS\Scripts\DCS-BIOS\doc\json\F-16C_50.json`
 - 웹: http://localhost:5010/reference/ (DCS 실행 중)
 
-**Protocol:**
+**전송 형식:**
 - Binary, sync `0x55` ×4
 - 반복 청크: `ADDR_LO ADDR_HI COUNT_LO COUNT_HI DATA[count]`
-- 프레임 종료: addr=0x5555, count=0x5555
+- 동기 바이트 `0x55` ×4를 감지하면 파서가 다음 주소·길이 읽기를 시작합니다.
 - Baud: 1,000,000
 
-**LED Address Map** (DcsBiosParser.h):
+**LED 주소** (DcsBiosParser.h):
 
 | Identifier | Addr(hex) | Mask | Bit | Description |
 |---|---|---|---|---|
@@ -32,7 +35,7 @@
 | LIGHT_CONSLES | 0x4482 | 0xFFFF | - | Console Lighting (0–65535, remap 11200–58510 → 0–255) |
 | LIGHT_INST_PNL | 0x4484 | 0xFFFF | - | Instrument Panel Lighting (0–65535) |
 
-**ECM LED Address Map** (74HC595, 32 outputs):
+**ECM LED 주소** (74HC595, 32 outputs):
 
 | Addr(hex) | Bits | LEDs |
 |---|---|---|
@@ -40,7 +43,7 @@
 | 0x448A | 0–15 | ECM 1T, 2–5 S/A/F/T |
 | 0x448C | 0–12 | ECM 5T, 6 S/A/F/T, FRM S/A/F/T, SPL S/A/F/T |
 
-**UHF Display** (string outputs):
+**UHF 표시 데이터** (문자열):
 
 | Identifier | Addr(hex) | Type | Length | Description |
 |---|---|---|---|---|
@@ -49,12 +52,12 @@
 
 ## 2. BMS-BIOS (Falcon BMS 4.38)
 
-**Source:** `C:\Falcon BMS 4.38\Tools\SharedMem\FlightData.h`
+**참조:** `C:\Falcon BMS 4.38\Tools\SharedMem\FlightData.h`
 
-**Protocol:**
+**전송 형식:**
 - Binary, sync `0xAA 0xBB`
 - Payload 13바이트:
-  - `ledBits` (uint32 LE, 4B) — bits 0–11: LED states, bits 16–23: console backlight PWM, bits 24–31: instr panel backlight PWM
+  - `ledBits` (uint32 LE, 4B) — 하위 16비트: 장치별 LED 상태, bits 16–23: console backlight PWM, bits 24–31: instr panel backlight PWM
   - `srData` (uint32 LE, 4B) — ECM 시프트 레지스터 32비트
   - `uhfFreq` (uint32 LE, 4B) — UHF 주파수 (kHz)
   - `uhfPreset` (uint8, 1B) — UHF 프리셋 채널 (1–20)
@@ -62,7 +65,7 @@
 - Total: **16 bytes** per frame (sync 2 + payload 13 + checksum 1)
 - Baud: 1,000,000
 
-**Shared Memory:**
+**공유 메모리:**
 
 | 영역 | 오프셋 | 타입 | 필드 | 설명 |
 |---|---|---|---|---|
@@ -75,7 +78,7 @@
 | | 1168 | uchar | floodConsole | Flood/console 조명 (0~6) — 패널 백라이트와 다른 조명, 미사용 |
 | | 1180 | uint[5] | ecmBits | ECM 프로그램 상태 ×5 |
 
-**LightBits Mask Map** (bmsbios_bridge.py):
+**LightBits 마스크** (bmsbios_bridge.py):
 
 LightBits (offset 108):
 
@@ -87,6 +90,10 @@ LightBits2 (offset 124):
 
 | Name | Mask | Bit | Description |
 |---|---|---|---|
+| Go | 0x00000040 | 6 | CMDS GO |
+| NoGo | 0x00000080 | 7 | CMDS NO GO |
+| Degr | 0x00000100 | 8 | AUTO DEGR (미사용) |
+| Rdy | 0x00000200 | 9 | CMDS DISPENSE RDY |
 | AuxSrch | 0x00001000 | 12 | TWA Search |
 | AuxAct | 0x00002000 | 13 | TWA Activity |
 | AuxLow | 0x00004000 | 14 | TWA Alt Low |
@@ -115,7 +122,7 @@ LightBits3 (offset 128):
 | LeftGearDown | 0x00020000 | 17 | Left gear down and locked |
 | RightGearDown | 0x00040000 | 18 | Right gear down and locked |
 
-## 3. LED Index Mapping — Left Aux + MISC (0x0487)
+## 3. LED 비트·핀 대응 — Left Aux + MISC (0x0487)
 
 | ledBits | Name | Location | BMS LightBit | DCS-BIOS |
 |---|---|---|---|---|
@@ -136,12 +143,11 @@ LightBits3 (offset 128):
 | 14 | CMDS NO GO | Teensy pin 43 | `LB2_EWS_NOGO` (LightBits2) | 0x4480 bit9 |
 | 15 | CMDS GO | Teensy pin 44 | `LB2_EWS_GO` (LightBits2) | 0x4480 bit10 |
 
-> 이 표는 펌웨어 `leds[]` / `LedIdx` 와 `tools/bmsbios_bridge.py` 의 맵에서 생성했습니다.
-> **ledBits 비트 번호 = `leds[]` 인덱스**이므로 (`BmsBiosParser.h` 의 `writeElecLed(i, ledBits >> i)`),
-> 배열 순서를 바꾸면 브리지 맵도 같이 바꿔야 합니다. 배열 순서는 실기 패널 배치를 따릅니다.
+> `ledBits` 비트 번호는 해당 장치의 `leds[]`/`LedIdx` 순서와 같습니다.
+> 배열 순서를 바꾸면 `tools/bmsbios_bridge.py`의 장치별 LED 맵도 함께 수정해야 합니다.
 
 
-## 4. LED Index Mapping — Left Console (0x048E)
+## 4. LED 비트·핀 대응 — Left Console (0x048E)
 
 | ledBits | Name | Location | BMS LightBit | DCS-BIOS |
 |---|---|---|---|---|
@@ -158,23 +164,25 @@ LightBits3 (offset 128):
 | 10 | FLCS RLY | MCP 0x21 GPA6 | `LB3_FLCS_RLY` (LightBits3) | 0x447E bit0 |
 | 11 | BATT FAIL | MCP 0x21 GPA7 | `LB3_BAT_FAIL` (LightBits3) | 0x447E bit1 |
 
-> 이 표는 펌웨어 `leds[]` / `LedIdx` 와 `tools/bmsbios_bridge.py` 의 맵에서 생성했습니다.
-> **ledBits 비트 번호 = `leds[]` 인덱스**이므로 (`BmsBiosParser.h` 의 `writeElecLed(i, ledBits >> i)`),
-> 배열 순서를 바꾸면 브리지 맵도 같이 바꿔야 합니다. 배열 순서는 실기 패널 배치를 따릅니다.
+> `ledBits` 비트 번호는 해당 장치의 `leds[]`/`LedIdx` 순서와 같습니다.
+> 배열 순서를 바꾸면 `tools/bmsbios_bridge.py`의 장치별 LED 맵도 함께 수정해야 합니다.
 
 
-Backlight 2원화:
+### 백라이트 채널
 - `ledBits` byte 2 (bits 16–23) = console backlight PWM → pin 13 (양쪽 보드)
 - `ledBits` byte 3 (bits 24–31) = instr panel backlight PWM → pin 12 (LEFT_AUX_MISC only, MISC 패널)
-- Bridge: `instrLight` 0→OFF, 1→DIM(255 or 50), 2→BRT(255). BMS는 소스가 하나라 두 채널 동일 값.
+- 브리지: `instrLight` 0→OFF, 1→DIM(255 or 50), 2→BRT(255). BMS는 소스가 하나라 두 채널 동일 값.
 - DCS: `LIGHT_CONSLES`(0x4482) → pin 13 (remap 11200~58510 → 0~255), `LIGHT_INST_PNL`(0x4484) → pin 12.
 - Offline 수동 조절: AUX = DN LOCK REL + HMCS pot (양쪽 동시), 콘솔 = UHF TEST + STATUS + VOL.
 
-`srData`: uint32, ECM 32 LED (74HC595). FlightData2 `ecmBits[5]`에서 생성.
+`srData`는 ECM 32개 LED용 비트맵입니다. 브리지가 FlightData2의 `ecmBits[5]`를 변환하고, 펌웨어는 `srMap[]`으로 실제 74HC595 출력에 대응시킵니다.
 
 ## 5. 프로토콜 자동 감지
 
-Teensy는 수신된 sync 바이트로 프로토콜을 자동 판별합니다:
+Teensy는 수신된 sync 바이트로 프로토콜을 자동 판별합니다.
+
 - `0x55` ×4 연속 → **DCS-BIOS**
 - `0xAA` → `0xBB` → **BMS-BIOS**
 - 타임아웃 (AUX 6초 / 콘솔 3초) → UNKNOWN으로 리셋, 재감지
+
+프로토콜 타임아웃은 현재 수신 처리 기준입니다. 정상 프레임 여부를 별도로 검증하는 감시와는 구분하십시오.

@@ -1,7 +1,8 @@
 # F16 LEFT AUX + MISC — 배선도
 
 `F16_LEFT_AUX_MISC/` 스케치의 물리 배선도입니다.
-핀 번호·버튼 번호는 `.ino`의 config 배열에서 그대로 가져온 값입니다.
+핀 번호는 현재 펌웨어의 설정 배열, 버튼 번호는 `dxOrder[]`를 기준으로 합니다.
+배선 변경 지시가 아니라 현재 구현을 정리한 문서입니다.
 
 - **Board**: Teensy 4.1 (헤더 핀 0–41)
 - **USB**: PID `0x0487`, `JOYSTICK_SIZE 64` (128버튼) — 콘솔 장치(`0x048E`)와 헤더 공유
@@ -36,8 +37,8 @@
                                     │ LED x8 (GO/NOGO/DISP/RDY) ├─C7(x5)──┤
                                     └───────────────────────┘         │
                                     ┌───────────────────────┐         │
-                                    │ TWA                   ├─C3(x5)──┤
-                                    │ LADDER x1  LED x4     │         │
+                                    │ TWA                   ├─C3(x6)──┤
+                                    │ LADDER x1 LED x4 DIMM │         │
                                     └───────────────────────┘         │
                                     ┌───────────────────────┐         │
                                     │ ALT GEAR   SW x1      ├─C4(x1)──┤
@@ -46,7 +47,7 @@
                                     │ HMCS       POT x1     ├─C5(x1)──┤
                                     └───────────────────────┘         │
                                     ┌───────────────────────┐         │
-                                    │ PEDALS     POT x2     ├─C6(x2)──┘
+                                    │ PEDALS     HALL x2    ├─C6(x2)──┘
                                     └───────────────────────┘
 
   I2C             I1 Teensy(18/19) > 0x20 — 스타 토폴로지, LAN (아래 "I1 — LAN 배선" 참조)
@@ -65,14 +66,14 @@
 | **M1** | MCP `0x20` → MISC 패널 | 스위치 GPIO 11 + LED 3 | 14 |
 | **C1** | Teensy → GEAR 패널 | 스위치 GPIO 13 + LED 4 (Nose/Left/Right/Warn) | 17 |
 | **C2** | Teensy → CMDS 패널 | 스위치 8 + 래더 2 (MODE, PRGM) | 10 |
-| **C3** | Teensy → TWA 패널 | 래더 1 + LED 4채널(LED 7개). **급전은 3.3V** — 기판 `5V` 실크 주의 | 5 |
+| **C3** | Teensy → TWA 패널 | 래더 1 + LED 4채널(LED 7개) + DIMM 입력 1. 전원 3.3V | 6 |
 | **C4** | Teensy → ALT GEAR | Handle (Reset 미연결) | 1 |
 | **C5** | Teensy → HMCS | Symbology 1개 (Brightness / Contrast 미연결) | 1 |
-| **C6** | Teensy → 페달 | 포트 2 (Left / Right). 홀 센서 — 자작 내역은 [REF_PEDAL.md](REF_PEDAL.md) | 2 |
+| **C6** | Teensy → 페달 | 홀 센서 신호 2개 (Left / Right). — 자작 내역은 [REF_PEDAL.md](REF_PEDAL.md) | 2 |
 | **C7** | Teensy 하단 SD 패드 → CMDS 램프 | LED 8 (DISPENSE RDY 5 / NO GO 2 / GO 1) on 5 pins | 5 (+GND, LAN 6심, pin 42 미사용) |
 | 12V | 12V 어댑터 → 백라이트 | MOSFET 2개: pin 13 (AUX 로컬), pin 12 (MISC via LAN). 어댑터는 콘솔과 **Y 케이블로 공유** | 2 |
 
-콘솔 장치와 달리 MCP가 1장뿐이라 **I2C는 체인이 아닌 스타(단일 링크)**입니다.
+MCP가 1장이므로 I2C는 Teensy와 MISC 사이의 단일 링크입니다.
 MCP 단선 시 **GEAR WARN LED가 점등**되어 패널에서 바로 알 수 있고 (콘솔에는 없는 표시등),
 500ms 간격으로 재접속을 시도합니다.
 
@@ -161,12 +162,12 @@ LAN pin 8 ── GND ───┴──┴── MCP23017 GND
 | MISC | 전해캡 | 10uF (10V+) | MCP VDD 핫플러그 스파이크 흡수 |
 | MISC | 세라믹캡 | 100nF | MCP VDD 고주파 노이즈 필터 (핀 근접 배치) |
 
-### 불필요한 부품
+### 이 구성에서 생략한 부품
 
 | 부품 | 사유 |
 |------|------|
-| TVS 다이오드 | 3.3V/12V USB 전원 수준, 과전압 파괴 위험 없음 |
-| 페라이트 비드 | 저전류 (~1mA), 노이즈 문제 없음 |
+| TVS 다이오드 | 기본 구성에 미포함. 외부 배선·접속 환경에 따라 별도 검토 |
+| 페라이트 비드 | 기본 구성에 미포함. 노이즈 발생 시 전류 경로부터 점검 |
 | 100uF+ 대용량 캡 | 과잉, 돌입전류만 증가 |
 | 외부 풀업 (MISC측) | AUX측 4.7kΩ로 충분 (1m 이내) |
 
@@ -197,10 +198,10 @@ LAN pin 8 ── GND ───┴──┴── MCP23017 GND
   ---   Vin                      ─────┤ ○         ○ ├─────  GND                      ---
   ---   GND                      ─────┤ ○         ○ ├──  0  -- spare --              --
   ---   3V3                      ─────┤ ○         ○ ├──  1  DN LOCK REL              C1
-  C2    CMDS FL            (A9)  23 ──┤ ○         ○ ├──  2  HORN SILENCER            C1
-  C2    CMDS CH            (A8)  22 ──┤ ○         ○ ├──  3  LANDING LIGHT TAXI       C1
-  C2    CMDS O2            (A7)  21 ──┤ ○         ○ ├──  4  LANDING LIGHT LANDING   C1
-  C2    CMDS O1            (A6)  20 ──┤ ○         ○ ├──  5  STORE CAT                C1
+  C2    CMDS O1            (A9)  23 ──┤ ○         ○ ├──  2  HORN SILENCER            C1
+  C2    CMDS O2            (A8)  22 ──┤ ○         ○ ├──  3  LANDING LIGHT TAXI       C1
+  C2    CMDS CH            (A7)  21 ──┤ ○         ○ ├──  4  LANDING LIGHT LANDING   C1
+  C2    CMDS FL            (A6)  20 ──┤ ○         ○ ├──  5  STORE CAT                C1
   I1    I2C SCL            (A5)  19 ──┤ ○         ○ ├──  6  ANTI SKID 1              C1
   I1    I2C SDA            (A4)  18 ──┤ ○         ○ ├──  7  ANTI SKID 2              C1
   C2    CMDS RWR           (A3)  17 ──┤ ○         ○ ├──  8  BRAKES CHANNEL           C1
@@ -278,7 +279,7 @@ FPC 배선표는 아래 **CMDS 램프** 절에 있습니다.
 
 로터리 스위치 2개(MODE 7포지션, PRGM 7포지션)를 **아날로그 핀 1개씩**으로 받습니다.
 디지털 핀으로 받으면 포지션마다 1핀씩 14핀이 필요한데, 래더로 2핀에 끝납니다.
-헤더가 39/42 로 거의 찬 보드라 이 절약이 큽니다.
+현재 헤더는 41/42핀을 사용하므로 래더로 입력 핀을 절약합니다.
 
 ### 구성
 
@@ -351,12 +352,12 @@ CMDS 둘은 위 방식으로 손배선합니다.
 
 ## CMDS 램프 — 하단 SD 패드 (C7)
 
-헤더 42핀이 모두 차 있어 **LED 8개를 하단 microSD 패드 5핀**에서 뽑습니다.
+헤더의 여유 핀이 1개뿐이므로 CMDS LED 8개는 하단 microSD 패드 5핀으로 구동합니다.
 15핀 FPC 확장 케이블로 인출하며, 한 핀에 LED 2개를 병렬로 다는 자리가 셋입니다.
 드라이버 IC 는 없습니다.
 
 `DISPENSE RDY` 는 LED 가 5개라 한 핀으로는 전류가 모자랍니다. 핀 셋에 2+1+2 로 나눠 달고
-브릿지가 같은 `Rdy` 비트를 세 항목에 보내므로 함께 점등합니다.
+브리지가 같은 `Rdy` 비트를 세 항목에 보내므로 함께 점등합니다.
 
 > **`DISPENSE` 와 `RDY` 는 한 램프입니다** — 범례가 두 단어로 나뉘어 보여도 BMS 가 주는
 > 신호는 `Rdy` 하나뿐입니다. CMDS 상단 지시등은 GO / NO GO / DISPENSE RDY **셋**이고
@@ -386,7 +387,7 @@ CMDS 둘은 위 방식으로 손배선합니다.
 `CMD` 가 `SCK2` 핀에, `DAT0` 가 `MOSI2` 핀에 올라갑니다.
 
 > 확장 케이블 제품마다 패드 번호 표기가 다를 수 있으니, 연결 후 `ALLOW_DEBUG`
-> 또는 LED 를 하나씩 켜 보며 매핑을 확인하세요. 순서가 다르면 `leds[]` 의 핀 번호만 바꾸면 됩니다.
+> 또는 LED를 하나씩 켜서 실제 결선을 확인하십시오. 표와 다르면 현재 배선을 기록하고 코드·문서를 대조한 뒤 변경합니다.
 
 ### 결선
 
@@ -468,13 +469,13 @@ LED 1개만 연결한 상태에서 **320Ω 양단 = 1.2V** → 단독 전류 **3
 | 44–50 | CMDS | MODE 래더 — 1~7 |
 | 51 | ALT GEAR | Handle |
 
-> 이 DX 로 BMS 키 파일을 만드는 법은 [REF_KEYMAP.md](REF_KEYMAP.md) 에 있습니다.
+> 장치별 BMS XML·DCS 프로파일 생성과 적용은 [REF_KEYMAP.md](REF_KEYMAP.md)를 참고하십시오.
 >
 > 줄을 옮기면 그 뒤 DX 가 전부 밀립니다. 기동 시 시리얼 요약이 현재 DX 를 찍어 줍니다.
 >
 > TWA 래더의 내부 순서(ACT/PWR → SEARCH → ALT → SYS PWR)는 저항값으로 고정되어 있어
 > 패널 배치(SEARCH → ACT/PWR → ALT → SYS PWR)와 앞 두 개가 바뀌어 있습니다.
-> 바꾸려면 배선을 손봐야 하므로 그대로 두었습니다.
+> 현재 매핑 표도 이 순서를 사용합니다. 패널의 인쇄 순서와 혼동하지 마십시오.
 
 ---
 
@@ -515,14 +516,16 @@ LED 1개만 연결한 상태에서 **320Ω 양단 = 1.2V** → 단독 전류 **3
 
 ## 시공 체크리스트
 
-| # | 항목 |
+| 항목 | 확인 내용 |
 |---|---|
-| 1 | ~~핀 27 충돌~~ **해결됨** — Gear Warn LED 는 핀 27, 핀 12 는 MISC 백라이트 MOSFET |
-| 2 | ~~핀 13 확인~~ **해결됨** — 백라이트 출력으로 변경. 온보드 LED가 백라이트 상태를 표시 (LEFT_CONSOLE과 동일). 핀 0은 여유 |
-| 3 | **래더 캘리브레이션** — TWA·CMDS MODE·PRGM. 제작법과 기대값은 위 「저항 래더」 절. PWM 디밍 방식 변경 후 BL OFF/ON 값 동일(±4)하여 1세트로 통합. `ALLOW_DEBUG = true` 로 실측 |
-| 4 | **I2C 핫플러그 보호** — SDA/SCL 직렬 100Ω, 보드 3.3V에 10µF + 100nF (위 "I1 — LAN 배선" 절). 단선 시 GEAR WARN 점등, 500ms 재접속 |
-| 5 | **MCP 주소 점퍼** — 출하 상태 그대로 (`0x20`) |
-| 6 | **백라이트 2원화** — MOSFET 2개: pin 13 = AUX 로컬 (console channel), pin 12 = MISC via LAN (instr panel channel). 12V 어댑터(콘솔과 Y 케이블 공유). Online: 각 채널 독립 제어. Offline 수동: DN LOCK REL 누른 채 HMCS pot(A15, 반전)로 양쪽 동시 조절. 배선은 위 "I1 — LAN 배선" 절 참조 |
-| 7 | **스위치 배선** — 전부 액티브 로우 + 내부 풀업 (공통 단자 GND) |
-| 8 | **CMDS 램프** — 하단 15핀 FPC 확장 케이블 → 5핀으로 LED 8개 (개별 320Ω = 220+100 직렬, 캐소드는 FPC 15 공통). pin 42 = 미사용. 병렬 자리 핀당 약 7.1mA. Vf 3.0V 이상 LED 는 쓰지 말 것 |
-| 9 | **TWA PCB 급전** — 기판 실크가 `5V` 여도 **Teensy 3.3V** 를 연결할 것. 래더 출력이 A10 으로 직결되는데 Teensy 4.1 은 5V 톨러런트가 아닙니다 (위 「다른 래더와의 차이」 절) |
+| Gear·백라이트 | Gear Warn=27, AUX 백라이트=13, MISC 백라이트=12. 핀 0은 여유 |
+| CMDS 접점 | O1/O2/CH/FL은 Teensy 23/22/21/20 순서 |
+| 래더 | TWA·CMDS MODE·PRGM을 `ALLOW_DEBUG`로 측정하고 기대값과 비교 |
+| I2C | SDA/SCL 직렬 100Ω, MISC 모듈에 10µF + 100nF. 단선 시 Gear Warn과 재접속 확인 |
+| MCP 주소 | A0/A1/A2 모두 GND, 주소 0x20 |
+| 백라이트 | AUX·MISC 두 MOSFET과 공통 GND 확인. 12V 어댑터는 콘솔과 공유 |
+| 수동 밝기 | 오프라인에서 DN LOCK REL + HMCS 노브로 두 채널 동시 조절 |
+| 스위치 | 공통 단자 GND, 입력 풀업. ALT REL은 NC 접점 처리 |
+| CMDS 램프 | LED마다 320Ω. 병렬 자리는 핀당 약 7.1mA. FPC 번호와 실제 연결 확인 |
+| TWA 전원·DIMM | 기판 실크와 관계없이 3.3V 사용. DIMM 신호는 A14(38) |
+| TWA LED | SEARCH/ACT/LOW/POWER는 36/37/28/29. 기어 접점 34/35와 혼동 금지 |

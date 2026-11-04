@@ -9,39 +9,31 @@ VR 전용 F-16 미니멀 데스크핏
 
 ## 개요
 
-**VR 전용 미니멀 데스크핏**을 지향합니다. VR 헤드셋을 쓴 채 손을 뻗은 자리에 스위치가
-있었으면 하는 생각을 1년 넘게 참다가 결국 만들었습니다 ㅠㅠ 실기 **1:1 스케일**입니다.
+VR에서 손이 닿는 위치에 실물 스위치를 배치하는 F-16 데스크핏입니다.
+Meta Quest 3의 핸드 패스스루를 사용하며, 가상 콕핏과 위치를 맞추기 위해 패널을 실기 1:1 크기로 제작했습니다.
 
-**Meta Quest 3 + 핸드 패스스루** 환경을 전제로 합니다. 패스스루로 가상 콕핏 안에서
-실제 손이 비치므로, 헤드셋을 벗지 않고도 스위치를 더듬어 찾을 수 있습니다.
-패널을 1:1 스케일로 만든 것도 이 때문입니다 — 눈에 보이는 위치와 손이 닿는 위치가 같아야 합니다.
-
-만들 것과 만들지 않을 것을 먼저 갈랐습니다.
-
-- **계기류는 빼고 스위치와 LED 위주로** — DED, RWR, 엔진 게이지, HSI 등은 인게임 디스플레이로 충분합니다.
-- **패널은 비행 중 손이 자주 가는 것만** — **MISC · Left Aux · Left Console · MFD** 네 묶음입니다. 나머지는 손이 덜 가서 뺐습니다.
-
-쓰지 않을 때 쉽게 치울 수 있는 이동식 · 수납식 구조를 대외적으로 표방합니다 (치울지는 모르겠습니다).
+MISC·Left Aux·Left Console·MFD를 중심으로 구성합니다. 계기류는 게임 화면을 사용하고,
+실물 패널에는 스위치·노브·표시등을 배치했습니다. 사용 후 이동하거나 수납할 수 있는 구조입니다.
 
 ### 주요 기능
 
-- **Thrustmaster Viper TQS 결합** — Left Console 인클로저가 TQS 옆면에 맞물려, 둘이 한 덩어리처럼 이어집니다
-- **TM MFD + 7.6인치 LCD 견고한 거치** — Thrustmaster MFD 뒤에 정사각 LCD 를 겹쳐 인클로저에 단단히 고정했습니다. 핸드 패스스루에서는 실물 MFD 가 인게임 MFD 화면을 가리므로, 그 자리를 실물 LCD 가 대신 메웁니다
-- **저렴한 자작 러더 페달** — 전동 킥보드용 스로틀 페달 2개를 PVC 전선 몰딩 사이에 물려 만들었습니다. 페달 안에 **홀 센서**가 들어 있어 포텐셔미터처럼 접점이 닳지 않습니다
-- **인게임 백라이트 · LED · UHF 디스플레이 연동** — 콕핏 조명 노브를 돌리면 패널 백라이트가 무단계로 따라오고, 경고등 · 상태등과 [자작 UHF 7세그먼트 디스플레이](pcb/uhf_display/)는 게임 안 상태를 그대로 반영합니다. BMS-BIOS / DCS-BIOS 를 자동 판별하므로 설정을 고칠 필요 없이 두 게임에 모두 붙습니다
-- **자동화 · 매크로 확장** — Teensy 펌웨어와 MCP23017 확장 위에 원하는 자동화를 직접 짜 넣을 수 있습니다. 예: **볼륨 노브를 끝까지 내리면 COMM1 · COMM2 전원까지 꺼짐**, **토글 스위치 커버 자동 개폐**. 각각 BMS 와 DCS 의 모델링 차이를 고려한 예일 뿐, 펌웨어는 심을 구분하지 않고 DX 를 항상 내보냅니다
+- **Viper TQS 결합**: Left Console 인클로저를 Thrustmaster Viper TQS 옆면에 연결합니다.
+- **MFD와 LCD 고정**: Thrustmaster MFD 뒤에 7.6인치 정사각 LCD를 겹쳐 홀더로 고정합니다. 패스스루에서 실물 MFD가 가리는 게임 화면을 LCD에 표시합니다.
+- **자작 러더 페달**: 홀 센서가 내장된 킥보드용 스로틀 페달 2개를 PVC 전선 몰딩에 고정합니다.
+- **게임 상태 표시**: BMS-BIOS/DCS-BIOS로 경고등·백라이트·[UHF 디스플레이](pcb/uhf_display/)를 연동합니다.
+- **입력 자동화**: COMM 볼륨 끝점의 전원 제어와 토글 커버 개폐용 DX를 출력합니다. DX 출력은 시뮬레이터와 무관하며, 필요한 기능만 각 게임에 매핑합니다.
 
 ### 디바이스 구성
 
-Teensy 4.1 기반 USB 디바이스 **2대**가 핵심이고, 각각 별도의 스케치를 씁니다.
+Teensy 4.1 기반 USB 디바이스 **2대**가 핵심이고, 각각 독립된 스케치를 사용합니다.
 여기에 PC 에 직접 붙는 **MFD · LCD** 가 더해집니다.
 
 | 디바이스 | 폴더 | PID | 규모 | 담당 |
 |---|---|---|---|---|
 | **Left Aux + MISC** | `F16_LEFT_AUX_MISC/` | `0x0487` | DX 51 · 축 4 | Gear, CMDS, TWA, Alt Gear, MISC, HMCS, Pedal |
 | **Left Console** | `F16_LEFT_CONSOLE/` | `0x048E` | DX 64 · 축 10 | ECM, ELEC, EPU, AVTR, UHF, ENGINE START, MPO, AUDIO 1/2 |
-| **MFD + LCD** | — | — | — | Thrustmaster MFD ×2 (USB) · 7.6인치 정사각 LCD ×2 (HDMI). **Teensy 와 연결되지 않습니다** — 다만 MFD 백라이트는 이 프로젝트의 브릿지가 인게임 조명에 맞춰 줍니다 |
-| **ICP** | — | — | — | SimGears ICP (USB). 역시 Teensy 와 무관하며, **백라이트 연동은 포기**했습니다 |
+| **MFD + LCD** | — | — | — | Thrustmaster MFD ×2 (USB) · 7.6인치 정사각 LCD ×2 (HDMI). PC에 직접 연결합니다. MFD 백라이트는 브리지가 게임 조명과 동기화합니다 |
+| **ICP** | — | — | — | SimGears ICP (USB). PC에 직접 연결하며, 백라이트는 자체 조절합니다 |
 
 패널별 입력 종류 · LED 구성 · DX 번호 주석은 **[docs/REF_DEVICES.md](docs/REF_DEVICES.md)** 에 있습니다.
 
@@ -76,8 +68,7 @@ Greenisland 패널은 **Top(아크릴) · Diffuser(아크릴) · LED layer(투�
 | <a href="docs/REF_ENCLOSURE.md"><img src="3d%20stl/Center%20Left%20Enclosure.png" width="150"></a> | <a href="docs/REF_ENCLOSURE.md"><img src="3d%20stl/LeftAuxEnclosure.png" width="150"></a> | <a href="docs/REF_ENCLOSURE.md"><img src="3d%20stl/LeftConsoleUpper.png" width="150"></a> | <a href="docs/REF_ENCLOSURE.md"><img src="3d%20stl/LeftMFDHolder.png" width="150"></a> | <a href="docs/REF_ENCLOSURE.md"><img src="3d%20stl/LED%20Plate%20-%20Gear.png" width="150"></a> |
 | **2** — 좌우 스탠드<br>Center 인클로저는 구매 모델<br>가공본이라 STL 미포함 | **3** — Enclosure<br>Front · Back | **4** — Upper · Lower<br>Bottom 2 종 | **4** — TM MFD + 7.6" LCD<br>를 함께 잡는 브래킷 | **8** — Left Aux 4<br>Left Console 4, 자작 모델 |
 
-묶음별 전체 썸네일 · 바운딩 박스 치수 · STL 내려받기 링크는
-**[docs/REF_ENCLOSURE.md](docs/REF_ENCLOSURE.md)** 에 있습니다 (위 그림을 눌러도 됩니다).
+썸네일·치수·STL 링크는 [REF_ENCLOSURE.md](docs/REF_ENCLOSURE.md)에 있습니다.
 
 ### 1-3. 부품 목록
 
@@ -98,12 +89,8 @@ Greenisland 패널은 **Top(아크릴) · Diffuser(아크릴) · LED layer(투�
 | 노동력 | - | 약 1년간의 설계, 조립, 프로그래밍 | priceless | - |
 | | | **합계** | **~$614** | **~$31** |
 
-> **3D 프린트 비용은 금액으로 적지 않았습니다.** 업체 발주분과 직접 출력분이 섞여 있고,
-> 업체 · 재료 · 시기에 따라 편차가 큽니다. **STL 을 [JLC3DP](https://jlc3dp.com) ·
-> [PCBWay](https://www.pcbway.com) 등에 업로드하면 재료별 실시간 견적**이 바로 나오니
-> 그쪽을 참고하십시오. 그만큼 실제 지출은 위 합계보다 큽니다.
-
-> 결론: 시간과 노동력을 고려하면 TEK Creations 등 완제품을 사는 게 현명합니다. 직접 만드는 건 취미입니다.
+> 위 금액은 프로젝트 구매 기록을 바탕으로 한 부분 합계입니다. 3D 출력비와 ICP·TQS·MFD·페달 등 표에 없는 품목은 포함하지 않습니다.
+> 출력비는 재료와 업체에 따라 달라지므로 [출력물 목록](docs/REF_ENCLOSURE.md#출력-수량)으로 별도 견적을 확인하십시오.
 
 ---
 
@@ -111,71 +98,16 @@ Greenisland 패널은 **Top(아크릴) · Diffuser(아크릴) · LED layer(투�
 
 ### 2-1. 조립 순서
 
-패널 제작은 [docs/REF_PANEL.md](docs/REF_PANEL.md), 구조물은 [docs/REF_ENCLOSURE.md](docs/REF_ENCLOSURE.md),
-배선은 2-2, 백라이트 회로는 2-3 을 보십시오. 여기서는 조립 순서만 정리합니다.
-
-**1. 패널 적층** — Greenisland 패널은 3 층을 겹칩니다. 스위치 · 로터리 · 푸시버튼은 전부
-맨 뒤 `LED layer` 에 체결되고, 앞의 두 장은 그 위에 얹힙니다.
-
-```
-   Top        아크릴 2 mm — 도색 + 각인        ← 전면
-   Diffuser   투명 아크릴 2~3 mm                빛 확산
-   LED layer  투명 PLA                         ← 스위치가 여기에 체결됨
-   ┊
-   ┊ 몇 cm 띄움
-   ┊
-   백라이트 플레이트   PLA · 레진              ← LED 를 여기에 장착
-```
-
-PC Flights 패널(MISC · Gear · CMDS)은 2 층(전면 도색 + 후면 투명)이고,
-후면 투명판 뒤 **1~2 cm** 에서 LED 를 쏩니다.
-
-> 적층 상세(체결 순서, 나사 · 스페이서 규격)는 **원본 제공처의 안내를 따르십시오.**
-> Greenisland 패널은 [Cults3D 모델](https://cults3d.com/en/users/Greenisland/3d-models)에 동봉된 매뉴얼,
-> PC Flights 패널은 [제품 페이지](https://pcflights.com/flight-simulator-cockpit-panels/f-16c-viper-home-cockpit-panels/)를 보십시오.
-> 이 문서는 본 프로젝트에서 달라진 부분만 적습니다.
-
-**2. 백라이트 플레이트** — LED 스트링(LED 3개 + 220Ω)을 플레이트에 심고,
-패널 **뒤쪽 몇 cm 뒤**에 고정합니다. 간격을 두는 이유는 [docs/REF_BACKLIGHT.md](docs/REF_BACKLIGHT.md) 참조.
-
-**3. 인클로저 조립** — 접착은 전부 **에폭시**입니다.
-
-| 붙이는 것 | 붙이는 곳 |
-|-----------|-----------|
-| Stand | Center 인클로저 **뒷면** |
-| MFD 홀더 | Center 인클로저 **아래쪽** |
-
-`…MFDHolderUpper` 는 접착 부품이 아니라, 인클로저와 MFD 사이에 남는 **빈틈을 메우는** 조각입니다.
-에폭시는 위 표의 두 곳에만 씁니다. MFD 와 LCD 는 어디에도 접착하지 않습니다.
-
-Left Console 인클로저는 **Thrustmaster Viper TQS** 와 맞물리도록 설계되어 있습니다.
-**TQS 의 Mission Pack 또는 더미 뚜껑을 먼저 떼어내야** 결합됩니다.
-
-**4. MFD** — Thrustmaster MFD 뒤에 7.6인치 정사각 LCD 를 **겹쳐 놓기만** 하고,
-MFD 홀더가 둘을 함께 눌러 고정합니다. **서로 붙이지 않습니다** —
-수리할 때 홀더에서 두 장을 그대로 빼낼 수 있어야 하기 때문입니다.
-
-LCD 는 HDMI·USB-C 로 PC 에 직접 연결하는 별개 모니터입니다. Teensy 와는 무관합니다.
-사양 · 기구 치수 · 홀더 설계 주의점은 **[docs/REF_MFD_LCD.md](docs/REF_MFD_LCD.md)** 에 있습니다.
-
-> 화면을 MFD 창에 맞출 때는 **표시 영역(135.36 × 135.36) 기준으로 정렬**하십시오.
-> 모듈 외형(142.56 × 148.24)은 정사각이 아니고 표시 영역이 가운데 있지 않아,
-> 외형에 맞추면 화면이 위로 치우칩니다. FPC 리본이 아래로 50 mm 더 나옵니다.
-
-**5. 러더 페달** — 전동 킥보드용 스로틀 페달 2개를 PVC 전선 몰딩 2줄 사이에
-**서로 반대 방향으로** 물립니다. 몰딩이 프레임이자 배선 통로입니다.
-페달 안에는 홀 센서가 들어 있어 **3.3V · GND · Signal 3선**이고, 신호 2개를 각각
-`A16` · `A17` 로 넣습니다. 만드는 법은 **[docs/REF_PEDAL.md](docs/REF_PEDAL.md)**.
-
-> ⚠ 페달에 **5V 를 넣지 마십시오.** 홀 센서 출력이 공급 전압을 따라가므로
-> Teensy 아날로그 핀 정격(3.3V)을 넘깁니다.
-
-**6. 배선** — 2-2 의 배선도대로 결선합니다. 패널을 인클로저에 완전히 고정하기 전에
-스위치 동작을 먼저 확인하는 편이 낫습니다 (5장 참조).
+1. **패널 제작·적층**: Greenisland 패널은 Top(아크릴 2 mm), Diffuser(투명 아크릴 2~3 mm), LED layer(투명 PLA) 순서로 겹칩니다. 스위치는 LED layer에 체결합니다. PC Flights 패널은 전면·후면 2층입니다. 상세는 [REF_PANEL.md](docs/REF_PANEL.md)와 원본 모델의 조립 안내를 따릅니다.
+2. **백라이트 설치**: LED 3개와 220Ω 저항으로 스트링을 만들고 별도 플레이트에 고정합니다. 패널과의 간격은 [REF_BACKLIGHT.md](docs/REF_BACKLIGHT.md)를 참고합니다.
+3. **인클로저 조립**: 스탠드는 Center 인클로저 뒷면에, MFD 홀더는 아래쪽에 에폭시로 고정합니다. `MFDHolderUpper`는 빈틈을 메우는 부품입니다. Left Console을 TQS와 결합하려면 Mission Pack 또는 더미 덮개를 먼저 분리합니다.
+4. **MFD·LCD 장착**: 두 장치를 겹쳐 홀더로 고정하며 서로 접착하지 않습니다. LCD는 외형이 아닌 표시 영역(135.36 × 135.36 mm)을 기준으로 정렬합니다. 아래쪽 FPC 리본의 여유 공간도 확보합니다. 상세는 [REF_MFD_LCD.md](docs/REF_MFD_LCD.md)를 참고합니다.
+5. **페달 제작**: 홀 센서 페달 2개를 몰딩 사이에 반대 방향으로 고정하고, 신호를 A16·A17에 연결합니다. 전원은 **3.3V**를 사용합니다. 상세는 [REF_PEDAL.md](docs/REF_PEDAL.md)를 참고합니다.
+6. **배선·확인**: 아래 배선도대로 결선한 뒤, 패널을 완전히 고정하기 전에 입력과 표시등을 확인합니다.
 
 ### 2-2. 보드별 배선도
 
-케이블 구성, Teensy 핀 배열, MCP GPIO 맵, DX 버튼 맵, 시공 체크리스트가 아래 두 문서에 있습니다. **배선 전에 반드시 읽으세요.**
+케이블 구성, Teensy 핀 배열, MCP GPIO 맵, DX 버튼 맵, 시공 체크리스트가 아래 두 문서에 있습니다. 배선 전에 확인하십시오.
 
 | 보드 | 배선도 |
 |---|---|
@@ -205,7 +137,7 @@ LCD 는 HDMI·USB-C 로 PC 에 직접 연결하는 별개 모니터입니다. Te
 
 ### 3-2. usb_desc.h 수정 (Extreme Joystick)
 
-AUX 51버튼, 콘솔 66버튼이므로 **두 스케치 모두** 128버튼 Extreme 모드가 필요합니다.
+AUX 51버튼, 콘솔 64버튼이므로 **두 스케치 모두** 128버튼 Extreme 모드가 필요합니다.
 
 파일 위치: `%LOCALAPPDATA%\Arduino15\packages\teensy\hardware\avr\<version>\cores\teensy4\usb_desc.h`
 
@@ -216,26 +148,28 @@ AUX 51버튼, 콘솔 66버튼이므로 **두 스케치 모두** 128버튼 Extrem
 
 두 보드가 `JOYSTICK_SIZE 64`를 공유하므로 빌드 사이에 이 값을 고칠 필요는 없습니다. **`PRODUCT_ID`만 디바이스에 맞게** 바꿔 빌드합니다. 값이 틀리면 각 스케치의 `#error`가 빌드를 막아줍니다.
 
-> **축은 6개가 아니라 23개입니다.** Extreme 모드는 명명 축 6개(X/Y/Z/Xrotate/Yrotate/Zrotate)에 더해 `Joystick.slider(1..17)`을 제공합니다. 단, Windows DirectInput은 최대 8축만 인식하므로, `usb_desc.c`에서 Report Count를 8로 줄이고 나머지는 constant padding 처리가 필요합니다. 상세는 [docs/REF_LEFT_CONSOLE_WIRING.md](docs/REF_LEFT_CONSOLE_WIRING.md)의 「usb_desc.c 수정 사항」 참조.
+Extreme 모드의 API는 명명 축 6개와 `slider(1..17)`을 제공합니다.
+이 프로젝트는 DirectInput용으로 HID 디스크립터를 8개 축과 나머지 패딩으로 수정합니다.
+펌웨어에서 출력하는 축과 게임에서 인식하는 축은 구분해야 합니다.
 
-> Teensyduino 업데이트 시 `usb_desc.h`와 `usb_desc.c`가 덮어씌워집니다. 업데이트 전에 백업하거나, 업데이트 후 다시 수정하세요. 상세는 [docs/teensyduino_upgrade.md](docs/teensyduino_upgrade.md) 참조.
+코어 수정 절차와 업데이트 후 확인 항목은 [teensyduino_upgrade.md](docs/teensyduino_upgrade.md)를 참고하십시오.
 
 ### 3-3. 업로드
 
-Arduino IDE에서 해당 `.ino`를 열고 Upload합니다. `usb_desc.h`의 `PRODUCT_ID`가 보드와 일치하는지 먼저 확인하세요.
+Arduino IDE에서 해당 `.ino`를 열고 Upload합니다. `usb_desc.h`의 `PRODUCT_ID`가 보드와 일치하는지 먼저 확인하십시오.
 
 | 보드 | 파일 | PRODUCT_ID |
 |---|---|---|
 | Left Aux + MISC | `F16_LEFT_AUX_MISC/F16_LEFT_AUX_MISC.ino` | `0x0487` |
 | Left Console | `F16_LEFT_CONSOLE/F16_LEFT_CONSOLE.ino` | `0x048E` |
 
-라이브러리는 `Wire`, `Keyboard` (모두 built-in)만 필요합니다.
+라이브러리는 Teensyduino에 포함된 `Wire`, `Keyboard`를 사용합니다.
 
 ---
 
 ## 4. BMS · DCS 연동
 
-스위치 입력은 USB Joystick으로 직접 전달되지만, **LED 상태는 시뮬레이터에서 받아와야 합니다.** Python 브릿지가 시뮬레이터 데이터를 읽어 시리얼로 Teensy에 전송합니다.
+스위치 입력은 USB Joystick으로 직접 전달되지만, **LED 상태는 시뮬레이터에서 받아와야 합니다.** Python 브리지가 시뮬레이터 데이터를 읽어 시리얼로 Teensy에 전송합니다.
 
 ```bash
 pip install pyserial hidapi
@@ -267,11 +201,24 @@ python tools/dcsbios_bridge.py    # COM port auto-detect
 - `0x55 ×4` sync로 자동 감지
 - [DCS-BIOS](https://github.com/DCS-Skunkworks/dcs-bios) 설치 필요
 
+### 키맵 자동 생성
+
+브리지를 종료하고 6초 이상 기다린 뒤 실행합니다. 보드마다 파일을 하나씩 생성합니다.
+
+```powershell
+python tools/gen_bms_setup_xml.py
+python tools/gen_dcs_profile.py
+```
+
+BMS는 장치별 Setup XML에 복사하고, DCS는 해당 장치 열에서 Load Profile로 불러옵니다.
+적용 절차와 미매핑 항목은 [REF_KEYMAP.md](docs/REF_KEYMAP.md)를 참고하십시오.
+
 ### 프로토콜 자동 감지
 
 Teensy는 수신된 sync 바이트로 BMS/DCS 프로토콜을 자동 판별합니다. 타임아웃(AUX 6초 / 콘솔 3초) 후 프로토콜을 리셋하고 재감지합니다.
 
-**오프라인(브릿지 미연결) 동작:**
+**오프라인(브리지 미연결) 동작:**
+
 - AUX 보드: Landing Gear 스위치 상태에 따라 Gear LED 3개를 시뮬레이션 (2초 딜레이 + Gear Warn 5초)
 - 콘솔 보드: 모든 LED 소등
 
@@ -285,7 +232,7 @@ Windows `joy.cpl` 은 **32버튼까지만** 표시합니다. 128버튼을 전부
 
 | 도구 | 비고 |
 |---|---|
-| **AIM Joystick Probe** (Invictus) | 실제로 사용 중. 128버튼·23축을 모두 표시 — `AIM-Joystick-Probe-v1.2.0-Setup.exe` |
+| **AIM Joystick Probe** (Invictus) | 프로젝트에서 사용한 입력 확인 도구 — `AIM-Joystick-Probe-v1.2.0-Setup.exe` |
 | [VKB DevCfg](https://vkbcontrollers.com/?page_id=4609) | 대안 |
 | [Joystick Gremlin](https://whitemagic.github.io/JoystickGremlin/) | 대안 |
 
@@ -293,21 +240,21 @@ DX 번호가 배선도의 「DX 버튼 맵」과 맞는지 여기서 확인합�
 
 ### 5-2. 래더 캘리브레이션 (완료 — 오동작 시에만)
 
-네 래더 모두 **실측값이 이미 반영돼 있어** 그대로 쓰면 됩니다.
-버튼이 엉뚱하게 눌리거나 안 눌리면 그때 다시 잡습니다.
+저장된 실측값은 이 프로젝트의 배선 기준입니다. 부품이나 배선이 달라지거나 오인식이 발생하면 다시 측정합니다.
 
 1. `F16_LEFT_AUX_MISC.ino` 또는 `F16_LEFT_CONSOLE.ino`에서 `ALLOW_DEBUG = true` 설정
 2. 업로드 후 시리얼 모니터(1000000 baud)에서 각 포지션의 ADC 값 확인
 3. `values[]` 배열을 실측값으로 업데이트
 4. `ALLOW_DEBUG = false`로 복원 후 재업로드
 
-> 값이 **전체적으로 함께 움직였다면** 캘리브레이션이 아니라 배선 문제입니다 —
-> 기준 전압·GND 가 흔들린 것이니 ECM 풀다운 접점, 백라이트 전원 경로를 먼저 보십시오.
+> 여러 위치의 값이 함께 변하면 기준 전압·GND 또는 접점 문제를 먼저 확인하십시오.
+> ECM 풀다운 접점과 백라이트 전류 경로를 점검한 뒤 캘리브레이션합니다.
 > (→ 각 배선도의 「저항 래더」 절)
 
 ### 5-3. 페달 캘리브레이션
 
 페달은 자동 캘리브레이션을 지원합니다.
+
 - **리셋**: 양 페달 최대 압력 + DN LOCK REL 2초간 홀드
 - **브레이크 모드 전환**: Landing Light UP 또는 양 페달 동시 압력
 
@@ -315,63 +262,30 @@ DX 번호가 배선도의 「DX 버튼 맵」과 맞는지 여기서 확인합�
 
 ### 5-4. 엔코더 방향 확인
 
-UHF 엔코더의 CW/CCW가 반대면 `encoders[]`의 `pinA`/`pinB`를 교체하세요.
+UHF 엔코더를 돌려 DX의 CCW/CW와 게임의 감소/증가 방향을 확인합니다.
+현재 핀 배정은 유지하고, 방향을 변경해야 하면 배선과 매핑 표를 먼저 대조하십시오.
 
 ---
 
 ## 프로젝트 구조
 
-```
-REDKITE-F16-Panels/
-├── F16_LEFT_AUX_MISC/             # Teensy 4.1 (PID 0x0487)
-│   │                              #   Gear, CMDS, TWA, Alt Gear, MISC, HMCS, Pedal
-│   ├── F16_LEFT_AUX_MISC.ino
-│   ├── BiosHandler/               # DcsBiosParser.h / BmsBiosParser.h
-│   ├── CLAUDE.md
-│   └── name.c
-├── F16_LEFT_CONSOLE/              # Teensy 4.1 (PID 0x048E)
-│   │                              #   ECM, ELEC, EPU, AVTR, UHF,
-│   │                              #   ENGINE START, MPO, AUDIO 1/2
-│   ├── F16_LEFT_CONSOLE.ino
-│   ├── BiosHandler/
-│   ├── Display/                   # Max7219Display.h (UHF 7-seg)
-│   ├── CLAUDE.md
-│   └── name.c
-├── tools/                         # Python 브릿지 (BMS/DCS → Teensy)
-│   ├── bmsbios_bridge.py          #   VID/PID로 두 디바이스 동시 인식
-│   ├── dcsbios_bridge.py
-│   ├── patch_usb_desc_h.py        #   IDE 업데이트 후 usb_desc.h 자동 패치
-│   ├── gen_bms_setup_xml.py       #   BMS 장치별 Setup XML 생성기
-│   ├── gen_dcs_profile.py         #   DCS 입력 프로파일(.diff.lua) 생성기
-│   ├── keymap/                    #   생성기가 읽는 데이터 (실행 안 함)
-│   │   ├── board.py               #     보드 질의·?DX 파서 (생성기 둘이 import)
-│   │   ├── sim_axes.py            #     축 설정·제품명·파일명
-│   │   ├── bms_callbacks.py       #     컨트롤 이름 → BMS 콜백 표
-│   │   ├── dcs_commands.py        #     컨트롤 이름 → DCS 명령 ID 표
-│   │   └── dcs_catalog.txt        #     DCS 명령 ID ↔ 이름
-│   ├── patch_usb_desc_c.py        #   usb_desc.c HID 슬라이더 디스크립터 패치
-│   └── reset_joystick_name.bat
-├── docs/                          # 배선도, 프로토콜 참조
-│   ├── REF_KEYMAP.md              #   BMS/DCS 키맵 자동 생성
-│   ├── REF_BACKLIGHT.md           #   백라이트 회로·전원·LED 배치
-│   ├── REF_PARTS.md               #   부품 목록
-│   ├── REF_PROTOCOL.md            #   DCS/BMS 프로토콜·LED 주소 맵
-│   ├── REF_LEFT_AUX_WIRING.md     #   AUX 보드 배선·핀 배열·DX맵·LAN
-│   ├── REF_LEFT_CONSOLE_WIRING.md #   콘솔 보드 배선·핀 배열·DX맵·전원
-│   ├── REF_MFD_LCD.md             #   MFD 뒤 7.6" 정사각 LCD
-│   ├── REF_PEDAL.md               #   러더 페달 자작
-│   └── REF_TWA_MOD.md             #   TWA 기판 LED 추가 개조 가이드
-├── 3d stl/                        # 3D 프린트용 STL + 썸네일
-├── pcb/                           # 커스텀 기판
-│   └── uhf_display/               #   UHF 디스플레이 자작 PCB (거버·BOM·설계)
-├── CLAUDE.md                      # Claude Code 가이드
-└── README.md
-```
+| 경로 | 내용 |
+|---|---|
+| `F16_LEFT_AUX_MISC/` | AUX·MISC 펌웨어, BIOS 파서, USB 장치명 |
+| `F16_LEFT_CONSOLE/` | 콘솔 펌웨어, BIOS 파서, USB 장치명 |
+| `tools/` | BMS/DCS 브리지, 키맵 생성기, USB 디스크립터 도구 |
+| `tools/keymap/` | 보드 질의, 컨트롤 매핑 표, 축 설정, DCS 명령 카탈로그 |
+| `tests/` | 키맵 생성기 회귀 테스트 |
+| `docs/` | 제작·배선·설정 문서와 참고 자료 |
+| `3d stl/` | 자작 STL과 썸네일 |
+| `pcb/uhf_display/` | UHF 디스플레이 거버·BOM·설계 문서 |
 
 ## 6. 참조 문서
 
 | 문서 | 내용 |
 |---|---|
+| [docs/REF_KEYMAP.md](docs/REF_KEYMAP.md) | 장치별 BMS/DCS 키맵 생성·적용·수정 |
+| [docs/teensyduino_upgrade.md](docs/teensyduino_upgrade.md) | Teensyduino 업데이트 후 USB 코어 수정 |
 | [docs/REF_DEVICES.md](docs/REF_DEVICES.md) | 디바이스 2대의 PID · 담당 패널, 패널별 입력 · LED 구성 |
 | [docs/REF_PANEL.md](docs/REF_PANEL.md) | 패널 구매처 · 3D 모델 출처, 레이어 구조와 두께, 도색 · 레이저 각인 방법 |
 | [docs/REF_ENCLOSURE.md](docs/REF_ENCLOSURE.md) | 3D 프린트 구조물 — 인클로저 · 스탠드 · 콘솔 · MFD 홀더 · 백라이트 플레이트 STL 과 치수 |
