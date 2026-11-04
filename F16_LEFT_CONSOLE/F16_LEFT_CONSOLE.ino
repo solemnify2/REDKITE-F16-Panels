@@ -1378,8 +1378,8 @@ void resetProtocol() {
 //  한 프로세스만 열 수 있으므로, 어차피 브리지를 끄고 써야 합니다.
 //
 //  출력 형식 (각 줄 '#DX' 로 시작):
-//    #DX BEGIN device=CONSOLE pid=0x048E entries=43 total=64
-//    #DX <첫 DX 번호> <차지하는 개수> <컨트롤 이름>
+//    #DX BEGIN device=CONSOLE pid=0x048E entries=34 total=64
+//    #DX <첫 DX 번호> <차지하는 개수> <스위치 이름>
 //    #DX END
 
 #define DX_DEVICE_NAME "CONSOLE"

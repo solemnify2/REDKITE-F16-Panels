@@ -1002,7 +1002,7 @@ void resetProtocol() {
 //
 //  출력 형식 (각 줄 '#DX' 로 시작):
 //    #DX BEGIN device=AUX pid=0x0487 entries=29 total=51
-//    #DX <첫 DX 번호> <차지하는 개수> <컨트롤 이름>
+//    #DX <첫 DX 번호> <차지하는 개수> <스위치 이름>
 //    #DX END
 
 #define DX_DEVICE_NAME "AUX"
