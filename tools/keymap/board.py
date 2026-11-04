@@ -12,8 +12,9 @@
 업로드된 펌웨어가 곧 심이 보는 장치이므로, 소스가 아니라 보드가 기준입니다.
 생성기는 스케치 소스를 아예 읽지 않습니다.
 
-브리지를 끄고 실행하십시오. Windows 는 COM 포트를 한 프로세스만 열 수 있고,
-펌웨어도 프로토콜 미검출 상태에서만 "?DX" 에 응답합니다.
+브리지를 끄고 실행하십시오. Windows 는 COM 포트를 한 프로세스만 열 수 있어, 브리지가
+떠 있으면 포트를 열지도 못합니다. 끈 뒤 몇 초 지나야 펌웨어가 프로토콜 미검출로
+돌아와 "?DX" 에 답합니다 (콘솔 3초, AUX 6초).
 """
 import os
 import re
@@ -67,8 +68,8 @@ def find_boards():
 class DumpParser(object):
     """펌웨어의 '#DX ...' 덤프를 누적 파싱. 완성되면 done 이 True.
 
-    #DX BEGIN device=CONSOLE pid=0x048E entries=43 total=64
-    #DX <첫 DX 번호> <차지하는 개수> <컨트롤 이름>
+    #DX BEGIN device=CONSOLE pid=0x048E entries=34 total=64
+    #DX <첫 DX 번호> <차지하는 개수> <스위치 이름>
     #DX END
     """
 
@@ -108,8 +109,9 @@ def query_board(port, timeout=3.0):
                 return p.device, p.entries
     raise SystemExit('%s: 보드가 "?DX" 에 응답하지 않았습니다.\n'
                      '  - 브리지가 돌고 있으면 끄십시오 (포트를 선점합니다)\n'
-                     '  - 펌웨어가 이 기능이 들어간 빌드인지 확인하십시오\n'
-                     '  - 보드 없이 쓰려면 --from-source' % port)
+                     '  - 막 껐다면 몇 초 기다리십시오 — 프레임이 끊겨야 펌웨어가\n'
+                     '    프로토콜 미검출로 돌아갑니다 (콘솔 3초, AUX 6초)\n'
+                     '  - 펌웨어가 이 기능이 들어간 빌드인지 확인하십시오' % port)
 
 
 def load_catalog(bms_root):

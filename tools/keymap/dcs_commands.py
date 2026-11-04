@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Redkite 컨트롤 이름 -> DCS F-16C 입력 명령 ID.
+"""Redkite 스위치 이름 -> DCS F-16C 입력 명령 ID.
 
 bms_callbacks.py 와 같은 모양입니다 — 컨트롤이 차지하는 DX 하나당 한 항목:
 

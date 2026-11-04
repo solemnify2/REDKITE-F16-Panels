@@ -999,6 +999,7 @@ void resetProtocol() {
 //  PROTO_UNKNOWN 에서만 받는 이유: BIOS 프레임이 흐르는 중에
 //  ASCII 를 섞으면 프레임 해석을 망칩니다. Windows 는 COM 포트를
 //  한 프로세스만 열 수 있으므로, 어차피 브리지를 끄고 써야 합니다.
+//  끄면 SERIAL_TIMEOUT(6초) 뒤 resetProtocol() 이 되돌려 놓습니다.
 //
 //  출력 형식 (각 줄 '#DX' 로 시작):
 //    #DX BEGIN device=AUX pid=0x0487 entries=29 total=51
