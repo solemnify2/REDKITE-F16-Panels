@@ -9,7 +9,7 @@ r"""Redkite 보드의 DX 맵에서 Falcon BMS 의 **장치별 Setup XML** 을 �
 
 그 다음 `User\Config` 에서 그 장치의 `Setup.v100.<제품명> {GUID}.xml` 을 찾아
 **덮어쓸지 묻습니다.** 고른 파일은 먼저 `.bak` 으로 복사해 둡니다. Enter 로
-건너뛰면 아무것도 건드리지 않고 직접 덮어쓸 명령만 찍습니다.
+건너뛰면 아무것도 건드리지 않고 끝냅니다 — 만들어 둔 파일은 그대로 남습니다.
 
 GUID 는 파일 이름에만 있고 내용에는 없어, 생성기는 GUID 를 만들 줄 몰라도 됩니다.
 포트를 바꿔 꽂으면 BMS 가 새 GUID 로 파일을 하나 더 만들고 옛 파일도 남으므로,
@@ -209,12 +209,6 @@ def main():
             bak = K.overwrite(dest, pick)
             sys.stderr.write('  덮어썼습니다: %s\n  백업: %s\n'
                              % (pick, os.path.basename(bak)))
-        else:
-            sys.stderr.write('\n%s: 건드리지 않았습니다. 직접 덮어쓰려면 (PowerShell):\n'
-                             '  Copy-Item "%s" "%s"\n' % (dev, dest, cands[0]))
-            if len(cands) > 1:
-                sys.stderr.write('  (제품명이 같은 파일이 %d개 — 가장 최근 것을 적었습니다)\n'
-                                 % len(cands))
     return 0
 
 
