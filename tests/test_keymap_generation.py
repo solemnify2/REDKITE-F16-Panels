@@ -66,6 +66,20 @@ class DumpParserTests(unittest.TestCase):
             '#DX BEGIN device=AUX pid=0x0487 entries=1 total=1', '#DX 1 1 RF'])
         self.assertFalse(parser.done)
 
+    def test_line_split_by_read_timeout_is_rejoined(self):
+        serial = MagicMock()
+        port = serial.Serial.return_value.__enter__.return_value
+        port.readline.side_effect = [
+            b'#DX BEGIN device=CONSOLE pid=0x048E entries=2 total=3\n',
+            b'#DX 1 1 MPO\n',
+            b'#DX 2 2 UHF 10M',          # readline timed out mid-line
+            b'Hz\n',
+            b'#DX END\n']
+        with patch.object(board, '_require_serial', return_value=serial):
+            device, entries = board.query_board('COM7')
+        self.assertEqual(device, 'CONSOLE')
+        self.assertEqual(entries, [(1, 'MPO', 1), (2, 'UHF 10MHz', 2)])
+
     def test_invalid_serial_dump_prevents_both_generators_from_writing(self):
         for generator in (BMS, DCS):
             with self.subTest(generator=generator.__name__):

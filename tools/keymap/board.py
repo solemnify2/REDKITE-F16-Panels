@@ -125,12 +125,20 @@ def query_board(port, timeout=3.0):
         ser.write(b'?DX\n')
         ser.flush()
         p, deadline = DumpParser(), time.time() + timeout
+        pending = b''
         while time.time() < deadline:
             raw = ser.readline()
             if not raw:
                 continue
+            # readline 은 타임아웃에 걸리면 줄 중간까지만 돌려줍니다. 그대로 넘기면
+            # 이름이 잘린 채 나머지 조각은 '#DX ' 로 시작하지 않아 버려져, 개수도
+            # DX 연속성도 맞는 멀쩡한 덤프처럼 보입니다. 줄이 끝나야 넘깁니다.
+            pending += raw
+            if not pending.endswith(b'\n'):
+                continue
+            line, pending = pending, b''
             try:
-                p.feed(raw.decode('ascii', 'replace'))
+                p.feed(line.decode('ascii', 'replace'))
             except ValueError as exc:
                 raise SystemExit('%s: 잘못된 DX 응답: %s' % (port, exc)) from exc
             if p.done:
