@@ -36,7 +36,7 @@ pyserial, 그리고 해당 심 설치본이면 됩니다. 심 PC 에 그대로 �
 | `--port COMx` | 자동 탐지 대신 포트 지정 |
 | `--bms-root` | BMS 설치 경로 (기본 `C:\Falcon BMS 4.38`). 콜백 목록을 읽는 데만 쓰며, **BMS 생성기 전용** |
 
-### 1-1. BMS — 장치별 Setup XML
+### 1-1. BMS 키맵 생성
 
 ```
 python tools/gen_bms_setup_xml.py
@@ -66,7 +66,7 @@ Copy-Item "left_console_new1.xml" (Get-ChildItem "C:\Falcon BMS 4.38\User\Config
 `Get-ChildItem` 이 못 찾으면 BMS 가 아직 그 장치를 모르는 것입니다. **SETUP –
 CONTROLLERS** 에서 아무 버튼이나 한 번 바인드하고 저장하면 생깁니다.
 
-### 1-2. DCS — 입력 프로파일
+### 1-2. DCS 키맵 생성
 
 ```
 python tools/gen_dcs_profile.py
