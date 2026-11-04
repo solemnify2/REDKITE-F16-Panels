@@ -212,8 +212,8 @@ LAN pin 8 ── GND ───┴──┴── MCP23017 GND
   C6    PEDAL RIGHT       (A17)  41 ──┤ ○         ○ ├── 24  TWA LADDER        (A10)  C3
   C6    PEDAL LEFT        (A16)  40 ──┤ ○         ○ ├── 25  CMDS MODE LDR     (A11)  C2
   C5    HMCS SYMBOL       (A15)  39 ──┤ ○         ○ ├── 26  CMDS PRGM LDR     (A12)  C2
-  C3    TWA DIMM POT     (A14)  38 ──┤ ○         ○ ├── 27  GEAR WARN LED    (A13)  C1
-  C3    TWA ACT LED (PWM)         37 ──┤ ○         ○ ├── 28  TWA LOW LED (PWM)        C3
+  C3    TWA DIMM          (A14)  38 ──┤ ○         ○ ├── 27  GEAR WARN LED     (A13)  C1
+  C3    TWA ACT LED (PWM)        37 ──┤ ○         ○ ├── 28  TWA LOW LED (PWM)        C3
   C3    TWA SEARCH LED (PWM)     36 ──┤ ○         ○ ├── 29  TWA POWER LED (PWM)      C3
   C1    LANDING GEAR DN          35 ──┤ ○         ○ ├── 30  NOSE GEAR LED            C1
   C1    LANDING GEAR UP          34 ──┤ ○         ○ ├── 31  LEFT GEAR LED            C1
@@ -498,7 +498,7 @@ LED 1개만 연결한 상태에서 **320Ω 양단 = 1.2V** → 단독 전류 **3
 |---|---|
 | **Teensy 헤더 핀** | **41 / 42** (여유 1개: pin 0) |
 | **하단 SD 패드** | **5 / 6** (CMDS 램프 5핀, 42 = 미사용) |
-| ├ 아날로그 입력 | 7 / 18 (래더 3 + HMCS 1 + TWA dimm 1 + 페달 2) — A0~A9 는 CMDS 스위치·I2C 가 디지털로 점유 |
+| ├ 아날로그 입력 | 7 / 18 (래더 3 + HMCS 1 + TWA DIMM 1 + 페달 2) — A0~A9 는 CMDS 스위치·I2C 가 디지털로 점유 |
 | └ 여유 핀 | 1개 (pin 0) |
 | **MCP23017 GPIO** | 14 / 16 (여유 PA6, PB7) |
 | LED | 16 (GEAR 4 + TWA 4 + MISC 3 + CMDS 5핀/8LED) |
