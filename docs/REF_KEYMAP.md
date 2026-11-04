@@ -81,7 +81,7 @@ C:\Users\<계정>\Saved Games\DCS\InputUserProfiles\
 ```
 
 ```powershell
-$p = "$env:USERPROFILE\Saved Games\DCS\InputUserProfiles"
+$p = Resolve-Path "$env:USERPROFILE\Saved Games\DCS*\InputUserProfiles"
 Copy-Item "left_console_new1.diff.lua" "$p\F16 Left Console panel.diff.lua"
 ```
 

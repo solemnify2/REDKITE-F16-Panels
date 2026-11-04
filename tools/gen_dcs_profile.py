@@ -177,7 +177,7 @@ def main():
             sys.stderr.write('  %-8s DX %-3d %s (x%d)\n' % (dev, dx, name, w))
 
     sys.stderr.write('\n덮어쓰려면 (PowerShell):\n'
-                     '  $p = "$env:USERPROFILE%sSaved Games%sDCS%sInputUserProfiles"\n' % (
+                     '  $p = Resolve-Path "$env:USERPROFILE%sSaved Games%sDCS*%sInputUserProfiles"\n' % (
                          chr(92), chr(92), chr(92)))
     for dev, dest in made:
         sys.stderr.write('  Copy-Item "%s" "$p%s%s.diff.lua"\n'
