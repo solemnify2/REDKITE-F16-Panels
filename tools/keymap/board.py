@@ -8,6 +8,8 @@
     query_board(port)  "?DX" 를 보내 현재 DX 맵을 받기
     load_catalog()     BMS - Full.key 에서 콜백 목록 읽기
     next_out(base,ext) 비어 있는 번호를 붙인 출력 파일명
+    ask_target(...)    덮어쓸 파일을 번호로 고르게 하기
+    overwrite(src,dst) 백업해 두고 덮어쓰기
 
 업로드된 펌웨어가 곧 심이 보는 장치이므로, 소스가 아니라 보드가 기준입니다.
 생성기는 스케치 소스를 아예 읽지 않습니다.
@@ -18,6 +20,7 @@
 """
 import os
 import re
+import shutil
 import sys
 import time
 
@@ -36,6 +39,67 @@ def next_out(base, ext):
     while os.path.exists('%s%d%s' % (base, n, ext)):
         n += 1
     return '%s%d%s' % (base, n, ext)
+
+
+# --------------------------------------------------------------- 덮어쓰기
+def mtime_text(path):
+    """파일 수정 시각. 비슷한 후보 중 어느 쪽이 살아있는지 가늠하는 단서입니다."""
+    return time.strftime('%Y-%m-%d %H:%M',
+                         time.localtime(os.path.getmtime(path)))
+
+
+def by_mtime(paths):
+    """최근에 쓰인 것부터. 심이 마지막으로 저장한 파일이 보통 지금 쓰는 파일입니다."""
+    return sorted(paths, key=os.path.getmtime, reverse=True)
+
+
+def _ask(prompt):
+    sys.stderr.write(prompt)
+    sys.stderr.flush()
+    try:
+        return input()
+    except (EOFError, KeyboardInterrupt):
+        sys.stderr.write('\n')
+        return ''
+
+
+def ask_target(title, options):
+    """덮어쓸 파일을 고르게 합니다. `options` 는 [(경로, 보여줄 글자)].
+
+    고른 경로를, 건너뛰면 None 을 반환합니다. 터미널이 아니면 묻지 않고 None —
+    파이프로 묶이거나 테스트에서 돌 때 입력을 기다리며 멈추지 않게 합니다.
+    """
+    if not options:
+        return None
+    try:
+        if not sys.stdin.isatty():
+            return None
+    except (AttributeError, ValueError):   # 스트림이 닫혔거나 대체되었을 때
+        return None
+    if len(options) == 1:
+        sys.stderr.write('\n%s\n  %s\n' % (title, options[0][1]))
+        return options[0][0] if _ask('  덮어쓸까요? (y/N) ').strip()[:1].lower() == 'y' else None
+    sys.stderr.write('\n%s (Enter = 건너뛰기)\n' % title)
+    for i, (_, label) in enumerate(options, 1):
+        sys.stderr.write('  %d) %s\n' % (i, label))
+    while True:
+        answer = _ask('  > ').strip()
+        if not answer:
+            return None
+        if answer.isdigit() and 1 <= int(answer) <= len(options):
+            return options[int(answer) - 1][0]
+        sys.stderr.write('  1~%d 중에서 고르거나 Enter 로 건너뛰십시오.\n' % len(options))
+
+
+def overwrite(src, dest):
+    """`dest` 를 번호 붙인 `.bak` 으로 치워두고 그 자리에 `src` 를 복사. 백업 경로 반환."""
+    bak = next_out(dest + '.bak', '')
+    try:
+        shutil.copy2(dest, bak)
+        shutil.copy2(src, dest)
+    except OSError as exc:
+        raise SystemExit('덮어쓰지 못했습니다: %s' % exc) from exc
+    return bak
 
 
 DEFAULT_BMS = r'C:\Falcon BMS 4.38'

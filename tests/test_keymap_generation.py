@@ -5,7 +5,10 @@ No serial hardware or simulator installation is required.
 """
 from pathlib import Path
 import io
+import os
+import shutil
 import sys
+import tempfile
 import unittest
 from unittest.mock import MagicMock, patch
 import xml.etree.ElementTree as ET
@@ -112,6 +115,7 @@ class BmsProfileTests(unittest.TestCase):
                 patch.object(board, 'query_board', return_value=('CONSOLE', [(1, 'MPO', 1)])), \
                 patch.object(board, 'load_catalog', return_value={}), \
                 patch.dict(BMS.bms_callbacks.MAPS, {'CONSOLE': {'MPO': [BMS.bms_callbacks.TODO]}}), \
+                patch.object(board, 'ask_target', return_value=None), \
                 patch('builtins.open', unittest.mock.mock_open()), \
                 patch.object(sys, 'stderr', stderr), \
                 patch.object(sys, 'argv', ['generator']):
@@ -159,12 +163,89 @@ class BmsProfileTests(unittest.TestCase):
                     'profileF15ABCD/dx/DxAssgn/assign/Assgn/Callback')))
 
 
+class OverwriteTests(unittest.TestCase):
+    """Choosing a target file to overwrite, and keeping the old one."""
+
+    def tmpdir(self):
+        path = tempfile.mkdtemp()
+        self.addCleanup(shutil.rmtree, path, True)
+        return path
+
+    def tty(self, answers):
+        """Pretend stderr/stdin are a terminal and feed `answers` to input()."""
+        return (patch.object(sys, 'stdin', MagicMock(isatty=lambda: True)),
+                patch.object(sys, 'stderr', io.StringIO()),
+                patch('builtins.input', side_effect=answers))
+
+    def test_number_picks_and_enter_skips(self):
+        options = [('first.xml', 'first'), ('second.xml', 'second')]
+        stdin, stderr, inp = self.tty(['9', 'x', '2'])  # out of range, junk, then 2
+        with stdin, stderr, inp:
+            self.assertEqual(board.ask_target('t', options), 'second.xml')
+        stdin, stderr, inp = self.tty([''])
+        with stdin, stderr, inp:
+            self.assertIsNone(board.ask_target('t', options))
+
+    def test_single_candidate_asks_yes_or_no(self):
+        options = [('only.xml', 'only')]
+        for answer, expected in (('y', 'only.xml'), ('', None), ('n', None)):
+            with self.subTest(answer=answer):
+                stdin, stderr, inp = self.tty([answer])
+                with stdin, stderr, inp:
+                    self.assertEqual(board.ask_target('t', options), expected)
+
+    def test_without_a_terminal_nothing_is_asked(self):
+        with patch.object(sys, 'stdin', MagicMock(isatty=lambda: False)), \
+                patch('builtins.input', side_effect=AssertionError('prompted')):
+            self.assertIsNone(board.ask_target('t', [('a.xml', 'a')]))
+
+    def test_overwrite_keeps_every_earlier_version(self):
+        folder = self.tmpdir()
+        source = os.path.join(folder, 'new1.xml')
+        target = os.path.join(folder, 'live.xml')
+        Path(source).write_text('generated', encoding='utf-8')
+        Path(target).write_text('original', encoding='utf-8')
+        first = board.overwrite(source, target)
+        self.assertEqual(Path(target).read_text(encoding='utf-8'), 'generated')
+        self.assertEqual(Path(first).read_text(encoding='utf-8'), 'original')
+        second = board.overwrite(source, target)
+        self.assertNotEqual(first, second)
+        self.assertEqual(Path(first).read_text(encoding='utf-8'), 'original')
+
+    def test_bms_cli_overwrites_only_the_chosen_guid(self):
+        folder = self.tmpdir()
+        config = os.path.join(folder, 'User', 'Config')
+        os.makedirs(config)
+        live = os.path.join(config, 'Setup.v100.F16 LEFT CONSOLE {NEW}.xml')
+        stale = os.path.join(config, 'Setup.v100.F16 LEFT CONSOLE {OLD}.xml')
+        for path in (stale, live):
+            Path(path).write_text('before', encoding='utf-8')
+        os.utime(stale, (1, 1))          # the leftover from an older USB port
+        here = os.getcwd()
+        os.chdir(folder)
+        self.addCleanup(os.chdir, here)
+        stdin, stderr, inp = self.tty(['1'])
+        with patch.object(board, 'find_boards', return_value=[('COM7', 'CONSOLE')]), \
+                patch.object(board, 'query_board',
+                             return_value=('CONSOLE', [(1, 'MPO', 1)])), \
+                patch.object(board, 'load_catalog', return_value={'SimMPO': (115, '')}), \
+                patch.dict(BMS.bms_callbacks.MAPS, {'CONSOLE': {'MPO': ['SimMPO']}}), \
+                patch.object(sys, 'argv', ['generator', '--bms-root', folder]), \
+                stdin, stderr, inp:
+            self.assertEqual(BMS.main(), 0)
+        self.assertIn('SimMPO', Path(live).read_text(encoding='utf-8'))
+        self.assertEqual(Path(stale).read_text(encoding='utf-8'), 'before')
+        self.assertEqual(Path(live + '.bak1').read_text(encoding='utf-8'), 'before')
+        self.assertTrue(os.path.exists(os.path.join(folder, 'left_console_new1.xml')))
+
+
 class DcsSwitchTests(unittest.TestCase):
     def test_cli_explains_how_to_load_each_device_profile(self):
         stderr = io.StringIO()
         with patch.object(board, 'find_boards', return_value=[('COM7', 'CONSOLE')]), \
                 patch.object(board, 'query_board', return_value=('CONSOLE', [(1, 'MPO', 1)])), \
                 patch.object(DCS, 'load_catalog', return_value=({}, {})), \
+                patch.object(DCS, 'default_profiles', return_value=None), \
                 patch('builtins.open', unittest.mock.mock_open()), \
                 patch.object(sys, 'stderr', stderr), \
                 patch.object(sys, 'argv', ['generator']):

@@ -7,10 +7,14 @@ r"""Redkite 보드의 DX 맵에서 Falcon BMS 의 **장치별 Setup XML** 을 �
 보이는 보드마다 `left_console_new1.xml` 같은 파일을 현재 폴더에 남깁니다.
 번호는 비어 있는 것으로 골라서, 전에 뽑은 걸 덮어쓰지 않습니다.
 
-**생성기는 BMS 폴더를 건드리지 않습니다.** 나온 파일을 BMS 가 만들어 둔
-`Setup.v100.<제품명> {GUID}.xml` 이름으로 바꿔 `User\Config` 에 넣는 것은
-사람의 일입니다. 그래서 생성기는 GUID 를 몰라도 됩니다 — GUID 는 파일 이름에만
-있고 내용에는 없습니다. BMS 설치 경로는 콜백 목록을 읽는 데만 씁니다.
+그 다음 `User\Config` 에서 그 장치의 `Setup.v100.<제품명> {GUID}.xml` 을 찾아
+**덮어쓸지 묻습니다.** 고른 파일은 먼저 `.bak` 으로 복사해 둡니다. Enter 로
+건너뛰면 아무것도 건드리지 않고 직접 덮어쓸 명령만 찍습니다.
+
+GUID 는 파일 이름에만 있고 내용에는 없어, 생성기는 GUID 를 만들 줄 몰라도 됩니다.
+포트를 바꿔 꽂으면 BMS 가 새 GUID 로 파일을 하나 더 만들고 옛 파일도 남으므로,
+제품명이 같은 파일이 여럿일 수 있습니다 — 그래서 짐작하지 않고 고르게 합니다.
+죽은 GUID 쪽에 쓰면 BMS 는 에러 없이 그 바인딩을 그냥 읽지 않습니다.
 
 **파일을 처음부터 전부 만듭니다.** 기존 XML 을 참고하지 않습니다 — 축 설정처럼
 유도할 수 없는 값은 `tools/keymap/sim_axes.py` 에 데이터로 적혀 있습니다.
@@ -32,6 +36,7 @@ BMS 는 버튼 바인딩을 장치마다 하나씩인 `Setup.v100.<장치명> {G
 루트와 profileDefaultF16에 같은 바인딩을 넣고, profileF15ABCD는 비웁니다.
 """
 import argparse
+import glob
 import os
 import sys
 
@@ -188,13 +193,28 @@ def main():
                                      % (dx + k, name, k + 1))
 
     cfg = os.path.join(args.bms_root, 'User', 'Config')
-    sys.stderr.write('\n덮어쓰려면 (PowerShell):\n')
     for dev, dest in made:
-        sys.stderr.write('  Copy-Item "%s" (Get-ChildItem "%s")\n'
-                         % (dest, os.path.join(cfg, 'Setup.v100.%s {*}.xml'
-                                               % AX.PRODUCT[dev])))
-    sys.stderr.write('\nGet-ChildItem 이 파일을 못 찾으면 BMS 가 아직 그 장치를 모르는 것입니다.\n'
-                     'SETUP - CONTROLLERS 에서 아무 버튼이나 한 번 바인드하고 저장하십시오.\n')
+        product = AX.PRODUCT[dev]
+        cands = K.by_mtime(glob.glob(os.path.join(
+            cfg, 'Setup.v100.%s {*}.xml' % product)))
+        if not cands:
+            sys.stderr.write('\n%s: %s 의 Setup XML 이 BMS 에 아직 없습니다.\n'
+                             '  SETUP - CONTROLLERS 에서 아무 버튼이나 한 번 바인드하고\n'
+                             '  저장한 뒤 다시 실행하십시오.\n' % (dev, product))
+            continue
+        pick = K.ask_target('%s — 덮어쓸 Setup XML' % dev,
+                            [(p, '%s   %s' % (os.path.basename(p), K.mtime_text(p)))
+                             for p in cands])
+        if pick:
+            bak = K.overwrite(dest, pick)
+            sys.stderr.write('  덮어썼습니다: %s\n  백업: %s\n'
+                             % (pick, os.path.basename(bak)))
+        else:
+            sys.stderr.write('\n%s: 건드리지 않았습니다. 직접 덮어쓰려면 (PowerShell):\n'
+                             '  Copy-Item "%s" "%s"\n' % (dev, dest, cands[0]))
+            if len(cands) > 1:
+                sys.stderr.write('  (제품명이 같은 파일이 %d개 — 가장 최근 것을 적었습니다)\n'
+                                 % len(cands))
     return 0
 
 

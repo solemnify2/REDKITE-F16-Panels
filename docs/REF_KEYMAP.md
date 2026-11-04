@@ -31,6 +31,11 @@ BMS 생성기는 설치된 `BMS - Full.key`를 읽습니다. DCS 생성기는 �
 | 생략 | VID/PID로 보드 자동 탐지 |
 | `--port COM7` | 질의할 포트 지정. 여러 보드는 옵션을 반복 지정 |
 | `--bms-root "D:\Falcon BMS 4.38"` | BMS 설치 경로 지정. BMS 생성기 전용 |
+| `--dcs-profiles "D:\...\InputUserProfiles"` | 덮어쓸 프로파일을 고를 폴더. DCS 생성기 전용 |
+
+생성기는 항상 현재 폴더에 새 파일을 만든 다음, 심이 쓰는 파일을 **덮어쓸지 물어봅니다.**
+고른 파일은 먼저 `.bak1`, `.bak2`로 복사해 두므로 이전 설정이 남습니다.
+Enter를 누르면 아무것도 건드리지 않습니다. 터미널이 아닌 환경에서는 묻지 않습니다.
 
 ## 2. BMS: 생성 및 적용
 
@@ -48,18 +53,28 @@ python tools/gen_bms_setup_xml.py
 적용 순서:
 
 1. BMS의 **SETUP → CONTROLLERS**에서 각 장치에 버튼을 하나 할당하고 저장합니다. 장치별 XML이 이미 있으면 생략합니다.
-2. BMS와 Launcher를 종료하고, 대상 XML을 백업합니다.
-3. 생성 파일을 해당 장치의 XML 이름으로 복사해 덮어씁니다. 실행 마지막에 출력되는 PowerShell 명령을 사용할 수 있습니다.
+2. BMS와 Launcher를 종료합니다.
+3. 생성기를 실행하고, 덮어쓸 XML을 번호로 고릅니다.
 4. BMS를 다시 실행해 F-16 버튼 매핑과 축 설정을 확인합니다.
 
-복사 명령 예시:
-
-```powershell
-Copy-Item "left_console_new1.xml" (Get-ChildItem "C:\Falcon BMS 4.38\User\Config\Setup.v100.F16 LEFT CONSOLE {*}.xml")
+```text
+CONSOLE — 덮어쓸 Setup XML (Enter = 건너뛰기)
+  1) Setup.v100.F16 LEFT CONSOLE {6AE05230-5FA3-11F1-8002-444553540000}.xml   2026-11-04 14:16
+  2) Setup.v100.F16 LEFT CONSOLE {024BB000-C258-11EF-8002-444553540000}.xml   2024-12-21 08:02
+  > 1
 ```
 
-GUID는 해당 PC에서 만들어진 파일의 값을 사용합니다. 대상 파일이 검색되지 않으면 1단계에서 장치 설정을 저장했는지 확인하십시오.
-같은 제품명으로 여러 파일이 검색되면 사용할 장치의 파일을 직접 지정하십시오.
+**제품명이 같은 파일이 여러 개일 수 있습니다.** 같은 보드라도 다른 USB 포트에 꽂으면
+BMS가 새 GUID로 파일을 하나 더 만들고, 쓰지 않는 파일도 그대로 남기 때문입니다.
+BMS는 현재 장치의 GUID와 맞는 파일만 읽으므로, 죽은 파일에 써넣으면 **오류 없이 매핑만 빠집니다.**
+어느 쪽인지는 수정 시각으로 가늠합니다 — 보통 BMS가 마지막으로 저장한 파일이 사용 중인 파일입니다.
+
+후보가 하나도 없으면 1단계에서 장치 설정을 저장했는지 확인하십시오.
+Enter로 건너뛰면 직접 실행할 복사 명령이 출력됩니다.
+
+```powershell
+Copy-Item "left_console_new1.xml" "C:\Falcon BMS 4.38\User\Config\Setup.v100.F16 LEFT CONSOLE {6AE05230-5FA3-11F1-8002-444553540000}.xml"
+```
 
 이 방식은 장치별 XML을 사용하므로 DX 번호에 장치 오프셋을 더하지 않습니다.
 `.key`와 `DeviceSorting.txt`를 수정하거나 다른 장치의 설정을 병합할 필요도 없습니다.
@@ -106,12 +121,18 @@ python tools/gen_dcs_profile.py
 4. 다른 보드에도 반복하고, 버튼·축 설정을 확인한 뒤 저장합니다.
 
 `.diff.lua`에는 장치 GUID가 없습니다. **불러올 때 선택한 장치 열**에 적용되므로 CONSOLE과 AUX 파일을 구분하십시오.
-`InputUserProfiles`에 파일을 복사하는 것만으로는 현재 장치에 적용되지 않습니다.
-생성 파일은 다음 폴더에 보관할 수 있습니다.
+
+생성기는 `InputUserProfiles`의 `.diff.lua` 목록을 보여주고 덮어쓸 파일을 고르게 합니다.
+프로파일 이름은 사람이 정하는 것이라 장치명으로 짐작할 수 없기 때문입니다.
+폴더는 `--dcs-profiles`로 지정하며, 생략하면 아래 표준 위치를 찾습니다.
 
 ```text
 C:\Users\<계정>\Saved Games\DCS\InputUserProfiles\
+C:\Users\<계정>\Saved Games\DCS.openbeta\InputUserProfiles\
 ```
+
+**덮어써도 적용은 되지 않습니다.** 위 3번의 Load Profile을 해야 현재 장치에 들어갑니다.
+덮어쓰기가 줄여주는 것은 파일을 옮기고 이름을 맞추는 수고뿐입니다.
 
 생성기는 각 장치 열에서 불러올 파일을 안내합니다. 파일명은 변경해도 되지만,
 CONSOLE과 AUX 중 어느 장치용인지 구분할 수 있도록 보관하십시오.

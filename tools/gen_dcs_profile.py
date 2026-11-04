@@ -1,15 +1,20 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""Redkite 보드의 DX 맵에서 DCS F-16C 입력 프로파일(.diff.lua)을 생성합니다.
+r"""Redkite 보드의 DX 맵에서 DCS F-16C 입력 프로파일(.diff.lua)을 생성합니다.
 
     python tools/gen_dcs_profile.py
 
 보이는 보드마다 `left_console_new1.diff.lua` 같은 파일을 현재 폴더에 남깁니다.
 번호는 비어 있는 것으로 골라서, 전에 뽑은 걸 덮어쓰지 않습니다.
 
-**생성기는 DCS 폴더를 건드리지 않습니다.** DCS의 Options - Controls에서 F-16C와
-해당 장치 열을 선택하고 Load Profile...로 생성 파일을 불러오십시오.
-InputUserProfiles에 복사하는 것만으로는 적용되지 않습니다.
+그 다음 InputUserProfiles 의 `.diff.lua` 목록을 보여주고 **덮어쓸지 묻습니다.**
+프로파일 이름은 사람이 정하는 것이라 장치명으로 짐작할 수 없어, 고르게 합니다.
+고른 파일은 먼저 `.bak` 으로 복사해 둡니다. 폴더는 `--dcs-profiles` 로 지정하고,
+없으면 `Saved Games\DCS[.openbeta]\InputUserProfiles` 를 찾아봅니다.
+
+**덮어써도 적용은 되지 않습니다.** DCS의 Options - Controls에서 F-16C와 해당 장치
+열을 선택하고 Load Profile...을 해야 들어갑니다. 덮어쓰기가 줄여주는 것은 파일을
+옮기고 이름을 맞추는 수고뿐입니다.
 
 BMS 장치별 XML과 마찬가지로 버튼 번호에 오프셋이 없습니다 — `JOY_BTN<n>` 의 n 이
 그 장치의 DX 번호 그대로입니다.
@@ -25,6 +30,7 @@ BMS 장치별 XML과 마찬가지로 버튼 번호에 오프셋이 없습니다 
 떼어내는 줄이라, 없으면 HMCS 노브가 스로틀을 움직입니다.
 """
 import argparse
+import glob
 import os
 import re
 import sys
@@ -36,6 +42,17 @@ import sim_axes as AX  # noqa: E402
 import board as K  # noqa: E402
 
 CATALOG = os.path.join(HERE, 'keymap', 'dcs_catalog.txt')
+
+
+def default_profiles():
+    """표준 위치의 InputUserProfiles. 못 찾으면 None — 그때는 --dcs-profiles."""
+    base = os.path.join(os.path.expanduser('~'), 'Saved Games')
+    for name in ('DCS', 'DCS.openbeta'):
+        path = os.path.join(base, name, 'InputUserProfiles')
+        if os.path.isdir(path):
+            return path
+    return None
+
 
 def load_catalog():
     """(이름 사전, 장치별 축 목록) 반환."""
@@ -135,6 +152,8 @@ def main():
     ap = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument('--port', action='append', metavar='COMx', help='포트 직접 지정')
+    ap.add_argument('--dcs-profiles', metavar='DIR',
+                    help='InputUserProfiles 폴더 — 덮어쓸 프로파일을 여기서 고릅니다')
     args = ap.parse_args()
 
     maps = {}
@@ -150,7 +169,7 @@ def main():
         maps[dev] = entries
 
     names, _ = load_catalog()
-    todos, unmapped_all, made = [], [], []
+    todos, unmapped_all, made, loads = [], [], [], {}
     for dev in sorted(maps):
         kd, todo, unmapped = collect(maps[dev], dcs_commands.MAPS[dev], dev)
         ax = AX.DCS_AXES[dev]
@@ -177,12 +196,28 @@ def main():
         for dev, dx, name, w in unmapped_all:
             sys.stderr.write('  %-8s DX %-3d %s (x%d)\n' % (dev, dx, name, w))
 
+    root = args.dcs_profiles or default_profiles()
+    if root and os.path.isdir(root):
+        for dev, dest in made:
+            # 프로파일 이름은 사람이 정합니다 — 장치명으로 맞출 수 없어 고르게 합니다.
+            cands = sorted(glob.glob(os.path.join(root, '*.diff.lua')))
+            pick = K.ask_target('%s (%s) — 덮어쓸 프로파일' % (dev, AX.PRODUCT[dev]),
+                                [(p, os.path.basename(p)) for p in cands])
+            if pick:
+                bak = K.overwrite(dest, pick)
+                sys.stderr.write('  덮어썼습니다: %s\n  백업: %s\n'
+                                 % (pick, os.path.basename(bak)))
+                loads[dev] = pick
+    elif args.dcs_profiles:
+        sys.stderr.write('\n폴더가 없습니다: %s\n' % args.dcs_profiles)
+
     sys.stderr.write('\n적용: DCS Options - Controls에서 F-16C를 선택하십시오.\n'
                      '기존 설정은 해당 장치 열의 Save Profile As...로 백업하십시오.\n')
     for dev, dest in made:
-        sys.stderr.write('  %s 장치 열: Load Profile... -> %s\n' % (AX.PRODUCT[dev], dest))
+        sys.stderr.write('  %s 장치 열: Load Profile... -> %s\n'
+                         % (AX.PRODUCT[dev], loads.get(dev, dest)))
     sys.stderr.write('버튼과 축 설정을 확인한 뒤 저장하십시오.\n'
-                     'InputUserProfiles에 파일을 복사하는 것만으로는 적용되지 않습니다.\n')
+                     '파일을 복사하거나 덮어쓰는 것만으로는 적용되지 않습니다.\n')
     return 0
 
 
