@@ -128,7 +128,7 @@ def render(size, text=True):
     # 흐려져서 얼룩으로 보입니다. 밝은 주황 위에서도 형태가 살도록 어두운 테두리를
     # 깔아 줍니다.
     big = size < TEXT_FROM
-    jet = jet_mask(round(s * (0.84 if big else 0.40)))
+    jet = jet_mask(round(s * (0.84 if big else 0.52)))
     jx = (s - jet.size[0]) // 2
     jy = round(s * 0.50) - jet.size[1] // 2
     if size >= RING_FROM:
