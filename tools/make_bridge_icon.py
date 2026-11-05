@@ -326,7 +326,8 @@ def render(size, text=True, wordmark=True, usb=False, pixel=False, prompt=False)
         elif pixel:
             stamp(img, bios_mark(s), TERM_GREEN, outline=False, shadow=True)
         elif usb:
-            stamp(img, usb_mark(s))
+            # 흰 기체 위에 흰 기호를 올리면 외곽선으로만 버텨 잘 안 보입니다.
+            stamp(img, usb_mark(s), INK, outline=False)
         elif wordmark:
             label(img, 'BIOS', 0.34, 0.46, 0.60, stroke=True)
 
