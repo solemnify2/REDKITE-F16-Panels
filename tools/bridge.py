@@ -26,8 +26,43 @@ import ctypes
 import ctypes.wintypes as wt
 import threading
 
-import serial
-import serial.tools.list_ports
+def _alert(text, title='Redkite Bridge'):
+    """치명적 오류를 알립니다. 콘솔이 없으면(=pythonw) 대화상자로 띄웁니다.
+
+    없으면 창도 메시지도 없이 그냥 사라져 버려서, 무엇이 없어서 못 떴는지 알 길이
+    없습니다.
+    """
+    try:
+        print(text)
+    except Exception:
+        pass
+    if sys.platform != 'win32':
+        return
+    k32 = ctypes.WinDLL('kernel32')
+    u32 = ctypes.WinDLL('user32')
+    hwnd = k32.GetConsoleWindow()
+    # 읽을 사람이 없을 때만 띄웁니다 — 콘솔이 아예 없거나(pythonw), 트레이 모드라
+    # 숨겨 둔 경우. 터미널에서 돌리는 중이면 출력만으로 충분합니다.
+    unseen = not k32.GetConsoleCP() or (hwnd and not u32.IsWindowVisible(hwnd))
+    if unseen:
+        u32.MessageBoxW(None, text, title, 0x10)      # MB_ICONERROR
+
+
+def _die(text, title='Redkite Bridge'):
+    _alert(text, title)
+    sys.exit(1)
+
+
+try:
+    import serial
+    import serial.tools.list_ports
+except ImportError as exc:
+    _die('필요한 패키지가 없습니다: %s' % exc.name + '\n' + '\n' +
+         '설치:' + '\n' +
+         '    pip install pyserial' + '\n' + '\n' +
+         'Cougar MFD 백라이트까지 쓰려면:' + '\n' +
+         '    pip install hidapi')
+
 
 # ================================================================
 #  Constants — Common
@@ -1031,8 +1066,7 @@ def main():
                 port, dtype = pa.split(':', 1)
                 dtype = dtype.upper()
                 if dtype not in DEVICE_PROFILES:
-                    print(f"알 수 없는 디바이스 타입: {dtype}")
-                    sys.exit(1)
+                    _die(f"알 수 없는 디바이스 타입: {dtype}")
                 port_specs.append((port, dtype))
             else:
                 # PID로 타입 추정
@@ -1048,14 +1082,16 @@ def main():
         auto, descs = find_teensy_ports()
         if not auto:
             all_ports = serial.tools.list_ports.comports()
-            print("Teensy를 자동 감지하지 못했습니다.")
+            lines = ["Teensy를 자동 감지하지 못했습니다.",
+                     "USB 연결과 펌웨어 업로드 상태를 확인하십시오."]
             if all_ports:
-                print("사용 가능한 COM 포트:")
+                lines.append("")
+                lines.append("보이는 COM 포트:")
                 for p in all_ports:
                     vid = f"VID:0x{p.vid:04X}" if p.vid else "VID:N/A"
                     pid = f"PID:0x{p.pid:04X}" if p.pid else "PID:N/A"
-                    print(f"  {p.device}: {p.description} [{vid} {pid}]")
-            sys.exit(1)
+                    lines.append(f"  {p.device}: {p.description} [{vid} {pid}]")
+            _die(chr(10).join(lines))
         port_specs = auto
 
     # --- Open serial ports ---
@@ -1076,7 +1112,9 @@ def main():
             print(f"  {port}: 열기 실패 -- {e}")
 
     if not serials:
-        sys.exit(1)
+        _die('열 수 있는 포트가 없습니다.' + '\n' + '\n' +
+             '다른 프로그램이 같은 COM 포트를 쓰고 있는지 확인하십시오 — '
+             'Windows 는 포트 하나를 한 프로세스만 엽니다.')
 
     # --- MFD ---
     mfd = MfdBacklight()
