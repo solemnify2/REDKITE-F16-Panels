@@ -23,7 +23,7 @@ import os
 import sys
 
 try:
-    from PIL import Image, ImageDraw, ImageFont
+    from PIL import Image, ImageChops, ImageDraw, ImageFont
 except ImportError:
     raise SystemExit('Pillow 가 필요합니다:  pip install pillow')
 
@@ -129,11 +129,16 @@ def band_wordmark(img, text, height=0.17, right=0.955):
     세로의 28%쯤이고 위 모서리가 오른쪽으로 갈수록 올라갑니다.
     """
     s = img.size[0]
-    layer = Image.new('RGBA', (s, s), (0, 0, 0, 0))
-    ImageDraw.Draw(layer).polygon(
+    # 띠는 BMS 쪽 것이므로 분할선을 넘지 않습니다. 앞쪽 끝이 대각선으로 잘립니다.
+    shape = Image.new('L', (s, s), 0)
+    ImageDraw.Draw(shape).polygon(
         [(0, round(s * BAND_TOP_LEFT)), (s, round(s * BAND_TOP_RIGHT)), (s, s), (0, s)],
-        fill=BAND + (255,))
-    img.alpha_composite(layer)
+        fill=255)
+    half = Image.new('L', (s, s), 0)
+    ImageDraw.Draw(half).polygon([(s, 0), (s, s), (0, s)], fill=255)
+    band = ImageChops.darker(shape, half)
+    layer = Image.new('RGBA', (s, s), BAND + (255,))
+    img.paste(layer, (0, 0), band)
 
     path = next((p for p in UPRIGHT_FONTS if os.path.isfile(p)), None)
     if path is None:
