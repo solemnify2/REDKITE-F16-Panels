@@ -23,7 +23,7 @@ import os
 import sys
 
 try:
-    from PIL import Image, ImageChops, ImageDraw, ImageFont
+    from PIL import Image, ImageDraw, ImageFont
 except ImportError:
     raise SystemExit('Pillow 가 필요합니다:  pip install pillow')
 
@@ -42,12 +42,11 @@ INK = (8, 26, 44)       # 외곽선과 그림자
 FONT_CANDIDATES = (r'C:\Windows\Fonts\arialbi.ttf',
                    r'C:\Windows\Fonts\ariali.ttf',
                    r'C:\Windows\Fonts\arialbd.ttf')
-UPRIGHT_FONTS = (r'C:\Windows\Fonts\arialbd.ttf', r'C:\Windows\Fonts\arial.ttf')
 
-# 아래쪽 띠 — BMS-BIOS.ico 의 우하단을 그대로 옮긴 부분입니다.
-BAND = (10, 24, 33)
-BAND_TOP_LEFT, BAND_TOP_RIGHT = 0.76, 0.70
-CHROME_TOP, CHROME_BOTTOM = (255, 255, 255), (205, 214, 224)
+# BMS-BIOS.ico 의 기체를 재서 옮긴 값입니다. 256px 기준 x 94..202, y 52..165 —
+# 가운데가 (0.578, 0.424), 긴 변이 0.445.
+JET_CENTER = (0.578, 0.424)
+JET_SCALE = 0.445
 
 # F-16 평면형. 기수가 위를 향하고 x=50 에 대칭인 100 x 124 상자 안의 좌표입니다.
 HALF = [(50, 0), (53, 12), (54, 30), (55, 46), (60, 54), (63, 60),
@@ -75,6 +74,9 @@ def jet_mask(size):
     d.polygon([(x * SS, y * SS) for x, y in JET], fill=255)
     d.polygon([(x * SS, y * SS) for x, y in FIN], fill=255)
     m = m.rotate(-32, resample=Image.BICUBIC, expand=True)
+    # 회전하면 상자 모서리에 빈 공간이 생깁니다. 그 상자로 크기를 맞추면 기체가
+    # 요청한 것보다 작아지므로, 실제 그려진 영역만 잘라 기준으로 삼습니다.
+    m = m.crop(m.getbbox())
     scale = size / max(m.size)
     return m.resize((max(round(m.size[0] * scale), 1),
                      max(round(m.size[1] * scale), 1)), Image.LANCZOS)
@@ -121,61 +123,6 @@ def label(img, text, width, cx, cy, align='center', stroke=False):
     img.alpha_composite(layer)
 
 
-def band_wordmark(img, text, height=0.17, right=0.955):
-    """아래쪽 검은 띠와 그 위의 직립 금속 글자.
-
-    BMS-BIOS.ico 의 우하단이 이 모양입니다 — 거의 검은 띠, 오른쪽 정렬, 이탤릭이
-    아닌 굵은 글자에 밝은 면과 두꺼운 검은 외곽선. 재려고 원본을 뜯어 보니 띠가
-    세로의 28%쯤이고 위 모서리가 오른쪽으로 갈수록 올라갑니다.
-    """
-    s = img.size[0]
-    # 띠는 BMS 쪽 것이므로 분할선을 넘지 않습니다. 앞쪽 끝이 대각선으로 잘립니다.
-    shape = Image.new('L', (s, s), 0)
-    ImageDraw.Draw(shape).polygon(
-        [(0, round(s * BAND_TOP_LEFT)), (s, round(s * BAND_TOP_RIGHT)), (s, s), (0, s)],
-        fill=255)
-    half = Image.new('L', (s, s), 0)
-    ImageDraw.Draw(half).polygon([(s, 0), (s, s), (0, s)], fill=255)
-    band = ImageChops.darker(shape, half)
-    layer = Image.new('RGBA', (s, s), BAND + (255,))
-    img.paste(layer, (0, 0), band)
-
-    path = next((p for p in UPRIGHT_FONTS if os.path.isfile(p)), None)
-    if path is None:
-        return
-    probe = ImageDraw.Draw(layer)
-    pt = 10
-    while pt < 900:
-        box = probe.textbbox((0, 0), text, font=ImageFont.truetype(path, pt + 4))
-        if box[3] - box[1] > s * height:
-            break
-        pt += 4
-    font = ImageFont.truetype(path, pt)
-
-    glyphs = Image.new('L', (s, s), 0)
-    d = ImageDraw.Draw(glyphs)
-    box = d.textbbox((0, 0), text, font=font)
-    w, h = box[2] - box[0], box[3] - box[1]
-    tx = round(s * right) - w - box[0]
-    ty = round(s * (BAND_TOP_RIGHT + (1 - BAND_TOP_RIGHT) / 2 + 0.012)) - h // 2 - box[1]
-    d.text((tx, ty), text, font=font, fill=255)
-
-    ring = max(round(s * 0.009), 1)
-    edge = Image.new('RGBA', (s, s), (0, 0, 0, 0))
-    for dx in range(-ring, ring + 1):
-        for dy in range(-ring, ring + 1):
-            if dx * dx + dy * dy <= ring * ring:
-                edge.paste((0, 0, 0, 255), (dx, dy), glyphs)
-    img.alpha_composite(edge)
-
-    # 금속 느낌은 글자 높이에만 걸립니다. 캔버스 전체에 걸면 회색으로 죽습니다.
-    top = ty + box[1]
-    strip = gradient(max(h, 1), CHROME_TOP, CHROME_BOTTOM).resize((s, max(h, 1)))
-    chrome = Image.new('RGB', (s, s), CHROME_TOP)
-    chrome.paste(strip, (0, top))
-    img.paste(chrome.convert('RGBA'), (0, 0), glyphs)
-
-
 def render(size, text=True):
     """한 크기 분량의 RGBA 이미지."""
     s = size * SS
@@ -192,14 +139,15 @@ def render(size, text=True):
                               width=max(round(s * 0.012), 1))
     img.alpha_composite(seam)
 
-    # 글자가 빠지는 작은 크기에서는 기체가 아이콘 전체를 채우고, 글자가 들어가면
-    # 그 자리를 비워 주려고 작아집니다. 글자 뒤에 반투명으로 까는 것도 해 봤지만
-    # 흐려져서 얼룩으로 보입니다. 밝은 주황 위에서도 형태가 살도록 어두운 테두리를
-    # 깔아 줍니다.
     big = size < TEXT_FROM
-    jet = jet_mask(round(s * (0.84 if big else 0.62)))
-    jx = (s - jet.size[0]) // 2
-    jy = round(s * (0.50 if big else 0.38)) - jet.size[1] // 2
+
+    # 글자가 빠지는 작은 크기에서는 기체가 아이콘 전체를 채웁니다. 글자가 들어가면
+    # BMS-BIOS.ico 의 기체와 같은 자리, 같은 크기로 앉습니다 (원본에서 잰 값).
+    # 밝은 주황 위에서도 형태가 살도록 어두운 테두리를 깔아 줍니다.
+    jet = jet_mask(round(s * (0.70 if big else JET_SCALE)))
+    cx, cy = (0.50, 0.50) if big else JET_CENTER
+    jx = round(s * cx) - jet.size[0] // 2
+    jy = round(s * cy) - jet.size[1] // 2
     if size >= RING_FROM:
         ring = max(round(s * 0.012), 1)
         shade = Image.new('RGBA', (s, s), (0, 0, 0, 0))
@@ -212,10 +160,10 @@ def render(size, text=True):
 
     if size >= TEXT_FROM and text:
         # 각 구석이 자기 색 위에서 제 심 이름을 답니다. 두 쪽에 공통인 BIOS 는
-        # 가운데 기체 위로 겹칩니다.
-        label(img, 'BIOS', 0.40, 0.50, 0.38, stroke=True)
-        label(img, 'DCS', 0.30, 0.10, 0.11, align='left')
-        band_wordmark(img, 'BMS')
+        # 기체에 걸치므로 흰 기체와 색 바탕 양쪽에서 읽히도록 외곽선을 씁니다.
+        label(img, 'DCS', 0.30, 0.10, 0.12, align='left')
+        label(img, 'BMS', 0.30, 0.90, 0.88, align='right')
+        label(img, 'BIOS', 0.34, 0.46, 0.60, stroke=True)
 
     # 둥근 모서리로 잘라냅니다.
     mask = Image.new('L', (s, s), 0)
