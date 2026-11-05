@@ -23,7 +23,7 @@ import os
 import sys
 
 try:
-    from PIL import Image, ImageChops, ImageDraw, ImageFont
+    from PIL import Image, ImageChops, ImageDraw, ImageFilter, ImageFont
 except ImportError:
     raise SystemExit('Pillow 가 필요합니다:  pip install pillow')
 
@@ -60,6 +60,12 @@ SHADOW_OFFSET = (-0.219, -0.062)
 SHADOW_ALPHA = 90
 MARK_CENTER = (0.52, 0.52)       # 기체 위에 겹치는 글리프 자리
 TERM_GREEN = (30, 240, 2)        # bios-text.png 에서 뽑은 터미널 녹색
+JET_FILL_A = (255, 250, 242)     # 기체 왼쪽 위 (주황 쪽)
+JET_FILL_B = (214, 228, 243)     # 기체 오른쪽 아래 (파랑 쪽)
+JET_SHADE = (96, 120, 150)
+JET_SHADE_ALPHA = 180
+JET_SHADE_WIDTH = 0.020
+JET_SHADE_BLUR = 0.010
 JET_SCALE = 0.70
 
 # F-16 평면형. 기수가 위를 향하고 x=50 에 대칭인 100 x 146 상자 안의 좌표입니다.
@@ -243,14 +249,31 @@ def render(size, text=True, wordmark=True, usb=False, pixel=False):
                      jy + round(s * SHADOW_OFFSET[1])), jet)
         img.alpha_composite(ghost)
 
-        ring = max(round(s * 0.012), 1)
-        shade = Image.new('RGBA', (s, s), (0, 0, 0, 0))
-        for dx in range(-ring, ring + 1):
-            for dy in range(-ring, ring + 1):
-                if dx * dx + dy * dy <= ring * ring:
-                    shade.paste(INK + (150,), (jx + dx, jy + dy), jet)
-        img.alpha_composite(shade)
-    img.paste((255, 255, 255, 255), (jx, jy), jet)
+    # 순백으로 채우면 기체만 그림에서 떠 보입니다. 주황 쪽은 따뜻하게, 파랑 쪽은
+    # 차갑게 흐르는 대각 그라디언트로 채워 양쪽 색에 걸치게 하고, 오른쪽 아래
+    # 가장자리에만 음영을 넣어 테두리 없이도 형태가 서게 합니다.
+    full = Image.new('L', (s, s), 0)
+    full.paste(jet, (jx, jy))
+    fill = Image.new('RGB', (s, s))
+    px = fill.load()
+    for y in range(s):
+        base = y / (2.0 * s)
+        for x in range(0, s, 8):          # 8px 씩 — 픽셀마다 계산하면 느립니다
+            t = base + x / (2.0 * s)
+            c = tuple(round(a + (b - a) * t) for a, b in zip(JET_FILL_A, JET_FILL_B))
+            for k in range(x, min(x + 8, s)):
+                px[k, y] = c
+    img.paste(fill.convert('RGBA'), (0, 0), full)
+
+    if size >= RING_FROM:
+        d = max(round(s * JET_SHADE_WIDTH), 1)
+        inner = Image.new('L', (s, s), 0)
+        inner.paste(full, (-d, -d))
+        band = ImageChops.subtract(full, inner)
+        band = band.filter(ImageFilter.GaussianBlur(max(s * JET_SHADE_BLUR, 0.5)))
+        band = ImageChops.darker(band, full)      # 실루엣 밖으로 번지지 않게
+        band = Image.eval(band, lambda v: v * JET_SHADE_ALPHA // 255)
+        img.paste(Image.new('RGBA', (s, s), JET_SHADE + (255,)), (0, 0), band)
 
     if size >= TEXT_FROM and text:
         # 각 구석이 자기 색 위에서 제 심 이름을 답니다. 두 쪽에 공통인 BIOS 는
