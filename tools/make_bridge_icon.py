@@ -23,7 +23,7 @@ import os
 import sys
 
 try:
-    from PIL import Image, ImageDraw, ImageFont
+    from PIL import Image, ImageChops, ImageDraw, ImageFont
 except ImportError:
     raise SystemExit('Pillow 가 필요합니다:  pip install pillow')
 
@@ -31,6 +31,8 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 DEST = os.path.join(HERE, 'bridge.ico')
 DEST_PLAIN = os.path.join(HERE, 'bridge-plain.ico')
 DEST_USB = os.path.join(HERE, 'bridge-usb.ico')
+DEST_TERM = os.path.join(HERE, 'bridge-term.ico')
+BIOS_TEXT = os.path.join(HERE, 'bios-text.png')
 SIZES = (16, 24, 32, 48, 64, 128, 256)
 TEXT_FROM = 128         # 이보다 작으면 글자를 넣지 않습니다
 RING_FROM = 32          # 이보다 작으면 테두리가 형태를 먹으므로 생략합니다
@@ -57,6 +59,7 @@ JET_CENTER = (0.578, 0.424)
 SHADOW_OFFSET = (-0.219, -0.062)
 SHADOW_ALPHA = 90
 MARK_CENTER = (0.52, 0.52)       # 기체 위에 겹치는 글리프 자리
+TERM_GREEN = (30, 240, 2)        # bios-text.png 에서 뽑은 터미널 녹색
 JET_SCALE = 0.70
 
 # F-16 평면형. 기수가 위를 향하고 x=50 에 대칭인 100 x 146 상자 안의 좌표입니다.
@@ -146,6 +149,24 @@ def label(img, text, width, cx, cy, align='center', stroke=False, italic=True):
     img.alpha_composite(layer)
 
 
+def bios_mark(s, width=0.52, center=(0.47, 0.60)):
+    """`bios-text.png` 의 픽셀 글꼴 BIOS 를 마스크로 돌려줍니다.
+
+    격자를 떠서 코드에 박는 것도 해 봤지만 모듈 경계가 딱 떨어지지 않아 글자가
+    뭉개졌습니다. 원본이 2172px 라 1024 캔버스에 올리기에 해상도가 남습니다.
+    """
+    red, green, _ = Image.open(BIOS_TEXT).convert('RGB').split()
+    mark = ImageChops.darker(Image.eval(green, lambda v: 255 if v > 120 else 0),
+                             Image.eval(red, lambda v: 255 if v < 160 else 0))
+    mark = mark.crop(mark.getbbox())
+    w = round(s * width)
+    h = max(round(w * mark.size[1] / mark.size[0]), 1)
+    mark = mark.resize((w, h), Image.LANCZOS)
+    out = Image.new('L', (s, s), 0)
+    out.paste(mark, (round(s * center[0]) - w // 2, round(s * center[1]) - h // 2))
+    return out
+
+
 def usb_mark(s):
     """USB 기호. 브리지가 실제로 쓰는 연결이라 비유가 아니라 사실입니다."""
     m = Image.new('L', (s, s), 0)
@@ -167,8 +188,8 @@ def usb_mark(s):
     return m
 
 
-def stamp(img, shape):
-    """글리프를 흰색으로 찍되 어두운 외곽선을 둘러, 흰 기체 위에서도 읽히게."""
+def stamp(img, shape, fill=(255, 255, 255)):
+    """글리프를 찍되 어두운 외곽선을 둘러, 흰 기체 위에서도 읽히게."""
     s = img.size[0]
     r = max(round(s * 0.013), 1)
     edge = Image.new('RGBA', (s, s), (0, 0, 0, 0))
@@ -177,10 +198,10 @@ def stamp(img, shape):
             if dx * dx + dy * dy <= r * r:
                 edge.paste(INK + (255,), (dx, dy), shape)
     img.alpha_composite(edge)
-    img.paste((255, 255, 255, 255), (0, 0), shape)
+    img.paste(tuple(fill) + (255,), (0, 0), shape)
 
 
-def render(size, text=True, wordmark=True, usb=False):
+def render(size, text=True, wordmark=True, usb=False, pixel=False):
     """한 크기 분량의 RGBA 이미지."""
     s = size * SS
     img = gradient(s, DCS_TOP, DCS_BOTTOM).convert('RGBA')
@@ -228,7 +249,9 @@ def render(size, text=True, wordmark=True, usb=False):
         # 기체에 걸치므로 흰 기체와 색 바탕 양쪽에서 읽히도록 외곽선을 씁니다.
         label(img, 'DCS', 0.40, 0.10, 0.12, align='left')
         label(img, 'BMS', 0.40, 0.90, 0.88, align='right', italic=False)
-        if usb:
+        if pixel:
+            stamp(img, bios_mark(s), TERM_GREEN)
+        elif usb:
             stamp(img, usb_mark(s))
         elif wordmark:
             label(img, 'BIOS', 0.34, 0.46, 0.60, stroke=True)
@@ -252,6 +275,7 @@ def main():
     write_ico(DEST)
     write_ico(DEST_PLAIN, wordmark=False)   # BIOS 없이 심 이름만
     write_ico(DEST_USB, usb=True)           # BIOS 대신 USB 기호
+    write_ico(DEST_TERM, pixel=True)        # 픽셀 글꼴 BIOS >_
     return 0
 
 
