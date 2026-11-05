@@ -19,6 +19,7 @@ DCS 주황, 오른쪽 아래가 BMS 파랑입니다. 16px 에서는 글자가 �
 
 PIL 이 필요합니다:  pip install pillow
 """
+import math
 import os
 import sys
 
@@ -33,6 +34,8 @@ DEST_PLAIN = os.path.join(HERE, 'bridge-plain.ico')
 DEST_USB = os.path.join(HERE, 'bridge-usb.ico')
 DEST_TERM = os.path.join(HERE, 'bridge-term.ico')
 DEST_PROMPT = os.path.join(HERE, 'bridge-prompt.ico')
+DEST_LED = os.path.join(HERE, 'bridge-led.ico')
+DEST_LAMP = os.path.join(HERE, 'bridge-lamp.ico')
 BIOS_TEXT = os.path.join(HERE, 'bios-text.png')
 SIZES = (16, 24, 32, 48, 64, 128, 256)
 TEXT_FROM = 128         # 이보다 작으면 글자를 넣지 않습니다
@@ -61,6 +64,9 @@ SHADOW_OFFSET = (-0.219, -0.062)
 SHADOW_ALPHA = 90
 MARK_CENTER = (0.52, 0.52)       # 기체 위에 겹치는 글리프 자리
 TERM_GREEN = (30, 240, 2)        # bios-text.png 에서 뽑은 터미널 녹색
+AMBER = (255, 176, 0)            # 표시등
+LED_ON = (70, 225, 70)           # 켜진 칸
+LED_OFF = (40, 55, 72)           # 꺼진 칸
 JET_FILL_A = (255, 250, 242)     # 기체 왼쪽 위 (주황 쪽)
 JET_FILL_B = (214, 228, 243)     # 기체 오른쪽 아래 (파랑 쪽)
 JET_SHADE = (96, 120, 150)
@@ -214,6 +220,38 @@ def prompt_mark(s, width=0.40, center=(0.38, 0.60)):
     return out
 
 
+def led_lamp(s, center=(0.50, 0.52), radius=0.085):
+    """켜진 표시등 하나와 사방으로 뻗는 빛살."""
+    m = Image.new('L', (s, s), 0)
+    d = ImageDraw.Draw(m)
+    x, y, r = s * center[0], s * center[1], s * radius
+    d.ellipse([x - r, y - r, x + r, y + r], fill=255)
+    for k in range(8):
+        a = math.radians(k * 45 + 22.5)
+        d.line([(x + math.cos(a) * r * 1.45, y + math.sin(a) * r * 1.45),
+                (x + math.cos(a) * r * 2.25, y + math.sin(a) * r * 2.25)],
+               fill=255, width=max(round(s * 0.026), 1))
+    return m
+
+
+def led_grid(s, center=(0.50, 0.52), width=0.30):
+    """경고등 패널. 켜진 칸과 꺼진 칸 두 장을 돌려줍니다."""
+    lit = Image.new('L', (s, s), 0)
+    dark = Image.new('L', (s, s), 0)
+    w = s * width
+    h = w * 0.52
+    x0, y0 = s * center[0] - w / 2, s * center[1] - h / 2
+    gap = w * 0.045
+    cw, ch = (w - gap * 3) / 4, (h - gap) / 2
+    on = {(0, 0), (0, 2), (0, 3), (1, 1), (1, 3)}
+    for r in range(2):
+        for c in range(4):
+            x, y = x0 + c * (cw + gap), y0 + r * (ch + gap)
+            ImageDraw.Draw(lit if (r, c) in on else dark).rounded_rectangle(
+                [x, y, x + cw, y + ch], radius=s * 0.010, fill=255)
+    return lit, dark
+
+
 def usb_mark(s):
     """USB 기호. 브리지가 실제로 쓰는 연결이라 비유가 아니라 사실입니다."""
     m = Image.new('L', (s, s), 0)
@@ -256,7 +294,8 @@ def stamp(img, shape, fill=(255, 255, 255), outline=True, shadow=False):
     img.paste(tuple(fill) + (255,), (0, 0), shape)
 
 
-def render(size, text=True, wordmark=True, usb=False, pixel=False, prompt=False):
+def render(size, text=True, wordmark=True, usb=False, pixel=False,
+           prompt=False, led=False, lamp=False):
     """한 크기 분량의 RGBA 이미지."""
     s = size * SS
     img = gradient(s, DCS_TOP, DCS_BOTTOM).convert('RGBA')
@@ -321,7 +360,14 @@ def render(size, text=True, wordmark=True, usb=False, pixel=False, prompt=False)
         # 기체에 걸치므로 흰 기체와 색 바탕 양쪽에서 읽히도록 외곽선을 씁니다.
         label(img, 'DCS', 0.40, 0.10, 0.12, align='left')
         label(img, 'BMS', 0.40, 0.90, 0.88, align='right', italic=False)
-        if prompt:
+        if led:
+            # 브리지가 실제로 하는 일 — 심 상태를 읽어 패널 등을 켭니다.
+            on, off = led_grid(s)
+            stamp(img, off, LED_OFF)
+            stamp(img, on, LED_ON)
+        elif lamp:
+            stamp(img, led_lamp(s), AMBER)
+        elif prompt:
             stamp(img, prompt_mark(s), TERM_GREEN, outline=False, shadow=True)
         elif pixel:
             stamp(img, bios_mark(s), TERM_GREEN, outline=False, shadow=True)
@@ -352,6 +398,8 @@ def main():
     write_ico(DEST_USB, usb=True)           # BIOS 대신 USB 기호
     write_ico(DEST_TERM, pixel=True)        # 픽셀 글꼴 BIOS >_
     write_ico(DEST_PROMPT, prompt=True)     # '>_' 만 크게
+    write_ico(DEST_LED, led=True)           # 경고등 패널
+    write_ico(DEST_LAMP, lamp=True)         # 표시등 하나
     return 0
 
 
