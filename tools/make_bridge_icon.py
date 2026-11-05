@@ -30,8 +30,8 @@ except ImportError:
     raise SystemExit('Pillow 가 필요합니다:  pip install pillow')
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-DEST_LINE = os.path.join(HERE, 'bridge-line.ico')
-DEST_LINE_PLAIN = os.path.join(HERE, 'bridge-line-plain.ico')
+DEST = os.path.join(HERE, 'bridge.ico')
+DEST_PLAIN = os.path.join(HERE, 'bridge-plain.ico')
 GEAR_DXF = os.path.join(HERE, 'GearLedLayout.dxf')
 SIZES = (16, 24, 32, 48, 64, 128, 256)
 TEXT_FROM = 128         # 이보다 작으면 글자를 넣지 않습니다
@@ -251,8 +251,8 @@ def write_ico(dest, **kw):
 
 
 def main():
-    write_ico(DEST_LINE)                    # BIOS 워드마크 포함
-    write_ico(DEST_LINE_PLAIN, wordmark=False)
+    write_ico(DEST)                         # BIOS 워드마크 포함
+    write_ico(DEST_PLAIN, wordmark=False)   # 심 이름만
     return 0
 
 
