@@ -36,6 +36,8 @@ DEST_TERM = os.path.join(HERE, 'bridge-term.ico')
 DEST_PROMPT = os.path.join(HERE, 'bridge-prompt.ico')
 DEST_LED = os.path.join(HERE, 'bridge-led.ico')
 DEST_LAMP = os.path.join(HERE, 'bridge-lamp.ico')
+DEST_GEAR = os.path.join(HERE, 'bridge-gear.ico')
+GEAR_DXF = os.path.join(HERE, 'GearLedLayout.dxf')
 BIOS_TEXT = os.path.join(HERE, 'bios-text.png')
 SIZES = (16, 24, 32, 48, 64, 128, 256)
 TEXT_FROM = 128         # 이보다 작으면 글자를 넣지 않습니다
@@ -67,6 +69,9 @@ TERM_GREEN = (30, 240, 2)        # bios-text.png 에서 뽑은 터미널 녹색
 AMBER = (255, 176, 0)            # 표시등
 LED_ON = (70, 225, 70)           # 켜진 칸
 LED_OFF = (40, 55, 72)           # 꺼진 칸
+GEAR_ART = (238, 248, 242)       # 패널 각인선
+GEAR_GLOW = (120, 255, 150)      # LED 번짐
+GEAR_LED = (235, 255, 240)       # LED 알맹이
 JET_FILL_A = (255, 250, 242)     # 기체 왼쪽 위 (주황 쪽)
 JET_FILL_B = (214, 228, 243)     # 기체 오른쪽 아래 (파랑 쪽)
 JET_SHADE = (96, 120, 150)
@@ -220,6 +225,68 @@ def prompt_mark(s, width=0.40, center=(0.38, 0.60)):
     return out
 
 
+def read_gear_dxf():
+    """GearLedLayout.dxf 에서 닫힌 폴리라인과 원을 읽습니다.
+
+    실제 패널의 기어 LED 판 도면입니다. 폴리라인은 윤곽선이 아니라 **각인 홈의
+    테두리**라서, 선으로 긋지 않고 안을 채워야 판에 새겨진 모양이 나옵니다.
+    원 셋은 LED 구멍입니다.
+    """
+    raw = [x.strip() for x in open(GEAR_DXF, encoding='latin-1').read().splitlines()]
+    polys, circles, i = [], [], 0
+    while i < len(raw) - 1:
+        if raw[i] == '0' and raw[i + 1] in ('LWPOLYLINE', 'CIRCLE'):
+            kind, j = raw[i + 1], i + 2
+            pts, pend, circ = [], None, [None, None, None]
+            while j < len(raw) - 1 and raw[j] != '0':
+                code, val = raw[j], raw[j + 1]
+                if kind == 'LWPOLYLINE':
+                    if code == '10':
+                        pend = float(val)
+                    elif code == '20' and pend is not None:
+                        pts.append((pend, float(val)))
+                        pend = None
+                elif code in ('10', '20', '40'):
+                    circ[{'10': 0, '20': 1, '40': 2}[code]] = float(val)
+                j += 2
+            (polys if kind == 'LWPOLYLINE' else circles).append(
+                pts if kind == 'LWPOLYLINE' else circ)
+            i = j
+        else:
+            i += 2
+    return polys, circles
+
+
+def gear_marks(s, height=0.70, center=(0.50, 0.47)):
+    """(각인 무늬, LED 세 개) 마스크."""
+    polys, circles = read_gear_dxf()
+    xs = [x for p in polys for x, _ in p]
+    ys = [y for p in polys for _, y in p]
+    x0, x1, y0, y1 = min(xs), max(xs), min(ys), max(ys)
+    scale = s * height / (y1 - y0)
+    w, h = (x1 - x0) * scale, (y1 - y0) * scale
+    ox, oy = s * center[0] - w / 2, s * center[1] - h / 2
+
+    def place(x, y):                      # DXF 는 y 가 위로 자랍니다
+        return ox + (x - x0) * scale, oy + h - (y - y0) * scale
+
+    art = Image.new('L', (s, s), 0)
+    d = ImageDraw.Draw(art)
+    for p in polys:
+        if len(p) > 2:
+            d.polygon([place(*q) for q in p], fill=255)
+    # 각인 홈이 0.5mm 남짓이라 그대로 줄이면 사라집니다. 조금 불려 둡니다.
+    art = art.filter(ImageFilter.MaxFilter(max(round(s * 0.004), 1) * 2 + 1))
+
+    led = Image.new('L', (s, s), 0)
+    dl = ImageDraw.Draw(led)
+    for cx, cy, r in circles:
+        x, y = place(cx, cy)
+        rr = r * scale * 1.30             # 실제 돔이 구멍보다 큽니다
+        dl.ellipse([x - rr, y - rr, x + rr, y + rr], fill=255)
+    return art, led
+
+
 def led_lamp(s, center=(0.50, 0.50), width=0.185):
     """LED 부품 — 돔, 플랜지, 다리 두 개, 빛살.
 
@@ -312,7 +379,7 @@ def stamp(img, shape, fill=(255, 255, 255), outline=True, shadow=False):
 
 
 def render(size, text=True, wordmark=True, usb=False, pixel=False,
-           prompt=False, led=False, lamp=False):
+           prompt=False, led=False, lamp=False, gear=False):
     """한 크기 분량의 RGBA 이미지."""
     s = size * SS
     img = gradient(s, DCS_TOP, DCS_BOTTOM).convert('RGBA')
@@ -327,6 +394,27 @@ def render(size, text=True, wordmark=True, usb=False, pixel=False,
     ImageDraw.Draw(seam).line([(0, s), (s, 0)], fill=(255, 255, 255, 70),
                               width=max(round(s * 0.012), 1))
     img.alpha_composite(seam)
+
+    if gear:
+        # 기체 자리를 실제 패널의 기어 LED 판이 대신합니다 — 그 자체가 기체 모양입니다.
+        art, leds = gear_marks(s)
+        drop = Image.new('RGBA', (s, s), (0, 0, 0, 0))
+        drop.paste(INK + (160,), (round(s * 0.006), round(s * 0.006)), art)
+        img.alpha_composite(drop)
+        img.paste(Image.new('RGBA', (s, s), GEAR_ART + (255,)), (0, 0), art)
+        if size >= RING_FROM:
+            halo = leds.filter(ImageFilter.GaussianBlur(s * 0.022))
+            halo = Image.eval(halo, lambda v: v * 190 // 255)
+            img.paste(Image.new('RGBA', (s, s), GEAR_GLOW + (255,)), (0, 0), halo)
+        img.paste(Image.new('RGBA', (s, s), GEAR_LED + (255,)), (0, 0), leds)
+        if size >= TEXT_FROM and text:
+            label(img, 'DCS', 0.40, 0.10, 0.12, align='left')
+            label(img, 'BMS', 0.40, 0.90, 0.88, align='right', italic=False)
+        mask = Image.new('L', (s, s), 0)
+        ImageDraw.Draw(mask).rounded_rectangle([0, 0, s - 1, s - 1],
+                                               radius=round(s * 0.20), fill=255)
+        img.putalpha(mask)
+        return img.resize((size, size), Image.LANCZOS)
 
     big = size < TEXT_FROM
 
@@ -417,6 +505,7 @@ def main():
     write_ico(DEST_PROMPT, prompt=True)     # '>_' 만 크게
     write_ico(DEST_LED, led=True)           # 경고등 패널
     write_ico(DEST_LAMP, lamp=True)         # 표시등 하나
+    write_ico(DEST_GEAR, gear=True)         # 실제 기어 LED 판
     return 0
 
 
