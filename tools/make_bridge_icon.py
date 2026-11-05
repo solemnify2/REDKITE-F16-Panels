@@ -69,10 +69,10 @@ TERM_GREEN = (30, 240, 2)        # bios-text.png 에서 뽑은 터미널 녹색
 AMBER = (255, 176, 0)            # 표시등
 LED_ON = (70, 225, 70)           # 켜진 칸
 LED_OFF = (40, 55, 72)           # 꺼진 칸
-GEAR_ART = (238, 248, 242)       # 패널 각인선
+GEAR_ART = (178, 242, 196)       # 패널 각인선 — 실물처럼 녹색을 띱니다
 GEAR_GLOW = (120, 255, 150)      # LED 번짐
 GEAR_LED = (60, 230, 90)         # LED 몸통 (진한 녹색)
-GEAR_CORE = (228, 255, 232)      # LED 한가운데 흰 심
+GEAR_CORE = (200, 255, 210)      # LED 한가운데 밝은 심
 JET_FILL_A = (255, 250, 242)     # 기체 왼쪽 위 (주황 쪽)
 JET_FILL_B = (214, 228, 243)     # 기체 오른쪽 아래 (파랑 쪽)
 JET_SHADE = (96, 120, 150)
@@ -418,7 +418,7 @@ def render(size, text=True, wordmark=True, usb=False, pixel=False,
                 bloom = Image.eval(bloom, lambda v, a=alpha: v * a // 255)
                 img.paste(Image.new('RGBA', (s, s), GEAR_GLOW + (255,)), (0, 0), bloom)
         img.paste(Image.new('RGBA', (s, s), GEAR_LED + (255,)), (0, 0), leds)
-        core = leds.filter(ImageFilter.MinFilter(max(round(s * 0.007), 1) * 2 + 1))
+        core = leds.filter(ImageFilter.MinFilter(max(round(s * 0.016), 1) * 2 + 1))
         img.paste(Image.new('RGBA', (s, s), GEAR_CORE + (255,)), (0, 0), core)
         if size >= TEXT_FROM and text:
             label(img, 'DCS', 0.40, 0.10, 0.12, align='left')
