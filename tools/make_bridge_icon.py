@@ -220,17 +220,34 @@ def prompt_mark(s, width=0.40, center=(0.38, 0.60)):
     return out
 
 
-def led_lamp(s, center=(0.50, 0.52), radius=0.085):
-    """켜진 표시등 하나와 사방으로 뻗는 빛살."""
+def led_lamp(s, center=(0.50, 0.50), width=0.185):
+    """LED 부품 — 돔, 플랜지, 다리 두 개, 빛살.
+
+    처음에는 원 하나에 빛살을 두른 표시등이었는데 해처럼 보였습니다. 부품 모양이
+    'LED' 라는 말을 훨씬 분명하게 합니다.
+    """
     m = Image.new('L', (s, s), 0)
     d = ImageDraw.Draw(m)
-    x, y, r = s * center[0], s * center[1], s * radius
-    d.ellipse([x - r, y - r, x + r, y + r], fill=255)
-    for k in range(8):
-        a = math.radians(k * 45 + 22.5)
-        d.line([(x + math.cos(a) * r * 1.45, y + math.sin(a) * r * 1.45),
-                (x + math.cos(a) * r * 2.25, y + math.sin(a) * r * 2.25)],
-               fill=255, width=max(round(s * 0.026), 1))
+    w = s * width
+    cx, cy = s * center[0], s * center[1]
+    top, body_bot = cy - w * 0.62, cy + w * 0.20
+    d.pieslice([cx - w / 2, top, cx + w / 2, top + w], 180, 360, fill=255)
+    d.rectangle([cx - w / 2, top + w / 2, cx + w / 2, body_bot], fill=255)
+    fl = w * 0.62                                        # 플랜지
+    d.rounded_rectangle([cx - fl, body_bot - w * 0.12, cx + fl, body_bot + w * 0.12],
+                        radius=w * 0.11, fill=255)
+    leg = w * 0.14
+    for k in (-1, 1):
+        x = cx + k * w * 0.26
+        d.rounded_rectangle([x - leg / 2, body_bot + w * 0.10,
+                             x + leg / 2, body_bot + w * 0.72],
+                            radius=leg / 2, fill=255)
+    t = max(round(w * 0.14), 1)
+    for a in (205, 230, 258, 282, 310, 335):
+        rad = math.radians(a)
+        d.line([(cx + math.cos(rad) * w * 0.80, cy - w * 0.10 + math.sin(rad) * w * 0.80),
+                (cx + math.cos(rad) * w * 1.22, cy - w * 0.10 + math.sin(rad) * w * 1.22)],
+               fill=255, width=t)
     return m
 
 
