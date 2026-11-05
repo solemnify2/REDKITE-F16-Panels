@@ -161,8 +161,8 @@ def render(size, text=True):
     if size >= TEXT_FROM and text:
         # 각 구석이 자기 색 위에서 제 심 이름을 답니다. 두 쪽에 공통인 BIOS 는
         # 기체에 걸치므로 흰 기체와 색 바탕 양쪽에서 읽히도록 외곽선을 씁니다.
-        label(img, 'DCS', 0.30, 0.10, 0.12, align='left')
-        label(img, 'BMS', 0.30, 0.90, 0.88, align='right')
+        label(img, 'DCS', 0.36, 0.10, 0.12, align='left')
+        label(img, 'BMS', 0.36, 0.90, 0.88, align='right')
         label(img, 'BIOS', 0.34, 0.46, 0.60, stroke=True)
 
     # 둥근 모서리로 잘라냅니다.
