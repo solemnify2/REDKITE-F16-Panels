@@ -188,16 +188,17 @@ def usb_mark(s):
     return m
 
 
-def stamp(img, shape, fill=(255, 255, 255)):
+def stamp(img, shape, fill=(255, 255, 255), outline=True):
     """글리프를 찍되 어두운 외곽선을 둘러, 흰 기체 위에서도 읽히게."""
     s = img.size[0]
-    r = max(round(s * 0.013), 1)
-    edge = Image.new('RGBA', (s, s), (0, 0, 0, 0))
-    for dx in range(-r, r + 1):
-        for dy in range(-r, r + 1):
-            if dx * dx + dy * dy <= r * r:
-                edge.paste(INK + (255,), (dx, dy), shape)
-    img.alpha_composite(edge)
+    if outline:
+        r = max(round(s * 0.013), 1)
+        edge = Image.new('RGBA', (s, s), (0, 0, 0, 0))
+        for dx in range(-r, r + 1):
+            for dy in range(-r, r + 1):
+                if dx * dx + dy * dy <= r * r:
+                    edge.paste(INK + (255,), (dx, dy), shape)
+        img.alpha_composite(edge)
     img.paste(tuple(fill) + (255,), (0, 0), shape)
 
 
@@ -250,7 +251,7 @@ def render(size, text=True, wordmark=True, usb=False, pixel=False):
         label(img, 'DCS', 0.40, 0.10, 0.12, align='left')
         label(img, 'BMS', 0.40, 0.90, 0.88, align='right', italic=False)
         if pixel:
-            stamp(img, bios_mark(s), TERM_GREEN)
+            stamp(img, bios_mark(s), TERM_GREEN, outline=False)
         elif usb:
             stamp(img, usb_mark(s))
         elif wordmark:
