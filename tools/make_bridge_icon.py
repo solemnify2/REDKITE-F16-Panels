@@ -89,8 +89,12 @@ def fitted_font(draw, text, width):
     return ImageFont.truetype(path, size)
 
 
-def label(img, text, width, cx, cy, align='center'):
-    """`text` 를 그림자와 함께 올립니다. cx/cy/width 는 변 길이에 대한 비율."""
+def label(img, text, width, cx, cy, align='center', stroke=False):
+    """`text` 를 올립니다. cx/cy/width 는 변 길이에 대한 비율.
+
+    `stroke` 면 그림자 대신 외곽선을 두릅니다. 흰 기체와 색 바탕에 걸치는 글자는
+    한 가지 색으로는 어느 한쪽에서 반드시 묻히기 때문입니다.
+    """
     s = img.size[0]
     layer = Image.new('RGBA', (s, s), (0, 0, 0, 0))
     d = ImageDraw.Draw(layer)
@@ -101,9 +105,13 @@ def label(img, text, width, cx, cy, align='center'):
     w, h = box[2] - box[0], box[3] - box[1]
     x = round(s * cx) - (w if align == 'right' else w // 2 if align == 'center' else 0)
     tx, ty = x - box[0], round(s * cy) - h // 2 - box[1]
-    off = max(round(s * 0.012), 1)
-    d.text((tx + off, ty + off), text, font=font, fill=INK + (190,))
-    d.text((tx, ty), text, font=font, fill=(255, 255, 255, 255))
+    if stroke:
+        d.text((tx, ty), text, font=font, fill=(255, 255, 255, 255),
+               stroke_width=max(round(s * 0.016), 1), stroke_fill=INK + (255,))
+    else:
+        off = max(round(s * 0.012), 1)
+        d.text((tx + off, ty + off), text, font=font, fill=INK + (190,))
+        d.text((tx, ty), text, font=font, fill=(255, 255, 255, 255))
     img.alpha_composite(layer)
 
 
@@ -128,7 +136,7 @@ def render(size, text=True):
     # 흐려져서 얼룩으로 보입니다. 밝은 주황 위에서도 형태가 살도록 어두운 테두리를
     # 깔아 줍니다.
     big = size < TEXT_FROM
-    jet = jet_mask(round(s * (0.84 if big else 0.52)))
+    jet = jet_mask(round(s * (0.84 if big else 0.80)))
     jx = (s - jet.size[0]) // 2
     jy = round(s * 0.50) - jet.size[1] // 2
     if size >= RING_FROM:
@@ -142,12 +150,11 @@ def render(size, text=True):
     img.paste((255, 255, 255, 255), (jx, jy), jet)
 
     if size >= TEXT_FROM and text:
-        # 각 구석이 자기 색 위에서 제 이름을 답니다 — 파랑에 BMS BIOS,
-        # 주황에 DCS BIOS. 원래 두 아이콘의 이름을 그대로 가져온 것입니다.
-        label(img, 'BMS', 0.30, 0.10, 0.115, align='left')
-        label(img, 'BIOS', 0.38, 0.10, 0.265, align='left')
-        label(img, 'DCS', 0.30, 0.90, 0.735, align='right')
-        label(img, 'BIOS', 0.38, 0.90, 0.885, align='right')
+        # 각 구석이 자기 색 위에서 제 심 이름을 답니다. 두 쪽에 공통인 BIOS 는
+        # 가운데 기체 위로 겹칩니다.
+        label(img, 'BMS', 0.30, 0.10, 0.12, align='left')
+        label(img, 'DCS', 0.30, 0.90, 0.88, align='right')
+        label(img, 'BIOS', 0.46, 0.50, 0.50, stroke=True)
 
     # 둥근 모서리로 잘라냅니다.
     mask = Image.new('L', (s, s), 0)
