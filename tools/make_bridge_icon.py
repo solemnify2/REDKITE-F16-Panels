@@ -34,7 +34,7 @@ DEST = os.path.join(HERE, 'bridge.ico')
 DEST_PLAIN = os.path.join(HERE, 'bridge-plain.ico')
 GEAR_DXF = os.path.join(HERE, os.pardir, 'docs', 'GearLedLayout.dxf')
 SIZES = (16, 24, 32, 48, 64, 128, 256)
-TEXT_FROM = 0           # 모든 크기에 글자를 넣습니다
+TEXT_FROM = 32          # 32px부터 글자를 넣습니다
 RING_FROM = 32          # 이보다 작으면 테두리가 형태를 먹으므로 생략합니다
 SS = 4                  # 수퍼샘플 배율
 
