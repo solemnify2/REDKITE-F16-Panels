@@ -30,12 +30,8 @@ except ImportError:
     raise SystemExit('Pillow 가 필요합니다:  pip install pillow')
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-DEST = os.path.join(HERE, 'bridge.ico')
-DEST_PLAIN = os.path.join(HERE, 'bridge-plain.ico')
 DEST_LINE = os.path.join(HERE, 'bridge-line.ico')
 DEST_LINE_PLAIN = os.path.join(HERE, 'bridge-line-plain.ico')
-DEST_DARK = os.path.join(HERE, 'bridge-dark.ico')
-DEST_DARK_PLAIN = os.path.join(HERE, 'bridge-dark-plain.ico')
 GEAR_DXF = os.path.join(HERE, 'GearLedLayout.dxf')
 SIZES = (16, 24, 32, 48, 64, 128, 256)
 TEXT_FROM = 128         # 이보다 작으면 글자를 넣지 않습니다
@@ -58,26 +54,12 @@ UPRIGHT_FONTS = (r'C:\Windows\Fonts\arialbd.ttf',
 # 크기는 거기서부터 키운 값으로, 모서리에도 글자에도 닿지 않는 선입니다.
 # **이 두 값은 확정입니다 — 바꾸지 마십시오.**
 JET_CENTER = (0.578, 0.424)
-# BMS-BIOS.ico 에서 잰 값입니다. 흰 기체 마스크를 옮겨 가며 어두운 영역과
-# 가장 많이 겹치는 자리를 찾았습니다 — 256px 기준 dx -56, dy -16 (일치율 0.50).
-SHADOW_OFFSET = (-0.219, -0.062)
-SHADOW_ALPHA = 90
-SHADOW_CLOSE = 0.055             # 그림자에서 LED 자국을 메우는 반경
-# 선만 남기는 판에는 그 간격이 너무 멉니다 — 채워진 실루엣이 아니라서
-# 그림자가 아니라 흩어진 복제본으로 보입니다. 바짝 붙입니다.
-LINE_SHADOW_OFFSET = (-0.035, -0.010)
-LINE_SHADOW_ALPHA = 130
+SHADOW_OFFSET = (-0.035, -0.010)
+SHADOW_ALPHA = 130
 GEAR_ART = (178, 242, 196)       # 패널 각인선 — 실물처럼 녹색을 띱니다
 GEAR_GLOW = (120, 255, 150)      # LED 번짐
 GEAR_LED = (60, 230, 90)         # LED 몸통 (진한 녹색)
 GEAR_CORE = (200, 255, 210)      # LED 한가운데 밝은 심
-BODY_A = (255, 250, 242)         # 기체 왼쪽 위 (주황 쪽)
-BODY_B = (214, 228, 243)         # 기체 오른쪽 아래 (파랑 쪽)
-BODY_DARK = (10, 28, 24)         # 검정 채움 — 실물 패널의 판 색에 가깝게
-BODY_SHADE = (96, 120, 150)
-BODY_SHADE_ALPHA = 180
-BODY_SHADE_WIDTH = 0.020
-BODY_SHADE_BLUR = 0.010
 TILT = -32                       # 기어 판을 눕히는 각도
 
 def gradient(size, top, bottom):
@@ -200,49 +182,7 @@ def gear_marks(s, height=0.70, center=JET_CENTER):
     return art, led
 
 
-def gear_body(art, leds):
-    """각인선이 둘러싼 안쪽을 채운 실루엣.
-
-    도면에는 기체 윤곽이 선으로만 있습니다. 예전 아이콘처럼 속을 채우려고, 바깥
-    여백에서 채우기를 돌려 **닿지 못한 곳**을 안쪽으로 봅니다.
-
-    LED 구멍 자리에서는 윤곽이 끊겨 있어 선만으로는 채우기가 새어 나갑니다.
-    구멍을 함께 막고 돌립니다.
-    """
-    work = Image.eval(ImageChops.lighter(art, leds), lambda v: 0 if v > 110 else 255)
-    ImageDraw.floodfill(work, (0, 0), 128)
-    return Image.eval(work, lambda v: 0 if v == 128 else 255)
-
-
-def gear_shadow(body, leds, s):
-    """뒤에 깔 실루엣 — LED 혹을 떼어낸 기체 윤곽.
-
-    채우기를 하려면 LED 구멍을 원째로 막아야 하는데(안 그러면 윤곽이 끊긴 자리로
-    새어 나갑니다), 그러면 원이 실루엣 밖으로 튀어나와 혹이 됩니다. 그림자에는
-    원을 도로 빼고 닫기(팽창 후 수축)로 자국을 메워, 원이 아니라 주변 윤곽을
-    따라가게 합니다.
-    """
-    n = max(round(s * SHADOW_CLOSE), 1) * 2 + 1
-    cut = ImageChops.subtract(body, leds)
-    out = cut.filter(ImageFilter.MaxFilter(n)).filter(ImageFilter.MinFilter(n))
-    return ImageChops.darker(out, body)        # 원래 몸통 밖으로 번지지 않게
-
-
-def body_fill(s):
-    """왼쪽 위는 따뜻하게, 오른쪽 아래는 차갑게 흐르는 대각 그라디언트."""
-    fill = Image.new('RGB', (s, s))
-    px = fill.load()
-    for y in range(s):
-        base = y / (2.0 * s)
-        for x in range(0, s, 8):          # 8px 씩 — 픽셀마다 계산하면 느립니다
-            t = base + x / (2.0 * s)
-            c = tuple(round(a + (b - a) * t) for a, b in zip(BODY_A, BODY_B))
-            for k in range(x, min(x + 8, s)):
-                px[k, y] = c
-    return fill
-
-
-def render(size, text=True, wordmark=True, fill='light'):
+def render(size, text=True, wordmark=True):
     """한 크기 분량의 RGBA 이미지."""
     s = size * SS
     img = gradient(s, DCS_TOP, DCS_BOTTOM).convert('RGBA')
@@ -262,40 +202,19 @@ def render(size, text=True, wordmark=True, fill='light'):
     art, leds = gear_marks(s, 0.80 if big else 0.70,
                            (0.50, 0.50) if big else JET_CENTER)
 
-    body = gear_body(art, leds) if fill else None
-
     if size >= RING_FROM:
-        # BMS-BIOS.ico 가 기체 뒤에 두던 그림자.
-        back, off, alpha = ((gear_shadow(body, leds, s), SHADOW_OFFSET, SHADOW_ALPHA)
-                            if fill else
-                            (art, LINE_SHADOW_OFFSET, LINE_SHADOW_ALPHA))
+        # BMS-BIOS.ico 가 기체 뒤에 두던 그림자. 가는 선뿐이라 멀리 떼면 그림자가
+        # 아니라 흩어진 복제본으로 보여, 바짝 붙입니다.
         ghost = Image.new('RGBA', (s, s), (0, 0, 0, 0))
-        ghost.paste(INK + (alpha,),
-                    (round(s * off[0]), round(s * off[1])), back)
+        ghost.paste(INK + (SHADOW_ALPHA,),
+                    (round(s * SHADOW_OFFSET[0]), round(s * SHADOW_OFFSET[1])), art)
         img.alpha_composite(ghost)
 
-    if fill == 'dark':
-        img.paste(Image.new('RGBA', (s, s), BODY_DARK + (255,)), (0, 0), body)
-    elif fill:
-        img.paste(body_fill(s).convert('RGBA'), (0, 0), body)
-    else:
-        # 채우지 않을 때는 가는 선이 바탕에 붙어 보이므로 바로 뒤에 짧은 그림자를.
-        drop = Image.new('RGBA', (s, s), (0, 0, 0, 0))
-        drop.paste(INK + (160,), (round(s * 0.006), round(s * 0.006)), art)
-        img.alpha_composite(drop)
+    # 가는 선이 바탕에 붙어 보이므로 바로 뒤에 짧은 그림자를 둡니다.
+    drop = Image.new('RGBA', (s, s), (0, 0, 0, 0))
+    drop.paste(INK + (160,), (round(s * 0.006), round(s * 0.006)), art)
+    img.alpha_composite(drop)
 
-    if fill == 'light' and size >= RING_FROM:
-        # 오른쪽 아래 가장자리에만 음영 — 테두리 없이 형태가 서게 합니다.
-        d = max(round(s * BODY_SHADE_WIDTH), 1)
-        inner = Image.new('L', (s, s), 0)
-        inner.paste(body, (-d, -d))
-        band = ImageChops.subtract(body, inner)
-        band = band.filter(ImageFilter.GaussianBlur(max(s * BODY_SHADE_BLUR, 0.5)))
-        band = ImageChops.darker(band, body)
-        band = Image.eval(band, lambda v: v * BODY_SHADE_ALPHA // 255)
-        img.paste(Image.new('RGBA', (s, s), BODY_SHADE + (255,)), (0, 0), band)
-
-    # 각인선은 채운 몸통 위에 녹색으로 남습니다.
     img.paste(Image.new('RGBA', (s, s), GEAR_ART + (255,)), (0, 0), art)
 
     # 켜진 LED — 넓게 번지는 빛, 그 안에 진한 녹색, 가운데에 밝은 심.
@@ -332,12 +251,8 @@ def write_ico(dest, **kw):
 
 
 def main():
-    write_ico(DEST)
-    write_ico(DEST_PLAIN, wordmark=False)   # BIOS 없이 심 이름만
-    write_ico(DEST_LINE, fill=None)                     # 속을 비운 판
-    write_ico(DEST_LINE_PLAIN, fill=None, wordmark=False)
-    write_ico(DEST_DARK, fill='dark')                   # 속을 검게 채운 판
-    write_ico(DEST_DARK_PLAIN, fill='dark', wordmark=False)
+    write_ico(DEST_LINE)                    # BIOS 워드마크 포함
+    write_ico(DEST_LINE_PLAIN, wordmark=False)
     return 0
 
 
