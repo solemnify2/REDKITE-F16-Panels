@@ -514,7 +514,7 @@ ILS는 현재 BMS 슬롯 7(0부터 계산), DCS `JOY_SLIDER2`에 매핑합니다
 
 ECM 1~6 / FRM / SPL × (S, A, F, T). `srMap[]`이 논리 인덱스를 물리 출력으로 리맵합니다.
 
-출력 32개를 모두 사용합니다. 칩을 추가하면 BMS-BIOS 프레임의 `srData` 32비트를 초과하므로 `BB_FRAME_PAYLOAD`, 양쪽 `BmsBiosParser.h`, `bmsbios_bridge.py`를 모두 수정해야 합니다.
+출력 32개를 모두 사용합니다. 칩을 추가하면 BMS-BIOS 프레임의 `srData` 32비트를 초과하므로 `BB_FRAME_PAYLOAD`, 양쪽 `BmsBiosParser.h`, `bridge.py`를 모두 수정해야 합니다.
 
 ---
 

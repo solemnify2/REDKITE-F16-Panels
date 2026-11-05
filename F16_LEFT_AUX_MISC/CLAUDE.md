@@ -15,13 +15,15 @@ Teensy 4.1-based USB joystick controller for an F-16 cockpit sim panel (Falcon B
 - **Extreme Joystick**: Before building, set `JOYSTICK_SIZE 64` in `%LOCALAPPDATA%\Arduino15\packages\teensy\hardware\avr\<version>\cores\teensy4\usb_desc.h` for 128-button support
 - **Upload**: Open `F16_LEFT_AUX_MISC.ino` in Arduino IDE and Upload
 
-### Python Bridges
+### Python Bridge
 
 ```
 pip install pyserial
-python ../tools/bmsbios_bridge.py             # Falcon BMS (COM port auto-detect)
-python ../tools/dcsbios_bridge.py             # DCS World (COM port auto-detect, also needs DCS-BIOS installed)
+pythonw ../tools/bridge.py                    # tray; detects BMS or DCS by itself
+python  ../tools/bridge.py --foreground       # console window
 ```
+
+DCS mode additionally needs DCS-BIOS installed.
 
 ## Architecture
 
@@ -55,8 +57,7 @@ The parsers call `writeLed()` and `setBacklightBrightness()` to control hardware
 | `F16_LEFT_AUX_MISC.ino` | Main sketch: config arrays, MCP23017 driver, switch/analog/pedal processing, protocol detection, main loop |
 | `BiosHandler/DcsBiosParser.h` | DCS-BIOS frame parser + F-16C address map (addresses from `F-16C_50.json`) |
 | `BiosHandler/BmsBiosParser.h` | BMS-BIOS frame parser (reads packed LED bitfield) |
-| `tools/bmsbios_bridge.py` | Python: reads BMS shared memory (`FalconSharedMemoryArea`), sends binary frames to Teensy |
-| `tools/dcsbios_bridge.py` | Python: receives DCS-BIOS UDP multicast, forwards changed frames to Teensy serial |
+| `tools/bridge.py` | Python: reads BMS shared memory (`FalconSharedMemoryArea`) or receives DCS-BIOS UDP multicast, forwards frames to Teensy serial; runs in the tray |
 | `name.c` | USB device name override |
 
 ### MCP23017 I2C Expansion

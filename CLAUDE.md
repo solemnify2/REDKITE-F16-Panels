@@ -23,14 +23,18 @@ Each sketch has its own `CLAUDE.md` with detailed architecture — read that fir
 - **Joystick axes**: `JOYSTICK_SIZE 64` exposes 6 named axes (X/Y/Z/Xrotate/Yrotate/Zrotate) **plus `slider(1..17)`** — 23 analog channels, not 6.
 - **Upload**: Open the `.ino` file in Arduino IDE and Upload
 
-### Python Bridges
+### Python Bridge
 
-Located in `tools/`. COM port auto-detect by VID/PID (VID `0x16C0`):
+One bridge, `tools/bridge.py`, serves both sims: it waits, enters BMS or DCS mode
+for whichever it detects, and returns to waiting when the sim exits. COM port
+auto-detect by VID/PID (VID `0x16C0`):
 ```
 pip install pyserial hidapi
-python tools/bmsbios_bridge.py               # Falcon BMS (auto-detect)
-python tools/dcsbios_bridge.py               # DCS World (auto-detect)
+pythonw tools/bridge.py                      # tray (default)
+python  tools/bridge.py --foreground         # console window
 ```
+The tray icon's menu shows the current mode and shows/hides the console; its
+output goes to that console either way.
 
 ## Conventions
 

@@ -178,25 +178,33 @@ pip install pyserial hidapi
 - `pyserial` — Teensy 시리얼 통신 (필수)
 - `hidapi` — Cougar MFD 백라이트 동기화 (선택, 없으면 MFD 건너뜀)
 
-### Falcon BMS (BMS-BIOS)
+### 실행
 
 ```bash
-python tools/bmsbios_bridge.py                          # 두 디바이스 자동 감지
-python tools/bmsbios_bridge.py COM4:AUX COM5:CONSOLE    # 수동 지정
-python tools/bmsbios_bridge.py --debug                  # LightBits 실시간 출력
+pythonw tools/bridge.py                          # 트레이 상주 (권장)
+python  tools/bridge.py --foreground             # 콘솔 창으로
+python  tools/bridge.py COM4:AUX COM5:CONSOLE    # 포트 수동 지정
+python  tools/bridge.py --debug --foreground     # LightBits 실시간 출력
 ```
+
+브리지는 **하나**입니다. 대기 상태에서 BMS 공유 메모리나 DCS-BIOS UDP 중 먼저
+잡히는 쪽으로 들어가고, 심이 끝나면 다시 대기로 돌아옵니다. 심보다 먼저 띄워도
+됩니다.
+
+`pythonw` 로 띄우면 알림 영역에만 남습니다. 아이콘을 **우클릭**하면 현재 모드
+(대기 / Falcon BMS / DCS World)와 `콘솔 보기·숨기기`, `종료` 가 나오고,
+**더블클릭**으로도 콘솔을 여닫습니다. 콘솔은 숨어 있을 뿐이라 지난 출력도 그대로
+남아 있습니다. 바로가기로 만들 때 아이콘은 `tools/bridge.ico` 를 쓰십시오.
+
+### Falcon BMS (BMS-BIOS)
 
 - `0xAA 0xBB` sync로 자동 감지
 - BMS 공유 메모리에서 LED 상태를 읽어 Teensy로 전송
 - 프레임: `sync(2) + ledBits(4) + srData(4) + uhfFreq(4) + uhfPreset(1) + XOR(1)` = 16바이트
 - Cougar MFD 연결 시 `instrLight`에 따라 백라이트 자동 동기화
-- BMS 실행 전에 bridge를 먼저 실행해도 안전
+- 종료는 IntelliVibe 의 `IsExitGame` 으로 감지합니다
 
 ### DCS World (DCS-BIOS)
-
-```bash
-python tools/dcsbios_bridge.py    # COM port auto-detect
-```
 
 - `0x55 ×4` sync로 자동 감지
 - [DCS-BIOS](https://github.com/DCS-Skunkworks/dcs-bios) 설치 필요
@@ -273,10 +281,10 @@ UHF 엔코더를 돌려 DX의 CCW/CW와 게임의 감소/증가 방향을 확인
 |---|---|
 | `F16_LEFT_AUX_MISC/` | AUX·MISC 펌웨어, BIOS 파서, USB 장치명 |
 | `F16_LEFT_CONSOLE/` | 콘솔 펌웨어, BIOS 파서, USB 장치명 |
-| `tools/` | BMS/DCS 브리지, 키맵 생성기, USB 디스크립터 도구 |
+| `tools/` | 통합 브리지(`bridge.py`)와 트레이 아이콘, 키맵 생성기, USB 디스크립터 도구 |
 | `tools/keymap/` | 보드 질의, 컨트롤 매핑 표, 축 설정, DCS 명령 카탈로그 |
 | `tests/` | 키맵 생성기 회귀 테스트 |
-| `docs/` | 제작·배선·설정 문서와 참고 자료 |
+| `docs/` | 제작·배선·설정 문서와 참고 자료, 패널 도면(`GearLedLayout.dxf`) |
 | `3d stl/` | 자작 STL과 썸네일 |
 | `pcb/uhf_display/` | UHF 디스플레이 거버·BOM·설계 문서 |
 

@@ -166,7 +166,7 @@ The display is always built in — there is no compile-time switch. `displayFreq
 
 ## Constraints to Watch
 
-- **74HC595 is at 32/32.** Adding a chip overflows the BMS-BIOS `srData` 32-bit field and requires changing `BB_FRAME_PAYLOAD`, both `BmsBiosParser.h` files, and `bmsbios_bridge.py`.
+- **74HC595 is at 32/32.** Adding a chip overflows the BMS-BIOS `srData` 32-bit field and requires changing `BB_FRAME_PAYLOAD`, both `BmsBiosParser.h` files, and `bridge.py`.
 - **Peak current**: every LED on this board uses a **220Ω series resistor** at 3.3V. Current depends on the driver's own output impedance, so it differs slightly per path:
 
   | Path | LEDs | Driver Rout @3.3V | Per LED | Total |

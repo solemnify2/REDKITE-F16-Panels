@@ -78,7 +78,7 @@
 | | 1168 | uchar | floodConsole | Flood/console 조명 (0~6) — 패널 백라이트와 다른 조명, 미사용 |
 | | 1180 | uint[5] | ecmBits | ECM 프로그램 상태 ×5 |
 
-**LightBits 마스크** (bmsbios_bridge.py):
+**LightBits 마스크** (bridge.py):
 
 LightBits (offset 108):
 
@@ -144,7 +144,7 @@ LightBits3 (offset 128):
 | 15 | CMDS GO | Teensy pin 44 | `LB2_EWS_GO` (LightBits2) | 0x4480 bit10 |
 
 > `ledBits` 비트 번호는 해당 장치의 `leds[]`/`LedIdx` 순서와 같습니다.
-> 배열 순서를 바꾸면 `tools/bmsbios_bridge.py`의 장치별 LED 맵도 함께 수정해야 합니다.
+> 배열 순서를 바꾸면 `tools/bridge.py`의 장치별 LED 맵도 함께 수정해야 합니다.
 
 
 ## 4. LED 비트·핀 대응 — Left Console (0x048E)
@@ -165,7 +165,7 @@ LightBits3 (offset 128):
 | 11 | BATT FAIL | MCP 0x21 GPA7 | `LB3_BAT_FAIL` (LightBits3) | 0x447E bit1 |
 
 > `ledBits` 비트 번호는 해당 장치의 `leds[]`/`LedIdx` 순서와 같습니다.
-> 배열 순서를 바꾸면 `tools/bmsbios_bridge.py`의 장치별 LED 맵도 함께 수정해야 합니다.
+> 배열 순서를 바꾸면 `tools/bridge.py`의 장치별 LED 맵도 함께 수정해야 합니다.
 
 
 ### 백라이트 채널
