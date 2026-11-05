@@ -43,8 +43,9 @@ FONT_CANDIDATES = (r'C:\Windows\Fonts\arialbi.ttf',
                    r'C:\Windows\Fonts\ariali.ttf',
                    r'C:\Windows\Fonts\arialbd.ttf')
 
-# BMS-BIOS.ico 의 기체를 재서 옮긴 값입니다. 256px 기준 x 94..202, y 52..165 —
-# 가운데가 (0.578, 0.424), 긴 변이 0.445 — 자리는 그대로 두고 크기만 키웠습니다.
+# 자리는 BMS-BIOS.ico 의 기체를 재서 가져왔습니다 (256px 기준 x 94..202, y 52..165).
+# 크기는 거기서부터 키운 값으로, 모서리에도 글자에도 닿지 않는 선입니다.
+# **이 두 값은 확정입니다 — 바꾸지 마십시오.**
 JET_CENTER = (0.578, 0.424)
 JET_SCALE = 0.70
 
@@ -161,8 +162,8 @@ def render(size, text=True):
     if size >= TEXT_FROM and text:
         # 각 구석이 자기 색 위에서 제 심 이름을 답니다. 두 쪽에 공통인 BIOS 는
         # 기체에 걸치므로 흰 기체와 색 바탕 양쪽에서 읽히도록 외곽선을 씁니다.
-        label(img, 'DCS', 0.36, 0.10, 0.12, align='left')
-        label(img, 'BMS', 0.36, 0.90, 0.88, align='right')
+        label(img, 'DCS', 0.40, 0.10, 0.12, align='left')
+        label(img, 'BMS', 0.40, 0.90, 0.88, align='right')
         label(img, 'BIOS', 0.34, 0.46, 0.60, stroke=True)
 
     # 둥근 모서리로 잘라냅니다.
