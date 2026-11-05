@@ -39,9 +39,12 @@ BMS_TOP, BMS_BOTTOM = (56, 134, 190), (6, 44, 74)
 DCS_TOP, DCS_BOTTOM = (248, 168, 12), (236, 112, 0)
 INK = (8, 26, 44)       # 외곽선과 그림자
 
-FONT_CANDIDATES = (r'C:\Windows\Fonts\arialbi.ttf',
-                   r'C:\Windows\Fonts\ariali.ttf',
-                   r'C:\Windows\Fonts\arialbd.ttf')
+# 원본을 따릅니다 — DCS-BIOS2.ico 의 DCS 는 굵은 이탤릭, BMS-BIOS.ico 의 BMS 는 직립.
+ITALIC_FONTS = (r'C:\Windows\Fonts\arialbi.ttf',
+                r'C:\Windows\Fonts\ariali.ttf',
+                r'C:\Windows\Fonts\arialbd.ttf')
+UPRIGHT_FONTS = (r'C:\Windows\Fonts\arialbd.ttf',
+                 r'C:\Windows\Fonts\arial.ttf')
 
 # 자리는 BMS-BIOS.ico 의 기체를 재서 가져왔습니다 (256px 기준 x 94..202, y 52..165).
 # 크기는 거기서부터 키운 값으로, 모서리에도 글자에도 닿지 않는 선입니다.
@@ -83,9 +86,10 @@ def jet_mask(size):
                      max(round(m.size[1] * scale), 1)), Image.LANCZOS)
 
 
-def fitted_font(draw, text, width):
+def fitted_font(draw, text, width, italic=True):
     """`text` 가 `width` 에 들어가는 가장 큰 글꼴."""
-    path = next((p for p in FONT_CANDIDATES if os.path.isfile(p)), None)
+    path = next((p for p in (ITALIC_FONTS if italic else UPRIGHT_FONTS)
+                 if os.path.isfile(p)), None)
     if path is None:
         return None
     size = 8
@@ -98,7 +102,7 @@ def fitted_font(draw, text, width):
     return ImageFont.truetype(path, size)
 
 
-def label(img, text, width, cx, cy, align='center', stroke=False):
+def label(img, text, width, cx, cy, align='center', stroke=False, italic=True):
     """`text` 를 올립니다. cx/cy/width 는 변 길이에 대한 비율.
 
     `stroke` 면 그림자 대신 외곽선을 두릅니다. 흰 기체와 색 바탕에 걸치는 글자는
@@ -107,7 +111,7 @@ def label(img, text, width, cx, cy, align='center', stroke=False):
     s = img.size[0]
     layer = Image.new('RGBA', (s, s), (0, 0, 0, 0))
     d = ImageDraw.Draw(layer)
-    font = fitted_font(d, text, round(s * width))
+    font = fitted_font(d, text, round(s * width), italic)
     if font is None:
         return
     box = d.textbbox((0, 0), text, font=font)
@@ -163,7 +167,7 @@ def render(size, text=True):
         # 각 구석이 자기 색 위에서 제 심 이름을 답니다. 두 쪽에 공통인 BIOS 는
         # 기체에 걸치므로 흰 기체와 색 바탕 양쪽에서 읽히도록 외곽선을 씁니다.
         label(img, 'DCS', 0.40, 0.10, 0.12, align='left')
-        label(img, 'BMS', 0.40, 0.90, 0.88, align='right')
+        label(img, 'BMS', 0.40, 0.90, 0.88, align='right', italic=False)
         label(img, 'BIOS', 0.34, 0.46, 0.60, stroke=True)
 
     # 둥근 모서리로 잘라냅니다.
