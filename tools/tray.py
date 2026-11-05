@@ -29,7 +29,7 @@ IMAGE_ICON = 1
 LR_LOADFROMFILE, LR_DEFAULTSIZE, LR_SHARED = 0x0010, 0x0040, 0x8000
 MF_STRING, MF_SEPARATOR, MF_GRAYED = 0x0000, 0x0800, 0x0001
 TPM_RIGHTBUTTON = 0x0002
-SW_HIDE, SW_SHOW = 0, 5
+SW_HIDE, SW_SHOW, SW_RESTORE = 0, 5, 9
 CW_USEDEFAULT = -0x80000000
 
 LRESULT = ctypes.c_longlong if ctypes.sizeof(ctypes.c_void_p) == 8 else ctypes.c_long
@@ -82,6 +82,39 @@ kernel32.GetConsoleCP.restype = wt.UINT
 kernel32.SetConsoleTitleW.argtypes = (wt.LPCWSTR,)
 kernel32.GetModuleHandleW.restype = wt.HMODULE
 kernel32.GetModuleHandleW.argtypes = (wt.LPCWSTR,)
+user32.IsIconic.argtypes = (wt.HWND,)
+user32.IsIconic.restype = wt.BOOL
+
+# ---- ITaskbarList COM (작업표시줄 항목 삭제용) ----
+_ole32 = ctypes.OleDLL('ole32')
+
+
+class _GUID(ctypes.Structure):
+    _fields_ = [('Data1', wt.DWORD), ('Data2', wt.WORD), ('Data3', wt.WORD),
+                ('Data4', ctypes.c_ubyte * 8)]
+
+
+_CLSID_TaskbarList = _GUID(0x56FDF344, 0xFD6D, 0x11D0,
+                           (ctypes.c_ubyte * 8)(0x95, 0x8A, 0x00, 0x60, 0x97, 0xC9, 0xA0, 0x90))
+_IID_ITaskbarList = _GUID(0x56FDF342, 0xFD6D, 0x11D0,
+                          (ctypes.c_ubyte * 8)(0x95, 0x8A, 0x00, 0x60, 0x97, 0xC9, 0xA0, 0x90))
+_FUNCTYPE = ctypes.WINFUNCTYPE
+
+
+def taskbar_delete_tab(hwnd):
+    """ITaskbarList::DeleteTab — 작업표시줄에서 창을 직접 제거합니다."""
+    _ole32.CoInitialize(None)
+    p = ctypes.c_void_p()
+    hr = _ole32.CoCreateInstance(ctypes.byref(_CLSID_TaskbarList), None, 1,
+                                ctypes.byref(_IID_ITaskbarList), ctypes.byref(p))
+    if hr != 0 or not p:
+        return
+    # vtable: [QI(0), AddRef(1), Release(2), HrInit(3), AddTab(4), DeleteTab(5)]
+    vtbl = ctypes.cast(ctypes.cast(p, ctypes.POINTER(ctypes.c_void_p))[0],
+                       ctypes.POINTER(ctypes.c_void_p * 6))[0]
+    _FUNCTYPE(ctypes.HRESULT, ctypes.c_void_p)(vtbl[3])(p)            # HrInit
+    _FUNCTYPE(ctypes.HRESULT, ctypes.c_void_p, wt.HWND)(vtbl[5])(p, hwnd)  # DeleteTab
+    _FUNCTYPE(ctypes.c_ulong, ctypes.c_void_p)(vtbl[2])(p)            # Release
 
 
 def console_window():
@@ -90,36 +123,38 @@ def console_window():
     return hwnd or None
 
 
+def _reopen_stdio():
+    """stdout/stderr 를 현재 콘솔(CONOUT$)에 묶습니다."""
+    try:
+        sys.stdout = open('CONOUT$', 'w', encoding='utf-8',
+                          errors='backslashreplace', buffering=1)
+        sys.stderr = sys.stdout
+    except OSError:
+        sys.stdout = sys.stderr = open(os.devnull, 'w')
+
+
 def ensure_console(title=None, show=True):
     """콘솔을 마련하고 `print` 가 거기로 가게 합니다. 콘솔 창 핸들을 돌려줍니다.
 
-    바로가기나 pythonw 로 띄우면 콘솔이 아예 없어 출력이 갈 데가 없습니다. 그때만
-    새로 만들고 stdout/stderr 를 묶습니다. 이미 콘솔이 있으면 (터미널에서 실행했거나
-    파이프로 묶였거나) 손대지 않습니다 — 묶어 버리면 파이프로 보내던 출력이
-    콘솔로 새 버립니다.
+    트레이 모드(show=False)에서는 우리가 제어할 수 있는 자체 콘솔이 필요합니다.
+    Windows Terminal(ConPTY) 콘솔은 GetConsoleWindow() 가 0 이라 숨기거나
+    소유자를 설정할 수 없으므로, 떼고 자체 콘솔을 만듭니다.
+
+    포그라운드 모드(show=True)에서는 기존 콘솔을 그대로 씁니다.
     """
     if sys.platform != 'win32':
         return None
-    # 창이 있느냐로 따지면 안 됩니다. 요즘 터미널(ConPTY)은 콘솔이 붙어 있어도
-    # GetConsoleWindow() 가 0 이라, 그걸 보고 새로 만들면 이미 붙은 콘솔을 다시
-    # 잡아 파이프로 가던 출력이 사라집니다. 붙어 있는지는 코드페이지로 봅니다.
+
     if not kernel32.GetConsoleCP():
+        # pythonw — 콘솔 자체가 없습니다
         kernel32.AllocConsole()
-        try:
-            sys.stdout = open('CONOUT$', 'w', encoding='utf-8',
-                              errors='backslashreplace', buffering=1)
-            sys.stderr = sys.stdout
-        except OSError:
-            pass
-    elif sys.stdout is None:                 # 콘솔은 붙었는데 핸들이 없을 때
-        try:
-            sys.stdout = sys.stderr = open('CONOUT$', 'w', encoding='utf-8',
-                                           errors='backslashreplace', buffering=1)
-        except OSError:
-            sys.stdout = sys.stderr = open(os.devnull, 'w')
+        _reopen_stdio()
+    elif sys.stdout is None:
+        _reopen_stdio()
+
     if title:
         kernel32.SetConsoleTitleW(title)
-    hwnd = kernel32.GetConsoleWindow()       # ConPTY 에서는 창이 없어 0 입니다
+    hwnd = kernel32.GetConsoleWindow()
     if hwnd:
         user32.ShowWindow(hwnd, SW_SHOW if show else SW_HIDE)
     return hwnd or None
@@ -152,8 +187,12 @@ class Tray(object):
     # ------------------------------------------------------ 콘솔 토글
     def toggle_console(self):
         if self._console:
-            visible = user32.IsWindowVisible(self._console)
-            user32.ShowWindow(self._console, SW_HIDE if visible else SW_SHOW)
+            if user32.IsWindowVisible(self._console) and not user32.IsIconic(self._console):
+                user32.ShowWindow(self._console, SW_HIDE)
+            else:
+                user32.ShowWindow(self._console, SW_RESTORE)
+                user32.SetForegroundWindow(self._console)
+                taskbar_delete_tab(self._console)
 
     def hide_console(self):
         if self._console:
@@ -161,7 +200,10 @@ class Tray(object):
 
     def show_console(self):
         if self._console:
-            user32.ShowWindow(self._console, SW_SHOW)
+            user32.ShowWindow(self._console, SW_RESTORE)
+            user32.SetForegroundWindow(self._console)
+            taskbar_delete_tab(self._console)
+
 
     # ---------------------------------------------------------- 표시
     def set_tooltip(self, text):
@@ -258,6 +300,8 @@ class Tray(object):
         if sys.platform != 'win32':
             raise SystemExit('트레이 모드는 Windows 전용입니다.')
         self._create()
+        if self._console:
+            taskbar_delete_tab(self._console)
         msg = wt.MSG()
         try:
             while user32.GetMessageW(ctypes.byref(msg), None, 0, 0) > 0:

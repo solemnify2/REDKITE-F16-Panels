@@ -36,6 +36,8 @@ TEENSY_VID = 0x16C0
 SERIAL_BAUD = 1000000
 
 HERE = os.path.dirname(os.path.abspath(__file__))
+if HERE not in sys.path:
+    sys.path.insert(0, HERE)
 TRAY_ICON = os.path.join(HERE, 'bridge-plain.ico')
 
 # 트레이에서 종료를 고르면 올라갑니다. 심 모드 루프도 이걸 보고 빠져나옵니다.
@@ -732,9 +734,21 @@ def main():
                         help='트레이에 넣지 않고 콘솔 창으로 돌립니다')
     args = parser.parse_args()
 
-    # 창 모드면 콘솔을 보이게, 트레이 모드면 같은 콘솔을 숨긴 채로 마련합니다.
-    # 어느 쪽이든 기존 출력문은 그대로 콘솔로 갑니다 — 트레이에서는 메뉴의
-    # '콘솔 보기' 로 꺼내 볼 수 있습니다.
+    # 트레이 모드에서 python.exe 로 실행됐으면 pythonw.exe 로 재실행합니다.
+    # python.exe 는 부모 터미널(Windows Terminal 등)을 물고 들어오므로
+    # 작업표시줄에서 뺄 수 없습니다. pythonw.exe 는 터미널 없이 시작되어
+    # AllocConsole 으로 자체 콘솔을 만들면 완전히 제어할 수 있습니다.
+    if (sys.platform == 'win32' and not args.foreground
+            and os.path.basename(sys.executable).lower().startswith('python')
+            and not os.path.basename(sys.executable).lower().startswith('pythonw')):
+        import subprocess
+        pythonw = os.path.join(os.path.dirname(sys.executable),
+                               os.path.basename(sys.executable).replace('python', 'pythonw', 1))
+        if os.path.exists(pythonw):
+            subprocess.Popen([pythonw, os.path.abspath(__file__)] + sys.argv[1:],
+                             creationflags=subprocess.DETACHED_PROCESS)
+            sys.exit(0)
+
     if sys.platform == 'win32':
         import tray as tray_mod
         tray_mod.ensure_console('Redkite Bridge', show=args.foreground)
