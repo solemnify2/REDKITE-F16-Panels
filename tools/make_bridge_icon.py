@@ -258,7 +258,7 @@ def read_gear_dxf():
     return polys, circles
 
 
-def gear_marks(s, height=0.70, center=(0.50, 0.47)):
+def gear_marks(s, height=0.70, center=JET_CENTER):
     """(각인 무늬, LED 세 개) 마스크."""
     polys, circles = read_gear_dxf()
     xs = [x for p in polys for x, _ in p]
