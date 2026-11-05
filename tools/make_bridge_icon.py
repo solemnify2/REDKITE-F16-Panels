@@ -11,7 +11,7 @@ r"""통합 브리지 아이콘(`tools/bridge.ico`)을 만듭니다.
   * 이탤릭 BIOS 워드마크 — 양쪽에 공통으로 있는 유일한 글자
 
 하나의 브리지가 두 심을 상대한다는 것을 **대각선 분할**로 말합니다. 왼쪽 위가
-BMS, 오른쪽 아래가 DCS 입니다. 16px 에서는 글자가 뭉개지므로 작은 크기는
+DCS 주황, 오른쪽 아래가 BMS 파랑입니다. 16px 에서는 글자가 뭉개지므로 작은 크기는
 분할과 기체만 남기고 글자를 뺍니다 — 색 두 개와 실루엣은 그 크기에서도 읽힙니다.
 
 기체는 원본에서 오려내지 않고 다시 그렸습니다. BMS 아이콘의 기체는 같은 색의
@@ -42,6 +42,12 @@ INK = (8, 26, 44)       # 외곽선과 그림자
 FONT_CANDIDATES = (r'C:\Windows\Fonts\arialbi.ttf',
                    r'C:\Windows\Fonts\ariali.ttf',
                    r'C:\Windows\Fonts\arialbd.ttf')
+UPRIGHT_FONTS = (r'C:\Windows\Fonts\arialbd.ttf', r'C:\Windows\Fonts\arial.ttf')
+
+# 아래쪽 띠 — BMS-BIOS.ico 의 우하단을 그대로 옮긴 부분입니다.
+BAND = (10, 24, 33)
+BAND_TOP_LEFT, BAND_TOP_RIGHT = 0.76, 0.70
+CHROME_TOP, CHROME_BOTTOM = (255, 255, 255), (205, 214, 224)
 
 # F-16 평면형. 기수가 위를 향하고 x=50 에 대칭인 100 x 124 상자 안의 좌표입니다.
 HALF = [(50, 0), (53, 12), (54, 30), (55, 46), (60, 54), (63, 60),
@@ -115,15 +121,65 @@ def label(img, text, width, cx, cy, align='center', stroke=False):
     img.alpha_composite(layer)
 
 
+def band_wordmark(img, text, height=0.17, right=0.955):
+    """아래쪽 검은 띠와 그 위의 직립 금속 글자.
+
+    BMS-BIOS.ico 의 우하단이 이 모양입니다 — 거의 검은 띠, 오른쪽 정렬, 이탤릭이
+    아닌 굵은 글자에 밝은 면과 두꺼운 검은 외곽선. 재려고 원본을 뜯어 보니 띠가
+    세로의 28%쯤이고 위 모서리가 오른쪽으로 갈수록 올라갑니다.
+    """
+    s = img.size[0]
+    layer = Image.new('RGBA', (s, s), (0, 0, 0, 0))
+    ImageDraw.Draw(layer).polygon(
+        [(0, round(s * BAND_TOP_LEFT)), (s, round(s * BAND_TOP_RIGHT)), (s, s), (0, s)],
+        fill=BAND + (255,))
+    img.alpha_composite(layer)
+
+    path = next((p for p in UPRIGHT_FONTS if os.path.isfile(p)), None)
+    if path is None:
+        return
+    probe = ImageDraw.Draw(layer)
+    pt = 10
+    while pt < 900:
+        box = probe.textbbox((0, 0), text, font=ImageFont.truetype(path, pt + 4))
+        if box[3] - box[1] > s * height:
+            break
+        pt += 4
+    font = ImageFont.truetype(path, pt)
+
+    glyphs = Image.new('L', (s, s), 0)
+    d = ImageDraw.Draw(glyphs)
+    box = d.textbbox((0, 0), text, font=font)
+    w, h = box[2] - box[0], box[3] - box[1]
+    tx = round(s * right) - w - box[0]
+    ty = round(s * (BAND_TOP_RIGHT + (1 - BAND_TOP_RIGHT) / 2 + 0.012)) - h // 2 - box[1]
+    d.text((tx, ty), text, font=font, fill=255)
+
+    ring = max(round(s * 0.009), 1)
+    edge = Image.new('RGBA', (s, s), (0, 0, 0, 0))
+    for dx in range(-ring, ring + 1):
+        for dy in range(-ring, ring + 1):
+            if dx * dx + dy * dy <= ring * ring:
+                edge.paste((0, 0, 0, 255), (dx, dy), glyphs)
+    img.alpha_composite(edge)
+
+    # 금속 느낌은 글자 높이에만 걸립니다. 캔버스 전체에 걸면 회색으로 죽습니다.
+    top = ty + box[1]
+    strip = gradient(max(h, 1), CHROME_TOP, CHROME_BOTTOM).resize((s, max(h, 1)))
+    chrome = Image.new('RGB', (s, s), CHROME_TOP)
+    chrome.paste(strip, (0, top))
+    img.paste(chrome.convert('RGBA'), (0, 0), glyphs)
+
+
 def render(size, text=True):
     """한 크기 분량의 RGBA 이미지."""
     s = size * SS
-    img = gradient(s, BMS_TOP, BMS_BOTTOM).convert('RGBA')
+    img = gradient(s, DCS_TOP, DCS_BOTTOM).convert('RGBA')
 
-    # 오른쪽 아래 삼각형만 DCS 주황으로 덮습니다.
+    # 오른쪽 아래 삼각형만 BMS 파랑으로 덮습니다.
     tri = Image.new('L', (s, s), 0)
     ImageDraw.Draw(tri).polygon([(s, 0), (s, s), (0, s)], fill=255)
-    img.paste(gradient(s, DCS_TOP, DCS_BOTTOM).convert('RGBA'), (0, 0), tri)
+    img.paste(gradient(s, BMS_TOP, BMS_BOTTOM).convert('RGBA'), (0, 0), tri)
 
     # 경계선 — 두 색이 맞닿는 자리를 또렷하게.
     seam = Image.new('RGBA', (s, s), (0, 0, 0, 0))
@@ -136,9 +192,9 @@ def render(size, text=True):
     # 흐려져서 얼룩으로 보입니다. 밝은 주황 위에서도 형태가 살도록 어두운 테두리를
     # 깔아 줍니다.
     big = size < TEXT_FROM
-    jet = jet_mask(round(s * (0.84 if big else 0.80)))
+    jet = jet_mask(round(s * (0.84 if big else 0.62)))
     jx = (s - jet.size[0]) // 2
-    jy = round(s * 0.50) - jet.size[1] // 2
+    jy = round(s * (0.50 if big else 0.38)) - jet.size[1] // 2
     if size >= RING_FROM:
         ring = max(round(s * 0.012), 1)
         shade = Image.new('RGBA', (s, s), (0, 0, 0, 0))
@@ -152,9 +208,9 @@ def render(size, text=True):
     if size >= TEXT_FROM and text:
         # 각 구석이 자기 색 위에서 제 심 이름을 답니다. 두 쪽에 공통인 BIOS 는
         # 가운데 기체 위로 겹칩니다.
-        label(img, 'BMS', 0.30, 0.10, 0.12, align='left')
-        label(img, 'DCS', 0.30, 0.90, 0.88, align='right')
-        label(img, 'BIOS', 0.46, 0.50, 0.50, stroke=True)
+        label(img, 'BIOS', 0.40, 0.50, 0.38, stroke=True)
+        label(img, 'DCS', 0.30, 0.10, 0.11, align='left')
+        band_wordmark(img, 'BMS')
 
     # 둥근 모서리로 잘라냅니다.
     mask = Image.new('L', (s, s), 0)
