@@ -59,9 +59,7 @@ JET_CENTER = (0.578, 0.424)
 SHADOW_OFFSET = (-0.219, -0.062)
 SHADOW_ALPHA = 90
 MARK_CENTER = (0.52, 0.52)       # 기체 위에 겹치는 글리프 자리
-# bios-text.png 의 녹색(30,240,2)을 어둡게 한 값입니다. 원색은 주황 바탕과
-# 밝기가 비슷해 테두리 없이는 글자가 묻힙니다.
-TERM_GREEN = (16, 170, 8)
+TERM_GREEN = (30, 240, 2)        # bios-text.png 에서 뽑은 터미널 녹색
 JET_SCALE = 0.70
 
 # F-16 평면형. 기수가 위를 향하고 x=50 에 대칭인 100 x 146 상자 안의 좌표입니다.
@@ -190,7 +188,7 @@ def usb_mark(s):
     return m
 
 
-def stamp(img, shape, fill=(255, 255, 255), outline=True):
+def stamp(img, shape, fill=(255, 255, 255), outline=True, shadow=False):
     """글리프를 찍되 어두운 외곽선을 둘러, 흰 기체 위에서도 읽히게."""
     s = img.size[0]
     if outline:
@@ -201,6 +199,13 @@ def stamp(img, shape, fill=(255, 255, 255), outline=True):
                 if dx * dx + dy * dy <= r * r:
                     edge.paste(INK + (255,), (dx, dy), shape)
         img.alpha_composite(edge)
+    if shadow:
+        # 테두리 없이 쓸 때. 녹색과 주황이 밝기가 비슷해 글자가 묻히는 것을
+        # 윤곽을 두르지 않고 밑에 깔아 둔 그림자로만 막습니다.
+        off = max(round(s * 0.009), 1)
+        drop = Image.new('RGBA', (s, s), (0, 0, 0, 0))
+        drop.paste(INK + (140,), (off, off), shape)
+        img.alpha_composite(drop)
     img.paste(tuple(fill) + (255,), (0, 0), shape)
 
 
@@ -253,7 +258,7 @@ def render(size, text=True, wordmark=True, usb=False, pixel=False):
         label(img, 'DCS', 0.40, 0.10, 0.12, align='left')
         label(img, 'BMS', 0.40, 0.90, 0.88, align='right', italic=False)
         if pixel:
-            stamp(img, bios_mark(s), TERM_GREEN, outline=False)
+            stamp(img, bios_mark(s), TERM_GREEN, outline=False, shadow=True)
         elif usb:
             stamp(img, usb_mark(s))
         elif wordmark:
