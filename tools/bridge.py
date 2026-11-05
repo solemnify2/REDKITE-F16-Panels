@@ -26,6 +26,7 @@ import ctypes
 import ctypes.wintypes as wt
 import threading
 
+
 def _alert(text, title='Redkite Bridge'):
     """치명적 오류를 알립니다. 콘솔이 없으면(=pythonw) 대화상자로 띄웁니다.
 
@@ -945,6 +946,18 @@ def _taskbar_add_tab(hwnd):
     _taskbar_tab(hwnd, add=True)
 
 
+class _CONSOLE_SELECTION_INFO(ctypes.Structure):
+    _fields_ = [('dwFlags', ctypes.c_uint32),
+                ('dwSelectionAnchor', ctypes.c_uint32),
+                ('srSelection', ctypes.c_uint64)]
+
+def _is_console_selecting():
+    info = _CONSOLE_SELECTION_INFO()
+    if _kernel32.GetConsoleSelectionInfo(ctypes.byref(info)):
+        return bool(info.dwFlags & 0x0001)   # CONSOLE_SELECTION_IN_PROGRESS
+    return False
+
+
 def _reopen_stdio():
     """stdout/stderr 를 현재 콘솔(CONOUT$)에 묶습니다."""
     try:
@@ -992,6 +1005,8 @@ class Tray:
         self._nid = None
         self._proc = _WNDPROC(self._wndproc)
         self._console = _console_window()
+        self._was_selecting = False
+        self._mode_text = ''
 
     def item(self, label, action=None):
         self.items.append((label, action))
@@ -1032,9 +1047,23 @@ class Tray:
 
     def _wndproc(self, hwnd, msg, wparam, lparam):
         if msg == WM_TIMER and wparam == _TIMER_MINIMIZE:
-            if self._console and _user32.IsIconic(self._console):
-                _user32.ShowWindow(self._console, SW_HIDE)
-                _taskbar_delete_tab(self._console)
+            if self._console:
+                if _user32.IsIconic(self._console):
+                    _user32.ShowWindow(self._console, SW_HIDE)
+                    _taskbar_delete_tab(self._console)
+                # 콘솔 선택 모드 감지 → 타이틀에 안내 표시
+                selecting = _is_console_selecting()
+                if selecting != self._was_selecting:
+                    base = self.title
+                    if self._mode_text and not (selecting and self._mode_text.startswith('감지')):
+                        base += ' — '
+                        if not selecting:
+                            base += '▶ '
+                        base += self._mode_text
+                    if selecting:
+                        base += '  ⏸ 일시 중지 (아무키나 누르세요)'
+                    _kernel32.SetConsoleTitleW(base)
+                self._was_selecting = selecting
             return 0
         if msg == WM_TRAY:
             if lparam in (WM_RBUTTONUP, 0x0007):
@@ -1143,6 +1172,8 @@ def run_tray(work, title='Redkite Bridge'):
     def status(text):
         icon.items[0] = (text, None)
         icon.set_tooltip('%s — %s' % (title, text))
+        icon._mode_text = text
+        _kernel32.SetConsoleTitleW('%s — ▶ %s' % (title, text))
 
     worker = threading.Thread(target=work, kwargs={'status': status}, daemon=True)
     worker.start()
@@ -1265,7 +1296,7 @@ def main():
         for a in args.watch.split(','):
             watch_addrs.add(int(a.strip(), 0))
 
-    WAITING = "대기 모드 -- BMS 또는 DCS 감지 중"
+    WAITING = "감지중 (BMS 또는 DCS를 시작하세요)"
 
     def work(status=None):
         """대기 ↔ 심 모드를 오가는 본체. 트레이 모드에서는 뒤 스레드에서 돕니다."""
