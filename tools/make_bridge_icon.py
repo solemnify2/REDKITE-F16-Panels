@@ -51,7 +51,9 @@ UPRIGHT_FONTS = (r'C:\Windows\Fonts\arialbd.ttf',
 # 크기는 거기서부터 키운 값으로, 모서리에도 글자에도 닿지 않는 선입니다.
 # **이 두 값은 확정입니다 — 바꾸지 마십시오.**
 JET_CENTER = (0.578, 0.424)
-SHADOW_OFFSET = (-0.11, 0.055)   # 기체 뒤 그림자가 밀려나는 정도
+# BMS-BIOS.ico 에서 잰 값입니다. 흰 기체 마스크를 옮겨 가며 어두운 영역과
+# 가장 많이 겹치는 자리를 찾았습니다 — 256px 기준 dx -56, dy -16 (일치율 0.50).
+SHADOW_OFFSET = (-0.219, -0.062)
 SHADOW_ALPHA = 90
 JET_SCALE = 0.70
 
