@@ -76,8 +76,9 @@ class Section(object):
         return True
 
     def close(self):
-        # 핸들만 닫는 것으로는 부족합니다. 매핑된 뷰가 남아 있으면 그것만으로
-        # 커널 섹션이 계속 살아 있어, 종료를 관측할 수 없게 됩니다.
+        # 이름은 **마지막 핸들**이 닫힐 때 사라집니다. 뷰만 남은 섹션은 메모리는
+        # 계속 읽히지만 OpenFileMapping 으로는 더 못 찾습니다. 그래서 존재 검사를
+        # 속이는 것은 핸들이고, 뷰를 푸는 것은 죽은 값을 계속 읽지 않기 위해서입니다.
         if self.view:
             k32.UnmapViewOfFile(self.view)
             self.view = None
