@@ -60,15 +60,54 @@ def _die(text, title='Redkite Bridge'):
     sys.exit(1)
 
 
-try:
-    import serial
-    import serial.tools.list_ports
-except ImportError as exc:
-    _die('필요한 패키지가 없습니다: %s' % exc.name + '\n' + '\n' +
-         '설치:' + '\n' +
-         '    pip install pyserial' + '\n' + '\n' +
-         'Cougar MFD 백라이트까지 쓰려면:' + '\n' +
-         '    pip install hidapi')
+def _ask(text, title='Redkite Bridge'):
+    """예/아니오를 묻습니다. 물어볼 창을 띄울 수 없으면 콘솔로 묻습니다."""
+    if sys.platform == 'win32':
+        u32 = ctypes.WinDLL('user32')
+        # MB_YESNO | MB_ICONQUESTION, IDYES == 6
+        return u32.MessageBoxW(None, text, title, 0x04 | 0x20) == 6
+    try:
+        return input(text + ' [y/N] ').strip().lower().startswith('y')
+    except EOFError:
+        return False
+
+
+def _need(module, package):
+    """모듈을 가져오되, 없으면 설치할지 묻고 직접 깔아 줍니다.
+
+    실행할 PC 마다 무엇을 깔아야 하는지 미리 알 수는 없습니다. 없으면 없다고만
+    하고 끝내는 대신, 그 자리에서 받을 기회를 줍니다.
+    """
+    import importlib
+    try:
+        return importlib.import_module(module)
+    except ImportError:
+        pass
+    if not _ask('%s 패키지가 필요합니다.\n\n지금 설치할까요?\n\n    pip install %s'
+                % (package, package)):
+        _die('%s 없이는 실행할 수 없습니다.\n\n설치:\n    pip install %s'
+             % (package, package))
+
+    import subprocess
+    cmd = [sys.executable, '-m', 'pip', 'install', package]
+    flags = 0x08000000 if sys.platform == 'win32' else 0   # CREATE_NO_WINDOW
+    try:
+        done = subprocess.run(cmd, capture_output=True, text=True,
+                              creationflags=flags)
+    except Exception as exc:                 # pip 자체를 못 부른 경우
+        _die('설치를 실행하지 못했습니다: %s\n\n직접 설치하십시오:\n    pip install %s'
+             % (exc, package))
+    try:
+        importlib.invalidate_caches()
+        return importlib.import_module(module)
+    except ImportError:
+        tail = ((done.stderr or done.stdout or '').strip().splitlines() or [''])[-5:]
+        _die('%s 설치에 실패했습니다.\n\n%s\n\n직접 설치하십시오:\n    pip install %s'
+             % (package, '\n'.join(tail), package))
+
+
+serial = _need('serial', 'pyserial')
+import serial.tools.list_ports          # noqa: E402  (위에서 받아 온 뒤라야 됩니다)
 
 
 # ================================================================

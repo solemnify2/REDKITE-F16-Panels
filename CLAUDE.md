@@ -29,7 +29,7 @@ One bridge, `tools/bridge.py`, serves both sims: it waits, enters BMS or DCS mod
 for whichever it detects, and returns to waiting when the sim exits. COM port
 auto-detect by VID/PID (VID `0x16C0`):
 ```
-pip install pyserial hidapi
+pip install pyserial hidapi                  # or let it offer at startup
 pythonw tools/bridge.py                      # tray (default)
 python  tools/bridge.py --foreground         # console window
 ```

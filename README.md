@@ -175,6 +175,9 @@ Arduino IDE에서 해당 `.ino`를 열고 Upload합니다. `usb_desc.h`의 `PROD
 pip install pyserial hidapi
 ```
 
+깔려 있지 않으면 브리지가 **실행할 때 묻고 직접 설치**합니다. 미리 챙기지
+않아도 됩니다.
+
 - `pyserial` — Teensy 시리얼 통신 (필수)
 - `hidapi` — Cougar MFD 백라이트 동기화 (선택, 없으면 MFD 건너뜀)
 
