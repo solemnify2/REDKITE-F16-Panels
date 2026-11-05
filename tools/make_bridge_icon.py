@@ -30,6 +30,7 @@ except ImportError:
 HERE = os.path.dirname(os.path.abspath(__file__))
 DEST = os.path.join(HERE, 'bridge.ico')
 DEST_PLAIN = os.path.join(HERE, 'bridge-plain.ico')
+DEST_USB = os.path.join(HERE, 'bridge-usb.ico')
 SIZES = (16, 24, 32, 48, 64, 128, 256)
 TEXT_FROM = 128         # 이보다 작으면 글자를 넣지 않습니다
 RING_FROM = 32          # 이보다 작으면 테두리가 형태를 먹으므로 생략합니다
@@ -55,6 +56,7 @@ JET_CENTER = (0.578, 0.424)
 # 가장 많이 겹치는 자리를 찾았습니다 — 256px 기준 dx -56, dy -16 (일치율 0.50).
 SHADOW_OFFSET = (-0.219, -0.062)
 SHADOW_ALPHA = 90
+MARK_CENTER = (0.52, 0.52)       # 기체 위에 겹치는 글리프 자리
 JET_SCALE = 0.70
 
 # F-16 평면형. 기수가 위를 향하고 x=50 에 대칭인 100 x 146 상자 안의 좌표입니다.
@@ -144,7 +146,41 @@ def label(img, text, width, cx, cy, align='center', stroke=False, italic=True):
     img.alpha_composite(layer)
 
 
-def render(size, text=True, wordmark=True):
+def usb_mark(s):
+    """USB 기호. 브리지가 실제로 쓰는 연결이라 비유가 아니라 사실입니다."""
+    m = Image.new('L', (s, s), 0)
+    d = ImageDraw.Draw(m)
+    cx, cy = s * MARK_CENTER[0], s * MARK_CENTER[1]
+    L, t, br = s * 0.17, s * 0.030, s * 0.095
+    d.line([(cx, cy + L), (cx, cy - L)], fill=255, width=round(t))
+    d.ellipse([cx - t * 1.5, cy + L - t * 1.5,
+               cx + t * 1.5, cy + L + t * 1.5], fill=255)      # 둥근 끝
+    d.line([(cx, cy - L * 0.15), (cx - br, cy - L * 0.62)], fill=255, width=round(t))
+    d.rectangle([cx - br - t * 1.2, cy - L * 0.62 - t * 1.2,
+                 cx - br + t * 1.2, cy - L * 0.62 + t * 1.2], fill=255)   # 네모 끝
+    d.line([(cx, cy - L * 0.15), (cx + br, cy - L * 0.62)], fill=255, width=round(t))
+    d.polygon([(cx + br + t * 1.6, cy - L * 0.62),
+               (cx + br - t * 1.0, cy - L * 0.62 - t * 1.5),
+               (cx + br - t * 1.0, cy - L * 0.62 + t * 1.5)], fill=255)   # 세모 끝
+    d.polygon([(cx, cy - L - t * 0.2), (cx - t * 1.7, cy - L + t * 2.2),
+               (cx + t * 1.7, cy - L + t * 2.2)], fill=255)    # 화살촉
+    return m
+
+
+def stamp(img, shape):
+    """글리프를 흰색으로 찍되 어두운 외곽선을 둘러, 흰 기체 위에서도 읽히게."""
+    s = img.size[0]
+    r = max(round(s * 0.013), 1)
+    edge = Image.new('RGBA', (s, s), (0, 0, 0, 0))
+    for dx in range(-r, r + 1):
+        for dy in range(-r, r + 1):
+            if dx * dx + dy * dy <= r * r:
+                edge.paste(INK + (255,), (dx, dy), shape)
+    img.alpha_composite(edge)
+    img.paste((255, 255, 255, 255), (0, 0), shape)
+
+
+def render(size, text=True, wordmark=True, usb=False):
     """한 크기 분량의 RGBA 이미지."""
     s = size * SS
     img = gradient(s, DCS_TOP, DCS_BOTTOM).convert('RGBA')
@@ -192,7 +228,9 @@ def render(size, text=True, wordmark=True):
         # 기체에 걸치므로 흰 기체와 색 바탕 양쪽에서 읽히도록 외곽선을 씁니다.
         label(img, 'DCS', 0.40, 0.10, 0.12, align='left')
         label(img, 'BMS', 0.40, 0.90, 0.88, align='right', italic=False)
-        if wordmark:
+        if usb:
+            stamp(img, usb_mark(s))
+        elif wordmark:
             label(img, 'BIOS', 0.34, 0.46, 0.60, stroke=True)
 
     # 둥근 모서리로 잘라냅니다.
@@ -213,6 +251,7 @@ def write_ico(dest, **kw):
 def main():
     write_ico(DEST)
     write_ico(DEST_PLAIN, wordmark=False)   # BIOS 없이 심 이름만
+    write_ico(DEST_USB, usb=True)           # BIOS 대신 USB 기호
     return 0
 
 
