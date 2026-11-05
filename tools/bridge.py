@@ -736,6 +736,10 @@ def main():
             if shm_exists(SHM_NAME):
                 print("[Bridge] Falcon BMS 감지됨")
                 run_bms(devices, mfd, hz=args.hz, debug=args.debug)
+                # BMS 종료 직후 SHM이 아직 남아 있을 수 있으므로
+                # 사라질 때까지 기다린 뒤 대기 모드로 복귀
+                while shm_exists(SHM_NAME):
+                    time.sleep(1)
                 print("[Bridge] BMS 오프라인 -- 대기 모드로 복귀\n")
                 continue
 
