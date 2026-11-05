@@ -72,6 +72,74 @@ def _ask(text, title='Redkite Bridge'):
         return False
 
 
+def _settings_path():
+    base = os.environ.get('LOCALAPPDATA') or os.path.expanduser('~')
+    return os.path.join(base, 'RedkiteBridge', 'settings.json')
+
+
+def _settings(update=None):
+    """작은 설정 파일. 한 번 거절한 설치를 매번 다시 묻지 않으려고 씁니다."""
+    import json
+    path = _settings_path()
+    try:
+        with open(path, encoding='utf-8') as f:
+            data = json.load(f)
+    except Exception:
+        data = {}
+    if update:
+        data.update(update)
+        try:
+            os.makedirs(os.path.dirname(path), exist_ok=True)
+            with open(path, 'w', encoding='utf-8') as f:
+                json.dump(data, f, ensure_ascii=False, indent=1)
+        except OSError:
+            pass
+    return data
+
+
+def _install(package):
+    """pip 로 설치하고 (성공?, 마지막 출력) 을 돌려줍니다."""
+    import subprocess
+    flags = 0x08000000 if sys.platform == 'win32' else 0   # CREATE_NO_WINDOW
+    try:
+        done = subprocess.run([sys.executable, '-m', 'pip', 'install', package],
+                              capture_output=True, text=True, creationflags=flags)
+    except Exception as exc:
+        return False, str(exc)
+    tail = ((done.stderr or done.stdout or '').strip().splitlines() or [''])[-5:]
+    return done.returncode == 0, '\n'.join(tail)
+
+
+def _need_optional(module, package, purpose):
+    """있으면 좋은 패키지. 없으면 한 번 묻고, 거절하면 다시 묻지 않습니다."""
+    import importlib
+    try:
+        return importlib.import_module(module)
+    except ImportError:
+        pass
+    key = 'skip_' + package
+    if _settings().get(key):
+        print('[MFD] %s 를 건너뜁니다 (%s 설치 안 함). 쓰려면: pip install %s'
+              % (purpose, package, package))
+        return None
+    if not _ask('%s 에 %s 가 필요합니다.\n\n지금 설치할까요?\n\n'
+                '아니오를 고르면 다시 묻지 않습니다.' % (purpose, package)):
+        _settings({key: True})
+        print('[MFD] %s 없이 진행합니다. 나중에 쓰려면: pip install %s'
+              % (purpose, package))
+        return None
+    ok, tail = _install(package)
+    if ok:
+        try:
+            importlib.invalidate_caches()
+            return importlib.import_module(module)
+        except ImportError:
+            pass
+    _alert('%s 설치에 실패했습니다. %s 없이 계속합니다.\n\n%s\n\n'
+           '직접 설치하려면:\n    pip install %s' % (package, purpose, tail, package))
+    return None
+
+
 def _need(module, package):
     """모듈을 가져오되, 없으면 설치할지 묻고 직접 깔아 줍니다.
 
@@ -88,22 +156,15 @@ def _need(module, package):
         _die('%s 없이는 실행할 수 없습니다.\n\n설치:\n    pip install %s'
              % (package, package))
 
-    import subprocess
-    cmd = [sys.executable, '-m', 'pip', 'install', package]
-    flags = 0x08000000 if sys.platform == 'win32' else 0   # CREATE_NO_WINDOW
-    try:
-        done = subprocess.run(cmd, capture_output=True, text=True,
-                              creationflags=flags)
-    except Exception as exc:                 # pip 자체를 못 부른 경우
-        _die('설치를 실행하지 못했습니다: %s\n\n직접 설치하십시오:\n    pip install %s'
-             % (exc, package))
-    try:
-        importlib.invalidate_caches()
-        return importlib.import_module(module)
-    except ImportError:
-        tail = ((done.stderr or done.stdout or '').strip().splitlines() or [''])[-5:]
-        _die('%s 설치에 실패했습니다.\n\n%s\n\n직접 설치하십시오:\n    pip install %s'
-             % (package, '\n'.join(tail), package))
+    ok, tail = _install(package)
+    if ok:
+        try:
+            importlib.invalidate_caches()
+            return importlib.import_module(module)
+        except ImportError:
+            pass
+    _die('%s 설치에 실패했습니다.\n\n%s\n\n직접 설치하십시오:\n    pip install %s'
+         % (package, tail, package))
 
 
 serial = _need('serial', 'pyserial')
@@ -256,10 +317,8 @@ class MfdBacklight:
         self.brt_seen = False
 
     def open(self):
-        try:
-            import hid
-        except ImportError:
-            print("[MFD] Cougar MFD 백라이트 동기화를 사용하려면: pip install hidapi")
+        hid = _need_optional('hid', 'hidapi', 'Cougar MFD 백라이트 동기화')
+        if hid is None:
             return
         for pid in MFD_PIDS:
             for info in hid.enumerate(MFD_VID, pid):

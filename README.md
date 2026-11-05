@@ -176,7 +176,9 @@ pip install pyserial hidapi
 ```
 
 깔려 있지 않으면 브리지가 **실행할 때 묻고 직접 설치**합니다. 미리 챙기지
-않아도 됩니다.
+않아도 됩니다. `hidapi` 는 선택이라 한 번 거절하면 다시 묻지 않습니다 — 그
+기록은 `%LOCALAPPDATA%\RedkiteBridge\settings.json` 에 있고, 지우면 다시
+물어봅니다.
 
 - `pyserial` — Teensy 시리얼 통신 (필수)
 - `hidapi` — Cougar MFD 백라이트 동기화 (선택, 없으면 MFD 건너뜀)
