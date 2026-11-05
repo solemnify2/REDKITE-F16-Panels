@@ -23,6 +23,7 @@ import struct
 import socket
 import argparse
 import ctypes
+import ctypes.wintypes as wt
 import threading
 
 import serial
@@ -36,8 +37,6 @@ TEENSY_VID = 0x16C0
 SERIAL_BAUD = 1000000
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-if HERE not in sys.path:
-    sys.path.insert(0, HERE)
 TRAY_ICON = os.path.join(HERE, 'bridge-plain.ico')
 
 # 트레이에서 종료를 고르면 올라갑니다. 심 모드 루프도 이걸 보고 빠져나옵니다.
@@ -250,7 +249,7 @@ def read_serial_output(port, ser, rx_bufs):
 #  BMS — SHM, Frame Builder, Device
 # ================================================================
 
-_kernel32 = ctypes.windll.kernel32
+_kernel32 = ctypes.WinDLL('kernel32', use_last_error=True)
 _kernel32.OpenFileMappingW.restype  = ctypes.c_void_p
 _kernel32.OpenFileMappingW.argtypes = (ctypes.c_uint32, ctypes.c_int, ctypes.c_wchar_p)
 _kernel32.MapViewOfFile.restype     = ctypes.c_void_p
@@ -692,24 +691,294 @@ def _mfd_update_bms(self, shm2):
 MfdBacklight.update_bms = _mfd_update_bms
 
 # ================================================================
+#  Tray — Windows 알림 영역 아이콘 + 콘솔 관리
+# ================================================================
+
+_user32  = ctypes.WinDLL('user32',  use_last_error=True)
+_shell32 = ctypes.WinDLL('shell32', use_last_error=True)
+_ole32   = ctypes.OleDLL('ole32')
+
+WM_DESTROY       = 0x0002
+WM_COMMAND       = 0x0111
+WM_LBUTTONDBLCLK = 0x0203
+WM_RBUTTONUP     = 0x0205
+WM_TRAY          = 0x0401       # WM_APP+1
+NIM_ADD, NIM_MODIFY, NIM_DELETE = 0, 1, 2
+NIF_MESSAGE, NIF_ICON, NIF_TIP = 0x01, 0x02, 0x04
+IMAGE_ICON          = 1
+LR_LOADFROMFILE     = 0x0010
+LR_DEFAULTSIZE      = 0x0040
+MF_STRING, MF_SEPARATOR, MF_GRAYED = 0x0000, 0x0800, 0x0001
+TPM_RIGHTBUTTON     = 0x0002
+SW_HIDE, SW_SHOW, SW_RESTORE = 0, 5, 9
+CW_USEDEFAULT       = -0x80000000
+
+_LRESULT = ctypes.c_longlong if ctypes.sizeof(ctypes.c_void_p) == 8 else ctypes.c_long
+_WNDPROC = ctypes.WINFUNCTYPE(_LRESULT, wt.HWND, wt.UINT, wt.WPARAM, wt.LPARAM)
+
+
+class _WNDCLASSW(ctypes.Structure):
+    _fields_ = [('style', wt.UINT), ('lpfnWndProc', _WNDPROC),
+                ('cbClsExtra', ctypes.c_int), ('cbWndExtra', ctypes.c_int),
+                ('hInstance', wt.HINSTANCE), ('hIcon', wt.HICON),
+                ('hCursor', wt.HANDLE), ('hbrBackground', wt.HBRUSH),
+                ('lpszMenuName', wt.LPCWSTR), ('lpszClassName', wt.LPCWSTR)]
+
+
+class _NOTIFYICONDATAW(ctypes.Structure):
+    _fields_ = [('cbSize', wt.DWORD), ('hWnd', wt.HWND), ('uID', wt.UINT),
+                ('uFlags', wt.UINT), ('uCallbackMessage', wt.UINT),
+                ('hIcon', wt.HICON), ('szTip', wt.WCHAR * 128),
+                ('dwState', wt.DWORD), ('dwStateMask', wt.DWORD),
+                ('szInfo', wt.WCHAR * 256), ('uVersion', wt.UINT),
+                ('szInfoTitle', wt.WCHAR * 64), ('dwInfoFlags', wt.DWORD)]
+
+
+class _GUID(ctypes.Structure):
+    _fields_ = [('Data1', wt.DWORD), ('Data2', wt.WORD), ('Data3', wt.WORD),
+                ('Data4', ctypes.c_ubyte * 8)]
+
+
+# --- user32 argtypes ---
+_user32.DefWindowProcW.restype  = _LRESULT
+_user32.DefWindowProcW.argtypes = (wt.HWND, wt.UINT, wt.WPARAM, wt.LPARAM)
+_user32.CreateWindowExW.restype  = wt.HWND
+_user32.CreateWindowExW.argtypes = (
+    wt.DWORD, wt.LPCWSTR, wt.LPCWSTR, wt.DWORD, ctypes.c_int, ctypes.c_int,
+    ctypes.c_int, ctypes.c_int, wt.HWND, wt.HMENU, wt.HINSTANCE, wt.LPVOID)
+_user32.LoadImageW.restype  = wt.HANDLE
+_user32.LoadImageW.argtypes = (wt.HINSTANCE, wt.LPCWSTR, wt.UINT,
+                               ctypes.c_int, ctypes.c_int, wt.UINT)
+_user32.LoadIconW.restype  = wt.HICON
+_user32.LoadIconW.argtypes = (wt.HINSTANCE, wt.LPCWSTR)
+_user32.CreatePopupMenu.restype = wt.HMENU
+_user32.AppendMenuW.argtypes    = (wt.HMENU, wt.UINT, ctypes.c_void_p, wt.LPCWSTR)
+_user32.TrackPopupMenu.argtypes = (wt.HMENU, wt.UINT, ctypes.c_int, ctypes.c_int,
+                                   ctypes.c_int, wt.HWND, wt.LPVOID)
+_user32.PostMessageW.argtypes       = (wt.HWND, wt.UINT, wt.WPARAM, wt.LPARAM)
+_user32.ShowWindow.argtypes         = (wt.HWND, ctypes.c_int)
+_user32.IsWindowVisible.argtypes    = (wt.HWND,)
+_user32.IsIconic.argtypes           = (wt.HWND,)
+_user32.IsIconic.restype            = wt.BOOL
+_user32.SetForegroundWindow.argtypes = (wt.HWND,)
+_user32.DestroyMenu.argtypes        = (wt.HMENU,)
+_shell32.Shell_NotifyIconW.argtypes  = (wt.DWORD, ctypes.c_void_p)
+_kernel32.GetConsoleWindow.restype   = wt.HWND
+_kernel32.GetConsoleCP.restype       = wt.UINT
+_kernel32.SetConsoleTitleW.argtypes  = (wt.LPCWSTR,)
+_kernel32.GetModuleHandleW.restype   = wt.HMODULE
+_kernel32.GetModuleHandleW.argtypes  = (wt.LPCWSTR,)
+
+# --- ITaskbarList COM (작업표시줄 항목 삭제용) ---
+_CLSID_TaskbarList = _GUID(0x56FDF344, 0xFD6D, 0x11D0,
+                           (ctypes.c_ubyte * 8)(0x95, 0x8A, 0x00, 0x60, 0x97, 0xC9, 0xA0, 0x90))
+_IID_ITaskbarList  = _GUID(0x56FDF342, 0xFD6D, 0x11D0,
+                           (ctypes.c_ubyte * 8)(0x95, 0x8A, 0x00, 0x60, 0x97, 0xC9, 0xA0, 0x90))
+
+
+def _taskbar_delete_tab(hwnd):
+    """ITaskbarList::DeleteTab — 작업표시줄에서 창을 직접 제거합니다."""
+    _ole32.CoInitialize(None)
+    p = ctypes.c_void_p()
+    hr = _ole32.CoCreateInstance(ctypes.byref(_CLSID_TaskbarList), None, 1,
+                                ctypes.byref(_IID_ITaskbarList), ctypes.byref(p))
+    if hr != 0 or not p:
+        return
+    vtbl = ctypes.cast(ctypes.cast(p, ctypes.POINTER(ctypes.c_void_p))[0],
+                       ctypes.POINTER(ctypes.c_void_p * 6))[0]
+    _FT = ctypes.WINFUNCTYPE
+    _FT(ctypes.HRESULT, ctypes.c_void_p)(vtbl[3])(p)                   # HrInit
+    _FT(ctypes.HRESULT, ctypes.c_void_p, wt.HWND)(vtbl[5])(p, hwnd)    # DeleteTab
+    _FT(ctypes.c_ulong, ctypes.c_void_p)(vtbl[2])(p)                   # Release
+
+
+def _reopen_stdio():
+    """stdout/stderr 를 현재 콘솔(CONOUT$)에 묶습니다."""
+    try:
+        sys.stdout = open('CONOUT$', 'w', encoding='utf-8',
+                          errors='backslashreplace', buffering=1)
+        sys.stderr = sys.stdout
+    except OSError:
+        sys.stdout = sys.stderr = open(os.devnull, 'w')
+
+
+def _console_window():
+    hwnd = _kernel32.GetConsoleWindow()
+    return hwnd or None
+
+
+def ensure_console(title=None, show=True):
+    """콘솔을 마련하고 print 가 거기로 가게 합니다. 콘솔 창 핸들을 돌려줍니다."""
+    if sys.platform != 'win32':
+        return None
+    if not _kernel32.GetConsoleCP():
+        _kernel32.AllocConsole()
+        _reopen_stdio()
+    elif sys.stdout is None:
+        _reopen_stdio()
+    if title:
+        _kernel32.SetConsoleTitleW(title)
+    hwnd = _kernel32.GetConsoleWindow()
+    if hwnd:
+        _user32.ShowWindow(hwnd, SW_SHOW if show else SW_HIDE)
+    return hwnd or None
+
+
+class Tray:
+    """Windows 알림 영역(트레이) 아이콘."""
+
+    FIRST_ID = 0x1000
+
+    def __init__(self, icon_path, tooltip='', on_quit=None, title='Bridge'):
+        self.icon_path = icon_path
+        self.tooltip = tooltip
+        self.on_quit = on_quit
+        self.title = title
+        self.items = []
+        self.hwnd = None
+        self._nid = None
+        self._proc = _WNDPROC(self._wndproc)
+        self._console = _console_window()
+
+    def item(self, label, action=None):
+        self.items.append((label, action))
+
+    def separator(self):
+        self.items.append((None, None))
+
+    def toggle_console(self):
+        if self._console:
+            if _user32.IsWindowVisible(self._console) and not _user32.IsIconic(self._console):
+                _user32.ShowWindow(self._console, SW_HIDE)
+            else:
+                _user32.ShowWindow(self._console, SW_RESTORE)
+                _user32.SetForegroundWindow(self._console)
+                _taskbar_delete_tab(self._console)
+
+    def hide_console(self):
+        if self._console:
+            _user32.ShowWindow(self._console, SW_HIDE)
+
+    def show_console(self):
+        if self._console:
+            _user32.ShowWindow(self._console, SW_RESTORE)
+            _user32.SetForegroundWindow(self._console)
+            _taskbar_delete_tab(self._console)
+
+    def set_tooltip(self, text):
+        self.tooltip = text
+        if self._nid is not None:
+            self._nid.szTip = text[:127]
+            _shell32.Shell_NotifyIconW(NIM_MODIFY, ctypes.byref(self._nid))
+
+    def stop(self):
+        if self.hwnd:
+            _user32.PostMessageW(self.hwnd, WM_DESTROY, 0, 0)
+
+    def _wndproc(self, hwnd, msg, wparam, lparam):
+        if msg == WM_TRAY:
+            if lparam in (WM_RBUTTONUP, 0x0007):
+                self._popup()
+            elif lparam == WM_LBUTTONDBLCLK:
+                self.toggle_console()
+            return 0
+        if msg == WM_COMMAND:
+            index = (wparam & 0xFFFF) - self.FIRST_ID
+            if 0 <= index < len(self.items):
+                action = self.items[index][1]
+                if action:
+                    action()
+            return 0
+        if msg == WM_DESTROY:
+            self._remove()
+            _user32.PostQuitMessage(0)
+            return 0
+        return _user32.DefWindowProcW(hwnd, msg, wparam, lparam)
+
+    def _popup(self):
+        menu = _user32.CreatePopupMenu()
+        for i, (label, action) in enumerate(self.items):
+            if label is None:
+                _user32.AppendMenuW(menu, MF_SEPARATOR, 0, None)
+            else:
+                flags = MF_STRING | (0 if action else MF_GRAYED)
+                _user32.AppendMenuW(menu, flags, self.FIRST_ID + i, label)
+        pos = wt.POINT()
+        _user32.GetCursorPos(ctypes.byref(pos))
+        _user32.SetForegroundWindow(self.hwnd)
+        _user32.TrackPopupMenu(menu, TPM_RIGHTBUTTON, pos.x, pos.y, 0, self.hwnd, None)
+        _user32.PostMessageW(self.hwnd, 0, 0, 0)
+        _user32.DestroyMenu(menu)
+
+    def _remove(self):
+        if self._nid is not None:
+            _shell32.Shell_NotifyIconW(NIM_DELETE, ctypes.byref(self._nid))
+            self._nid = None
+
+    def _create(self):
+        hinst = _kernel32.GetModuleHandleW(None)
+        cls = _WNDCLASSW()
+        cls.lpfnWndProc = self._proc
+        cls.hInstance = hinst
+        cls.lpszClassName = 'RedkiteBridgeTray'
+        if not _user32.RegisterClassW(ctypes.byref(cls)):
+            err = ctypes.get_last_error()
+            if err != 1410:
+                raise ctypes.WinError(err)
+        self.hwnd = _user32.CreateWindowExW(
+            0, cls.lpszClassName, self.title, 0,
+            CW_USEDEFAULT, CW_USEDEFAULT, 0, 0, None, None, hinst, None)
+        if not self.hwnd:
+            raise ctypes.WinError(ctypes.get_last_error())
+
+        hicon = None
+        if self.icon_path and os.path.isfile(self.icon_path):
+            hicon = _user32.LoadImageW(None, self.icon_path, IMAGE_ICON, 0, 0,
+                                       LR_LOADFROMFILE | LR_DEFAULTSIZE)
+        if not hicon:
+            hicon = _user32.LoadIconW(None, ctypes.c_wchar_p(32512))
+
+        nid = _NOTIFYICONDATAW()
+        nid.cbSize = ctypes.sizeof(_NOTIFYICONDATAW)
+        nid.hWnd = self.hwnd
+        nid.uID = 1
+        nid.uFlags = NIF_MESSAGE | NIF_ICON | NIF_TIP
+        nid.uCallbackMessage = WM_TRAY
+        nid.hIcon = hicon
+        nid.szTip = self.tooltip[:127]
+        if not _shell32.Shell_NotifyIconW(NIM_ADD, ctypes.byref(nid)):
+            raise ctypes.WinError(ctypes.get_last_error())
+        self._nid = nid
+
+    def run(self):
+        self._create()
+        if self._console:
+            _taskbar_delete_tab(self._console)
+        msg = wt.MSG()
+        try:
+            while _user32.GetMessageW(ctypes.byref(msg), None, 0, 0) > 0:
+                _user32.TranslateMessage(ctypes.byref(msg))
+                _user32.DispatchMessageW(ctypes.byref(msg))
+        finally:
+            self._remove()
+            if self.on_quit:
+                self.on_quit()
+
+
+# ================================================================
 #  Main
 # ================================================================
 
 def run_tray(work, title='Redkite Bridge'):
-    """일은 뒤 스레드에 맡기고, 이 스레드는 트레이 메시지를 돕니다.
-
-    Win32 창은 만든 스레드에 묶이므로 메시지 루프가 주 스레드여야 합니다.
-    """
-    import tray as tray_mod
-
-    icon = tray_mod.Tray(TRAY_ICON, title, title=title)
-    icon.item(title)                     # 상태 줄 — 눌리지 않습니다
+    """일은 뒤 스레드에 맡기고, 이 스레드는 트레이 메시지를 돕니다."""
+    icon = Tray(TRAY_ICON, title, title=title)
+    icon.item(title)
     icon.separator()
     icon.item('콘솔 보기/숨기기', icon.toggle_console)
     icon.item('종료', icon.stop)
 
     def status(text):
-        icon.items[0] = (text, None)     # 메뉴는 열 때마다 새로 그려집니다
+        icon.items[0] = (text, None)
         icon.set_tooltip('%s — %s' % (title, text))
 
     worker = threading.Thread(target=work, kwargs={'status': status}, daemon=True)
@@ -750,8 +1019,7 @@ def main():
             sys.exit(0)
 
     if sys.platform == 'win32':
-        import tray as tray_mod
-        tray_mod.ensure_console('Redkite Bridge', show=args.foreground)
+        ensure_console('Redkite Bridge', show=args.foreground)
     elif sys.stdout is None:
         sys.stdout = sys.stderr = open(os.devnull, 'w')
 
