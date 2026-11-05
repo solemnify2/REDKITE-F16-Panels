@@ -32,6 +32,7 @@ DEST = os.path.join(HERE, 'bridge.ico')
 DEST_PLAIN = os.path.join(HERE, 'bridge-plain.ico')
 DEST_USB = os.path.join(HERE, 'bridge-usb.ico')
 DEST_TERM = os.path.join(HERE, 'bridge-term.ico')
+DEST_PROMPT = os.path.join(HERE, 'bridge-prompt.ico')
 BIOS_TEXT = os.path.join(HERE, 'bios-text.png')
 SIZES = (16, 24, 32, 48, 64, 128, 256)
 TEXT_FROM = 128         # 이보다 작으면 글자를 넣지 않습니다
@@ -155,7 +156,7 @@ def label(img, text, width, cx, cy, align='center', stroke=False, italic=True):
     img.alpha_composite(layer)
 
 
-def bios_mark(s, width=0.66, center=(0.47, 0.495)):
+def bios_mark(s, width=0.66, center=(0.47, 0.495), prompt=False):
     """`bios-text.png` 의 픽셀 글꼴 BIOS 를 마스크로 돌려줍니다.
 
     격자를 떠서 코드에 박는 것도 해 봤지만 모듈 경계가 딱 떨어지지 않아 글자가
@@ -164,12 +165,52 @@ def bios_mark(s, width=0.66, center=(0.47, 0.495)):
     red, green, _ = Image.open(BIOS_TEXT).convert('RGB').split()
     mark = ImageChops.darker(Image.eval(green, lambda v: 255 if v > 120 else 0),
                              Image.eval(red, lambda v: 255 if v < 160 else 0))
+    if prompt:
+        # 'BIOS' 와 '>_' 사이의 빈 구간은 원본에서 x 1303..1528 입니다.
+        mark = mark.crop((1415, 0, mark.size[0], mark.size[1]))
+    # 원본에 압축 잡티가 있어 크게 쓰면 블록 가장자리가 지저분합니다. 블록보다
+    # 훨씬 작은 창의 중앙값 필터로 점만 걷어냅니다. 모듈 격자까지 줄였다 되키우는
+    # 방법도 해 봤지만 모듈이 정수가 아니라 글자가 뭉개졌습니다.
+    mark = mark.filter(ImageFilter.MedianFilter(9))
     mark = mark.crop(mark.getbbox())
     w = round(s * width)
     h = max(round(w * mark.size[1] / mark.size[0]), 1)
     mark = mark.resize((w, h), Image.LANCZOS)
     out = Image.new('L', (s, s), 0)
     out.paste(mark, (round(s * center[0]) - w // 2, round(s * center[1]) - h // 2))
+    return out
+
+
+# 획을 두 칸으로 둡니다. 한 칸이면 위아래 블록이 모서리로만 닿아 점선처럼 보입니다.
+PROMPT_GRID = (
+    '##.......',
+    '.##......',
+    '..##.....',
+    '...##....',
+    '..##.....',
+    '.##......',
+    '##..#####',
+)
+
+
+def prompt_mark(s, width=0.40, center=(0.38, 0.60)):
+    """'>_' 를 격자에서 바로 그립니다.
+
+    bios-text.png 의 같은 글자를 오려 키워도 봤지만, 계단이 한 칸씩이라 크게
+    쓰면 획이 아니라 흩어진 블록으로 보입니다. 모양은 그대로 두고 다시 그립니다.
+    """
+    cols, rows = len(PROMPT_GRID[0]), len(PROMPT_GRID)
+    cell = max(round(s * width / cols), 1)
+    mark = Image.new('L', (cols * cell, rows * cell), 0)
+    d = ImageDraw.Draw(mark)
+    for r, line in enumerate(PROMPT_GRID):
+        for c, ch in enumerate(line):
+            if ch == '#':
+                d.rectangle([c * cell, r * cell,
+                             (c + 1) * cell - 1, (r + 1) * cell - 1], fill=255)
+    out = Image.new('L', (s, s), 0)
+    out.paste(mark, (round(s * center[0]) - mark.size[0] // 2,
+                     round(s * center[1]) - mark.size[1] // 2))
     return out
 
 
@@ -215,7 +256,7 @@ def stamp(img, shape, fill=(255, 255, 255), outline=True, shadow=False):
     img.paste(tuple(fill) + (255,), (0, 0), shape)
 
 
-def render(size, text=True, wordmark=True, usb=False, pixel=False):
+def render(size, text=True, wordmark=True, usb=False, pixel=False, prompt=False):
     """한 크기 분량의 RGBA 이미지."""
     s = size * SS
     img = gradient(s, DCS_TOP, DCS_BOTTOM).convert('RGBA')
@@ -280,7 +321,9 @@ def render(size, text=True, wordmark=True, usb=False, pixel=False):
         # 기체에 걸치므로 흰 기체와 색 바탕 양쪽에서 읽히도록 외곽선을 씁니다.
         label(img, 'DCS', 0.40, 0.10, 0.12, align='left')
         label(img, 'BMS', 0.40, 0.90, 0.88, align='right', italic=False)
-        if pixel:
+        if prompt:
+            stamp(img, prompt_mark(s), TERM_GREEN, outline=False, shadow=True)
+        elif pixel:
             stamp(img, bios_mark(s), TERM_GREEN, outline=False, shadow=True)
         elif usb:
             stamp(img, usb_mark(s))
@@ -307,6 +350,7 @@ def main():
     write_ico(DEST_PLAIN, wordmark=False)   # BIOS 없이 심 이름만
     write_ico(DEST_USB, usb=True)           # BIOS 대신 USB 기호
     write_ico(DEST_TERM, pixel=True)        # 픽셀 글꼴 BIOS >_
+    write_ico(DEST_PROMPT, prompt=True)     # '>_' 만 크게
     return 0
 
 
