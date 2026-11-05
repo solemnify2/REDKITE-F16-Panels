@@ -852,6 +852,8 @@ MF_STRING, MF_SEPARATOR, MF_GRAYED = 0x0000, 0x0800, 0x0001
 TPM_RIGHTBUTTON     = 0x0002
 SW_HIDE, SW_SHOW, SW_RESTORE = 0, 5, 9
 CW_USEDEFAULT       = -0x80000000
+WM_TIMER             = 0x0113
+_TIMER_MINIMIZE      = 1
 
 _LRESULT = ctypes.c_longlong if ctypes.sizeof(ctypes.c_void_p) == 8 else ctypes.c_long
 _WNDPROC = ctypes.WINFUNCTYPE(_LRESULT, wt.HWND, wt.UINT, wt.WPARAM, wt.LPARAM)
@@ -902,6 +904,8 @@ _user32.IsIconic.argtypes           = (wt.HWND,)
 _user32.IsIconic.restype            = wt.BOOL
 _user32.SetForegroundWindow.argtypes = (wt.HWND,)
 _user32.DestroyMenu.argtypes        = (wt.HMENU,)
+_user32.SetTimer.argtypes            = (wt.HWND, ctypes.c_uint, wt.UINT, wt.LPVOID)
+_user32.KillTimer.argtypes           = (wt.HWND, ctypes.c_uint)
 _shell32.Shell_NotifyIconW.argtypes  = (wt.DWORD, ctypes.c_void_p)
 _kernel32.GetConsoleWindow.restype   = wt.HWND
 _kernel32.GetConsoleCP.restype       = wt.UINT
@@ -916,8 +920,8 @@ _IID_ITaskbarList  = _GUID(0x56FDF342, 0xFD6D, 0x11D0,
                            (ctypes.c_ubyte * 8)(0x95, 0x8A, 0x00, 0x60, 0x97, 0xC9, 0xA0, 0x90))
 
 
-def _taskbar_delete_tab(hwnd):
-    """ITaskbarList::DeleteTab — 작업표시줄에서 창을 직접 제거합니다."""
+def _taskbar_tab(hwnd, add=False):
+    """ITaskbarList::AddTab / DeleteTab — 작업표시줄에 창을 등록하거나 제거합니다."""
     _ole32.CoInitialize(None)
     p = ctypes.c_void_p()
     hr = _ole32.CoCreateInstance(ctypes.byref(_CLSID_TaskbarList), None, 1,
@@ -928,8 +932,17 @@ def _taskbar_delete_tab(hwnd):
                        ctypes.POINTER(ctypes.c_void_p * 6))[0]
     _FT = ctypes.WINFUNCTYPE
     _FT(ctypes.HRESULT, ctypes.c_void_p)(vtbl[3])(p)                   # HrInit
-    _FT(ctypes.HRESULT, ctypes.c_void_p, wt.HWND)(vtbl[5])(p, hwnd)    # DeleteTab
+    idx = 4 if add else 5                                               # AddTab / DeleteTab
+    _FT(ctypes.HRESULT, ctypes.c_void_p, wt.HWND)(vtbl[idx])(p, hwnd)
     _FT(ctypes.c_ulong, ctypes.c_void_p)(vtbl[2])(p)                   # Release
+
+
+def _taskbar_delete_tab(hwnd):
+    _taskbar_tab(hwnd, add=False)
+
+
+def _taskbar_add_tab(hwnd):
+    _taskbar_tab(hwnd, add=True)
 
 
 def _reopen_stdio():
@@ -990,20 +1003,22 @@ class Tray:
         if self._console:
             if _user32.IsWindowVisible(self._console) and not _user32.IsIconic(self._console):
                 _user32.ShowWindow(self._console, SW_HIDE)
+                _taskbar_delete_tab(self._console)
             else:
                 _user32.ShowWindow(self._console, SW_RESTORE)
                 _user32.SetForegroundWindow(self._console)
-                _taskbar_delete_tab(self._console)
+                _taskbar_add_tab(self._console)
 
     def hide_console(self):
         if self._console:
             _user32.ShowWindow(self._console, SW_HIDE)
+            _taskbar_delete_tab(self._console)
 
     def show_console(self):
         if self._console:
             _user32.ShowWindow(self._console, SW_RESTORE)
             _user32.SetForegroundWindow(self._console)
-            _taskbar_delete_tab(self._console)
+            _taskbar_add_tab(self._console)
 
     def set_tooltip(self, text):
         self.tooltip = text
@@ -1016,6 +1031,11 @@ class Tray:
             _user32.PostMessageW(self.hwnd, WM_DESTROY, 0, 0)
 
     def _wndproc(self, hwnd, msg, wparam, lparam):
+        if msg == WM_TIMER and wparam == _TIMER_MINIMIZE:
+            if self._console and _user32.IsIconic(self._console):
+                _user32.ShowWindow(self._console, SW_HIDE)
+                _taskbar_delete_tab(self._console)
+            return 0
         if msg == WM_TRAY:
             if lparam in (WM_RBUTTONUP, 0x0007):
                 self._popup()
@@ -1094,12 +1114,15 @@ class Tray:
         self._create()
         if self._console:
             _taskbar_delete_tab(self._console)
+            _user32.SetTimer(self.hwnd, _TIMER_MINIMIZE, 200, None)
         msg = wt.MSG()
         try:
             while _user32.GetMessageW(ctypes.byref(msg), None, 0, 0) > 0:
                 _user32.TranslateMessage(ctypes.byref(msg))
                 _user32.DispatchMessageW(ctypes.byref(msg))
         finally:
+            if self._console:
+                _user32.KillTimer(self.hwnd, _TIMER_MINIMIZE)
             self._remove()
             if self.on_quit:
                 self.on_quit()
@@ -1254,36 +1277,43 @@ def main():
         say(WAITING)
         try:
             while not STOP.is_set():
-                # 1) BMS check (instant)
-                if shm_exists(SHM_NAME):
-                    say("Falcon BMS")
-                    run_bms(devices, mfd, hz=args.hz, debug=args.debug)
-                    if STOP.is_set():
-                        break
-                    wait_for_bms_gone()
-                    say(WAITING)
-                    continue
-
-                # 2) DCS check (1s timeout)
-                udp_sock.settimeout(1.0)
                 try:
-                    data, addr = udp_sock.recvfrom(4096)
-                    if data:
-                        # First packet received -> enter DCS mode
-                        # Forward this first packet immediately
-                        for port, s in serials:
-                            try:
-                                s.write(data)
-                            except serial.SerialException:
-                                pass
-                        say("DCS World")
-                        run_dcs(serials, mfd, udp_sock,
-                                watch_addrs=watch_addrs, debug=args.debug)
+                    # 1) BMS check (instant)
+                    if shm_exists(SHM_NAME):
+                        say("Falcon BMS")
+                        run_bms(devices, mfd, hz=args.hz, debug=args.debug)
                         if STOP.is_set():
                             break
+                        wait_for_bms_gone()
                         say(WAITING)
-                except socket.timeout:
-                    pass
+                        continue
+
+                    # 2) DCS check (1s timeout)
+                    udp_sock.settimeout(1.0)
+                    try:
+                        data, addr = udp_sock.recvfrom(4096)
+                        if data:
+                            # First packet received -> enter DCS mode
+                            # Forward this first packet immediately
+                            for port, s in serials:
+                                try:
+                                    s.write(data)
+                                except serial.SerialException:
+                                    pass
+                            say("DCS World")
+                            run_dcs(serials, mfd, udp_sock,
+                                    watch_addrs=watch_addrs, debug=args.debug)
+                            if STOP.is_set():
+                                break
+                            say(WAITING)
+                    except socket.timeout:
+                        pass
+                except KeyboardInterrupt:
+                    raise
+                except Exception as exc:
+                    print(f"[Bridge] 오류: {exc}")
+                    say(WAITING)
+                    time.sleep(2)
         except KeyboardInterrupt:
             print("\n[Bridge] 종료.")
 
