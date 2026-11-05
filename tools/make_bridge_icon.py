@@ -107,7 +107,7 @@ def label(img, text, width, cx, cy, align='center'):
     img.alpha_composite(layer)
 
 
-def render(size, wordmark=True, sims=True):
+def render(size, text=True):
     """한 크기 분량의 RGBA 이미지."""
     s = size * SS
     img = gradient(s, BMS_TOP, BMS_BOTTOM).convert('RGBA')
@@ -128,9 +128,9 @@ def render(size, wordmark=True, sims=True):
     # 흐려져서 얼룩으로 보입니다. 밝은 주황 위에서도 형태가 살도록 어두운 테두리를
     # 깔아 줍니다.
     big = size < TEXT_FROM
-    jet = jet_mask(round(s * (0.84 if big else 0.46)))
+    jet = jet_mask(round(s * (0.84 if big else 0.40)))
     jx = (s - jet.size[0]) // 2
-    jy = round(s * (0.50 if big else 0.38)) - jet.size[1] // 2
+    jy = round(s * 0.50) - jet.size[1] // 2
     if size >= RING_FROM:
         ring = max(round(s * 0.012), 1)
         shade = Image.new('RGBA', (s, s), (0, 0, 0, 0))
@@ -141,14 +141,13 @@ def render(size, wordmark=True, sims=True):
         img.alpha_composite(shade)
     img.paste((255, 255, 255, 255), (jx, jy), jet)
 
-    if size >= TEXT_FROM:
-        # 가운데가 BIOS, 위가 BMS, 아래가 DCS. 위는 파랑, 아래는 주황이라
-        # 분할 방향과 글자 순서가 같은 이야기를 합니다.
-        if sims:
-            label(img, 'BMS', 0.36, 0.12, 0.13, align='left')
-            label(img, 'DCS', 0.36, 0.88, 0.89, align='right')
-        if wordmark:
-            label(img, 'BIOS', 0.44, 0.50, 0.68)
+    if size >= TEXT_FROM and text:
+        # 각 구석이 자기 색 위에서 제 이름을 답니다 — 파랑에 BMS BIOS,
+        # 주황에 DCS BIOS. 원래 두 아이콘의 이름을 그대로 가져온 것입니다.
+        label(img, 'BMS', 0.30, 0.10, 0.115, align='left')
+        label(img, 'BIOS', 0.38, 0.10, 0.265, align='left')
+        label(img, 'DCS', 0.30, 0.90, 0.735, align='right')
+        label(img, 'BIOS', 0.38, 0.90, 0.885, align='right')
 
     # 둥근 모서리로 잘라냅니다.
     mask = Image.new('L', (s, s), 0)
