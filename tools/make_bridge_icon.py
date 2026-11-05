@@ -32,7 +32,7 @@ except ImportError:
 HERE = os.path.dirname(os.path.abspath(__file__))
 DEST = os.path.join(HERE, 'bridge.ico')
 DEST_PLAIN = os.path.join(HERE, 'bridge-plain.ico')
-GEAR_DXF = os.path.join(HERE, 'GearLedLayout.dxf')
+GEAR_DXF = os.path.join(HERE, os.pardir, 'docs', 'GearLedLayout.dxf')
 SIZES = (16, 24, 32, 48, 64, 128, 256)
 TEXT_FROM = 128         # 이보다 작으면 글자를 넣지 않습니다
 RING_FROM = 32          # 이보다 작으면 테두리가 형태를 먹으므로 생략합니다

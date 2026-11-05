@@ -5,18 +5,25 @@ Unified Bridge -- Falcon BMS / DCS World -> Teensy Serial
 대기 모드에서 BMS 공유 메모리 또는 DCS-BIOS UDP를 감지하면
 해당 모드로 전환하여 동작합니다. 심이 종료되면 다시 대기 모드로 복귀합니다.
 
+기본은 트레이 상주입니다. 콘솔 창은 숨고 알림 영역에 아이콘만 남습니다
+(아이콘 더블클릭하면 콘솔이 다시 보이고, 우클릭하면 메뉴가 나옵니다).
+창으로 띄우려면 --foreground 를 주십시오.
+
 사용법:
-  python bridge.py                              (자동 감지)
+  python bridge.py                              (트레이 상주, 자동 감지)
+  python bridge.py --foreground                 (콘솔 창으로)
   python bridge.py COM3:AUX COM4:CONSOLE        (수동 지정)
   python bridge.py --hz 20 --debug
 """
 
+import os
 import sys
 import time
 import struct
 import socket
 import argparse
 import ctypes
+import threading
 
 import serial
 import serial.tools.list_ports
@@ -27,6 +34,12 @@ import serial.tools.list_ports
 
 TEENSY_VID = 0x16C0
 SERIAL_BAUD = 1000000
+
+HERE = os.path.dirname(os.path.abspath(__file__))
+TRAY_ICON = os.path.join(HERE, 'bridge-plain.ico')
+
+# 트레이에서 종료를 고르면 올라갑니다. 심 모드 루프도 이걸 보고 빠져나옵니다.
+STOP = threading.Event()
 
 PID_DEVICES = {
     0x0487: ("F16 LEFT AUX MISC", "AUX"),
@@ -478,7 +491,7 @@ def run_bms(devices, mfd, hz=20, debug=False):
     print(f"[BMS] Update rate: {hz} Hz")
 
     try:
-        while True:
+        while not STOP.is_set():
             if not shm.ok:
                 if not shm.open():
                     return
@@ -680,6 +693,32 @@ MfdBacklight.update_bms = _mfd_update_bms
 #  Main
 # ================================================================
 
+def run_tray(work, title='Redkite Bridge'):
+    """일은 뒤 스레드에 맡기고, 이 스레드는 트레이 메시지를 돕니다.
+
+    Win32 창은 만든 스레드에 묶이므로 메시지 루프가 주 스레드여야 합니다.
+    """
+    import tray as tray_mod
+
+    icon = tray_mod.Tray(TRAY_ICON, title, title=title)
+    icon.item(title)                     # 상태 줄 — 눌리지 않습니다
+    icon.separator()
+    icon.item('콘솔 보기/숨기기', icon.toggle_console)
+    icon.item('종료', icon.stop)
+
+    def status(text):
+        icon.items[0] = (text, None)     # 메뉴는 열 때마다 새로 그려집니다
+        icon.set_tooltip('%s — %s' % (title, text))
+
+    worker = threading.Thread(target=work, kwargs={'status': status}, daemon=True)
+    worker.start()
+    try:
+        icon.run()
+    finally:
+        STOP.set()
+        worker.join(timeout=5.0)
+
+
 def main():
     parser = argparse.ArgumentParser(description='Unified Bridge -- BMS / DCS auto-detect')
     parser.add_argument('ports', nargs='*',
@@ -689,7 +728,18 @@ def main():
     parser.add_argument('--debug', action='store_true')
     parser.add_argument('--watch', type=str, default='',
                         help='DCS: hex addresses to watch (e.g. 0x4480,0x448A)')
+    parser.add_argument('--foreground', action='store_true',
+                        help='트레이에 넣지 않고 콘솔 창으로 돌립니다')
     args = parser.parse_args()
+
+    # 창 모드면 콘솔을 보이게, 트레이 모드면 같은 콘솔을 숨긴 채로 마련합니다.
+    # 어느 쪽이든 기존 출력문은 그대로 콘솔로 갑니다 — 트레이에서는 메뉴의
+    # '콘솔 보기' 로 꺼내 볼 수 있습니다.
+    if sys.platform == 'win32':
+        import tray as tray_mod
+        tray_mod.ensure_console('Redkite Bridge', show=args.foreground)
+    elif sys.stdout is None:
+        sys.stdout = sys.stderr = open(os.devnull, 'w')
 
     # --- Teensy port detection ---
     port_specs = []   # [(port, dev_type), ...]
@@ -767,39 +817,56 @@ def main():
         for a in args.watch.split(','):
             watch_addrs.add(int(a.strip(), 0))
 
-    print("\n[Bridge] 대기 모드 -- BMS 또는 DCS 감지 중...\n")
+    WAITING = "대기 모드 -- BMS 또는 DCS 감지 중"
+
+    def work(status=None):
+        """대기 ↔ 심 모드를 오가는 본체. 트레이 모드에서는 뒤 스레드에서 돕니다."""
+        def say(text):
+            print("[Bridge] " + text)
+            if status:
+                status(text)
+
+        say(WAITING)
+        try:
+            while not STOP.is_set():
+                # 1) BMS check (instant)
+                if shm_exists(SHM_NAME):
+                    say("Falcon BMS")
+                    run_bms(devices, mfd, hz=args.hz, debug=args.debug)
+                    if STOP.is_set():
+                        break
+                    wait_for_bms_gone()
+                    say(WAITING)
+                    continue
+
+                # 2) DCS check (1s timeout)
+                udp_sock.settimeout(1.0)
+                try:
+                    data, addr = udp_sock.recvfrom(4096)
+                    if data:
+                        # First packet received -> enter DCS mode
+                        # Forward this first packet immediately
+                        for port, s in serials:
+                            try:
+                                s.write(data)
+                            except serial.SerialException:
+                                pass
+                        say("DCS World")
+                        run_dcs(serials, mfd, udp_sock,
+                                watch_addrs=watch_addrs, debug=args.debug)
+                        if STOP.is_set():
+                            break
+                        say(WAITING)
+                except socket.timeout:
+                    pass
+        except KeyboardInterrupt:
+            print("\n[Bridge] 종료.")
 
     try:
-        while True:
-            # 1) BMS check (instant)
-            if shm_exists(SHM_NAME):
-                print("[Bridge] Falcon BMS 감지됨")
-                run_bms(devices, mfd, hz=args.hz, debug=args.debug)
-                wait_for_bms_gone()
-                print("[Bridge] BMS 오프라인 -- 대기 모드로 복귀\n")
-                continue
-
-            # 2) DCS check (1s timeout)
-            udp_sock.settimeout(1.0)
-            try:
-                data, addr = udp_sock.recvfrom(4096)
-                if data:
-                    # First packet received -> enter DCS mode
-                    # Forward this first packet immediately
-                    for port, s in serials:
-                        try:
-                            s.write(data)
-                        except serial.SerialException:
-                            pass
-                    print("[Bridge] DCS World 감지됨")
-                    run_dcs(serials, mfd, udp_sock,
-                            watch_addrs=watch_addrs, debug=args.debug)
-                    print("[Bridge] DCS 오프라인 -- 대기 모드로 복귀\n")
-            except socket.timeout:
-                pass
-
-    except KeyboardInterrupt:
-        print("\n[Bridge] 종료.")
+        if args.foreground:
+            work()
+        else:
+            run_tray(work)
     finally:
         mfd.close()
         for _, s in serials:
