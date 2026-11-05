@@ -123,14 +123,15 @@ def render(size, wordmark=True, sims=True):
                               width=max(round(s * 0.012), 1))
     img.alpha_composite(seam)
 
-    # 큰 크기는 글자가, 작은 크기는 기체가 맡습니다. 세 줄이 들어가면 기체 자리가
-    # 없고, 뒤에 깔면 글자와 겹쳐 얼룩처럼 보입니다. 기체에는 밝은 주황 위에서도
-    # 형태가 살도록 어두운 테두리를 깔아 줍니다.
+    # 글자가 빠지는 작은 크기에서는 기체가 아이콘 전체를 채우고, 글자가 들어가면
+    # 그 자리를 비워 주려고 작아집니다. 글자 뒤에 반투명으로 까는 것도 해 봤지만
+    # 흐려져서 얼룩으로 보입니다. 밝은 주황 위에서도 형태가 살도록 어두운 테두리를
+    # 깔아 줍니다.
     big = size < TEXT_FROM
-    jet = jet_mask(round(s * (0.84 if big else 0.92)))
+    jet = jet_mask(round(s * (0.84 if big else 0.46)))
     jx = (s - jet.size[0]) // 2
-    jy = round(s * 0.50) - jet.size[1] // 2
-    if big and size >= RING_FROM:
+    jy = round(s * (0.50 if big else 0.38)) - jet.size[1] // 2
+    if size >= RING_FROM:
         ring = max(round(s * 0.012), 1)
         shade = Image.new('RGBA', (s, s), (0, 0, 0, 0))
         for dx in range(-ring, ring + 1):
@@ -138,17 +139,16 @@ def render(size, wordmark=True, sims=True):
                 if dx * dx + dy * dy <= ring * ring:
                     shade.paste(INK + (150,), (jx + dx, jy + dy), jet)
         img.alpha_composite(shade)
-    if big:
-        img.paste((255, 255, 255, 255), (jx, jy), jet)
+    img.paste((255, 255, 255, 255), (jx, jy), jet)
 
     if size >= TEXT_FROM:
         # 가운데가 BIOS, 위가 BMS, 아래가 DCS. 위는 파랑, 아래는 주황이라
         # 분할 방향과 글자 순서가 같은 이야기를 합니다.
         if sims:
-            label(img, 'BMS', 0.30, 0.50, 0.17)
-            label(img, 'DCS', 0.30, 0.50, 0.83)
+            label(img, 'BMS', 0.36, 0.12, 0.13, align='left')
+            label(img, 'DCS', 0.36, 0.88, 0.89, align='right')
         if wordmark:
-            label(img, 'BIOS', 0.60, 0.50, 0.50)
+            label(img, 'BIOS', 0.44, 0.50, 0.68)
 
     # 둥근 모서리로 잘라냅니다.
     mask = Image.new('L', (s, s), 0)
