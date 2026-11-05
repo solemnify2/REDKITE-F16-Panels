@@ -79,6 +79,7 @@ JET_SHADE_ALPHA = 180
 JET_SHADE_WIDTH = 0.020
 JET_SHADE_BLUR = 0.010
 JET_SCALE = 0.70
+TILT = -32                       # 기체와 기어 판을 함께 기울이는 각도
 
 # F-16 평면형. 기수가 위를 향하고 x=50 에 대칭인 100 x 146 상자 안의 좌표입니다.
 #
@@ -116,7 +117,7 @@ def jet_mask(size):
     h = round(max(y for _, y in JET) * SS) + 1
     m = Image.new('L', (w, h), 0)
     ImageDraw.Draw(m).polygon([(x * SS, y * SS) for x, y in JET], fill=255)
-    m = m.rotate(-32, resample=Image.BICUBIC, expand=True)
+    m = m.rotate(TILT, resample=Image.BICUBIC, expand=True)
     # 회전하면 상자 모서리에 빈 공간이 생깁니다. 그 상자로 크기를 맞추면 기체가
     # 요청한 것보다 작아지므로, 실제 그려진 영역만 잘라 기준으로 삼습니다.
     m = m.crop(m.getbbox())
@@ -284,6 +285,12 @@ def gear_marks(s, height=0.70, center=(0.50, 0.47)):
         x, y = place(cx, cy)
         rr = r * scale * 1.30             # 실제 돔이 구멍보다 큽니다
         dl.ellipse([x - rr, y - rr, x + rr, y + rr], fill=255)
+
+    # 기체와 같은 각도로 눕힙니다. 두 마스크를 같은 중심으로 돌려야 LED 가 제자리에
+    # 남습니다.
+    pivot = (s * center[0], s * center[1])
+    art = art.rotate(TILT, resample=Image.BICUBIC, center=pivot)
+    led = led.rotate(TILT, resample=Image.BICUBIC, center=pivot)
     return art, led
 
 
