@@ -41,9 +41,16 @@ def _alert(text, title='Redkite Bridge'):
     k32 = ctypes.WinDLL('kernel32')
     u32 = ctypes.WinDLL('user32')
     hwnd = k32.GetConsoleWindow()
-    # 읽을 사람이 없을 때만 띄웁니다 — 콘솔이 아예 없거나(pythonw), 트레이 모드라
-    # 숨겨 둔 경우. 터미널에서 돌리는 중이면 출력만으로 충분합니다.
-    unseen = not k32.GetConsoleCP() or (hwnd and not u32.IsWindowVisible(hwnd))
+
+    # 이 콘솔에 우리만 붙어 있으면, 창은 우리가 끝나는 순간 같이 닫힙니다.
+    # .py 를 더블클릭했을 때가 그렇습니다 — 글자는 찍히지만 읽을 틈이 없습니다.
+    buf = (ctypes.c_uint32 * 8)()
+    owned = k32.GetConsoleProcessList(buf, 8) == 1
+
+    # 읽을 사람이 없을 때만 띄웁니다. 터미널에서 돌리는 중이면 출력으로 충분합니다.
+    unseen = (not k32.GetConsoleCP()                       # pythonw — 콘솔 자체가 없음
+              or (hwnd and not u32.IsWindowVisible(hwnd))  # 트레이가 숨겨 둔 콘솔
+              or owned)                                    # 더블클릭 — 곧 닫힘
     if unseen:
         u32.MessageBoxW(None, text, title, 0x10)      # MB_ICONERROR
 
