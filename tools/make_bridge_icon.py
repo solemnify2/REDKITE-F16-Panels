@@ -29,6 +29,7 @@ except ImportError:
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 DEST = os.path.join(HERE, 'bridge.ico')
+DEST_PLAIN = os.path.join(HERE, 'bridge-plain.ico')
 SIZES = (16, 24, 32, 48, 64, 128, 256)
 TEXT_FROM = 128         # 이보다 작으면 글자를 넣지 않습니다
 RING_FROM = 32          # 이보다 작으면 테두리가 형태를 먹으므로 생략합니다
@@ -50,6 +51,8 @@ UPRIGHT_FONTS = (r'C:\Windows\Fonts\arialbd.ttf',
 # 크기는 거기서부터 키운 값으로, 모서리에도 글자에도 닿지 않는 선입니다.
 # **이 두 값은 확정입니다 — 바꾸지 마십시오.**
 JET_CENTER = (0.578, 0.424)
+SHADOW_OFFSET = (-0.11, 0.055)   # 기체 뒤 그림자가 밀려나는 정도
+SHADOW_ALPHA = 90
 JET_SCALE = 0.70
 
 # F-16 평면형. 기수가 위를 향하고 x=50 에 대칭인 100 x 146 상자 안의 좌표입니다.
@@ -139,7 +142,7 @@ def label(img, text, width, cx, cy, align='center', stroke=False, italic=True):
     img.alpha_composite(layer)
 
 
-def render(size, text=True):
+def render(size, text=True, wordmark=True):
     """한 크기 분량의 RGBA 이미지."""
     s = size * SS
     img = gradient(s, DCS_TOP, DCS_BOTTOM).convert('RGBA')
@@ -165,6 +168,14 @@ def render(size, text=True):
     jx = round(s * cx) - jet.size[0] // 2
     jy = round(s * cy) - jet.size[1] // 2
     if size >= RING_FROM:
+        # BMS-BIOS.ico 처럼 기체 뒤로 같은 실루엣을 왼쪽 아래에 깔아 둡니다.
+        # 반투명이라 주황 쪽과 파랑 쪽에서 각각 그 색이 어두워집니다.
+        ghost = Image.new('RGBA', (s, s), (0, 0, 0, 0))
+        ghost.paste(INK + (SHADOW_ALPHA,),
+                    (jx + round(s * SHADOW_OFFSET[0]),
+                     jy + round(s * SHADOW_OFFSET[1])), jet)
+        img.alpha_composite(ghost)
+
         ring = max(round(s * 0.012), 1)
         shade = Image.new('RGBA', (s, s), (0, 0, 0, 0))
         for dx in range(-ring, ring + 1):
@@ -179,7 +190,8 @@ def render(size, text=True):
         # 기체에 걸치므로 흰 기체와 색 바탕 양쪽에서 읽히도록 외곽선을 씁니다.
         label(img, 'DCS', 0.40, 0.10, 0.12, align='left')
         label(img, 'BMS', 0.40, 0.90, 0.88, align='right', italic=False)
-        label(img, 'BIOS', 0.34, 0.46, 0.60, stroke=True)
+        if wordmark:
+            label(img, 'BIOS', 0.34, 0.46, 0.60, stroke=True)
 
     # 둥근 모서리로 잘라냅니다.
     mask = Image.new('L', (s, s), 0)
@@ -189,11 +201,16 @@ def render(size, text=True):
     return img.resize((size, size), Image.LANCZOS)
 
 
-def main():
-    frames = [render(n) for n in SIZES]
-    frames[-1].save(DEST, format='ICO',
+def write_ico(dest, **kw):
+    frames = [render(n, **kw) for n in SIZES]
+    frames[-1].save(dest, format='ICO',
                     sizes=[(n, n) for n in SIZES], append_images=frames[:-1])
-    sys.stderr.write('%s  (%s)\n' % (DEST, ', '.join('%d' % n for n in SIZES)))
+    sys.stderr.write('%s  (%s)\n' % (dest, ', '.join('%d' % n for n in SIZES)))
+
+
+def main():
+    write_ico(DEST)
+    write_ico(DEST_PLAIN, wordmark=False)   # BIOS 없이 심 이름만
     return 0
 
 
