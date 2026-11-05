@@ -149,7 +149,7 @@ def label(img, text, width, cx, cy, align='center', stroke=False, italic=True):
     img.alpha_composite(layer)
 
 
-def bios_mark(s, width=0.52, center=(0.47, 0.545)):
+def bios_mark(s, width=0.52, center=(0.47, 0.495)):
     """`bios-text.png` 의 픽셀 글꼴 BIOS 를 마스크로 돌려줍니다.
 
     격자를 떠서 코드에 박는 것도 해 봤지만 모듈 경계가 딱 떨어지지 않아 글자가
