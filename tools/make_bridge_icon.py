@@ -71,7 +71,8 @@ LED_ON = (70, 225, 70)           # 켜진 칸
 LED_OFF = (40, 55, 72)           # 꺼진 칸
 GEAR_ART = (238, 248, 242)       # 패널 각인선
 GEAR_GLOW = (120, 255, 150)      # LED 번짐
-GEAR_LED = (235, 255, 240)       # LED 알맹이
+GEAR_LED = (60, 230, 90)         # LED 몸통 (진한 녹색)
+GEAR_CORE = (228, 255, 232)      # LED 한가운데 흰 심
 JET_FILL_A = (255, 250, 242)     # 기체 왼쪽 위 (주황 쪽)
 JET_FILL_B = (214, 228, 243)     # 기체 오른쪽 아래 (파랑 쪽)
 JET_SHADE = (96, 120, 150)
@@ -409,11 +410,16 @@ def render(size, text=True, wordmark=True, usb=False, pixel=False,
         drop.paste(INK + (160,), (round(s * 0.006), round(s * 0.006)), art)
         img.alpha_composite(drop)
         img.paste(Image.new('RGBA', (s, s), GEAR_ART + (255,)), (0, 0), art)
+        # 켜진 LED 처럼 보이게 합니다 — 넓게 번지는 빛, 그 안에 진한 녹색,
+        # 가운데에 흰 심. 사진의 램프가 이 순서로 밝아집니다.
         if size >= RING_FROM:
-            halo = leds.filter(ImageFilter.GaussianBlur(s * 0.022))
-            halo = Image.eval(halo, lambda v: v * 190 // 255)
-            img.paste(Image.new('RGBA', (s, s), GEAR_GLOW + (255,)), (0, 0), halo)
+            for blur, alpha in ((0.042, 120), (0.017, 205)):
+                bloom = leds.filter(ImageFilter.GaussianBlur(s * blur))
+                bloom = Image.eval(bloom, lambda v, a=alpha: v * a // 255)
+                img.paste(Image.new('RGBA', (s, s), GEAR_GLOW + (255,)), (0, 0), bloom)
         img.paste(Image.new('RGBA', (s, s), GEAR_LED + (255,)), (0, 0), leds)
+        core = leds.filter(ImageFilter.MinFilter(max(round(s * 0.007), 1) * 2 + 1))
+        img.paste(Image.new('RGBA', (s, s), GEAR_CORE + (255,)), (0, 0), core)
         if size >= TEXT_FROM and text:
             label(img, 'DCS', 0.40, 0.10, 0.12, align='left')
             label(img, 'BMS', 0.40, 0.90, 0.88, align='right', italic=False)
