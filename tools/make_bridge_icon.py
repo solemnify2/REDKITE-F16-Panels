@@ -30,7 +30,7 @@ except ImportError:
 HERE = os.path.dirname(os.path.abspath(__file__))
 DEST = os.path.join(HERE, 'bridge.ico')
 SIZES = (16, 24, 32, 48, 64, 128, 256)
-TEXT_FROM = 64          # 이보다 작으면 글자를 넣지 않습니다
+TEXT_FROM = 128         # 이보다 작으면 글자를 넣지 않습니다
 RING_FROM = 32          # 이보다 작으면 테두리가 형태를 먹으므로 생략합니다
 SS = 4                  # 수퍼샘플 배율
 
@@ -89,7 +89,25 @@ def fitted_font(draw, text, width):
     return ImageFont.truetype(path, size)
 
 
-def render(size):
+def label(img, text, width, cx, cy, align='center'):
+    """`text` 를 그림자와 함께 올립니다. cx/cy/width 는 변 길이에 대한 비율."""
+    s = img.size[0]
+    layer = Image.new('RGBA', (s, s), (0, 0, 0, 0))
+    d = ImageDraw.Draw(layer)
+    font = fitted_font(d, text, round(s * width))
+    if font is None:
+        return
+    box = d.textbbox((0, 0), text, font=font)
+    w, h = box[2] - box[0], box[3] - box[1]
+    x = round(s * cx) - (w if align == 'right' else w // 2 if align == 'center' else 0)
+    tx, ty = x - box[0], round(s * cy) - h // 2 - box[1]
+    off = max(round(s * 0.012), 1)
+    d.text((tx + off, ty + off), text, font=font, fill=INK + (190,))
+    d.text((tx, ty), text, font=font, fill=(255, 255, 255, 255))
+    img.alpha_composite(layer)
+
+
+def render(size, wordmark=True, sims=True):
     """한 크기 분량의 RGBA 이미지."""
     s = size * SS
     img = gradient(s, BMS_TOP, BMS_BOTTOM).convert('RGBA')
@@ -105,11 +123,14 @@ def render(size):
                               width=max(round(s * 0.012), 1))
     img.alpha_composite(seam)
 
-    # 기체. 밝은 주황 위에서도 형태가 살도록 어두운 테두리를 깔아 줍니다.
-    jet = jet_mask(round(s * (0.84 if size < TEXT_FROM else 0.64)))
+    # 큰 크기는 글자가, 작은 크기는 기체가 맡습니다. 세 줄이 들어가면 기체 자리가
+    # 없고, 뒤에 깔면 글자와 겹쳐 얼룩처럼 보입니다. 기체에는 밝은 주황 위에서도
+    # 형태가 살도록 어두운 테두리를 깔아 줍니다.
+    big = size < TEXT_FROM
+    jet = jet_mask(round(s * (0.84 if big else 0.92)))
     jx = (s - jet.size[0]) // 2
-    jy = round(s * (0.50 if size < TEXT_FROM else 0.39)) - jet.size[1] // 2
-    if size >= RING_FROM:
+    jy = round(s * 0.50) - jet.size[1] // 2
+    if big and size >= RING_FROM:
         ring = max(round(s * 0.012), 1)
         shade = Image.new('RGBA', (s, s), (0, 0, 0, 0))
         for dx in range(-ring, ring + 1):
@@ -117,20 +138,17 @@ def render(size):
                 if dx * dx + dy * dy <= ring * ring:
                     shade.paste(INK + (150,), (jx + dx, jy + dy), jet)
         img.alpha_composite(shade)
-    img.paste((255, 255, 255, 255), (jx, jy), jet)
+    if big:
+        img.paste((255, 255, 255, 255), (jx, jy), jet)
 
     if size >= TEXT_FROM:
-        layer = Image.new('RGBA', (s, s), (0, 0, 0, 0))
-        d = ImageDraw.Draw(layer)
-        font = fitted_font(d, 'BIOS', round(s * 0.62))
-        if font is not None:
-            box = d.textbbox((0, 0), 'BIOS', font=font)
-            tx = (s - (box[2] - box[0])) // 2 - box[0]
-            ty = round(s * 0.80) - (box[3] - box[1]) // 2 - box[1]
-            off = max(round(s * 0.012), 1)
-            d.text((tx + off, ty + off), 'BIOS', font=font, fill=INK + (190,))
-            d.text((tx, ty), 'BIOS', font=font, fill=(255, 255, 255, 255))
-        img.alpha_composite(layer)
+        # 가운데가 BIOS, 위가 BMS, 아래가 DCS. 위는 파랑, 아래는 주황이라
+        # 분할 방향과 글자 순서가 같은 이야기를 합니다.
+        if sims:
+            label(img, 'BMS', 0.30, 0.50, 0.17)
+            label(img, 'DCS', 0.30, 0.50, 0.83)
+        if wordmark:
+            label(img, 'BIOS', 0.60, 0.50, 0.50)
 
     # 둥근 모서리로 잘라냅니다.
     mask = Image.new('L', (s, s), 0)
