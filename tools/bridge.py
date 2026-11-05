@@ -55,6 +55,7 @@ OFF_FD2_UHF_FREQ   = 52
 OFF_IV_IS_EXIT_GAME = 20   # bool — BMS sets this true on exit
 
 FILE_MAP_READ = 0x0004
+BMS_EXIT_WAIT = 15.0       # 종료한 세션의 SHM 정리를 기다리는 상한(초)
 
 LB_ADV_STANDBY      = 0x80000000
 LB2_EWS_GO          = 0x00000040
@@ -247,12 +248,50 @@ _kernel32.CloseHandle.argtypes      = (ctypes.c_void_p,)
 
 
 def shm_exists(name):
-    """SHM이 존재하는지만 확인합니다. 섹션을 만들거나 붙들지 않습니다."""
+    """SHM이 존재하는지만 확인합니다. 섹션을 만들거나 붙들지 않습니다.
+
+    "이름이 조회되는가"일 뿐 "BMS가 살아 있는가"가 아닙니다. 이름은 마지막
+    핸들이 닫혀야 사라지므로, 죽어가는 세션도 새로 뜬 세션도 똑같이 True입니다.
+    """
     handle = _kernel32.OpenFileMappingW(FILE_MAP_READ, False, name)
     if not handle:
         return False
     _kernel32.CloseHandle(handle)
     return True
+
+
+def exit_flag_set():
+    """IntelliVibe의 IsExitGame. 읽고 바로 놓습니다 — 섹션을 붙들지 않습니다."""
+    iv = ShmView(IV_NAME, IV_SIZE)
+    if not iv.open():
+        return False
+    try:
+        return iv.flag(OFF_IV_IS_EXIT_GAME)
+    except Exception:
+        return False
+    finally:
+        iv.close()
+
+
+def wait_for_bms_gone(timeout=BMS_EXIT_WAIT):
+    """종료한 세션의 SHM이 정리되길 기다립니다.
+
+    이름만 보고 기다리면 BMS를 곧바로 다시 켰을 때 새 세션의 섹션을 이전 세션으로
+    착각해 영영 빠져나오지 못합니다. IsExitGame을 같이 봅니다 — 새 세션이 만든
+    섹션에서는 내려가 있으므로, 그때는 기다리지 않고 바로 다시 붙습니다.
+
+    상한을 두는 것은 다른 BMS 도구가 핸들을 쥐고 있거나 BMS가 종료 도중 멈춰서
+    이름이 영영 남는 경우에 갇히지 않기 위해서입니다.
+    """
+    deadline = time.time() + timeout
+    while time.time() < deadline:
+        if not shm_exists(SHM_NAME):
+            return
+        if not exit_flag_set():
+            print("[Bridge] 새 BMS 세션 감지")
+            return
+        time.sleep(0.5)
+    print("[Bridge] SHM이 %.0f초 동안 남아 있습니다 -- 그대로 진행합니다" % timeout)
 
 
 class ShmView:
@@ -736,10 +775,7 @@ def main():
             if shm_exists(SHM_NAME):
                 print("[Bridge] Falcon BMS 감지됨")
                 run_bms(devices, mfd, hz=args.hz, debug=args.debug)
-                # BMS 종료 직후 SHM이 아직 남아 있을 수 있으므로
-                # 사라질 때까지 기다린 뒤 대기 모드로 복귀
-                while shm_exists(SHM_NAME):
-                    time.sleep(1)
+                wait_for_bms_gone()
                 print("[Bridge] BMS 오프라인 -- 대기 모드로 복귀\n")
                 continue
 
