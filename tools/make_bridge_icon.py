@@ -4,7 +4,8 @@ r"""통합 브리지 아이콘(`tools/bridge.ico`)을 만듭니다.
 
     python tools/make_bridge_icon.py
 
-`BMS-BIOS.ico` 와 `DCS-BIOS2.ico` 에서 가져온 것:
+원래 쓰던 `BMS-BIOS.ico` 와 `DCS-BIOS2.ico` 에서 가져온 것 (두 파일은 역할을
+마치고 지웠습니다 — 값은 아래 상수에 남아 있고, 원본은 커밋 a31c266 이전에 있습니다):
 
   * 색 — BMS 의 파랑 그라디언트, DCS 의 주황 그라디언트. 실제 픽셀에서 뽑았습니다.
   * 모서리 둥근 사각형 — DCS 쪽 모양
