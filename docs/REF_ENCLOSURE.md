@@ -95,21 +95,22 @@ MFD 와 **Alibaba 에서 구한 7.6인치 정사각 LCD** 를 겹쳐 놓고 홀�
 ## 토글 스위치 커버
 
 EPU · Engine Cont 처럼 실수로 건드리면 안 되는 토글에 씌우는 보호 커버입니다.
-`3d stl/ToggleCover/` 에 있고, 썸네일은 없습니다.
+`3d stl/ToggleCover/` 에 있습니다. 썸네일이 없어 파일 이름을 바로 링크했습니다 —
+이름을 누르면 STL, 오른쪽 칸을 누르면 STEP 을 내려받습니다.
 
 파일 이름의 `(SM 1.0t)` 는 **1.0t 판금(sheet metal)** 으로 깎을 것을 염두에 둔
 모델이라는 뜻입니다. 그 버전은 **`.step` 이 함께 있어** 발주에 그대로 쓸 수 있고,
 `.step` 이 없는 것은 플라스틱 출력용입니다.
 
-| 파일 | 크기 (mm) | STEP |
+| 파일 | 크기 (mm) | 판금용 |
 |------|----------:|:----:|
-| `EPU Switch Guard - Base (SM 1.0t)` | 16.8 × 28.6 × 6.0 | O |
-| `EPU Switch Guard - Top L (SM 1.0t)` | 8.3 × 24.0 × 12.3 | O |
-| `EPU Switch Guard - Top R (SM 1.0t)` | 8.4 × 24.0 × 12.3 | O |
-| `Trigger Guard - Base Body - Long` | 16.8 × 34.7 × 6.0 | O (`Base Body Long`) |
-| `Trigger Guard A - Top Body` | 17.0 × 24.1 × 12.5 | O |
-| `Trigger Guard B - Top Body` | 17.0 × 24.1 × 12.5 | O |
-| `Trigger Guard B - Top Body - Long` | 17.0 × 30.2 × 12.5 | O |
+| [`EPU Switch Guard - Base (SM 1.0t)`](../3d%20stl/ToggleCover/EPU%20Switch%20Guard%20-%20Base%20%28SM%201.0t%29.stl) | 16.8 × 28.6 × 6.0 | [STEP](../3d%20stl/ToggleCover/EPU%20Switch%20Guard%20-%20Base%20%28SM%201.0t%29.step) |
+| [`EPU Switch Guard - Top L (SM 1.0t)`](../3d%20stl/ToggleCover/EPU%20Switch%20Guard%20-%20Top%20L%20%28SM%201.0t%29.stl) | 8.3 × 24.0 × 12.3 | [STEP](../3d%20stl/ToggleCover/EPU%20Switch%20Guard%20-%20Top%20L%20%28SM%201.0t%29.step) |
+| [`EPU Switch Guard - Top R (SM 1.0t)`](../3d%20stl/ToggleCover/EPU%20Switch%20Guard%20-%20Top%20R%20%28SM%201.0t%29.stl) | 8.4 × 24.0 × 12.3 | [STEP](../3d%20stl/ToggleCover/EPU%20Switch%20Guard%20-%20Top%20R%20%28SM%201.0t%29.step) |
+| [`Trigger Guard - Base Body - Long`](../3d%20stl/ToggleCover/Trigger%20Guard%20-%20Base%20Body%20-%20Long.stl) | 16.8 × 34.7 × 6.0 | [STEP](../3d%20stl/ToggleCover/Trigger%20Guard%20-%20Base%20Body%20Long%20%28SM%201.0t%29.step) |
+| [`Trigger Guard A - Top Body`](../3d%20stl/ToggleCover/Trigger%20Guard%20A%20-%20Top%20Body.stl) | 17.0 × 24.1 × 12.5 | [STEP](../3d%20stl/ToggleCover/Trigger%20Guard%20A%20-%20Top%20Body%20%28SM%201.0t%29.step) |
+| [`Trigger Guard B - Top Body - Long`](../3d%20stl/ToggleCover/Trigger%20Guard%20B%20-%20Top%20Body%20-%20Long.stl) | 17.0 × 30.2 × 12.5 | [STEP](../3d%20stl/ToggleCover/Trigger%20Guard%20B%20-%20Top%20Body%20Long%20%28SM%201.0t%29.step) |
+| [`Trigger Guard B - Top Body`](../3d%20stl/ToggleCover/Trigger%20Guard%20B%20-%20Top%20Body.stl) | 17.0 × 24.1 × 12.5 | [STEP](../3d%20stl/ToggleCover/Trigger%20Guard%20B%20-%20Top%20Body%20%28SM%201.0t%29.step) |
 
 커버 하나는 **베이스 + 상부** 로 이루어집니다. EPU 는 상부가 좌우 한 쌍(`Top L` ·
 `Top R`)이고, Trigger Guard 는 상부 A/B 와 길이 두 가지를 같은 베이스에 조합합니다.
