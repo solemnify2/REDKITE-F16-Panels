@@ -66,7 +66,14 @@ Upper와 Lower를 결합한 뒤, Bottom 2종을 바닥판으로 장착합니다.
 
 **Thrustmaster(TM) MFD** 를 Center 인클로저에 고정하는 브래킷입니다.
 MFD 와 **Alibaba 에서 구한 7.6인치 정사각 LCD** 를 겹쳐 놓고 홀더가 둘을 함께 잡습니다.
-접착하지 않아 수리 시 분리가 쉽습니다. 조립은 [README 2-1](../README.md#2-1-조립-순서) 참조.
+
+**홀더는 Center Left · Right 인클로저에 고정합니다** — 에폭시 등으로 접착하거나,
+인클로저를 직접 출력한다면 아예 **일체로 뽑아도 됩니다.** 한 번 붙이면 떼지 않는
+부분입니다.
+
+**MFD 와 LCD 는 반대로 쉽게 탈착됩니다.** 둘 다 접착하지 않고 홀더가 눌러 잡는
+구조라, 수리하거나 바꿔 끼울 때 구조물을 건드리지 않고 빼낼 수 있습니다.
+조립은 [README 2-1](../README.md#2-1-조립-순서) 참조.
 
 | LeftMFDHolder | LeftMFDHolderUpper | RightMFDHolder | RightMFDHolderUpper |
 |:----:|:----:|:----:|:----:|

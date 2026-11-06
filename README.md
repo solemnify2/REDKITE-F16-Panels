@@ -104,7 +104,7 @@ Greenisland 패널은 **Top(아크릴) · Diffuser(아크릴) · LED layer(투�
 
 1. **패널 제작·적층**: Greenisland 패널은 Top(아크릴 2 mm), Diffuser(투명 아크릴 2~3 mm), LED layer(투명 PLA) 순서로 겹칩니다. 스위치는 LED layer에 체결합니다. PC Flights 패널은 전면·후면 2층입니다. 상세는 [REF_PANEL.md](docs/REF_PANEL.md)와 원본 모델의 조립 안내를 따릅니다.
 2. **백라이트 설치**: LED 3개와 220Ω 저항으로 스트링을 만들고 별도 플레이트에 고정합니다. 패널과의 간격은 [REF_BACKLIGHT.md](docs/REF_BACKLIGHT.md)를 참고합니다.
-3. **인클로저 조립**: 스탠드는 Center 인클로저 뒷면에, MFD 홀더는 아래쪽에 에폭시로 고정합니다. `MFDHolderUpper`는 빈틈을 메우는 부품입니다. Left Console을 TQS와 결합하려면 Mission Pack 또는 더미 덮개를 먼저 분리합니다.
+3. **인클로저 조립**: 스탠드는 Center 인클로저 뒷면에, MFD 홀더는 Center Left · Right 인클로저 아래쪽에 에폭시로 고정합니다 (인클로저를 직접 출력한다면 일체로 뽑아도 됩니다). MFD와 LCD는 접착하지 않아 나중에 쉽게 빼낼 수 있습니다. `MFDHolderUpper`는 빈틈을 메우는 부품입니다. Left Console을 TQS와 결합하려면 Mission Pack 또는 더미 덮개를 먼저 분리합니다.
 4. **MFD·LCD 장착**: 두 장치를 겹쳐 홀더로 고정하며 서로 접착하지 않습니다. LCD는 외형이 아닌 표시 영역(135.36 × 135.36 mm)을 기준으로 정렬합니다. 아래쪽 FPC 리본의 여유 공간도 확보합니다. 상세는 [REF_MFD_LCD.md](docs/REF_MFD_LCD.md)를 참고합니다.
 5. **페달 제작**: 홀 센서 페달 2개를 몰딩 사이에 반대 방향으로 고정하고, 신호를 A16·A17에 연결합니다. 전원은 **3.3V**를 사용합니다. 상세는 [REF_PEDAL.md](docs/REF_PEDAL.md)를 참고합니다.
 6. **배선·확인**: 아래 배선도대로 결선한 뒤, 패널을 완전히 고정하기 전에 입력과 표시등을 확인합니다.
