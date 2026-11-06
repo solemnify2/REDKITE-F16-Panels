@@ -20,7 +20,7 @@ MISC·Left Aux·Left Console·MFD를 중심으로 구성합니다. 계기류는 
 - **Viper TQS 결합**: Left Console 인클로저를 Thrustmaster Viper TQS 옆면에 연결합니다.
 - **MFD와 LCD 고정**: Thrustmaster MFD 뒤에 7.6인치 정사각 LCD를 겹쳐 홀더로 고정합니다. 패스스루에서 실물 MFD가 가리는 게임 화면을 LCD에 표시합니다.
 - **자작 러더 페달**: 홀 센서가 내장된 킥보드용 스로틀 페달 2개를 PVC 전선 몰딩에 고정합니다.
-- **게임 상태 표시**: BMS-BIOS/DCS-BIOS로 경고등·백라이트·[UHF 디스플레이](pcb/uhf_display/)를 연동합니다.
+- **게임 상태 표시**: BMS-BIOS/DCS-BIOS로 경고등·백라이트·[UHF 디스플레이](pcb/uhf_display/)를 연동합니다. 브리지는 **하나**로, 트레이에 상주하며 BMS와 DCS 중 먼저 잡히는 쪽에 붙고 심이 끝나면 다시 대기합니다. 어느 심을 켤지 미리 고를 필요가 없습니다.
 - **입력 자동화**: COMM 볼륨 끝점의 전원 제어와 토글 커버 개폐용 DX를 출력합니다. DX 출력은 시뮬레이터와 무관하며, 필요한 기능만 각 게임에 매핑합니다.
 - **키맵 자동 생성**: 보드에 꽂힌 펌웨어에게 DX 배치를 직접 물어 BMS의 장치별 Setup XML과 DCS의 입력 프로파일을 만듭니다. 스위치 63개를 손으로 할당할 필요가 없고, DX 번호가 바뀌어도 다시 뽑으면 됩니다.
 
@@ -217,7 +217,9 @@ python  tools/bridge.py --debug --foreground     # LightBits 실시간 출력
 
 ### 키맵 자동 생성
 
-브리지를 종료하고 6초 이상 기다린 뒤 실행합니다. 보드마다 파일을 하나씩 생성합니다.
+브리지를 종료하고(트레이 아이콘 우클릭 → 종료) 6초 이상 기다린 뒤 실행합니다.
+Windows는 COM 포트를 한 프로세스만 열 수 있어, 브리지가 떠 있으면 보드에 물어볼 수
+없습니다. 보드마다 파일을 하나씩 생성합니다.
 
 ```powershell
 python tools/gen_bms_setup_xml.py
