@@ -1,10 +1,8 @@
 .claude/
 *.bak
-*.stl
-# 자작 모델만 저장소에 둡니다. 하위 폴더까지 포함해야 합니다 —
-# `!3d stl/*.stl` 하나로는 바로 밑 파일만 예외가 됩니다.
-!3d stl/*.stl
-!3d stl/**/*.stl
+# STL 은 모두 저장소에 둡니다. 콕핏 전체 모델 하나만 뺍니다 — 71 MB 라
+# GitHub 의 50 MB 파일 경고에 걸리고, 한 번 들어가면 히스토리에서 빼기 어렵습니다.
+docs/3d stl/My Cockpit3.stl
 
 __pycache__/
 
