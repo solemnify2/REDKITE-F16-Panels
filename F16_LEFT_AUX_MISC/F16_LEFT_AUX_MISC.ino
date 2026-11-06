@@ -965,10 +965,8 @@ void updateLedsOffline() {
       for (uint8_t d = 0; d < NUM_MCP_DEVICES; d++) { if (!mcpConnected[d]) mcpDisconnected = true; }
       writeLed(i, gearWarnTicks > 0 || mcpDisconnected);
     }
-    else if (i >= LI_TWA_POWER && i <= LI_TWA_ACT)
-      writeLed(i, 0);
     else
-      writeLed(i, 0);
+      writeLed(i, 0);   // TWA 포함 나머지는 전부 소등
   }
 
   if (gearWarnTicks > 0) gearWarnTicks--;
