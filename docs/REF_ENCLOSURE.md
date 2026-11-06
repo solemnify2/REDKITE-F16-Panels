@@ -26,9 +26,9 @@
 | Left Console | 4 | PLA · PETG | `LeftConsole/` |
 | MFD 홀더 | 4 | PLA · PETG | `LeftAuxMiscCenter/` |
 | 스탠드 | 2 | PLA · PETG | `LeftAuxMiscCenter/` |
-| 토글 스위치 커버 | 7 | PLA · 판금 | `ToggleCover/` — EPU 3 · Fuel Master 2 · Engine Cont 2 |
+| 토글 스위치 커버 | 9 | PLA · 판금 | `ToggleCover/` — EPU 3 · Fuel Master 2 · NUCLEAR CONSENT 2 · Engine Cont 2 |
 | 인클로저 | 2 | PLA · PETG | Cults3D 구매 모델 |
-| **합계** | **41** | | |
+| **합계** | **43** | | |
 
 스위치 캡 · 노브는 별도이며, 수량은 스위치 구성에 따라 달라집니다 (본 프로젝트 기준 64개).
 
@@ -102,8 +102,8 @@ EPU · Engine Cont 처럼 실수로 건드리면 안 되는 토글에 씌우는 
 **1.0t 판금(sheet metal)** 기준으로 그렸다는 뜻이고, 일곱 개 모두 두 형식이
 한 쌍으로 있습니다.
 
-커버는 **베이스 + 상부** 조합입니다. 베이스는 짧은 것과 긴 것 두 종류뿐이고,
-짧은 베이스는 EPU 와 Fuel Master 가 같이 쓰므로 **두 개 출력**합니다.
+커버는 **베이스 + 상부** 조합이고, 베이스는 짧은 것과 긴 것 두 종류뿐입니다.
+짧은 베이스는 세 커버가 같이 쓰므로 **세 개** 출력해야 합니다.
 
 **EPU 커버**
 
@@ -113,7 +113,7 @@ EPU · Engine Cont 처럼 실수로 건드리면 안 되는 토글에 씌우는 
 | 상부 좌 | [`EPU Switch Guard - Top L (SM 1.0t)`](../3d%20stl/ToggleCover/EPU%20Switch%20Guard%20-%20Top%20L%20%28SM%201.0t%29.stl) | 8.3 × 24.0 × 12.3 | [STEP](../3d%20stl/ToggleCover/EPU%20Switch%20Guard%20-%20Top%20L%20%28SM%201.0t%29.step) |
 | 상부 우 | [`EPU Switch Guard - Top R (SM 1.0t)`](../3d%20stl/ToggleCover/EPU%20Switch%20Guard%20-%20Top%20R%20%28SM%201.0t%29.stl) | 8.4 × 24.0 × 12.3 | [STEP](../3d%20stl/ToggleCover/EPU%20Switch%20Guard%20-%20Top%20R%20%28SM%201.0t%29.step) |
 
-**Fuel Master 커버** — EPU 와 같은 베이스를 씁니다.
+**Fuel Master · NUCLEAR CONSENT 커버** — 두 스위치가 똑같은 조합이라 이 한 벌을 두 번 만듭니다.
 
 | 역할 | 파일 | 크기 (mm) | 판금용 |
 |------|------|----------:|:----:|
