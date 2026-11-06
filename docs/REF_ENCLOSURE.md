@@ -97,9 +97,8 @@ MFD 와 **Alibaba 에서 구한 7.6인치 정사각 LCD** 를 겹쳐 놓고 홀�
 
 실수로 건드리면 안 되는 토글에 씌우는 보호 커버입니다. 이 패널에는 EPU 와
 Engine Cont 두 곳에 달았고, 나머지 스위치용 모델도 함께 들어 있습니다.
-`3d stl/ToggleCover/` 에 있습니다. 썸네일이 없어 파일 이름을 바로 링크했습니다 —
-이름을 누르면 STL 을, 오른쪽 `발주` 칸에서 그 부품을 주문할 때 보낼 파일을
-내려받습니다.
+`3d stl/ToggleCover/` 에 있습니다. 썸네일을 누르면 STL 을, 오른쪽 `발주` 칸에서
+그 부품을 주문할 때 보낼 파일을 내려받습니다.
 
 커버는 **금속으로 만듭니다.** PLA 나 레진으로 출력해 봤지만 금속 커버의 질감도,
 기능도 나오지 않았습니다.
@@ -116,18 +115,18 @@ Engine Cont 두 곳에 달았고, 나머지 스위치용 모델도 함께 들어
 
 **EPU 커버**
 
-| 역할 | 파일 | 크기 (mm) | 발주 |
-|------|------|----------:|------|
-| 베이스 | [`EPU Switch Guard - Base (SM 1.0t)`](../3d%20stl/ToggleCover/EPU%20Switch%20Guard%20-%20Base%20%28SM%201.0t%29.stl) | 16.8 × 28.6 × 6.0 | 판금 [STEP](../3d%20stl/ToggleCover/EPU%20Switch%20Guard%20-%20Base%20%28SM%201.0t%29.step) |
-| 상부 좌 | [`EPU Switch Guard - Top L (SM 1.0t)`](../3d%20stl/ToggleCover/EPU%20Switch%20Guard%20-%20Top%20L%20%28SM%201.0t%29.stl) | 8.3 × 24.0 × 12.3 | **금속 3D 프린트** [STL](../3d%20stl/ToggleCover/EPU%20Switch%20Guard%20-%20Top%20L%20%28SM%201.0t%29.stl) |
-| 상부 우 | [`EPU Switch Guard - Top R (SM 1.0t)`](../3d%20stl/ToggleCover/EPU%20Switch%20Guard%20-%20Top%20R%20%28SM%201.0t%29.stl) | 8.4 × 24.0 × 12.3 | **금속 3D 프린트** [STL](../3d%20stl/ToggleCover/EPU%20Switch%20Guard%20-%20Top%20R%20%28SM%201.0t%29.stl) |
+| 모양 | 역할 | 파일 | 크기 (mm) | 발주 |
+|:----:|------|------|----------:|------|
+| <a href="../3d%20stl/ToggleCover/EPU%20Switch%20Guard%20-%20Base%20%28SM%201.0t%29.stl"><img src="../3d%20stl/ToggleCover/EPU%20Switch%20Guard%20-%20Base%20%28SM%201.0t%29.png" width="130"></a> | 베이스 | `EPU Switch Guard - Base (SM 1.0t)` | 16.8 × 28.6 × 6.0 | 판금 [STEP](../3d%20stl/ToggleCover/EPU%20Switch%20Guard%20-%20Base%20%28SM%201.0t%29.step) |
+| <a href="../3d%20stl/ToggleCover/EPU%20Switch%20Guard%20-%20Top%20L%20%28SM%201.0t%29.stl"><img src="../3d%20stl/ToggleCover/EPU%20Switch%20Guard%20-%20Top%20L%20%28SM%201.0t%29.png" width="130"></a> | 상부 좌 | `EPU Switch Guard - Top L (SM 1.0t)` | 8.3 × 24.0 × 12.3 | **금속 3D 프린트** [STL](../3d%20stl/ToggleCover/EPU%20Switch%20Guard%20-%20Top%20L%20%28SM%201.0t%29.stl) |
+| <a href="../3d%20stl/ToggleCover/EPU%20Switch%20Guard%20-%20Top%20R%20%28SM%201.0t%29.stl"><img src="../3d%20stl/ToggleCover/EPU%20Switch%20Guard%20-%20Top%20R%20%28SM%201.0t%29.png" width="130"></a> | 상부 우 | `EPU Switch Guard - Top R (SM 1.0t)` | 8.4 × 24.0 × 12.3 | **금속 3D 프린트** [STL](../3d%20stl/ToggleCover/EPU%20Switch%20Guard%20-%20Top%20R%20%28SM%201.0t%29.stl) |
 
 **Engine Cont 커버**
 
-| 역할 | 파일 | 크기 (mm) | 발주 |
-|------|------|----------:|------|
-| 베이스 | [`Trigger Guard - Base Body Long (SM 1.0t)`](../3d%20stl/ToggleCover/Trigger%20Guard%20-%20Base%20Body%20Long%20%28SM%201.0t%29.stl) | 16.8 × 34.7 × 6.0 | 판금 [STEP](../3d%20stl/ToggleCover/Trigger%20Guard%20-%20Base%20Body%20Long%20%28SM%201.0t%29.step) |
-| 상부 | [`Trigger Guard B - Top Body Long`](../3d%20stl/ToggleCover/Trigger%20Guard%20B%20-%20Top%20Body%20Long.stl) | 17.0 × 30.2 × 12.5 | 판금 [STEP](../3d%20stl/ToggleCover/Trigger%20Guard%20B%20-%20Top%20Body%20Long%20%28SM%201.0t%29.step) |
+| 모양 | 역할 | 파일 | 크기 (mm) | 발주 |
+|:----:|------|------|----------:|------|
+| <a href="../3d%20stl/ToggleCover/Trigger%20Guard%20-%20Base%20Body%20Long%20%28SM%201.0t%29.stl"><img src="../3d%20stl/ToggleCover/Trigger%20Guard%20-%20Base%20Body%20Long%20%28SM%201.0t%29.png" width="130"></a> | 베이스 | `Trigger Guard - Base Body Long (SM 1.0t)` | 16.8 × 34.7 × 6.0 | 판금 [STEP](../3d%20stl/ToggleCover/Trigger%20Guard%20-%20Base%20Body%20Long%20%28SM%201.0t%29.step) |
+| <a href="../3d%20stl/ToggleCover/Trigger%20Guard%20B%20-%20Top%20Body%20Long.stl"><img src="../3d%20stl/ToggleCover/Trigger%20Guard%20B%20-%20Top%20Body%20Long.png" width="130"></a> | 상부 | `Trigger Guard B - Top Body Long` | 17.0 × 30.2 × 12.5 | 판금 [STEP](../3d%20stl/ToggleCover/Trigger%20Guard%20B%20-%20Top%20Body%20Long%20%28SM%201.0t%29.step) |
 
 ### 만들어 두었지만 쓰지 않은 것
 
@@ -136,24 +135,24 @@ Engine Cont 두 곳에 달았고, 나머지 스위치용 모델도 함께 들어
 
 **ZEROIZE OFP 커버** — EPU 커버와 같은 조합입니다.
 
-| 역할 | 파일 | 크기 (mm) | 발주 |
-|------|------|----------:|------|
-| 베이스 | [`EPU Switch Guard - Base (SM 1.0t)`](../3d%20stl/ToggleCover/EPU%20Switch%20Guard%20-%20Base%20%28SM%201.0t%29.stl) | 16.8 × 28.6 × 6.0 | 판금 [STEP](../3d%20stl/ToggleCover/EPU%20Switch%20Guard%20-%20Base%20%28SM%201.0t%29.step) |
-| 상부 좌 | [`EPU Switch Guard - Top L (SM 1.0t)`](../3d%20stl/ToggleCover/EPU%20Switch%20Guard%20-%20Top%20L%20%28SM%201.0t%29.stl) | 8.3 × 24.0 × 12.3 | **금속 3D 프린트** [STL](../3d%20stl/ToggleCover/EPU%20Switch%20Guard%20-%20Top%20L%20%28SM%201.0t%29.stl) |
-| 상부 우 | [`EPU Switch Guard - Top R (SM 1.0t)`](../3d%20stl/ToggleCover/EPU%20Switch%20Guard%20-%20Top%20R%20%28SM%201.0t%29.stl) | 8.4 × 24.0 × 12.3 | **금속 3D 프린트** [STL](../3d%20stl/ToggleCover/EPU%20Switch%20Guard%20-%20Top%20R%20%28SM%201.0t%29.stl) |
+| 모양 | 역할 | 파일 | 크기 (mm) | 발주 |
+|:----:|------|------|----------:|------|
+| <a href="../3d%20stl/ToggleCover/EPU%20Switch%20Guard%20-%20Base%20%28SM%201.0t%29.stl"><img src="../3d%20stl/ToggleCover/EPU%20Switch%20Guard%20-%20Base%20%28SM%201.0t%29.png" width="130"></a> | 베이스 | `EPU Switch Guard - Base (SM 1.0t)` | 16.8 × 28.6 × 6.0 | 판금 [STEP](../3d%20stl/ToggleCover/EPU%20Switch%20Guard%20-%20Base%20%28SM%201.0t%29.step) |
+| <a href="../3d%20stl/ToggleCover/EPU%20Switch%20Guard%20-%20Top%20L%20%28SM%201.0t%29.stl"><img src="../3d%20stl/ToggleCover/EPU%20Switch%20Guard%20-%20Top%20L%20%28SM%201.0t%29.png" width="130"></a> | 상부 좌 | `EPU Switch Guard - Top L (SM 1.0t)` | 8.3 × 24.0 × 12.3 | **금속 3D 프린트** [STL](../3d%20stl/ToggleCover/EPU%20Switch%20Guard%20-%20Top%20L%20%28SM%201.0t%29.stl) |
+| <a href="../3d%20stl/ToggleCover/EPU%20Switch%20Guard%20-%20Top%20R%20%28SM%201.0t%29.stl"><img src="../3d%20stl/ToggleCover/EPU%20Switch%20Guard%20-%20Top%20R%20%28SM%201.0t%29.png" width="130"></a> | 상부 우 | `EPU Switch Guard - Top R (SM 1.0t)` | 8.4 × 24.0 × 12.3 | **금속 3D 프린트** [STL](../3d%20stl/ToggleCover/EPU%20Switch%20Guard%20-%20Top%20R%20%28SM%201.0t%29.stl) |
 
 **Fuel Master 커버**
 
-| 역할 | 파일 | 크기 (mm) | 발주 |
-|------|------|----------:|------|
-| 베이스 | [`EPU Switch Guard - Base (SM 1.0t)`](../3d%20stl/ToggleCover/EPU%20Switch%20Guard%20-%20Base%20%28SM%201.0t%29.stl) | 16.8 × 28.6 × 6.0 | 판금 [STEP](../3d%20stl/ToggleCover/EPU%20Switch%20Guard%20-%20Base%20%28SM%201.0t%29.step) |
-| 상부 | [`Trigger Guard B - Top Body (SM 1.0t)`](../3d%20stl/ToggleCover/Trigger%20Guard%20B%20-%20Top%20Body%20%28SM%201.0t%29.stl) | 17.0 × 24.1 × 12.5 | 판금 [STEP](../3d%20stl/ToggleCover/Trigger%20Guard%20B%20-%20Top%20Body%20%28SM%201.0t%29.step) |
+| 모양 | 역할 | 파일 | 크기 (mm) | 발주 |
+|:----:|------|------|----------:|------|
+| <a href="../3d%20stl/ToggleCover/EPU%20Switch%20Guard%20-%20Base%20%28SM%201.0t%29.stl"><img src="../3d%20stl/ToggleCover/EPU%20Switch%20Guard%20-%20Base%20%28SM%201.0t%29.png" width="130"></a> | 베이스 | `EPU Switch Guard - Base (SM 1.0t)` | 16.8 × 28.6 × 6.0 | 판금 [STEP](../3d%20stl/ToggleCover/EPU%20Switch%20Guard%20-%20Base%20%28SM%201.0t%29.step) |
+| <a href="../3d%20stl/ToggleCover/Trigger%20Guard%20B%20-%20Top%20Body%20%28SM%201.0t%29.stl"><img src="../3d%20stl/ToggleCover/Trigger%20Guard%20B%20-%20Top%20Body%20%28SM%201.0t%29.png" width="130"></a> | 상부 | `Trigger Guard B - Top Body (SM 1.0t)` | 17.0 × 24.1 × 12.5 | 판금 [STEP](../3d%20stl/ToggleCover/Trigger%20Guard%20B%20-%20Top%20Body%20%28SM%201.0t%29.step) |
 
 **NUCLEAR CONSENT 커버**
 
-| 역할 | 파일 | 크기 (mm) | 발주 |
-|------|------|----------:|------|
-| 베이스 | [`EPU Switch Guard - Base (SM 1.0t)`](../3d%20stl/ToggleCover/EPU%20Switch%20Guard%20-%20Base%20%28SM%201.0t%29.stl) | 16.8 × 28.6 × 6.0 | 판금 [STEP](../3d%20stl/ToggleCover/EPU%20Switch%20Guard%20-%20Base%20%28SM%201.0t%29.step) |
-| 상부 | [`Trigger Guard A - Top Body (SM 1.0t)`](../3d%20stl/ToggleCover/Trigger%20Guard%20A%20-%20Top%20Body%20%28SM%201.0t%29.stl) | 17.0 × 24.1 × 12.5 | 판금 [STEP](../3d%20stl/ToggleCover/Trigger%20Guard%20A%20-%20Top%20Body%20%28SM%201.0t%29.step) |
+| 모양 | 역할 | 파일 | 크기 (mm) | 발주 |
+|:----:|------|------|----------:|------|
+| <a href="../3d%20stl/ToggleCover/EPU%20Switch%20Guard%20-%20Base%20%28SM%201.0t%29.stl"><img src="../3d%20stl/ToggleCover/EPU%20Switch%20Guard%20-%20Base%20%28SM%201.0t%29.png" width="130"></a> | 베이스 | `EPU Switch Guard - Base (SM 1.0t)` | 16.8 × 28.6 × 6.0 | 판금 [STEP](../3d%20stl/ToggleCover/EPU%20Switch%20Guard%20-%20Base%20%28SM%201.0t%29.step) |
+| <a href="../3d%20stl/ToggleCover/Trigger%20Guard%20A%20-%20Top%20Body%20%28SM%201.0t%29.stl"><img src="../3d%20stl/ToggleCover/Trigger%20Guard%20A%20-%20Top%20Body%20%28SM%201.0t%29.png" width="130"></a> | 상부 | `Trigger Guard A - Top Body (SM 1.0t)` | 17.0 × 24.1 × 12.5 | 판금 [STEP](../3d%20stl/ToggleCover/Trigger%20Guard%20A%20-%20Top%20Body%20%28SM%201.0t%29.step) |
 
 짧은 상부 A 와 B 는 치수가 같고 생김새만 다릅니다 — 스위치에 맞는 쪽을 쓰십시오.
