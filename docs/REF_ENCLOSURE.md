@@ -113,7 +113,14 @@ EPU · Engine Cont 처럼 실수로 건드리면 안 되는 토글에 씌우는 
 | 상부 좌 | [`EPU Switch Guard - Top L (SM 1.0t)`](../3d%20stl/ToggleCover/EPU%20Switch%20Guard%20-%20Top%20L%20%28SM%201.0t%29.stl) | 8.3 × 24.0 × 12.3 | [STEP](../3d%20stl/ToggleCover/EPU%20Switch%20Guard%20-%20Top%20L%20%28SM%201.0t%29.step) |
 | 상부 우 | [`EPU Switch Guard - Top R (SM 1.0t)`](../3d%20stl/ToggleCover/EPU%20Switch%20Guard%20-%20Top%20R%20%28SM%201.0t%29.stl) | 8.4 × 24.0 × 12.3 | [STEP](../3d%20stl/ToggleCover/EPU%20Switch%20Guard%20-%20Top%20R%20%28SM%201.0t%29.step) |
 
-**Fuel Master · NUCLEAR CONSENT 커버** — 두 스위치가 똑같은 조합이라 이 한 벌을 두 번 만듭니다.
+**Fuel Master 커버**
+
+| 역할 | 파일 | 크기 (mm) | 판금용 |
+|------|------|----------:|:----:|
+| 베이스 | [`EPU Switch Guard - Base (SM 1.0t)`](../3d%20stl/ToggleCover/EPU%20Switch%20Guard%20-%20Base%20%28SM%201.0t%29.stl) | 16.8 × 28.6 × 6.0 | [STEP](../3d%20stl/ToggleCover/EPU%20Switch%20Guard%20-%20Base%20%28SM%201.0t%29.step) |
+| 상부 | [`Trigger Guard B - Top Body (SM 1.0t)`](../3d%20stl/ToggleCover/Trigger%20Guard%20B%20-%20Top%20Body%20%28SM%201.0t%29.stl) | 17.0 × 24.1 × 12.5 | [STEP](../3d%20stl/ToggleCover/Trigger%20Guard%20B%20-%20Top%20Body%20%28SM%201.0t%29.step) |
+
+**NUCLEAR CONSENT 커버**
 
 | 역할 | 파일 | 크기 (mm) | 판금용 |
 |------|------|----------:|:----:|
@@ -127,5 +134,4 @@ EPU · Engine Cont 처럼 실수로 건드리면 안 되는 토글에 씌우는 
 | 베이스 | [`Trigger Guard - Base Body Long (SM 1.0t)`](../3d%20stl/ToggleCover/Trigger%20Guard%20-%20Base%20Body%20Long%20%28SM%201.0t%29.stl) | 16.8 × 34.7 × 6.0 | [STEP](../3d%20stl/ToggleCover/Trigger%20Guard%20-%20Base%20Body%20Long%20%28SM%201.0t%29.step) |
 | 상부 | [`Trigger Guard B - Top Body Long`](../3d%20stl/ToggleCover/Trigger%20Guard%20B%20-%20Top%20Body%20Long.stl) | 17.0 × 30.2 × 12.5 | [STEP](../3d%20stl/ToggleCover/Trigger%20Guard%20B%20-%20Top%20Body%20Long%20%28SM%201.0t%29.step) |
 
-`Trigger Guard B - Top Body (SM 1.0t)` 는 아직 어느 스위치에 쓰는지
-적지 않았습니다.
+짧은 상부 A 와 B 는 생김새가 다를 뿐 치수가 같습니다 — 스위치에 맞는 쪽을 쓰십시오.
