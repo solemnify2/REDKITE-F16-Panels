@@ -93,8 +93,8 @@ Greenisland 설계는 백라이트 LED 를 `LED layer` 에 함께 장착하도�
 
 덕분에 전체 31스트링 93 LED, 약 422mA 로 끝나 12V 1A 어댑터 하나에 들어갑니다.
 
-플레이트 STL 은 `3d stl/LED Plate*.stl` 입니다 — Left Aux 4장(Gear · CMDS · TWA · HMCS),
-Left Console 4장(`LED Plate1`~`4`). 자작 모델이며 PLA 또는 레진 출력으로 충분합니다.
+플레이트 STL 은 Left Aux 4장이 `3d stl/LeftAuxMiscCenter/LED Plate - *.stl`
+(Gear · CMDS · TWA · HMCS), Left Console 4장이 `3d stl/LeftConsole/LED Plate1~4.stl` 입니다. 자작 모델이며 PLA 또는 레진 출력으로 충분합니다.
 
 ### LED layer 재질 — 투명 PLA 의 한계
 

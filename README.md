@@ -61,12 +61,15 @@ Greenisland 패널은 **Top(아크릴) · Diffuser(아크릴) · LED layer(투�
 
 ### 1-2. 3D 프린트 구조물
 
-`3d stl/` 폴더에 STL 21 개가 있습니다. 인클로저 · 스탠드 · 콘솔 · MFD 홀더는 **PLA 또는 PETG**,
+`3d stl/` 폴더에 STL 28 개가 쓰임새별로 나뉘어 있습니다 — `LeftAuxMiscCenter/`(인클로저 ·
+스탠드 · MFD 홀더 · Left Aux 백라이트), `LeftConsole/`(콘솔 · 콘솔 백라이트),
+`ToggleCover/`(토글 스위치 커버). 인클로저 · 스탠드 · 콘솔 · MFD 홀더는 **PLA 또는 PETG**,
 패널 `LED layer` 는 **투명 PLA**, 백라이트 플레이트는 **PLA 또는 레진** 으로 출력합니다.
+토글 커버는 금속 판금(SM 1.0t)을 염두에 둔 모델이라 **STEP 7 개** 가 함께 있습니다.
 
 | 인클로저 & 스탠드 | Left Aux 인클로저 | Left Console | MFD 홀더 | 백라이트 플레이트 |
 |:----:|:----:|:----:|:----:|:----:|
-| <a href="docs/REF_ENCLOSURE.md"><img src="3d%20stl/Center%20Left%20Enclosure.png" width="150"></a> | <a href="docs/REF_ENCLOSURE.md"><img src="3d%20stl/LeftAuxEnclosure.png" width="150"></a> | <a href="docs/REF_ENCLOSURE.md"><img src="3d%20stl/LeftConsoleUpper.png" width="150"></a> | <a href="docs/REF_ENCLOSURE.md"><img src="3d%20stl/LeftMFDHolder.png" width="150"></a> | <a href="docs/REF_ENCLOSURE.md"><img src="3d%20stl/LED%20Plate%20-%20Gear.png" width="150"></a> |
+| <a href="docs/REF_ENCLOSURE.md"><img src="3d%20stl/LeftAuxMiscCenter/Center%20Left%20Enclosure.png" width="150"></a> | <a href="docs/REF_ENCLOSURE.md"><img src="3d%20stl/LeftAuxMiscCenter/LeftAuxEnclosure.png" width="150"></a> | <a href="docs/REF_ENCLOSURE.md"><img src="3d%20stl/LeftConsole/LeftConsoleUpper.png" width="150"></a> | <a href="docs/REF_ENCLOSURE.md"><img src="3d%20stl/LeftAuxMiscCenter/LeftMFDHolder.png" width="150"></a> | <a href="docs/REF_ENCLOSURE.md"><img src="3d%20stl/LeftAuxMiscCenter/LED%20Plate%20-%20Gear.png" width="150"></a> |
 | **2** — 좌우 스탠드<br>Center 인클로저는 구매 모델<br>가공본이라 STL 미포함 | **3** — Enclosure<br>Front · Back | **4** — Upper · Lower<br>Bottom 2 종 | **4** — TM MFD + 7.6" LCD<br>를 함께 잡는 브래킷 | **8** — Left Aux 4<br>Left Console 4, 자작 모델 |
 
 썸네일·치수·STL 링크는 [REF_ENCLOSURE.md](docs/REF_ENCLOSURE.md)에 있습니다.
@@ -293,7 +296,7 @@ UHF 엔코더를 돌려 DX의 CCW/CW와 게임의 감소/증가 방향을 확인
 | `tools/keymap/` | 보드 질의, 컨트롤 매핑 표, 축 설정, DCS 명령 카탈로그 |
 | `tests/` | 키맵 생성기 회귀 테스트 |
 | `docs/` | 제작·배선·설정 문서와 참고 자료, 패널 도면(`GearLedLayout.dxf`) |
-| `3d stl/` | 자작 STL과 썸네일 |
+| `3d stl/` | 자작 STL·STEP과 썸네일 (`LeftAuxMiscCenter/` · `LeftConsole/` · `ToggleCover/`) |
 | `pcb/uhf_display/` | UHF 디스플레이 거버·BOM·설계 문서 |
 
 ## 6. 참조 문서
