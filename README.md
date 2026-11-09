@@ -61,11 +61,13 @@ Greenisland 패널은 **Top(아크릴) · Diffuser(아크릴) · LED layer(투�
 
 ### 1-2. 3D 프린트 구조물
 
-`3d stl/` 폴더에 STL 28 개가 쓰임새별로 나뉘어 있습니다 — `LeftAuxMiscCenter/`(인클로저 ·
+`3d stl/` 폴더에 STL 24 개가 쓰임새별로 나뉘어 있습니다 — `LeftAuxMiscCenter/`(인클로저 ·
 스탠드 · MFD 홀더 · Left Aux 백라이트), `LeftConsole/`(콘솔 · 콘솔 백라이트),
 `ToggleCover/`(토글 스위치 커버). 인클로저 · 스탠드 · 콘솔 · MFD 홀더는 **PLA 또는 PETG**,
 패널 `LED layer` 는 **투명 PLA**, 백라이트 플레이트는 **PLA 또는 레진** 으로 출력합니다.
-토글 커버는 금속 판금(SM 1.0t)을 염두에 둔 모델이라 **STEP 7 개** 가 함께 있습니다.
+토글 커버만 **금속**입니다 — 판금(SM 1.0t) 발주용 **STEP 3 개** 가 함께 있고, 작아서
+판금이 안 되는 EPU 상부는 금속 3D 프린트로 뽑습니다. `Trigger Guard` 커버는 구매
+모델이라 렌더만 있고 파일은 없습니다.
 
 | 인클로저 & 스탠드 | Left Aux 인클로저 | Left Console | MFD 홀더 | 백라이트 플레이트 |
 |:----:|:----:|:----:|:----:|:----:|
@@ -324,6 +326,7 @@ UHF 엔코더를 돌려 DX의 CCW/CW와 게임의 감소/증가 방향을 확인
 코드·문서·설정은 [MIT License](LICENSE).
 
 `3d stl/` 의 자작 STL 은 **CC BY-NC-SA 4.0** 입니다 (MIT 아님).
-구매 모델을 잘라 합친 것(Center Left/Right Enclosure)과 타 프로젝트 패널 STL·거버는
+구매 모델을 잘라 합친 것(Center Left/Right Enclosure), 구매한 토글 커버(`Trigger Guard`),
+타 프로젝트 패널 STL·거버는
 **재배포하지 않습니다** —
 원 출처에서 받으십시오. 상세는 [LICENSE](LICENSE) 의 NOTICE.
