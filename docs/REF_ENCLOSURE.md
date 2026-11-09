@@ -120,7 +120,7 @@ Engine Cont 두 곳**에 달았습니다. 파일은 `3d stl/ToggleCover/` 에 �
 커버는 **베이스 + 상부** 조합이고, 베이스는 짧은 것과 긴 것 두 종류뿐입니다.
 
 **EPU 커버만 자작입니다.** Engine Cont 에 쓴 `Trigger Guard` 는 구매 모델이라
-재배포하지 않고, 어떤 모양인지 알 수 있도록 렌더만 남겨 두었습니다.
+**STL 은 재배포하지 않습니다** — 발주에 쓰는 판금용 `.step` 과 렌더만 두었습니다.
 
 **EPU 커버**
 
@@ -134,5 +134,5 @@ Engine Cont 두 곳**에 달았습니다. 파일은 `3d stl/ToggleCover/` 에 �
 
 | 모양 | 역할 | 파일 | 크기 (mm) | 발주 |
 |:----:|------|------|----------:|------|
-| <img src="../3d%20stl/ToggleCover/Trigger%20Guard%20-%20Base%20Body%20Long%20%28SM%201.0t%29.png" width="130"> | 베이스 | `Trigger Guard - Base Body Long (SM 1.0t)` | 16.8 × 34.7 × 6.0 | 구매 모델 — 파일 미포함 |
-| <img src="../3d%20stl/ToggleCover/Trigger%20Guard%20B%20-%20Top%20Body%20Long.png" width="130"> | 상부 | `Trigger Guard B - Top Body Long` | 17.0 × 30.2 × 12.5 | 구매 모델 — 파일 미포함 |
+| <img src="../3d%20stl/ToggleCover/Trigger%20Guard%20-%20Base%20Body%20Long%20%28SM%201.0t%29.png" width="130"> | 베이스 | `Trigger Guard - Base Body Long (SM 1.0t)` | 16.8 × 34.7 × 6.0 | 판금 [STEP](../3d%20stl/ToggleCover/Trigger%20Guard%20-%20Base%20Body%20Long%20%28SM%201.0t%29.step) |
+| <img src="../3d%20stl/ToggleCover/Trigger%20Guard%20B%20-%20Top%20Body%20Long.png" width="130"> | 상부 | `Trigger Guard B - Top Body Long` | 17.0 × 30.2 × 12.5 | 판금 [STEP](../3d%20stl/ToggleCover/Trigger%20Guard%20B%20-%20Top%20Body%20Long%20%28SM%201.0t%29.step) |
