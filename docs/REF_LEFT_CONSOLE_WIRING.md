@@ -155,34 +155,35 @@ Teensy 의 SDA·SCL 한 쌍에서 출발해 MCP 3장을 단일 버스의 데이�
 
 ```
   ▼ BOTTOM VIEW (기판을 뒤집어 본 모습)
+  PWM 가능 핀: 0~15, 18~19, 22~25, 28~29, 33, 36~37
 
-  CABLE   SIGNAL                PIN      PIN   SIGNAL                CABLE
-                                  ┌──── USB ────┐
-  ---   Vin                  ─────┤ ○         ○ ├─────  GND                  ---
-  ---   GND                     ──┤ ○         ○ ├──  0  ENC PRESET  A      C3
-  ---   3V3                     ──┤ ○         ○ ├──  1  ENC PRESET  B      C3
-  C2    UHF VOL       (A9)   23 ──┤ ○         ○ ├──  2  ENC 100M    A      C3
-  C4    AUDIO1 COMM1  (A8)   22 ──┤ ○         ○ ├──  3  ENC 100M    B      C3
-  C4    AUDIO1 COMM2  (A7)   21 ──┤ ○         ○ ├──  4  ENC 10M     A      C2
-  C4    AUDIO1 SECURE (A6)   20 ──┤ ○         ○ ├──  5  ENC 10M     B      C2
-  C4    AUDIO1 MSL    (A5)   19 ──┤ ○         ○ ├──  6  ENC 1M      A      C2
-  C4    AUDIO1 TF     (A4)   18 ──┤ ○         ○ ├──  7  ENC 1M      B      C2
-  C4    AUDIO1 THREAT (A3)   17 ──┤ ○         ○ ├──  8  ENC 0.1M    A      C2
-  C5    AUDIO2 INTCOM (A2)   16 ──┤ ○         ○ ├──  9  ENC 0.1M    B      C2
-  C5    AUDIO2 TACAN  (A1)   15 ──┤ ○         ○ ├── 10  ENC 0.025M  A      C3
-  C5    AUDIO2 ILS    (A0)   14 ──┤ ○         ○ ├── 11  ENC 0.025M  B      C3
-  12V   BACKLIGHT [!]LED     13 ──┤ ○         ○ ├── 12  -- spare --       ---
-  ---   GND                  ─────┤ ○         ○ ├─────  3.3V                 ---
-  C13   UHF STATUS    (A17)  41 ──┤ ○         ○ ├── 24  I2C SCL2    (A10)  I1
-  C1    MPO           (A16)  40 ──┤ ○         ○ ├── 25  I2C SDA2    (A11)  I1
-  C13   UHF TEST      (A15)  39 ──┤ ○         ○ ├── 26  JFS RUN LED (A12)  C1
-  C6    ECM LADDER    (A14)  38 ──┤ ○         ○ ├── 27  JFS pin1    (A13)  C1
-  C6    74HC595 ST_CP        37 ──┤ ○         ○ ├── 28  JFS pin2           C1
-  C6    74HC595 SH_CP        36 ──┤ ○         ○ ├── 29  ENG CONT           C1
-  C6    74HC595 DS           35 ──┤ ○         ○ ├── 30  AB RESET           C1
-  C13   UHF T-TONE           34 ──┤ ○         ○ ├── 31  ENG DATA           C1
-  C13   UHF SQUELCH          33 ──┤ ○         ○ ├── 32  MAX POWER          C1
-                                  └─────────────┘
+  CABLE   SIGNAL                   PIN      PIN   SIGNAL                   CABLE
+                                     ┌──── USB ────┐
+  ---   Vin                     ─────┤ ○         ○ ├─────  GND                     ---
+  ---   GND                        ──┤ ○         ○ ├──  0  ENC PRESET  A     (PWM) C3
+  ---   3V3                        ──┤ ○         ○ ├──  1  ENC PRESET  B     (PWM) C3
+  C2    UHF VOL    (PWM)(A9)    23 ──┤ ○         ○ ├──  2  ENC 100M    A     (PWM) C3
+  C4    AUDIO1 CM1 (PWM)(A8)    22 ──┤ ○         ○ ├──  3  ENC 100M    B     (PWM) C3
+  C4    AUDIO1 CM2       (A7)   21 ──┤ ○         ○ ├──  4  ENC 10M     A     (PWM) C2
+  C4    AUDIO1 SEC       (A6)   20 ──┤ ○         ○ ├──  5  ENC 10M     B     (PWM) C2
+  C4    AUDIO1 MSL (PWM)(A5)    19 ──┤ ○         ○ ├──  6  ENC 1M      A     (PWM) C2
+  C4    AUDIO1 TF  (PWM)(A4)    18 ──┤ ○         ○ ├──  7  ENC 1M      B     (PWM) C2
+  C4    AUDIO1 THR       (A3)   17 ──┤ ○         ○ ├──  8  ENC 0.1M    A     (PWM) C2
+  C5    AUDIO2 INT       (A2)   16 ──┤ ○         ○ ├──  9  ENC 0.1M    B     (PWM) C2
+  C5    AUDIO2 TAC (PWM)(A1)    15 ──┤ ○         ○ ├── 10  ENC 0.025M  A     (PWM) C3
+  C5    AUDIO2 ILS (PWM)(A0)    14 ──┤ ○         ○ ├── 11  ENC 0.025M  B     (PWM) C3
+  12V   BACKLIGHT [!](PWM)LED  13 ──┤ ○         ○ ├── 12  -- spare --       (PWM) ---
+  ---   GND                     ─────┤ ○         ○ ├─────  3.3V                    ---
+  C13   UHF STATUS       (A17)  41 ──┤ ○         ○ ├── 24  I2C SCL2   (PWM)(A10)   I1
+  C1    MPO              (A16)  40 ──┤ ○         ○ ├── 25  I2C SDA2   (PWM)(A11)   I1
+  C13   UHF TEST         (A15)  39 ──┤ ○         ○ ├── 26  JFS RUN LED      (A12)  C1
+  C6    ECM LADDER       (A14)  38 ──┤ ○         ○ ├── 27  JFS pin1         (A13)  C1
+  C6    74HC595 ST_CP    (PWM)  37 ──┤ ○         ○ ├── 28  JFS pin2         (PWM)  C1
+  C6    74HC595 SH_CP    (PWM)  36 ──┤ ○         ○ ├── 29  ENG CONT         (PWM)  C1
+  C6    74HC595 DS               35 ──┤ ○         ○ ├── 30  AB RESET                C1
+  C13   UHF T-TONE               34 ──┤ ○         ○ ├── 31  ENG DATA                C1
+  C13   UHF SQUELCH      (PWM)  33 ──┤ ○         ○ ├── 32  MAX POWER               C1
+                                     └─────────────┘
 
   [!] pin 13 is shared with the Teensy on-board LED. Used as an OUTPUT here,
       so the on-board LED simply mirrors the backlight state (same as LEFT_AUX).

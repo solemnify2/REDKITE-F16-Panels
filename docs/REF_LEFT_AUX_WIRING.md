@@ -192,33 +192,34 @@ LAN pin 8 ── GND ───┴──┴── MCP23017 GND
 
 ```
   ▼ BOTTOM VIEW (기판을 뒤집어 본 모습)
+  PWM 가능 핀: 0~15, 18~19, 22~25, 28~29, 33, 36~37
 
   CABLE SIGNAL                   PIN                    PIN SIGNAL                   CABLE
                                       ┌──── USB ────┐
   ---   Vin                      ─────┤ ○         ○ ├─────  GND                      ---
-  ---   GND                      ─────┤ ○         ○ ├──  0  -- spare --              --
-  ---   3V3                      ─────┤ ○         ○ ├──  1  DN LOCK REL              C1
-  C2    CMDS O1            (A9)  23 ──┤ ○         ○ ├──  2  HORN SILENCER            C1
-  C2    CMDS O2            (A8)  22 ──┤ ○         ○ ├──  3  LANDING LIGHT TAXI       C1
-  C2    CMDS CH            (A7)  21 ──┤ ○         ○ ├──  4  LANDING LIGHT LANDING   C1
-  C2    CMDS FL            (A6)  20 ──┤ ○         ○ ├──  5  STORE CAT                C1
-  I1    I2C SCL            (A5)  19 ──┤ ○         ○ ├──  6  ANTI SKID 1              C1
-  I1    I2C SDA            (A4)  18 ──┤ ○         ○ ├──  7  ANTI SKID 2              C1
-  C2    CMDS RWR           (A3)  17 ──┤ ○         ○ ├──  8  BRAKES CHANNEL           C1
-  C2    CMDS JMR           (A2)  16 ──┤ ○         ○ ├──  9  GND JETT ENABLE          C1
-  C2    CMDS MWS           (A1)  15 ──┤ ○         ○ ├── 10  EMER JETTISON            C1
-  C2    CMDS JETT          (A0)  14 ──┤ ○         ○ ├── 11  HOOK                     C1
-  12V   AUX BACKLIGHT [!]LED     13 ──┤ ○         ○ ├── 12  MISC BACKLIGHT           I1
+  ---   GND                      ─────┤ ○         ○ ├──  0  -- spare --        (PWM) --
+  ---   3V3                      ─────┤ ○         ○ ├──  1  DN LOCK REL        (PWM) C1
+  C2    CMDS O1      (PWM)(A9)   23 ──┤ ○         ○ ├──  2  HORN SILENCER      (PWM) C1
+  C2    CMDS O2      (PWM)(A8)   22 ──┤ ○         ○ ├──  3  LANDING LIGHT TAXI (PWM) C1
+  C2    CMDS CH            (A7)  21 ──┤ ○         ○ ├──  4  LANDING LIGHT LAND (PWM) C1
+  C2    CMDS FL            (A6)  20 ──┤ ○         ○ ├──  5  STORE CAT          (PWM) C1
+  I1    I2C SCL      (PWM)(A5)   19 ──┤ ○         ○ ├──  6  ANTI SKID 1        (PWM) C1
+  I1    I2C SDA      (PWM)(A4)   18 ──┤ ○         ○ ├──  7  ANTI SKID 2        (PWM) C1
+  C2    CMDS RWR           (A3)  17 ──┤ ○         ○ ├──  8  BRAKES CHANNEL     (PWM) C1
+  C2    CMDS JMR           (A2)  16 ──┤ ○         ○ ├──  9  GND JETT ENABLE    (PWM) C1
+  C2    CMDS MWS     (PWM)(A1)   15 ──┤ ○         ○ ├── 10  EMER JETTISON      (PWM) C1
+  C2    CMDS JETT    (PWM)(A0)   14 ──┤ ○         ○ ├── 11  HOOK               (PWM) C1
+  12V   AUX BACKLT [!](PWM)LED  13 ──┤ ○         ○ ├── 12  MISC BACKLIGHT     (PWM) I1
   ---   GND                      ─────┤ ○         ○ ├─────  3.3V                     ---
-  C6    PEDAL RIGHT       (A17)  41 ──┤ ○         ○ ├── 24  TWA LADDER        (A10)  C3
-  C6    PEDAL LEFT        (A16)  40 ──┤ ○         ○ ├── 25  CMDS MODE LDR     (A11)  C2
+  C6    PEDAL RIGHT       (A17)  41 ──┤ ○         ○ ├── 24  TWA LADDER   (PWM)(A10)  C3
+  C6    PEDAL LEFT        (A16)  40 ──┤ ○         ○ ├── 25  CMDS MODE LDR(PWM)(A11)  C2
   C5    HMCS SYMBOL       (A15)  39 ──┤ ○         ○ ├── 26  CMDS PRGM LDR     (A12)  C2
   C3    TWA DIMM          (A14)  38 ──┤ ○         ○ ├── 27  GEAR WARN LED     (A13)  C1
-  C3    TWA ACT LED (PWM)        37 ──┤ ○         ○ ├── 28  TWA LOW LED (PWM)        C3
-  C3    TWA SEARCH LED (PWM)     36 ──┤ ○         ○ ├── 29  TWA POWER LED (PWM)      C3
+  C3    TWA ACT LED (PWM)        37 ──┤ ○         ○ ├── 28  TWA LOW LED  (PWM)       C3
+  C3    TWA SEARCH LED (PWM)     36 ──┤ ○         ○ ├── 29  TWA POWER LED(PWM)       C3
   C1    LANDING GEAR DN          35 ──┤ ○         ○ ├── 30  NOSE GEAR LED            C1
   C1    LANDING GEAR UP          34 ──┤ ○         ○ ├── 31  LEFT GEAR LED            C1
-  C4    ALTGEAR HANDLE           33 ──┤ ○         ○ ├── 32  RIGHT GEAR LED           C1
+  C4    ALTGEAR HANDLE     (PWM) 33 ──┤ ○         ○ ├── 32  RIGHT GEAR LED           C1
                                       └─────────────┘
 
   [!] pin 13 is shared with the Teensy on-board LED. Used as an OUTPUT here,
