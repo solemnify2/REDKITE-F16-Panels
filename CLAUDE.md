@@ -42,3 +42,4 @@ output goes to that console either way.
 - Switch wiring: active-low with INPUT_PULLUP (pressed = LOW = logical ON)
 - `name.c` in each sketch folder overrides the USB device name
 - Hardware is data-driven: edit config arrays (`switches[]`, `leds[]`, etc.) to add/remove hardware
+- **LED pin assignment**: Always assign LEDs to PWM-capable pins (Teensy 4.1: 0–15, 18–19, 22–25, 28–29, 33, 36–37) so that brightness dimming is possible. Non-PWM pins (16–17, 20–21, 26–27, 30–32, 34–35, 38–41) should be used for switches or other digital I/O only.
