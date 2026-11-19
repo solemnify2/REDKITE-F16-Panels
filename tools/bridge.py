@@ -179,7 +179,7 @@ import serial.tools.list_ports          # noqa: E402  (위에서 받아 온 뒤�
 TEENSY_VID = 0x16C0
 SERIAL_BAUD = 1000000
 
-HERE = os.path.dirname(os.path.abspath(__file__))
+HERE = getattr(sys, '_MEIPASS', os.path.dirname(os.path.abspath(__file__)))
 TRAY_ICON = os.path.join(HERE, 'bridge-plain.ico')
 
 # 트레이에서 종료를 고르면 올라갑니다. 심 모드 루프도 이걸 보고 빠져나옵니다.

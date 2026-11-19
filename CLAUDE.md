@@ -36,6 +36,16 @@ python  tools/bridge.py --foreground         # console window
 The tray icon's menu shows the current mode and shows/hides the console; its
 output goes to that console either way.
 
+### Standalone EXE Build
+
+```
+pip install pyinstaller pyserial hidapi
+cd tools
+pyinstaller --onefile --noconsole --name "Redkite Bridge" --icon bridge-plain.ico --add-data "bridge-plain.ico;." --hidden-import hid bridge.py
+```
+Output: `tools/dist/Redkite Bridge.exe` — single file, no Python install required.
+`build/` and `dist/` are gitignored.
+
 ## Conventions
 
 - Mixed Korean (comments, README, docs) and English (code identifiers, CLAUDE.md)
