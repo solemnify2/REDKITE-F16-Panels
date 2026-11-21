@@ -913,6 +913,11 @@ _kernel32.GetConsoleCP.restype       = wt.UINT
 _kernel32.SetConsoleTitleW.argtypes  = (wt.LPCWSTR,)
 _kernel32.GetModuleHandleW.restype   = wt.HMODULE
 _kernel32.GetModuleHandleW.argtypes  = (wt.LPCWSTR,)
+_kernel32.GetConsoleSelectionInfo.restype  = wt.BOOL
+_kernel32.GetConsoleSelectionInfo.argtypes = (ctypes.c_void_p,)
+_kernel32.CreateMutexW.restype       = wt.HANDLE
+_kernel32.CreateMutexW.argtypes      = (wt.LPVOID, wt.BOOL, wt.LPCWSTR)
+_kernel32.CloseHandle.argtypes       = (wt.HANDLE,)
 
 # --- ITaskbarList COM (작업표시줄 항목 삭제용) ---
 _CLSID_TaskbarList = _GUID(0x56FDF344, 0xFD6D, 0x11D0,
@@ -1052,7 +1057,10 @@ class Tray:
                     _user32.ShowWindow(self._console, SW_HIDE)
                     _taskbar_delete_tab(self._console)
                 # 콘솔 선택 모드 감지 → 타이틀에 안내 표시
-                selecting = _is_console_selecting()
+                try:
+                    selecting = _is_console_selecting()
+                except Exception:
+                    selecting = False
                 if selecting != self._was_selecting:
                     base = self.title
                     if self._mode_text and not (selecting and self._mode_text.startswith('감지')):
@@ -1210,6 +1218,13 @@ def main():
         if os.path.exists(pythonw):
             subprocess.Popen([pythonw, os.path.abspath(__file__)] + sys.argv[1:],
                              creationflags=subprocess.DETACHED_PROCESS)
+            sys.exit(0)
+
+    # --- 단일 인스턴스 --- 이미 떠 있으면 조용히 종료합니다.
+    if sys.platform == 'win32':
+        _mutex = _kernel32.CreateMutexW(None, False, 'RedkiteBridge_SingleInstance')
+        if ctypes.get_last_error() == 183:          # ERROR_ALREADY_EXISTS
+            _kernel32.CloseHandle(_mutex)
             sys.exit(0)
 
     if sys.platform == 'win32':
