@@ -416,16 +416,11 @@ def shm_exists(name):
 
 
 def exit_flag_set():
-    """IntelliVibe의 IsExitGame. 읽고 바로 놓습니다 — 섹션을 붙들지 않습니다."""
+    """IntelliVibe의 IsExitGame. snapshot 으로 읽고 바로 놓습니다."""
     iv = ShmView(IV_NAME, IV_SIZE)
-    if not iv.open():
+    if not iv.snapshot():
         return False
-    try:
-        return iv.flag(OFF_IV_IS_EXIT_GAME)
-    except Exception:
-        return False
-    finally:
-        iv.close()
+    return iv.flag(OFF_IV_IS_EXIT_GAME)
 
 
 def wait_for_bms_gone(timeout=BMS_EXIT_WAIT):
@@ -450,38 +445,38 @@ def wait_for_bms_gone(timeout=BMS_EXIT_WAIT):
 
 
 class ShmView:
-    """ctypes 로 공유 메모리를 열고 읽는 래퍼.
+    """ctypes 로 공유 메모리를 스냅샷으로 읽는 래퍼.
 
-    mmap.mmap(-1, tagname=...) 은 CreateFileMappingW 를 써서 섹션이 없으면
-    새로 만들고, 있으면 레퍼런스를 붙듭니다. BMS 가 종료해도 bridge 가
-    매핑을 쥐고 있으면 커널 섹션이 사라지지 않아 종료를 감지할 수 없습니다.
-
-    이 클래스는 OpenFileMappingW 만 사용하므로 섹션을 만들지 않고,
-    close() 하면 레퍼런스를 완전히 놓습니다.
+    snapshot() 은 섹션을 열어 전체를 복사한 뒤 곧바로 닫습니다.
+    핸들을 붙들지 않으므로 다른 프로세스(RTTClient 등)와 경합하지 않습니다.
     """
 
     def __init__(self, name, size):
         self.name, self.size = name, size
-        self._handle = None
-        self._view = None
+        self._data = None
 
-    def open(self):
+    def snapshot(self):
+        """Open → memcpy → close. 핸들 보유 시간을 최소화합니다."""
         h = _kernel32.OpenFileMappingW(FILE_MAP_READ, False, self.name)
         if not h:
+            self._data = None
             return False
         v = _kernel32.MapViewOfFile(h, FILE_MAP_READ, 0, 0, self.size)
         if not v:
             _kernel32.CloseHandle(h)
+            self._data = None
             return False
-        self._handle, self._view = h, v
+        self._data = ctypes.string_at(v, self.size)
+        _kernel32.UnmapViewOfFile(v)
+        _kernel32.CloseHandle(h)
         return True
 
     @property
     def ok(self):
-        return self._view is not None
+        return self._data is not None
 
     def read(self, offset, length):
-        return ctypes.string_at(self._view + offset, length)
+        return self._data[offset:offset + length]
 
     def i32(self, offset):
         return int.from_bytes(self.read(offset, 4), 'little', signed=True)
@@ -496,12 +491,7 @@ class ShmView:
         return self.read(offset, 1)[0] != 0
 
     def close(self):
-        if self._view:
-            _kernel32.UnmapViewOfFile(self._view)
-            self._view = None
-        if self._handle:
-            _kernel32.CloseHandle(self._handle)
-            self._handle = None
+        self._data = None
 
 
 def read_int32(shm, offset):
@@ -630,20 +620,23 @@ def run_bms(devices, mfd, hz=20, debug=False):
     shm2 = ShmView(SHM2_NAME, SHM2_SIZE)
     iv   = ShmView(IV_NAME, IV_SIZE)
     rx_bufs = {}
+    shm_connected = shm2_connected = iv_connected = False
     print(f"[BMS] Update rate: {hz} Hz")
 
     try:
         while not STOP.is_set():
-            if not shm.ok:
-                if not shm.open():
-                    return
+            # 매 사이클 snapshot: 열기→복사→닫기 (핸들을 붙들지 않음)
+            if not shm.snapshot():
+                return
+            if not shm_connected:
                 print("[BMS] shared memory connected")
-            if not shm2.ok:
-                if shm2.open():
-                    print("[BMS] FlightData2 connected")
-            if not iv.ok:
-                if iv.open():
-                    print("[BMS] IntelliVibe connected")
+                shm_connected = True
+            if shm2.snapshot() and not shm2_connected:
+                print("[BMS] FlightData2 connected")
+                shm2_connected = True
+            if iv.snapshot() and not iv_connected:
+                print("[BMS] IntelliVibe connected")
+                iv_connected = True
 
             try:
                 # IntelliVibe: BMS 가 종료 플래그를 세우면 즉시 복귀
@@ -685,9 +678,6 @@ def run_bms(devices, mfd, hz=20, debug=False):
         for dev in devices:
             dev.reset()
         mfd.reset()
-        shm.close()
-        shm2.close()
-        iv.close()
 
 
 # ================================================================
